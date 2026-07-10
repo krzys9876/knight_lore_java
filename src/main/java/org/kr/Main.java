@@ -1,17 +1,59 @@
 package org.kr;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import com.formdev.flatlaf.FlatLightLaf;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 public class Main {
     static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+        IO.println("START");
+        FlatLightLaf.setup();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
-        }
+        JPanel panel1 = new KLPanel();
+        JPanel panel2 = new KLPanel();
+        JPanel panel3 = new KLPanel();
+        JPanel panel4 = new KLPanel();
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(900, 700);
+        frame.setTitle("KL");
+        frame.setLayout(new GridLayout(2, 2));
+        frame.add(panel1);
+        frame.add(panel2);
+        frame.add(panel3);
+        frame.add(panel4);
+        frame.setVisible(true);
+
+
+        //panel.paint(g);
+        //panel.repaint();
+
+        IO.println("END");
+    }
+}
+
+class KLPanel extends JPanel {
+    final int WIDTH = 400;
+    final int HEIGHT = 300;
+    BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+
+    public KLPanel() {
+        super();
+        setSize(WIDTH, HEIGHT);
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics gi = image.getGraphics();
+        gi.setColor(Color.RED);
+        gi.fillRect(0, 0, WIDTH/2, HEIGHT/2);
+        gi.setColor(Color.GREEN);
+        gi.fillRect(WIDTH/2, HEIGHT/2, WIDTH/2, HEIGHT/2);
+
+        g.drawImage(image, 0, 0, null);
+
     }
 }
