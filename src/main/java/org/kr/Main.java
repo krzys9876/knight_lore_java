@@ -14,9 +14,7 @@ public class Main {
         ScreenPanel panel1 = new ScreenPanel();
         ScreenPanel panel2 = new ScreenPanel();
         DebugPanel panel3 = new DebugPanel();
-        panel3.setText("Text 1");
         DebugPanel panel4 = new DebugPanel();
-        panel4.setText("Text 2");
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(900, 700);
@@ -28,14 +26,44 @@ public class Main {
         frame.add(panel4);
         frame.setVisible(true);
 
-        try {
+        /*try {
             panel1.saveImage("p1.png");
             panel1.saveImage("p2.png");
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+
+        Game game = new Game(panel1, panel2, panel3, panel4);
 
         IO.println("END init");
     }
+}
+
+class Game {
+    ScreenPanel mainPanel;
+    ScreenPanel shadowPanel;
+    DebugPanel debugPanel1;
+    DebugPanel debugPanel2;
+    VideoMemory mainMemory;
+    VideoMemory shadowMemory;
+
+    public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2) {
+        this.mainPanel = mainPanel;
+        this.shadowPanel = shadowPanel;
+        this.debugPanel1 = debugPanel1;
+        this.debugPanel2 = debugPanel2;
+
+        this.debugPanel1.append("Start");
+        this.debugPanel2.append("Start");
+
+        mainMemory = new VideoMemory();
+        shadowMemory = new VideoMemory();
+
+        updateMainMemory();
+        updateShadowMemory();
+    }
+
+    public void updateMainMemory() { this.mainPanel.setPixelData(mainMemory.toPixels()); }
+    public void updateShadowMemory() { this.shadowPanel.setPixelData(shadowMemory.toPixels()); }
 }
 

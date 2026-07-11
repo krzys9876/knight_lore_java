@@ -12,7 +12,11 @@ public class DebugPanel extends JPanel {
         text.setEditable(false);
     }
 
-    public void setText(String text) {
-        this.text.setText(text);
+    public void setText(String t) {
+        this.text.setText(t);
+    }
+
+    public void append(String t) {
+        text.append(t+"\n");
     }
 }
