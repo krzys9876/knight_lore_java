@@ -13,7 +13,7 @@ public class VideoMemory {
         super();
     }
 
-    public void setByteAt(int address, byte value) { memory[address] = (byte) value;}
+    public void setByteAt(int address, byte value) { memory[address] = value;}
 
     public byte getByteAt(int address) { return memory[address];}
 
