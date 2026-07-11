@@ -5,6 +5,8 @@ import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Main {
     static void main() {
@@ -34,36 +36,10 @@ public class Main {
         }*/
 
         Game game = new Game(panel1, panel2, panel3, panel4);
+        Thread gameThread = new Thread(game);
+        gameThread.start();
 
         IO.println("END init");
     }
-}
-
-class Game {
-    ScreenPanel mainPanel;
-    ScreenPanel shadowPanel;
-    DebugPanel debugPanel1;
-    DebugPanel debugPanel2;
-    VideoMemory mainMemory;
-    VideoMemory shadowMemory;
-
-    public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2) {
-        this.mainPanel = mainPanel;
-        this.shadowPanel = shadowPanel;
-        this.debugPanel1 = debugPanel1;
-        this.debugPanel2 = debugPanel2;
-
-        this.debugPanel1.append("Start");
-        this.debugPanel2.append("Start");
-
-        mainMemory = new VideoMemory();
-        shadowMemory = new VideoMemory();
-
-        updateMainMemory();
-        updateShadowMemory();
-    }
-
-    public void updateMainMemory() { this.mainPanel.setPixelData(mainMemory.toPixels()); }
-    public void updateShadowMemory() { this.shadowPanel.setPixelData(shadowMemory.toPixels()); }
 }
 
