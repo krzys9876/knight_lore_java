@@ -13,8 +13,10 @@ public class Main {
 
         KLPanel panel1 = new KLPanel();
         KLPanel panel2 = new KLPanel();
-        KLPanel panel3 = new KLPanel();
-        KLPanel panel4 = new KLPanel();
+        TextPanel panel3 = new TextPanel();
+        panel3.setText("Text 1");
+        TextPanel panel4 = new TextPanel();
+        panel4.setText("Text 2");
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(900, 700);
@@ -29,15 +31,25 @@ public class Main {
         try {
             panel1.saveImage("p1.png");
             panel1.saveImage("p2.png");
-            panel1.saveImage("p3.png");
-            panel1.saveImage("p4.png");
-            KLPanel panel5 = new KLPanel();
-            panel5.saveImage("p5.png");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         IO.println("END init");
+    }
+}
+
+class TextPanel extends JPanel {
+    private final JTextArea text = new JTextArea();
+
+    public TextPanel() {
+        setLayout(new BorderLayout());
+        add(new JScrollPane(text), BorderLayout.CENTER);
+        text.setEditable(false);
+    }
+
+    public void setText(String text) {
+        this.text.setText(text);
     }
 }
 
