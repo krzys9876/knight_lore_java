@@ -8,13 +8,13 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 
-public class KLPanel extends JPanel {
+public class ScreenPanel extends JPanel {
     final int BASE_WIDTH = 256;
     final int BASE_HEIGHT = 192;
     private int[] pixelData = new int[BASE_WIDTH * BASE_HEIGHT];
     BufferedImage image = new BufferedImage(BASE_WIDTH, BASE_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-    public KLPanel() {
+    public ScreenPanel() {
         super();
         setSize(BASE_WIDTH, BASE_HEIGHT);
         for(int i=0; i<pixelData.length; i++){

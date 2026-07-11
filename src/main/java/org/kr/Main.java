@@ -11,11 +11,11 @@ public class Main {
         IO.println("START init");
         FlatLightLaf.setup();
 
-        KLPanel panel1 = new KLPanel();
-        KLPanel panel2 = new KLPanel();
-        TextPanel panel3 = new TextPanel();
+        ScreenPanel panel1 = new ScreenPanel();
+        ScreenPanel panel2 = new ScreenPanel();
+        DebugPanel panel3 = new DebugPanel();
         panel3.setText("Text 1");
-        TextPanel panel4 = new TextPanel();
+        DebugPanel panel4 = new DebugPanel();
         panel4.setText("Text 2");
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,20 +36,6 @@ public class Main {
         }
 
         IO.println("END init");
-    }
-}
-
-class TextPanel extends JPanel {
-    private final JTextArea text = new JTextArea();
-
-    public TextPanel() {
-        setLayout(new BorderLayout());
-        add(new JScrollPane(text), BorderLayout.CENTER);
-        text.setEditable(false);
-    }
-
-    public void setText(String text) {
-        this.text.setText(text);
     }
 }
 

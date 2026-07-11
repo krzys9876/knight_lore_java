@@ -4,7 +4,7 @@ package org.kr.kl.test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kr.Color;
-import org.kr.KLPanel;
+import org.kr.ScreenPanel;
 import org.kr.VideoMemory;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -83,7 +83,7 @@ public class VideoMemoryTest {
     }
 
     private void saveToFile(VideoMemory mem, String path) {
-        KLPanel panel = new KLPanel();
+        ScreenPanel panel = new ScreenPanel();
         panel.setPixelData(mem.toPixels());
         try {
             panel.saveImage(path);
