@@ -1,8 +1,5 @@
 package org.kr;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 public class Game implements Runnable {
     private final ScreenPanel mainPanel;
     private final ScreenPanel shadowPanel;
