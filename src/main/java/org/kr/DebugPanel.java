@@ -18,5 +18,6 @@ public class DebugPanel extends JPanel {
 
     public void append(String t) {
         text.append(t+"\n");
+        text.setCaretPosition(text.getDocument().getLength());
     }
 }

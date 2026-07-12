@@ -19,7 +19,7 @@ public class Main {
         DebugPanel panel4 = new DebugPanel();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(900, 700);
+        frame.setSize(1400, 900);
         frame.setTitle("KL");
         frame.setLayout(new GridLayout(2, 2));
         frame.add(panel1);
