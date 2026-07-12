@@ -1,5 +1,8 @@
 package org.kr;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Game implements Runnable {
     private final ScreenPanel mainPanel;
     private final ScreenPanel shadowPanel;
@@ -16,6 +19,17 @@ public class Game implements Runnable {
     private final int[] variables = new int[0x6107 - 0x5BA0 + 1];
     private final int[] lookupTable = new int[0xFFFF - 0xF100 + 1];
 
+    // Repaint every fixed interval
+    final long repaintIntervalMs = 50;
+    Timer timer = new Timer();
+    TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            updateMainMemory();
+            updateShadowMemory();
+        }
+    };
+
     public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
@@ -28,12 +42,18 @@ public class Game implements Runnable {
         mainMemory = new VideoMemory();
         shadowMemory = new VideoMemory();
 
-        updateMainMemory();
-        updateShadowMemory();
+        timer.scheduleAtFixedRate(task, repaintIntervalMs * 2, repaintIntervalMs);
+
     }
 
-    public void updateMainMemory() { this.mainPanel.setPixelData(mainMemory.toPixels()); }
-    public void updateShadowMemory() { this.shadowPanel.setPixelData(shadowMemory.toPixels()); }
+    public void updateMainMemory() {
+        mainPanel.setPixelData(mainMemory.toPixels());
+        mainPanel.repaint();
+    }
+    public void updateShadowMemory() {
+        shadowPanel.setPixelData(shadowMemory.toPixels());
+        shadowPanel.repaint();
+    }
 
 
     @Override
@@ -46,6 +66,12 @@ public class Game implements Runnable {
                 e.printStackTrace();
             }
         }*/
+        // Just for testing
+        mainMemory.setByteAt(0x1800,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
+        mainMemory.setByteAt(0x181F,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
+        shadowMemory.setByteAt(0x1800,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
+        shadowMemory.setByteAt(0x181F,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
+
         start_AF6C();
     }
 
