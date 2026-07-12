@@ -1,5 +1,6 @@
 package org.kr;
 
+import java.time.LocalDateTime;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -47,11 +48,11 @@ public class Game implements Runnable {
     }
 
     public void updateMainMemory() {
-        mainPanel.setPixelData(mainMemory.toPixels());
+        mainPanel.setPixelData(mainMemory.toPixels(LocalDateTime.now()));
         mainPanel.repaint();
     }
     public void updateShadowMemory() {
-        shadowPanel.setPixelData(shadowMemory.toPixels());
+        shadowPanel.setPixelData(shadowMemory.toPixels(LocalDateTime.now()));
         shadowPanel.repaint();
     }
 
@@ -68,8 +69,12 @@ public class Game implements Runnable {
         }*/
         // Just for testing
         mainMemory.setByteAt(0x1800,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
+        mainMemory.setByteAt(0x1801,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
+        mainMemory.setByteAt(0x181E,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
         mainMemory.setByteAt(0x181F,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
         shadowMemory.setByteAt(0x1800,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
+        shadowMemory.setByteAt(0x1801,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
+        shadowMemory.setByteAt(0x181E,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
         shadowMemory.setByteAt(0x181F,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
 
         start_AF6C();
