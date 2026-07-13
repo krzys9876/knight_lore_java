@@ -161,7 +161,7 @@ public class Game implements Runnable {
         // Lookup table values verified with KL memory dump
         //printLookupTable();
         //printLookupTable();
-        printShadowMemory();
+        //printShadowMemory();
     }
 
     private void printLookupTable() {
