@@ -1,0 +1,29 @@
+package org.kr;
+
+import java.util.Arrays;
+
+public class DataBlock {
+    public final int start;
+    public final int size;
+    private final int[] data;
+
+    public DataBlock(int start, int size) {
+        this.start = start;
+        this.size = size;
+        data = new int[size];
+    }
+
+    public DataBlock(int start, int[] data) {
+        this.start = start;
+        this.size = data.length;
+        this.data = Arrays.copyOf(data, data.length);
+    }
+
+    public DataBlock copy() {
+        return new DataBlock(start, Arrays.copyOf(data, data.length));
+    }
+
+    public void set(int address, int value) { data[address - start]=value; }
+    public int get(int address) { return data[address - start]; }
+    public int[] getCopy() { return Arrays.copyOf(data, data.length); }
+}

@@ -17,8 +17,9 @@ public class Game implements Runnable {
     private final VideoMemory shadowMemory;
     // $5BA0-$6107 - variables
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
-    private final int[] variables = new int[0x6107 - 0x5BA0 + 1];
-    private final int[] lookupTable = new int[0xFFFF - 0xF100 + 1];
+    private final DataBlock variables = new DataBlock(0x5BA0, 0x6107 - 0x5BA0 + 1);
+    private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
+    private final DataBlock flags12_1_D16D = InitialData.flags12_1_D16D.copy();
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -80,30 +81,27 @@ public class Game implements Runnable {
         start_AF6C();
     }
 
-    private int getVariableAt(int address) { return variables[address - 0x5BA0]; }
-    private void setVariableAt(int address, int value) { variables[address - 0x5BA0] = value; }
-    private int getLookup(int address) { return lookupTable[address - 0xF100]; }
-    private void setLookup(int address, int value) {
-        //debugPanel2.append(Integer.toHexString(address) + ": "+ Integer.toHexString(value));
-        lookupTable[address - 0xF100] = value;
-    }
-
     private void start_AF6C() {
         debugPanel1.append("start_AF6C");
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         clear_mem_D53A(0x5BA0, 0x0568); // clear all variables
-        setVariableAt(0x5BA0, v5C78);
+        variables.set(0x5BA0, v5C78);
         main_AF88();
     }
 
     private void clear_mem_D53A(int address, int cells) {
         debugPanel1.append("clear_mem_D53A");
-        for (int i = address; i < address + cells; i++) { setVariableAt(i, (byte)0);}
+        for (int i = address; i < address + cells; i++) { variables.set(i, 0);}
     }
 
     private void main_AF88() {
         debugPanel1.append("main_AF88");
         build_lookup_tables_D69E();
+        // XOR A
+        // LD ($5BB2),A
+        variables.set(0x5BB2, 0);
+        // LD ($D16D),A  ; plyr_spr_1_scratchpad
+        flags12_1_D16D.set(0xD16D, 0);
     }
 
     private void build_lookup_tables_D69E() {
@@ -129,14 +127,14 @@ public class Game implements Runnable {
                 // CPL
                 a = a ^ 0xFF;
                 // LD (HL), A
-                setLookup(h * 256 + l, a);
+                lookupTable.set(h * 256 + l, a);
                 // DEC H
                 h--;
                 // LD A, D
                 a = d;
                 // CPL
                 a = a ^ 0xFF;
-                setLookup(h * 256 + l, a);
+                lookupTable.set(h * 256 + l, a);
                 // DEC H
                 h--;
                 // DJNZ $D6A7
@@ -155,21 +153,20 @@ public class Game implements Runnable {
                 // DJNZ $D6BE
             }
             // LD (HL), e
-            setLookup(0xF100+l, e);
+            lookupTable.set(0xF100+l, e);
         }
 
         // Lookup table values verified with KL memory dump
-        //printLookupTable();
         //printLookupTable();
         //printShadowMemory();
     }
 
     private void printLookupTable() {
-        debugTable("Lookup table:", 0xF100, lookupTable);
+        debugTable("Lookup table:", 0xF100, lookupTable.getCopy());
     }
 
     private void printVariables() {
-        debugTable("Variables:", 0x5BA0, variables);
+        debugTable("Variables:", 0x5BA0, variables.getCopy());
     }
 
     private void printVideoMemory() {
@@ -192,6 +189,8 @@ public class Game implements Runnable {
         }
         debugPanel2.append(t.toString());
     }
+}
 
-
+class InitialData {
+    public static final DataBlock flags12_1_D16D = new DataBlock(0xD16D, new int[] {0, 0, 0, 0});
 }

@@ -53,3 +53,4 @@ public class VideoMemory {
         return pixels;
     }
 }
+
