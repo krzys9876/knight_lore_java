@@ -90,7 +90,7 @@ public class Game implements Runnable {
 
     private void start_AF6C() {
         debugPanel1.append("start_AF6C");
-        int v5C78 = getVariableAt(0x5C78); // FRAMES system variable (LSB)
+        int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         clear_mem_D53A(0x5BA0, 0x0568); // clear all variables
         setVariableAt(0x5BA0, v5C78);
         main_AF88();
