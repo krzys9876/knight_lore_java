@@ -19,8 +19,8 @@ public class VideoMemoryTest {
         VideoMemory mem = new VideoMemory();
         // when
         // attribute - blue ink (001), red paper (010), brightness on, flash off
-        mem.setByteAt(0x1800, (byte)0b01010001);
-        mem.setByteAt(0,(byte)0b10101010);
+        mem.setByteAt(0x1800, 0b01010001);
+        mem.setByteAt(0, 0b10101010);
         int[] pixels = mem.toPixels();
         // then
         // testing first 8 bytes
@@ -80,7 +80,7 @@ public class VideoMemoryTest {
     private void fillOneCell(VideoMemory mem, int x, int y) {
         // Note: the screen is divided into 3 areas, each is 8 cells high
         for(int i=0; i<8; i++) {
-            mem.setByteAt(x + 32*8*8*(y/8) + 32*(y & 7) + 32*8 * i, (i & 1)==0 ? (byte)0b01010101 : (byte)0b10101010);
+            mem.setByteAt(x + 32*8*8*(y/8) + 32*(y & 7) + 32*8 * i, (i & 1)==0 ? 0b01010101 : 0b10101010);
         }
     }
 

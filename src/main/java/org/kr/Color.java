@@ -21,12 +21,12 @@ public class Color {
             0x00898989,0x000000FF,0x00FF0000,0x00FF00FF,0x0000FF00,0x0000FFFF,0x00FFFFC5,0x00FFFFFF
     };
 
-    public static byte getAttribute(int pen, int paper, boolean bright, boolean flash) {
+    public static int getAttribute(int pen, int paper, boolean bright, boolean flash) {
         return getAttribute(pen, paper, bright ? BRIGHT : 0, flash ? FLASH : 0);
     }
 
-    public static byte getAttribute(int pen, int paper, int bright, int flash) {
-        return (byte)((pen & 0x07) + ((paper & 0x07) << 3) + bright + flash);
+    public static int getAttribute(int pen, int paper, int bright, int flash) {
+        return ((pen & 0x07) + ((paper & 0x07) << 3) + bright + flash);
     }
 
     public static int getScreenColor(int color, boolean bright) {

@@ -159,17 +159,39 @@ public class Game implements Runnable {
         }
 
         // Lookup table values verified with KL memory dump
-        /*StringBuilder t= new StringBuilder();
-        for(int i = 0; i < lookupTable.length; i++) {
-            if((i % 16) == 0) {
-                debugPanel2.append(t.toString());
-                t = new StringBuilder(String.format("%04x:", i + 0xF100));
-            }
-            t.append(" ").append(String.format("%02x", lookupTable[i]));
-        }
-        debugPanel2.append(t.toString());*/
+        //printLookupTable();
+        //printLookupTable();
+        printShadowMemory();
     }
 
+    private void printLookupTable() {
+        debugTable("Lookup table:", 0xF100, lookupTable);
+    }
+
+    private void printVariables() {
+        debugTable("Variables:", 0x5BA0, variables);
+    }
+
+    private void printVideoMemory() {
+        debugTable("Video (main):", 0x4000, mainMemory.getCopy());
+    }
+
+    private void printShadowMemory() {
+        debugTable("Video (shadow):", 0x4000, shadowMemory.getCopy());
+    }
+
+    private void debugTable(String title, int offset, int[] table) {
+        StringBuilder t= new StringBuilder();
+        t.append(title);
+        for(int i = 0; i < table.length; i++) {
+            if((i % 16) == 0) {
+                debugPanel2.append(t.toString());
+                t = new StringBuilder(String.format("%04x:", i + offset));
+            }
+            t.append(" ").append(String.format("%02x", table[i]));
+        }
+        debugPanel2.append(t.toString());
+    }
 
 
 }
