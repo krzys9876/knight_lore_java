@@ -41,8 +41,8 @@ public class Game implements Runnable {
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
 
-        mainMemory = new VideoMemory();
-        shadowMemory = new VideoMemory();
+        mainMemory = new VideoMemory(0x4000);
+        shadowMemory = new VideoMemory(0xD8F3);
 
         timer.scheduleAtFixedRate(task, repaintIntervalMs * 2, repaintIntervalMs);
 
@@ -69,29 +69,37 @@ public class Game implements Runnable {
             }
         }*/
         // Just for testing
-        mainMemory.setByteAt(0x1800,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
-        mainMemory.setByteAt(0x1801,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
-        mainMemory.setByteAt(0x181E,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
-        mainMemory.setByteAt(0x181F,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
-        shadowMemory.setByteAt(0x1800,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
-        shadowMemory.setByteAt(0x1801,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
-        shadowMemory.setByteAt(0x181E,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
-        shadowMemory.setByteAt(0x181F,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
+        mainMemory.setByteAt(0x5800,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
+        mainMemory.setByteAt(0x5801,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
+        mainMemory.setByteAt(0x581E,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
+        mainMemory.setByteAt(0x581F,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
+        shadowMemory.setByteAt(0xD8F3+0x1800,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
+        shadowMemory.setByteAt(0xD8F3+0x1801,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
+        shadowMemory.setByteAt(0xD8F3+0x181E,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
+        shadowMemory.setByteAt(0xD8F3+0x181F,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
 
         start_AF6C();
     }
 
     private void start_AF6C() {
         debugPanel1.append("start_AF6C");
+
+        // initialize variables (TODO: split variables to separate data blocks)
+        // @label=seed_1
+        // b$5BA0 DEFB $53,$00
+        variables.set(0x5BA0, 0x53);
+        //; Data block at 5BA2
+        // @label=seed_2
+        // b$5BA2 DEFS $02
+        variables.set(0x5BA2, 2);
+
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
-        clear_mem_D53A(0x5BA0, 0x0568); // clear all variables
+        // PUSH AF       ;
+        // CALL $D53A    ;
+        // POP AF        ;
+        for (int i = 0x5BA0; i < 0x5BA0 + 0x0568; i++) { variables.set(i, 0);}
         variables.set(0x5BA0, v5C78);
         main_AF88();
-    }
-
-    private void clear_mem_D53A(int address, int cells) {
-        debugPanel1.append("clear_mem_D53A");
-        for (int i = address; i < address + cells; i++) { variables.set(i, 0);}
     }
 
     private void main_AF88() {
@@ -102,6 +110,18 @@ public class Game implements Runnable {
         variables.set(0x5BB2, 0);
         // LD ($D16D),A  ; plyr_spr_1_scratchpad
         flags12_1_D16D.set(0xD16D, 0);
+        // LD A,$05      ; 5 lives to start
+        // LD ($5BBA),A  ;
+        variables.set(0x5BBA, 5);
+        // LD HL,$5BA0   ;
+        // LD A,($5BA2)  ;
+        // ADD A,(HL)    ; seed_1 += seed_2
+        // LD (HL),A     ; update seed
+        variables.set(0x5BA0, (variables.get(0x5BA0) + variables.get(0x5BA2)) & 0xFF);
+        // CALL $D55F    ; {colour is bright yellow on black
+        clear_scrn_D55F();
+
+        printVariables();
     }
 
     private void build_lookup_tables_D69E() {
@@ -159,6 +179,22 @@ public class Game implements Runnable {
         // Lookup table values verified with KL memory dump
         //printLookupTable();
         //printShadowMemory();
+    }
+
+    private void clear_scrn_D55F() {
+        debugPanel1.append("clear_scrn_D55F");
+        // NOTE: we ignore sound
+        // XOR A         ; border colour BLACK, activate MIC
+        // OUT ($FE),A   ; ULA
+        // CALL $D54C    ;
+
+        // LD HL,$5800   ; colour data
+        // LD BC,$0300   ; # bytes to clear
+        // LD E,$46      ; bright yellow on black
+        // JR $D53C      ;
+        for(int hl = 0x5800; hl < 0x5800+0x0300; hl++) { mainMemory.setByteAt(hl, 0x46); }
+        // JR $D544      ;
+        for(int hl = 0x4000; hl < 0x4000+0x1800; hl++) { mainMemory.setByteAt(hl, 0); }
     }
 
     private void printLookupTable() {

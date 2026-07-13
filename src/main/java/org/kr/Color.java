@@ -18,7 +18,7 @@ public class Color {
             // dark colors
             0x00000000,0x000000AA,0x00AA0000,0x00AA00AA,0x0000AA00,0x0000AAAA,0x00BA8E23,0x00D3D3D3,
             // bright colors
-            0x00898989,0x000000FF,0x00FF0000,0x00FF00FF,0x0000FF00,0x0000FFFF,0x00FFFFC5,0x00FFFFFF
+            0x00000000,0x000000FF,0x00FF0000,0x00FF00FF,0x0000FF00,0x0000FFFF,0x00FFFFC5,0x00FFFFFF
     };
 
     public static int getAttribute(int pen, int paper, boolean bright, boolean flash) {
