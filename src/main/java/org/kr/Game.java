@@ -96,6 +96,12 @@ public class Game implements Runnable {
         // @label=seed_2
         // b$5BA2 DEFS $02
         variables.set(0x5BA2, 2);
+        //; Data block at 5BC7
+        // @label=gfxbase_8x8
+        // b$5BC7 DEFB $08,$61
+        variables.set(0x5BC7, 0x08);
+        variables.set(0x5BC8, 0x61);
+
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -226,33 +232,71 @@ public class Game implements Runnable {
 
     private void display_menu_BEB3() {
         debugPanel1.append("display_menu_BEB3");
-        int hl2 = 0xBDAA;
-        int de2 = 0xBDBA;
+        int hl2 = 0xBDAA; // menu xy
+        int de2 = 0xBDBA; // menu text
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
             variables.set(0x5BB6, menu_colours_BDA2.get(de1));
             int l = menu_xy_BDAA.get(hl2); // x - menu position
             int h = menu_xy_BDAA.get(hl2+1); // y
             hl2 += 2;
-            print_text_single_colour_BE31(h, l, de2);
-
+            de2 = print_text_single_colour_BE31(h, l, de1, de2);
         }
     }
 
-    private void print_text_single_colour_BE31(int h, int l, int de) {
-        debugPanel1.append(String.format("print_text_single_colour_BE31 ( y: %02x, x: %02x, text_addr: %04x)", h, l, de));
-        variables.set(0x5BC7, 0x6108);
+    private int print_text_single_colour_BE31(int h, int l,int de1, int de2) {
+        // h: y, l: x, de1: attribute address, de2: text address (first)
+        debugPanel1.append(String.format("print_text_single_colour_BE31 ( y: %02x, x: %02x, attr_addr: %02x, text_addr: %04x)", h, l, de1, de2));
+        variables.set(0x5BC7, 0x08);
+        variables.set(0x5BC8, 0x61);
         int bc = calc_vidbuf_addr_D811(h, l);
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
         // for testing only
         shadowMemory.setByteAt(bc, 255);
-        for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLACK, Color.NONE, Color.NONE));
+        for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
+
+        int hl = calc_attrib_addr_D848(h, l);
+
+        // for testing only
+        //mainMemory.setByteAt(hl, Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
+
+        boolean textDone = false;
+        while(!textDone) {
+            print_8x8_BE7F(menu_text_BDBA.get(de2), bc);
+            mainMemory.setByteAt(hl, variables.get(0x5BB6)); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
+            textDone = (menu_text_BDBA.get(de2) & 0x80) > 0;
+            //textDone = true;
+            hl ++;
+            de2 ++;
+            bc ++;
+        }
+        return de2;
     }
 
     private int calc_vidbuf_addr_D811(int b, int c) {
-        // c: x, b: y
+        // b: y, c: x
         int xy = (c + b*256) >> 3;
         return xy + 0xD8F3;
+    }
+
+    private int calc_attrib_addr_D848(int h, int l) {
+        // h: y, l: x
+        int y = (h ^ 0xFF) >> 3;
+        int xy = (y * 256 + l) >> 3;
+        return xy + 0x5700;
+    }
+
+    private void print_8x8_BE7F(int a, int bc) {
+        // a: character, bc: shadow memory address
+        int ch = a & 0x7F;
+        debugPanel1.append("print_8x8_BE7F");
+        int baseChar = variables.get(0x5BC7) + variables.get(0x5BC8)*256;
+        int de2 = ch  * 8 + baseChar; // font address
+        for(int b = 8; b>0; b--) {
+            shadowMemory.setByteAt(bc, font_6108.get(de2));
+            de2++;
+            bc-=32;
+        }
     }
 
 
@@ -299,7 +343,7 @@ class InitialData {
             0x05,0x26,0x0D,0x12,0x1B,0x0E,0x0C,0x1D,0x12,0x18,0x17,0x0A,0x15,0x26,0x0C,0x18,0x17,0x1D,0x1B,0x18,0x95,
             0x00,0x26,0x1C,0x1D,0x0A,0x1B,0x1D,0x26,0x10,0x0A,0x16,0x8E,
             0x25,0x26,0x01,0x09,0x08,0x04,0x26,0x0A,0x24,0x0C,0x24,0x10,0xA4});
-    public static final DataBlock font_6108 = new DataBlock(0, new int[] {
+    public static final DataBlock font_6108 = new DataBlock(0x6108, new int[] {
         0x38,0x6C,0xD6,0xD6,0xD6,0xD6,0x6C,0x38, // '0'
         0x18,0x38,0x58,0x18,0x18,0x18,0x18,0x7C, // '1'
         0x38,0x4C,0x0C,0x3C,0x60,0xC2,0xC2,0xFE, // '2'

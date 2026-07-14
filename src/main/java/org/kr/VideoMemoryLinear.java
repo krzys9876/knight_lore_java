@@ -16,6 +16,6 @@ public class VideoMemoryLinear extends VideoMemory {
 
     @Override
     protected int getYFromAddress(int address) {
-        return address >> 5;
+        return 191 - (address >> 5); // video buffer has reversed Y axis
     }
 }
