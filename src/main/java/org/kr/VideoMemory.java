@@ -11,7 +11,7 @@ public class VideoMemory {
     // pixel memory: 32 bytes * 192 lines
     // attribute memory: 32 x 24 attribute "cells" (8x8 pixels each)
     // NOTE: using int instead of byte because there is no unsigned byte type in java
-    private final int[] memory = new int[PIXEL_MEM_SIZE + WIDTH/8 * HEIGHT/8];
+    protected final int[] memory = new int[PIXEL_MEM_SIZE + WIDTH/8 * HEIGHT/8];
     public final int start;
 
     public VideoMemory(int start) {
@@ -30,8 +30,6 @@ public class VideoMemory {
 
     public int[] toPixels() { return toPixels(false); }
 
-    //public int[]
-
     public int[] toPixels(boolean flash) {
         int[] pixels = new int[WIDTH * HEIGHT];
         for(int i = 0; i < PIXEL_MEM_SIZE; i++) {
@@ -43,7 +41,7 @@ public class VideoMemory {
             int paper = (attrFlash && flash) ? origPen : origPaper;
             boolean bright = (attribute & 0b1000000) > 0;
             int pixelData = memory[i];
-            int baseX = (i & 0b11111) * 8;
+            int baseX = (i & 0b11111) << 3;
             int baseY = ((i & 0b11100000000) >> 8) + ((i & 0b11100000) >> 2) + ((i & 0b1100000000000) >> 5);
             //IO.println("i="+i+", baseX="+baseX+", baseY="+baseY);
             for(int b = 0; b<8; b++) {
