@@ -12,7 +12,7 @@ public class Game implements Runnable {
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
-    private final VideoMemory mainMemory;
+    private final VideoMemoryScreen mainMemory;
     // $D8F3-$F0F2 - video buffer
     private final VideoMemoryLinear shadowMemory;
     // $5BA0-$6107 - variables
@@ -45,7 +45,7 @@ public class Game implements Runnable {
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
 
-        mainMemory = new VideoMemory(0x4000);
+        mainMemory = new VideoMemoryScreen(0x4000);
         shadowMemory = new VideoMemoryLinear(0xD8F3);
 
         timer.scheduleAtFixedRate(task, repaintIntervalMs * 2, repaintIntervalMs);

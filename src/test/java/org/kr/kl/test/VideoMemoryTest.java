@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kr.Color;
 import org.kr.ScreenPanel;
-import org.kr.VideoMemory;
+import org.kr.VideoMemoryScreen;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -16,12 +16,12 @@ public class VideoMemoryTest {
     @DisplayName("Set the first bytes of pixel and attribute memory areas and test the outcome for the first 8 pixels")
     public void shouldPixelsReflectVideoMemoryLayoutWhenTopByteIsSet() {
         // given
-        VideoMemory mem = new VideoMemory(0x4000);
+        VideoMemoryScreen mem = new VideoMemoryScreen(0x4000);
         // when
         // attribute - blue ink (001), red paper (010), brightness on, flash off
         mem.setByteAt(mem.start+0x1800, 0b01010001);
         mem.setByteAt(mem.start, 0b10101010);
-        int[] pixels = mem.toPixels();
+        int[] pixels = mem.toPixels(false);
         // then
         // testing first 8 bytes
         for(int i=0; i<4; i++) {
@@ -35,7 +35,7 @@ public class VideoMemoryTest {
     @DisplayName("Set a byte somewhere in the middle of the screen (pixel and attribute memory areas) and test the outcome")
     public void shouldPixelsReflectVideoMemoryLayoutWhenMiddleByteIsSet() {
         // given
-        VideoMemory mem = new VideoMemory(0x8000);
+        VideoMemoryScreen mem = new VideoMemoryScreen(0x8000);
         // when
         // we should set each of the three areas (8x8 pixels high each) of the screen to ensure proper logic
         // we set attribute "cells": (6,0), (8,7), (10,8), (13,15), (17,16), (31,23)
@@ -66,25 +66,25 @@ public class VideoMemoryTest {
         saveToFile(mem, Path.of("test-files","test002_flash.png").toString(), true);
     }
 
-    private void verifyOneCell(VideoMemory mem, int x, int y, int pen, int paper, boolean bright, boolean flash) {
+    private void verifyOneCell(VideoMemoryScreen mem, int x, int y, int pen, int paper, boolean bright, boolean flash) {
         int[] pixels = mem.toPixels(flash);
         for(int iy=0; iy<8; iy++) {
             for(int ix=0; ix<8; ix++) {
                 boolean isPen = (((ix+iy) & 1) == 0) ^ flash ;
                 assertEquals(Color.getScreenColor(isPen ? paper : pen, bright),
-                        pixels[x * 8 + ix + (y*8 + iy) * VideoMemory.WIDTH]);
+                        pixels[x * 8 + ix + (y*8 + iy) * VideoMemoryScreen.WIDTH]);
             }
         }
     }
 
-    private void fillOneCell(VideoMemory mem, int x, int y) {
+    private void fillOneCell(VideoMemoryScreen mem, int x, int y) {
         // Note: the screen is divided into 3 areas, each is 8 cells high
         for(int i=0; i<8; i++) {
             mem.setByteAt(mem.start+x + 32*8*8*(y/8) + 32*(y & 7) + 32*8 * i, (i & 1)==0 ? 0b01010101 : 0b10101010);
         }
     }
 
-    private void saveToFile(VideoMemory mem, String path, boolean flash) {
+    private void saveToFile(VideoMemoryScreen mem, String path, boolean flash) {
         ScreenPanel panel = new ScreenPanel();
         panel.setPixelData(mem.toPixels(flash));
         try {

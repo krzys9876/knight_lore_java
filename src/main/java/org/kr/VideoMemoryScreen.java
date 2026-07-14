@@ -2,8 +2,8 @@ package org.kr;
 
 import java.time.LocalDateTime;
 
-public class VideoMemoryLinear extends VideoMemory implements ToScreenPixels {
-    public VideoMemoryLinear(int start) {
+public class VideoMemoryScreen extends VideoMemory implements ToScreenPixels {
+    public VideoMemoryScreen(int start) {
         super(start);
     }
 
@@ -16,7 +16,7 @@ public class VideoMemoryLinear extends VideoMemory implements ToScreenPixels {
     public int[] toPixels(boolean flash) {
         int[] pixels = new int[WIDTH * HEIGHT];
         for(int i = 0; i < PIXEL_MEM_SIZE; i++) {
-            int attribute = memory[PIXEL_MEM_SIZE + (i & 0b11111) + ((i & 0b1111100000000) >> 3)];
+            int attribute = memory[PIXEL_MEM_SIZE + (i & 0b11111111) + ((i & 0b1100000000000) >> 3)];
             boolean attrFlash = (attribute & 0x80) > 0;
             int origPen = attribute & 0b111;
             int origPaper = (attribute & 0b111000) >> 3;
@@ -25,7 +25,7 @@ public class VideoMemoryLinear extends VideoMemory implements ToScreenPixels {
             boolean bright = (attribute & 0b1000000) > 0;
             int pixelData = memory[i];
             int baseX = (i & 0b11111) << 3;
-            int baseY = i >> 5;
+            int baseY = ((i & 0b11100000000) >> 8) + ((i & 0b11100000) >> 2) + ((i & 0b1100000000000) >> 5);
             //IO.println("i="+i+", baseX="+baseX+", baseY="+baseY);
             for(int b = 0; b<8; b++) {
                 boolean isSet = (pixelData & (1 << (7-b))) > 0;
@@ -35,3 +35,4 @@ public class VideoMemoryLinear extends VideoMemory implements ToScreenPixels {
         return pixels;
     }
 }
+
