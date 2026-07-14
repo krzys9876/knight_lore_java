@@ -101,6 +101,14 @@ public class Game implements Runnable {
         // b$5BC7 DEFB $08,$61
         variables.set(0x5BC7, 0x08);
         variables.set(0x5BC8, 0x61);
+        // @label=user_input_method
+        // b$5BA4 DEFS $01
+        variables.set(0x5BA4, 1);
+        //; Data block at 5BB8
+        //@label=suppress_border
+        //b$5BB8 DEFB $01
+        variables.set(0x5BB8, 1);
+
 
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
@@ -223,9 +231,14 @@ public class Game implements Runnable {
         // RES 7,(HL)    ;
         // INC HL        ; next menu colour entry
         // DJNZ $BD15    ; {loop until done
-        for (int hl = 0xBDA2; hl < 0xBDA2 + 8; hl++) { menu_colours_BDA2.set(hl, menu_colours_BDA2.get(hl) | 0x7F); }
+        for (int hl = 0xBDA2; hl < 0xBDA2 + 8; hl++) { menu_colours_BDA2.set(hl, menu_colours_BDA2.get(hl) & 0x7F); }
         //CALL $D567    ;
         for (int hl = 0xD8F3; hl < 0xD8F3 + 0x1800; hl++) { shadowMemory.setByteAt(hl, 0); }
+        // CALL $BEB3    ;
+        display_menu_BEB3();
+        // CALL $BD89
+        flash_menu_BD89();
+        //@label=menu_loop
         // CALL $BEB3    ;
         display_menu_BEB3();
     }
@@ -240,6 +253,12 @@ public class Game implements Runnable {
             int h = menu_xy_BDAA.get(hl2+1); // y
             hl2 += 2;
             de2 = print_text_single_colour_BE31(h, l, de1, de2);
+        }
+        int a = variables.get(0x5BB8); // suppress border
+        if(a == 0) {
+            variables.set(0x5BB8,1);
+            print_border_D296();
+            // TODO: update_screen_D56F()
         }
     }
 
@@ -265,7 +284,6 @@ public class Game implements Runnable {
             print_8x8_BE7F(menu_text_BDBA.get(de2), bc);
             mainMemory.setByteAt(hl, variables.get(0x5BB6)); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
             textDone = (menu_text_BDBA.get(de2) & 0x80) > 0;
-            //textDone = true;
             hl ++;
             de2 ++;
             bc ++;
@@ -297,6 +315,25 @@ public class Game implements Runnable {
             de2++;
             bc-=32;
         }
+    }
+
+    private void flash_menu_BD89() {
+        debugPanel1.append("flash_menu_BD89");
+        int hl = 0xBDA3; // first menu entry
+        int a = variables.get(0x5BA4); // input method
+        a = (a >> 1) & 0x3; // joystick / keyboard flag
+        // CALL $BEA3
+        for(int i = 0; i < 4; i++) {
+            if(a == i) menu_colours_BDA2.set(hl+i, menu_colours_BDA2.get(hl+i) | 0x80 );
+            else menu_colours_BDA2.set(hl+i, menu_colours_BDA2.get(hl+i) & 0x7F );
+        }
+        if((variables.get(0x5BA4) & 0x80)>0) menu_colours_BDA2.set(hl+5, menu_colours_BDA2.get(hl+5) | 0x80 );
+        else menu_colours_BDA2.set(hl+5, menu_colours_BDA2.get(hl+5) & 0x7F );
+    }
+
+    private void print_border_D296() {
+        debugPanel1.append("print_border_D296");
+
     }
 
 
