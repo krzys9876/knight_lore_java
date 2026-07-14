@@ -1,5 +1,6 @@
 package org.kr;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 public abstract class VideoMemory {
@@ -18,4 +19,38 @@ public abstract class VideoMemory {
     public int[] getCopy() { return Arrays.copyOf(memory, memory.length); }
     public void setByteAt(int address, int value) { memory[address - start] = value ; }
     public int getByteAt(int address) { return memory[address - start]; }
+
+    public int[] toPixels(LocalDateTime time) {
+        return toPixels((time.getSecond() % 2) == 0);
+    }
+
+    public int[] toPixels(boolean flash) {
+        int[] pixels = new int[WIDTH * HEIGHT];
+        for(int i = 0; i < PIXEL_MEM_SIZE; i++) {
+            int attribute = getAttributeFromAddress(i);
+            boolean attrFlash = (attribute & 0x80) > 0;
+            int origPen = attribute & 0b111;
+            int origPaper = (attribute & 0b111000) >> 3;
+            int pen = (attrFlash && flash) ? origPaper : origPen;
+            int paper = (attrFlash && flash) ? origPen : origPaper;
+            boolean bright = (attribute & 0b1000000) > 0;
+            int pixelData = memory[i];
+            int baseX = getXFromAddress(i);
+            int baseY = getYFromAddress(i);
+            //IO.println("i="+i+", baseX="+baseX+", baseY="+baseY);
+            for(int b = 0; b<8; b++) {
+                boolean isSet = (pixelData & (1 << (7-b))) > 0;
+                pixels[baseX + baseY * WIDTH + b] = Color.getScreenColor(isSet ? pen : paper, bright);
+            }
+        }
+        return pixels;
+    }
+
+    abstract protected int getAttributeFromAddress(int address);
+
+    protected int getXFromAddress(int address) {
+        return (address & 0b11111) << 3;
+    }
+
+    abstract protected int getYFromAddress(int address);
 }
