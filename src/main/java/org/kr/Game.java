@@ -250,25 +250,9 @@ public class Game implements Runnable {
     }
 
     private int calc_vidbuf_addr_D811(int b, int c) {
-        int x = c;
-        int y = b;
-        boolean cy;
-        cy = (y & 1) > 0;
-        y = y >> 1;
-        x = x >> 1;
-        if(cy) x+=0x80;
-
-        cy = (y & 1) > 0;
-        y = y >> 1;
-        x = x >> 1;
-        if(cy) x+=0x80;
-
-        cy = (y & 1) > 0;
-        y = y >> 1;
-        x = x >> 1;
-        if(cy) x+=0x80;
-
-        return y*256 + x + 0xD8F3;
+        // c: x, b: y
+        int xy = (c + b*256) >> 3;
+        return xy + 0xD8F3;
     }
 
 
