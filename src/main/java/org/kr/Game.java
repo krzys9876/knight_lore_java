@@ -19,15 +19,15 @@ public class Game implements Runnable {
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
     private final DataBlock variables = new DataBlock(0x5BA0, 0x6107 - 0x5BA0 + 1);
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
-    private final DataBlock flags12_1_D16D = InitialData.flags12_1_D16D.copy();
-    private final DataBlock menu_colours_BDA2 = InitialData.menu_colours_BDA2.copy();
-    private final DataBlock menu_xy_BDAA = InitialData.menu_xy_BDAA.copy();
-    private final DataBlock menu_text_BDBA = InitialData.menu_text_BDBA.copy();
-    private final DataBlock font_6108 = InitialData.font_6108.copy();
-    private final DataBlock sprite_scratchpad_BFDB = InitialData.sprite_scratchpad_BFDB.copy();
-    private final DataBlock border_data_D2CF = InitialData.border_data_D2CF.copy();
-    private final DataBlock sprite_tbl_7112 = InitialData.sprite_tbl_7112.copy();
-    private final DataBlock sprite_graphics_data_728A = InitialData.sprite_graphics_data_728A.copy();
+    private final DataBlock flags12_1_D16D = InitialData.block("flags12_1_D16D");
+    private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
+    private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
+    private final DataBlock menu_text_BDBA = InitialData.block("menu_text_BDBA");
+    private final DataBlock font_6108 = InitialData.block("font_6108");
+    private final DataBlock sprite_scratchpad_BFDB = InitialData.block("sprite_scratchpad_BFDB");
+    private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
+    private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
+    private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
