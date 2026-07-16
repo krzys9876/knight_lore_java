@@ -1,6 +1,7 @@
 package org.kr;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -217,9 +218,15 @@ public class Game implements Runnable {
         // LD BC,$0300   ; # bytes to clear
         // LD E,$46      ; bright yellow on black
         // JR $D53C      ;
-        for(int hl = 0x5800; hl < 0x5800+0x0300; hl++) { mainMemory.setByteAt(hl, 0x46); }
+        for(int hl = 0x5800; hl < 0x5800+0x0300; hl++) {
+            mainMemory.setByteAt(hl, 0x46);
+            shadowMemory.setByteAt(hl - mainMemory.start + shadowMemory.start, 0x46);
+        }
         // JR $D544      ;
-        for(int hl = 0x4000; hl < 0x4000+0x1800; hl++) { mainMemory.setByteAt(hl, 0); }
+        for(int hl = 0x4000; hl < 0x4000+0x1800; hl++) {
+            mainMemory.setByteAt(hl, 0);
+            shadowMemory.setByteAt(hl - mainMemory.start + shadowMemory.start, 0);
+        }
     }
 
     private void do_menu_selection_BD0C() {
@@ -253,6 +260,7 @@ public class Game implements Runnable {
         int de2 = 0xBDBA; // menu text
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
             variables.set(0x5BB6, menu_colours_BDA2.get(de1));
+            debugPanel2.append("menu attrib: %02x".formatted(variables.get(0x5BB6))) ;
             int l = menu_xy_BDAA.get(hl2); // x - menu position
             int h = menu_xy_BDAA.get(hl2+1); // y
             hl2 += 2;
@@ -263,6 +271,11 @@ public class Game implements Runnable {
             variables.set(0x5BB8,1);
             print_border_D296();
             // TODO: update_screen_D56F()
+        }
+        for(int i=0; i<768;i++) {
+            if(mainMemory.getByteAt(mainMemory.start+0x1800+i)!=shadowMemory.getByteAt(shadowMemory.start+0x1800+i)) {
+                IO.println(i);
+            }
         }
     }
 
@@ -275,8 +288,9 @@ public class Game implements Runnable {
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
         // for testing only
-        shadowMemory.setByteAt(bc, 255);
-        for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
+        //shadowMemory.setByteAt(bc, 255);
+        //for(int i=0; i < 32*192; i++) mainMemory.setByteAt(i + mainMemory.start, 0xFF);
+        //for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
         int hl = calc_attrib_addr_D848(h, l);
 
@@ -287,6 +301,7 @@ public class Game implements Runnable {
         while(!textDone) {
             print_8x8_BE7F(menu_text_BDBA.get(de2), bc);
             mainMemory.setByteAt(hl, variables.get(0x5BB6)); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
+            shadowMemory.setByteAt(hl-mainMemory.start+shadowMemory.start, variables.get(0x5BB6));
             textDone = (menu_text_BDBA.get(de2) & 0x80) > 0;
             hl ++;
             de2 ++;
@@ -340,19 +355,22 @@ public class Game implements Runnable {
         int ix = 0xBFDB;
         int hl = 0xD2CF;
         // CALL $D24C x4
-        transfer_sprite_and_print_D24C(ix, hl);
-
+        hl = transfer_sprite_and_print_D24C(ix, hl);
+        hl = transfer_sprite_and_print_D24C(ix, hl);
+        hl = transfer_sprite_and_print_D24C(ix, hl);
+        hl = transfer_sprite_and_print_D24C(ix, hl);
     }
 
     // TODO: probably we need DataBlock as parameter here
-    private void transfer_sprite_and_print_D24C(int ix, int hl) {
+    private int transfer_sprite_and_print_D24C(int ix, int hl) {
         // hl: sprite index, ix: scratchpad address
         debugPanel1.append("transfer_sprite_and_print_D24C");
         transfer_sprite_D237(ix, hl);
+        print_sprite_D718(ix, hl);
 
         debugTable("Sprite scratchpad:", 0xBFD8, sprite_scratchpad_BFDB.getCopy());
 
-        print_sprite_D718(ix, hl);
+        return hl+4;
     }
 
     // TODO: probably we need DataBlock as parameter here
@@ -368,7 +386,46 @@ public class Game implements Runnable {
 
     private void print_sprite_D718(int ix, int hl) {
         debugPanel1.append("print_sprite_D718 (hl: %02x, ix: %04x)".formatted(hl, ix));
-        if(flip_sprite_D6EF(ix)==0) return;
+        int de = flip_sprite_D6EF(ix);
+        if(de == 0) return; // spr_null used as a flag to return from routine
+
+        int x = sprite_scratchpad_BFDB.get(ix + 0x1A);
+        int xOffset = (x & 7);
+        debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned");
+        // JR Z,$D76F    ; {no, skip
+        if(xOffset == 0) {
+            //@label=loc_D76F
+            int a = sprite_graphics_data_728A.get(de);
+            de ++;
+            a = a & 0x7; // width_bytes
+            sprite_scratchpad_BFDB.set(ix + 0x18, a);
+            int jumpLSB = (1 - (a * 8) - 6);
+            debugPanel2.append("jump LSB: %02x %d".formatted(jumpLSB & 0xFF,jumpLSB));
+            // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
+            int a2 = (0x22 - a) & 0xFF;
+            debugPanel2.append("add number in D801: %02x %d".formatted(a2,a2));
+            sprite_scratchpad_BFDB.set(ix + 0x19,   sprite_graphics_data_728A.get(de)); // height_lines
+            de ++;
+            if(sprite_scratchpad_BFDB.get(ix + 0x1B)+sprite_scratchpad_BFDB.get(ix + 0x19)>0xC0) { // off bottom of screen?
+                sprite_scratchpad_BFDB.set(ix + 0x19, 0xC0);
+            }
+            int bc = calc_vidbuf_addr_D811(sprite_scratchpad_BFDB.get(ix + 0x1B), sprite_scratchpad_BFDB.get(ix + 0x1A));
+            for(int lineNo = 0; lineNo<sprite_scratchpad_BFDB.get(ix + 0x19); lineNo++) {
+                //int sp = de;
+                for (int i = 0; i < a; i++) {
+                    int bufByte = shadowMemory.getByteAt(bc);
+                    int e_mask = sprite_graphics_data_728A.get(de);
+                    de++;
+                    int d_spriteByte = sprite_graphics_data_728A.get(de);
+                    de++;
+                    bufByte = (bufByte & (e_mask ^ 0xFF));
+                    bufByte = (bufByte | d_spriteByte) & 0xFF;
+                    shadowMemory.setByteAt(bc, bufByte);
+                    bc++;
+                }
+                bc+=(32-a);
+            }
+        }
     }
 
     private int flip_sprite_D6EF(int ix) {
@@ -379,6 +436,47 @@ public class Game implements Runnable {
         debugPanel2.append("sprite address (DE): %04x".formatted(de));
         int width = sprite_graphics_data_728A.get(de);
         // returns sprite address or 0 if sprite is spr_null
+        // TODO: continue implementation - flip sprite
+        int flagsScratch = sprite_scratchpad_BFDB.get(ix + 0x07);
+        boolean flipVScratch = (flagsScratch & 0x80) > 0;
+        boolean flipHScratch = (flagsScratch & 0x40) > 0;
+        int flagsSpriteData = sprite_graphics_data_728A.get(de) & 0xC0;
+        boolean flipVData = (flagsSpriteData & 0x80) > 0;
+        boolean flipHData = (flagsSpriteData & 0x40) > 0;
+
+        // Flip vertically (in-place) and set flag in data
+        if(flipVScratch != flipVData) {
+            int lines = sprite_graphics_data_728A.get(de+1);
+            int bytesInLine = (sprite_graphics_data_728A.get(de) & 0x07) * 2;
+            for(int line = 0; line<(lines >> 1); line++) {
+                for(int b = 0; b < bytesInLine; b++) {
+                    int topByteAddress = de + 2 + line * bytesInLine + b;
+                    int bottomByteAddress = de + 2 + (lines - line - 1) * bytesInLine + b;
+                    int buffer = sprite_graphics_data_728A.get(topByteAddress);
+                    sprite_graphics_data_728A.set(topByteAddress, sprite_graphics_data_728A.get(bottomByteAddress));
+                    sprite_graphics_data_728A.set(bottomByteAddress, buffer);
+                }
+            }
+            sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.get(de) ^ 0x80);
+        }
+        // Flip horizontally (in-place) and set flag in data
+        if(flipHScratch != flipHData) {
+            int lines = sprite_graphics_data_728A.get(de+1);
+            int bytesInLine = (sprite_graphics_data_728A.get(de) & 0x07) * 2;
+            for(int line = 0; line<lines; line++) {
+                for(int b = 0; b < (bytesInLine >> 1); b++) {
+                    int leftByteAddress = de + 2 + line * bytesInLine + b;
+                    int rightByteAddress = de + 2 + line * bytesInLine + (bytesInLine - b -1);
+                    int leftBuffer = sprite_graphics_data_728A.get(leftByteAddress);
+                    leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
+                    int rightBuffer = sprite_graphics_data_728A.get(rightByteAddress);
+                    rightBuffer = lookupTable.get(0xF100 + rightBuffer);
+                    sprite_graphics_data_728A.set(leftByteAddress, rightBuffer);
+                    sprite_graphics_data_728A.set(rightByteAddress, leftBuffer);
+                }
+            }
+            sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.get(de) ^ 0x40);
+        }
         return width == 0 ? 0 : de;
     }
 
