@@ -1,5 +1,6 @@
 package org.kr;
 
+import javax.xml.crypto.Data;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Timer;
@@ -359,6 +360,10 @@ public class Game implements Runnable {
         hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
         hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
         hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(8, 0, 0x18, ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(8, 0, 0x18, ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF);
+        transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF);
     }
 
     // TODO: probably we need DataBlock as parameter here
@@ -478,6 +483,20 @@ public class Game implements Runnable {
             sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.get(de) ^ 0x40);
         }
         return width == 0 ? 0 : de;
+    }
+
+    private int transfer_and_multiple_print_sprite(int dx, int dy, int times, int ix, int hl, DataBlock dataBlock) {
+        transfer_sprite_D237(ix, hl, dataBlock);
+        return multiple_print_sprite_BEE4(dx, dy, times, ix, hl);
+    }
+
+    private int multiple_print_sprite_BEE4(int dx, int dy, int times, int ix, int hl) {
+        for(int i=0; i<times; i++) {
+            print_sprite_D718(ix, hl);
+            sprite_scratchpad_BFDB.set(ix + 0x1A, sprite_scratchpad_BFDB.get(ix + 0x1A) + dx);
+            sprite_scratchpad_BFDB.set(ix + 0x1B, sprite_scratchpad_BFDB.get(ix + 0x1B) + dy);
+        }
+        return hl+4;
     }
 
 
