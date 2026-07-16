@@ -4,6 +4,8 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Main {
     static void main() {
@@ -32,9 +34,22 @@ public class Main {
             e.printStackTrace();
         }*/
 
-        Game game = new Game(panel1, panel2, panel3, panel4);
+        ConcurrentLinkedQueue<Integer> keyQueue = new ConcurrentLinkedQueue<>();
+        Game game = new Game(panel1, panel2, panel3, panel4, keyQueue);
         Thread gameThread = new Thread(game);
         gameThread.start();
+
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addKeyEventDispatcher(new KeyEventDispatcher() {
+                    @Override
+                    public boolean dispatchKeyEvent(KeyEvent e) {
+                        if (e.getID() == KeyEvent.KEY_PRESSED) {
+                            keyQueue.add(e.getKeyCode());   // e.g. KeyEvent.VK_LEFT
+                        }
+                        return false; // false = let the event continue to normal processing
+                    }
+                });
+
 
         IO.println("END init");
     }

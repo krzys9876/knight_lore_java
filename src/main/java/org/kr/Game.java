@@ -5,12 +5,14 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Game implements Runnable {
     private final ScreenPanel mainPanel;
     private final ScreenPanel shadowPanel;
     private final DebugPanel debugPanel1;
     private final DebugPanel debugPanel2;
+    private final ConcurrentLinkedQueue<Integer> keyQueue;
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
@@ -39,14 +41,17 @@ public class Game implements Runnable {
         public void run() {
             updateMainMemory();
             updateShadowMemory();
+            printKeys();
         }
     };
 
-    public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2) {
+    public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
+                ConcurrentLinkedQueue<Integer> keyQueue) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
         this.debugPanel1 = debugPanel1;
         this.debugPanel2 = debugPanel2;
+        this.keyQueue = keyQueue;
 
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
@@ -55,7 +60,6 @@ public class Game implements Runnable {
         shadowMemory = new VideoMemoryLinear(0xD8F3);
 
         timer.scheduleAtFixedRate(task, repaintIntervalMs * 2, repaintIntervalMs);
-
     }
 
     public void updateMainMemory() {
@@ -65,6 +69,13 @@ public class Game implements Runnable {
     public void updateShadowMemory() {
         shadowPanel.setPixelData(shadowMemory.toPixels(LocalDateTime.now()));
         shadowPanel.repaint();
+    }
+
+    private void printKeys() {
+        if(keyQueue.isEmpty()) return;
+
+        Integer key = keyQueue.poll();
+        IO.println("Key: " + key);
     }
 
 
@@ -232,9 +243,14 @@ public class Game implements Runnable {
         display_menu_BEB3();
         // CALL $BD89
         flash_menu_BD89();
+
         //@label=menu_loop
         // CALL $BEB3    ;
         display_menu_BEB3();
+        // LD DE,$B253   ;
+        // CALL $B2B6    ; ignore audio
+
+
     }
 
     private void display_menu_BEB3() {
