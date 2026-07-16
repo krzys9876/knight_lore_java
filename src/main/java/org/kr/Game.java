@@ -144,7 +144,7 @@ public class Game implements Runnable {
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-        menu_loop_BD23();
+        menu_loop_BD23(); // returns when game starts
 
         debugPanel2.append("START THE GAME");
         //printVariables();
