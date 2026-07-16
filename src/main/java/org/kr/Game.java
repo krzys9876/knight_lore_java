@@ -355,17 +355,17 @@ public class Game implements Runnable {
         int ix = 0xBFDB;
         int hl = 0xD2CF;
         // CALL $D24C x4
-        hl = transfer_sprite_and_print_D24C(ix, hl);
-        hl = transfer_sprite_and_print_D24C(ix, hl);
-        hl = transfer_sprite_and_print_D24C(ix, hl);
-        hl = transfer_sprite_and_print_D24C(ix, hl);
+        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
     }
 
     // TODO: probably we need DataBlock as parameter here
-    private int transfer_sprite_and_print_D24C(int ix, int hl) {
+    private int transfer_sprite_and_print_D24C(int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         debugPanel1.append("transfer_sprite_and_print_D24C");
-        transfer_sprite_D237(ix, hl);
+        transfer_sprite_D237(ix, hl, source);
         print_sprite_D718(ix, hl);
 
         debugTable("Sprite scratchpad:", 0xBFD8, sprite_scratchpad_BFDB.getCopy());
@@ -375,13 +375,13 @@ public class Game implements Runnable {
 
     // TODO: probably we need DataBlock as parameter here
     // Populate sprite metadata
-    private void transfer_sprite_D237(int ix, int hl) {
+    private void transfer_sprite_D237(int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         debugPanel1.append("transfer_sprite_D237 (hl: %02x, ix: %04x)".formatted(hl, ix));
-        sprite_scratchpad_BFDB.set(ix, border_data_D2CF.get(hl)); // sprite index
-        sprite_scratchpad_BFDB.set(ix+0x07, border_data_D2CF.get(hl+1)); // flags
-        sprite_scratchpad_BFDB.set(ix+0x1A, border_data_D2CF.get(hl+2)); // pixel X
-        sprite_scratchpad_BFDB.set(ix+0x1B, border_data_D2CF.get(hl+3)); // pixel Y
+        sprite_scratchpad_BFDB.set(ix, source.get(hl)); // sprite index
+        sprite_scratchpad_BFDB.set(ix+0x07, source.get(hl+1)); // flags
+        sprite_scratchpad_BFDB.set(ix+0x1A, source.get(hl+2)); // pixel X
+        sprite_scratchpad_BFDB.set(ix+0x1B, source.get(hl+3)); // pixel Y
     }
 
     private void print_sprite_D718(int ix, int hl) {
