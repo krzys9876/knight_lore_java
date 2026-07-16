@@ -271,12 +271,7 @@ public class Game implements Runnable {
         if(a == 0) {
             variables.set(0x5BB8,1);
             print_border_D296();
-            // TODO: update_screen_D56F()
-        }
-        for(int i=0; i<768;i++) {
-            if(mainMemory.getByteAt(mainMemory.start+0x1800+i)!=shadowMemory.getByteAt(shadowMemory.start+0x1800+i)) {
-                IO.println(i);
-            }
+            update_screen_D56F();
         }
     }
 
@@ -366,7 +361,6 @@ public class Game implements Runnable {
         transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF);
     }
 
-    // TODO: probably we need DataBlock as parameter here
     private int transfer_sprite_and_print_D24C(int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         debugPanel1.append("transfer_sprite_and_print_D24C");
@@ -378,7 +372,6 @@ public class Game implements Runnable {
         return hl+4;
     }
 
-    // TODO: probably we need DataBlock as parameter here
     // Populate sprite metadata
     private void transfer_sprite_D237(int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
@@ -441,7 +434,6 @@ public class Game implements Runnable {
         debugPanel2.append("sprite address (DE): %04x".formatted(de));
         int width = sprite_graphics_data_728A.get(de);
         // returns sprite address or 0 if sprite is spr_null
-        // TODO: continue implementation - flip sprite
         int flagsScratch = sprite_scratchpad_BFDB.get(ix + 0x07);
         boolean flipVScratch = (flagsScratch & 0x80) > 0;
         boolean flipHScratch = (flagsScratch & 0x40) > 0;
@@ -497,6 +489,24 @@ public class Game implements Runnable {
             sprite_scratchpad_BFDB.set(ix + 0x1B, sprite_scratchpad_BFDB.get(ix + 0x1B) + dy);
         }
         return hl+4;
+    }
+
+    private void update_screen_D56F() {
+        int bytesX = VideoMemory.WIDTH / 8;
+        for(int bufferY = 0; bufferY<VideoMemory.HEIGHT; bufferY++) {
+            int screenY = ((bufferY & 0b111) <<3) + ((bufferY & 0b111000) >> 3) + (bufferY & 0b11000000);
+            int screenBase = screenY * bytesX + mainMemory.start;
+            int bufferBase = (VideoMemory.HEIGHT - bufferY -1) * bytesX + shadowMemory.start;
+            for(int b = 0; b<VideoMemory.WIDTH / 8; b++) {
+                mainMemory.setByteAt(screenBase+b, shadowMemory.getByteAt(bufferBase+b));
+                shadowMemory.setByteAt(bufferBase+b, 0); // wipe buffer
+            }
+        }
+        // wipe buffer attributes (non-existent in original game)
+        for(int attr = shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE;
+            attr<shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE + VideoMemory.HEIGHT /8 * VideoMemory.WIDTH / 8; attr++) {
+            shadowMemory.setByteAt(attr, 0);
+        }
     }
 
 
