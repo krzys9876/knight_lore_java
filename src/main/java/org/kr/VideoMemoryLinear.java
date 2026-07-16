@@ -11,7 +11,11 @@ public class VideoMemoryLinear extends VideoMemory {
 
     @Override
     protected int getAttributeFromAddress(int address) {
-        return memory[PIXEL_MEM_SIZE + (address & 0b11111) + ((address & 0b1111100000000) >> 3)];
+        int x = address & 0x1F;
+        int y = (address & 0b11111111100000) >> 8;
+        y = 23 - y;
+        int attrAddress = (y << 5) + x;
+        return memory[PIXEL_MEM_SIZE + attrAddress];
     }
 
     @Override
