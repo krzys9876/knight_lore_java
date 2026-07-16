@@ -70,24 +70,6 @@ public class Game implements Runnable {
 
     @Override
     public void run() {
-        /*while (true) {
-            debugPanel1.append(DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now()));
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }*/
-        // Just for testing
-        mainMemory.setByteAt(0x5800,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
-        mainMemory.setByteAt(0x5801,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
-        mainMemory.setByteAt(0x581E,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
-        mainMemory.setByteAt(0x581F,  Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.FLASH));
-        shadowMemory.setByteAt(0xD8F3+0x1800,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
-        shadowMemory.setByteAt(0xD8F3+0x1801,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
-        shadowMemory.setByteAt(0xD8F3+0x181E,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.NONE));
-        shadowMemory.setByteAt(0xD8F3+0x181F,  Color.getAttribute(Color.RED, Color.BLUE, Color.BRIGHT, Color.FLASH));
-
         start_AF6C();
     }
 
