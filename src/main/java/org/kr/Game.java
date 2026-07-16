@@ -144,32 +144,9 @@ public class Game implements Runnable {
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-        // @label=menu_loop
-        boolean startGame = false;
-        while(!startGame) {
-            if (!keyQueue.isEmpty()) {
-                int a = variables.get(0x5BA4);
-                variables.set(0x5BA6, a);
-                Integer key = keyQueue.poll();
-                IO.println("Key: " + key);
-                // 1,2,3,4,5
-                if (key == KeyEvent.VK_1) a &= 0xF9;
-                if (key == KeyEvent.VK_2) {
-                    a &= 0xF9;
-                    a |= 2;
-                }
-                if (key == KeyEvent.VK_3) {
-                    a &= 0xF9;
-                    a |= 4;
-                }
-                if (key == KeyEvent.VK_4) a |= 6;
-                //variables.set(0x5BA4, a);
-                if (key == KeyEvent.VK_5) a ^= 0x08; //; toggle directional
-                variables.set(0x5BA4, a);
-                // CALL NZ,$B4A3 ; yes // ignore audio
-                do_menu_selection_BD0C();
-            }
-        }
+        menu_loop_BD23();
+
+        debugPanel2.append("START THE GAME");
         //printVariables();
     }
 
@@ -561,6 +538,41 @@ public class Game implements Runnable {
         for(int attr = shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE;
             attr<shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE + VideoMemory.HEIGHT /8 * VideoMemory.WIDTH / 8; attr++) {
             shadowMemory.setByteAt(attr, 0);
+        }
+    }
+
+    // exiting means game starts
+    private void menu_loop_BD23() {
+        debugPanel1.append("menu_loop_BD23");
+        // @label=menu_loop
+
+        boolean startGame = false;
+        while(!startGame) {
+            if (!keyQueue.isEmpty()) {
+                int a = variables.get(0x5BA4);
+                variables.set(0x5BA6, a);
+                Integer key = keyQueue.poll();
+                IO.println("Key: " + key);
+                // 1,2,3,4,5
+                if (key == KeyEvent.VK_1) a &= 0xF9;
+                if (key == KeyEvent.VK_2) {
+                    a &= 0xF9;
+                    a |= 2;
+                }
+                if (key == KeyEvent.VK_3) {
+                    a &= 0xF9;
+                    a |= 4;
+                }
+                if (key == KeyEvent.VK_4) a |= 6;
+                //variables.set(0x5BA4, a);
+                if (key == KeyEvent.VK_5) a ^= 0x08; //; toggle directional
+                variables.set(0x5BA4, a);
+                // CALL NZ,$B4A3 ; yes // ignore audio
+                do_menu_selection_BD0C();
+                if (key == KeyEvent.VK_0) startGame = true;
+                //Do not change seed to make game deterministic during development
+                //variables.set(0x5BA0, variables.get(0x5BA0)+1); // increase seed
+            }
         }
     }
 
