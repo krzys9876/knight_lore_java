@@ -351,13 +351,13 @@ public class Game implements Runnable {
         int ix = 0xBFDB;
         int hl = 0xD2CF;
         // CALL $D24C x4
+        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF); // corners
         hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
         hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
         hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(8, 0, 0x18, ix, hl, border_data_D2CF); // horizontal lines
         hl = transfer_and_multiple_print_sprite(8, 0, 0x18, ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(8, 0, 0x18, ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF); // vertical lines
         transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF);
     }
 
@@ -388,28 +388,26 @@ public class Game implements Runnable {
         if(de == 0) return; // spr_null used as a flag to return from routine
 
         int x = sprite_scratchpad_BFDB.get(ix + 0x1A);
+        int y = sprite_scratchpad_BFDB.get(ix + 0x1B);
         int xOffset = (x & 7);
-        debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned");
+        debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned by %02x".formatted(xOffset));
         // JR Z,$D76F    ; {no, skip
+
+        // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
+        // we skip this part entirely, using inner for loop instead
+        int a = sprite_graphics_data_728A.get(de);
+        a = (a & 0x7); // width_bytes, ignore rotation flags
+        de ++;
+        sprite_scratchpad_BFDB.set(ix + 0x19,   sprite_graphics_data_728A.get(de)); // height_lines
+        // off bottom of screen?
+        if(y + sprite_scratchpad_BFDB.get(ix + 0x19)>0xC0) sprite_scratchpad_BFDB.set(ix + 0x19, 0xC0);
+        de ++;
+        int bc = calc_vidbuf_addr_D811(y, x);
+
         if(xOffset == 0) {
             //@label=loc_D76F
-            int a = sprite_graphics_data_728A.get(de);
-            de ++;
-            a = a & 0x7; // width_bytes
             sprite_scratchpad_BFDB.set(ix + 0x18, a);
-            int jumpLSB = (1 - (a * 8) - 6);
-            debugPanel2.append("jump LSB: %02x %d".formatted(jumpLSB & 0xFF,jumpLSB));
-            // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
-            int a2 = (0x22 - a) & 0xFF;
-            debugPanel2.append("add number in D801: %02x %d".formatted(a2,a2));
-            sprite_scratchpad_BFDB.set(ix + 0x19,   sprite_graphics_data_728A.get(de)); // height_lines
-            de ++;
-            if(sprite_scratchpad_BFDB.get(ix + 0x1B)+sprite_scratchpad_BFDB.get(ix + 0x19)>0xC0) { // off bottom of screen?
-                sprite_scratchpad_BFDB.set(ix + 0x19, 0xC0);
-            }
-            int bc = calc_vidbuf_addr_D811(sprite_scratchpad_BFDB.get(ix + 0x1B), sprite_scratchpad_BFDB.get(ix + 0x1A));
             for(int lineNo = 0; lineNo<sprite_scratchpad_BFDB.get(ix + 0x19); lineNo++) {
-                //int sp = de;
                 for (int i = 0; i < a; i++) {
                     int bufByte = shadowMemory.getByteAt(bc);
                     int e_mask = sprite_graphics_data_728A.get(de);
@@ -423,9 +421,39 @@ public class Game implements Runnable {
                 }
                 bc+=(32-a);
             }
+        } else {
+            sprite_scratchpad_BFDB.set(ix + 0x18, a + 1);
+            int lookupBase = 0xF000 + (xOffset << 9);
+            for(int lineNo = 0; lineNo<sprite_scratchpad_BFDB.get(ix + 0x19); lineNo++) {
+                // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
+                for (int i = 0; i < a; i++) {
+                    int bufByteLeft = shadowMemory.getByteAt(bc);
+                    int bufByteRight = shadowMemory.getByteAt(bc+1);
+                    int e_mask = sprite_graphics_data_728A.get(de);
+                    de++;
+                    int d_spriteByte = sprite_graphics_data_728A.get(de);
+                    de++;
+                    int e_maskLeft = (lookupTable.get(lookupBase + e_mask)) ^ 0xFF;
+                    int e_maskRight = (lookupTable.get(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
+                    int d_spriteByteLeft = (lookupTable.get(lookupBase + d_spriteByte)) ^ 0xFF;
+                    int d_spriteByteRight = (lookupTable.get(lookupBase + 0x0100 + d_spriteByte)) ^ 0xFF;
+                    bufByteLeft = (bufByteLeft & (e_maskLeft ^ 0xFF));
+                    bufByteLeft = (bufByteLeft | d_spriteByteLeft) & 0xFF;
+                    shadowMemory.setByteAt(bc, bufByteLeft);
+                    // Do not modify next line
+                    if(((bc - shadowMemory.start) & 0x001F)!=0x001F) {
+                        bufByteRight = (bufByteRight & (e_maskRight ^ 0xFF));
+                        bufByteRight = (bufByteRight | d_spriteByteRight) & 0xFF;
+                        shadowMemory.setByteAt(bc+1, bufByteRight);
+                    }
+                    bc++;
+                }
+                bc+=(32-a);
+            }
         }
     }
 
+    // Returns address of sprite graphics data or 0 if null sprite
     private int flip_sprite_D6EF(int ix) {
         debugPanel1.append("flip_sprite_D6EF (ix: %04x)".formatted(ix));
         int l = sprite_scratchpad_BFDB.get(ix);
