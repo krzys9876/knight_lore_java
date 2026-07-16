@@ -1,6 +1,7 @@
 package org.kr;
 
 import javax.xml.crypto.Data;
+import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Timer;
@@ -41,7 +42,7 @@ public class Game implements Runnable {
         public void run() {
             updateMainMemory();
             updateShadowMemory();
-            printKeys();
+            //printKeys();
         }
     };
 
@@ -107,7 +108,11 @@ public class Game implements Runnable {
         //@label=suppress_border
         //b$5BB8 DEFB $01
         variables.set(0x5BB8, 1);
-
+        //@label=old_input_method
+        //b$5BA6 DEFS $01
+        //$5BA7 DEFS $01
+        variables.set(0x5BA6, 1);
+        variables.set(0x5BA7, 1);
 
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
@@ -139,8 +144,32 @@ public class Game implements Runnable {
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-
-
+        // @label=menu_loop
+        boolean startGame = false;
+        while(!startGame) {
+            if (!keyQueue.isEmpty()) {
+                int a = variables.get(0x5BA4);
+                variables.set(0x5BA6, a);
+                Integer key = keyQueue.poll();
+                IO.println("Key: " + key);
+                // 1,2,3,4,5
+                if (key == KeyEvent.VK_1) a &= 0xF9;
+                if (key == KeyEvent.VK_2) {
+                    a &= 0xF9;
+                    a |= 2;
+                }
+                if (key == KeyEvent.VK_3) {
+                    a &= 0xF9;
+                    a |= 4;
+                }
+                if (key == KeyEvent.VK_4) a |= 6;
+                //variables.set(0x5BA4, a);
+                if (key == KeyEvent.VK_5) a ^= 0x08; //; toggle directional
+                variables.set(0x5BA4, a);
+                // CALL NZ,$B4A3 ; yes // ignore audio
+                do_menu_selection_BD0C();
+            }
+        }
         //printVariables();
     }
 
@@ -340,7 +369,7 @@ public class Game implements Runnable {
             if(a == i) menu_colours_BDA2.set(hl+i, menu_colours_BDA2.get(hl+i) | 0x80 );
             else menu_colours_BDA2.set(hl+i, menu_colours_BDA2.get(hl+i) & 0x7F );
         }
-        if((variables.get(0x5BA4) & 0x80)>0) menu_colours_BDA2.set(hl+5, menu_colours_BDA2.get(hl+5) | 0x80 );
+        if((variables.get(0x5BA4) & 0x08)>0) menu_colours_BDA2.set(hl+4, menu_colours_BDA2.get(hl+4) | 0x80 );
         else menu_colours_BDA2.set(hl+5, menu_colours_BDA2.get(hl+5) & 0x7F );
     }
 
