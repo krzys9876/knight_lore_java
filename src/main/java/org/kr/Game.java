@@ -39,6 +39,8 @@ public class Game implements Runnable {
     private final DataBlock start_loc_2_D189 =  InitialData.block("start_loc_2_D189");
     private final DataBlock byte_D191 =  InitialData.block("byte_D191");
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
+    private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
+
 
 
     // Repaint every fixed interval
@@ -159,7 +161,8 @@ public class Game implements Runnable {
         // CALL $B2CF    ; play tune // ignore audio
         // CALL $B544    ; randomise order of required objects
         shuffle_objects_required_B544();
-
+        // CALL $D1B1    ; {randomise player start location
+        init_start_location_D1B1();
 
     //printVariables();
     }
@@ -603,7 +606,26 @@ public class Game implements Runnable {
                 iy++;
             }
         }
-        debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
+        //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
+    }
+
+    private void init_start_location_D1B1() {
+        for(int i=0; i<8; i++)
+            plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i,
+                    plyr_spr_init_data_D1A1.get(plyr_spr_init_data_D1A1.start+i));
+        for(int i=0; i<8; i++)
+            plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start+i,
+                    plyr_spr_init_data_D1A1.get(plyr_spr_init_data_D1A1.start+i+8));
+        // LD A,$12      ; graphic_no (player top half)
+        // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
+        byte_D171.set(0xD171, 0x12);
+        // LD A,$22      ; graphic_no (player bottom half)
+        // LD ($D191),A  ; {plyr_spr_2_scratchpad (byte 16)
+        byte_D191.set(0xD191, 0x22);
+        int a = variables.get(0x5BA0) & 0x3; // random
+        int randomLoc = start_locations_D1E2.get(0xD1E2 + a);
+        start_loc_1_D169.set(0xD169, randomLoc);
+        start_loc_2_D189.set(0xD189, randomLoc);
     }
 
 
