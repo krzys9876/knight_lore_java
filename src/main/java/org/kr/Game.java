@@ -22,7 +22,6 @@ public class Game implements Runnable {
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
     private final DataBlock variables = new DataBlock(0x5BA0, 0x6107 - 0x5BA0 + 1);
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
-    private final DataBlock flags12_1_D16D = InitialData.block("flags12_1_D16D");
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
     private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
     private final DataBlock menu_text_BDBA = InitialData.block("menu_text_BDBA");
@@ -32,6 +31,15 @@ public class Game implements Runnable {
     private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
     private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
+    private final DataBlock plyr_spr_1_scratchpad_D161 =  InitialData.block("plyr_spr_1_scratchpad_D161");
+    private final DataBlock start_loc_1_D169 =  InitialData.block("start_loc_1_D169");
+    private final DataBlock flags12_1_D16D =  InitialData.block("flags12_1_D16D");
+    private final DataBlock byte_D171 =  InitialData.block("byte_D171");
+    private final DataBlock plyr_spr_2_scratchpad_D181 =  InitialData.block("plyr_spr_2_scratchpad_D181");
+    private final DataBlock start_loc_2_D189 =  InitialData.block("start_loc_2_D189");
+    private final DataBlock byte_D191 =  InitialData.block("byte_D191");
+    private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
+
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
