@@ -1,9 +1,7 @@
 package org.kr;
 
-import javax.xml.crypto.Data;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -33,6 +31,7 @@ public class Game implements Runnable {
     private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
     private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
     private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
+    private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -147,7 +146,14 @@ public class Game implements Runnable {
         menu_loop_BD23(); // returns when game starts
 
         debugPanel2.append("START THE GAME");
-        //printVariables();
+
+        // LD DE,$B20E   ; }
+        // CALL $B2CF    ; play tune // ignore audio
+        // CALL $B544    ; randomise order of required objects
+        shuffle_objects_required_B544();
+
+
+    //printVariables();
     }
 
     private void build_lookup_tables_D69E() {
@@ -574,6 +580,22 @@ public class Game implements Runnable {
                 //variables.set(0x5BA0, variables.get(0x5BA0)+1); // increase seed
             }
         }
+    }
+
+    private void shuffle_objects_required_B544() {
+        debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
+        int a = variables.get(0x5BA0); //seed 1
+        a = (a & 3) | 4; // random number (assuming seed is random)
+        for(int c = a; c>0; c--) {
+            int iy = objects_required_C27D.start;
+            for (int b = 0x0D; b > 0; b--) {
+                int buf = objects_required_C27D.get(iy);
+                objects_required_C27D.set(iy, objects_required_C27D.get(iy+1));
+                objects_required_C27D.set(iy+1, buf);
+                iy++;
+            }
+        }
+        debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
     }
 
 
