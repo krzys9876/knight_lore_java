@@ -42,6 +42,7 @@ public class Game implements Runnable {
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
+    private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40);
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -104,7 +105,8 @@ public class Game implements Runnable {
         //; Data block at 5BA2
         // @label=seed_2
         // b$5BA2 DEFS $02
-        variables.set(0x5BA2, 2);
+        variables.set(0x5BA2, 0);
+        variables.set(0x5BA3, 0);
         //; Data block at 5BC7
         // @label=gfxbase_8x8
         // b$5BC7 DEFB $08,$61
@@ -112,7 +114,7 @@ public class Game implements Runnable {
         variables.set(0x5BC8, 0x61);
         // @label=user_input_method
         // b$5BA4 DEFS $01
-        variables.set(0x5BA4, 1);
+        variables.set(0x5BA4, 0);
         //; Data block at 5BB8
         //@label=suppress_border
         //b$5BB8 DEFB $01
@@ -120,8 +122,12 @@ public class Game implements Runnable {
         //@label=old_input_method
         //b$5BA6 DEFS $01
         //$5BA7 DEFS $01
-        variables.set(0x5BA6, 1);
-        variables.set(0x5BA7, 1);
+        variables.set(0x5BA6, 0);
+        variables.set(0x5BA7, 0);
+        // @label=transform_flag_graphic
+        // b$5BB1 DEFS $01
+        variables.set(0x5BB1, 0);
+
 
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
@@ -167,7 +173,9 @@ public class Game implements Runnable {
         init_sun_C46D();
         // CALL $C47E    ; randomise special object locations
         init_special_objects_C47E();
-
+        // @label=player_dies
+        // CALL $D12A    ;
+        player_dies_AFB7();
 
     //printVariables();
     }
@@ -652,6 +660,48 @@ public class Game implements Runnable {
             rnd++;
         }
         debugTable("Special objects:", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy());
+    }
+
+    private void player_dies_AFB7() {
+        lose_life_$D12A();
+    }
+
+    private void lose_life_$D12A() {
+        int de = graphic_objs_tbl_5C08.start;
+        for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) graphic_objs_tbl_5C08.set(de+i, plyr_spr_1_scratchpad_D161.get(plyr_spr_1_scratchpad_D161.start+i));
+        de+=plyr_spr_1_scratchpad_D161.size;
+        for(int i=0; i<start_loc_1_D169.size; i++) graphic_objs_tbl_5C08.set(de+i, start_loc_1_D169.get(start_loc_1_D169.start+i));
+        de+=start_loc_1_D169.size;
+        for(int i=0; i<flags12_1_D16D.size; i++) graphic_objs_tbl_5C08.set(de+i, flags12_1_D16D.get(flags12_1_D16D.start+i));
+        de+=flags12_1_D16D.size;
+        for(int i=0; i<byte_D171.size; i++) graphic_objs_tbl_5C08.set(de+i, byte_D171.get(byte_D171.start+i));
+        de+=byte_D171.size;
+        for(int i=0; i<plyr_spr_2_scratchpad_D181.size; i++) graphic_objs_tbl_5C08.set(de+i, plyr_spr_2_scratchpad_D181.get(plyr_spr_2_scratchpad_D181.start+i));
+        de+=plyr_spr_2_scratchpad_D181.size;
+        for(int i=0; i<start_loc_2_D189.size; i++) graphic_objs_tbl_5C08.set(de+i, start_loc_2_D189.get(start_loc_2_D189.start+i));
+        de+=start_loc_2_D189.size;
+        for(int i=0; i<byte_D191.size; i++) graphic_objs_tbl_5C08.set(de+i, byte_D191.get(byte_D191.start+i));
+
+        variables.set(0x5BB1, 0);
+        int livesLeft = variables.get(0x5BBA) - 1;
+        variables.set(0x5BBA, livesLeft);
+        if(livesLeft < 0) {
+            game_over_BA22();
+            return;
+        }
+        int a = sun_moon_scratchpad_C44D.get(0xC44D);
+        int dayNight = (a >> 3) & 0x20; // ; day/night?
+        int playerGraphicsNo = graphic_objs_tbl_5C08.get(0x5C08+0x10);
+        playerGraphicsNo = (playerGraphicsNo & 0x1F) + dayNight;
+        graphic_objs_tbl_5C08.set(0x5C08+0x10, playerGraphicsNo);
+        int playerGraphicsNoTop = graphic_objs_tbl_5C08.get(0x5C08+0x30);
+        playerGraphicsNoTop = (playerGraphicsNoTop & 0xF0) + dayNight + 0x20;
+        graphic_objs_tbl_5C08.set(0x5C08+0x30, playerGraphicsNoTop);
+    }
+
+    private void game_over_BA22() {
+        debugPanel2.append("Game over BA22\n");
+        //TODO: implement
     }
 
 
