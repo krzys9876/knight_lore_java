@@ -28,6 +28,7 @@ public class Game implements Runnable {
     private final DataBlock font_6108 = InitialData.block("font_6108");
     private final DataBlock sprite_scratchpad_BFDB = InitialData.block("sprite_scratchpad_BFDB");
     private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
+    private final DataBlock special_objs_tbl_6FF2 = InitialData.block("special_objs_tbl_6FF2");
     private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
     private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
@@ -40,8 +41,7 @@ public class Game implements Runnable {
     private final DataBlock byte_D191 =  InitialData.block("byte_D191");
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
-
-
+    private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -163,6 +163,11 @@ public class Game implements Runnable {
         shuffle_objects_required_B544();
         // CALL $D1B1    ; {randomise player start location
         init_start_location_D1B1();
+        // CALL $C46D    ; }
+        init_sun_C46D();
+        // CALL $C47E    ; randomise special object locations
+        init_special_objects_C47E();
+
 
     //printVariables();
     }
@@ -594,7 +599,7 @@ public class Game implements Runnable {
     }
 
     private void shuffle_objects_required_B544() {
-        debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
+        //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
         int a = variables.get(0x5BA0); //seed 1
         a = (a & 3) | 4; // random number (assuming seed is random)
         for(int c = a; c>0; c--) {
@@ -626,6 +631,27 @@ public class Game implements Runnable {
         int randomLoc = start_locations_D1E2.get(0xD1E2 + a);
         start_loc_1_D169.set(0xD169, randomLoc);
         start_loc_2_D189.set(0xD189, randomLoc);
+    }
+
+    private void init_sun_C46D() {
+        sun_moon_scratchpad_C44D.set(0xC44D, 0x58); // ; sprite index
+        sun_moon_scratchpad_C44D.set(0xC44D+0x1A, 0xB0); // ; pixel X
+        sun_moon_scratchpad_C44D.set(0xC44D+0x1B, 0x09); // ; pixel Y
+    }
+
+    private void init_special_objects_C47E() {
+        int rnd = variables.get(0x5BA0) & 0x07; // random
+        int hl = special_objs_tbl_6FF2.start;
+        while(hl < special_objs_tbl_6FF2.start + special_objs_tbl_6FF2.size) {
+            rnd = (rnd & 0x07) | 0x60; // set numbers between 0x60 and 0x67 starting from random number to special object indexes
+            special_objs_tbl_6FF2.set(hl, rnd);
+            hl++;
+            // copy coords from "start" to "current"
+            for(int i=0; i<4; i++) special_objs_tbl_6FF2.set(hl+i+4, special_objs_tbl_6FF2.get(hl+i));
+            hl+=8;
+            rnd++;
+        }
+        debugTable("Special objects:", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy());
     }
 
 
