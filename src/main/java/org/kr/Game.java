@@ -1,5 +1,6 @@
 package org.kr;
 
+import javax.xml.crypto.Data;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.util.Timer;
@@ -43,6 +44,9 @@ public class Game implements Runnable {
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
     private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40);
+    private final DataBlock other_objs_here_5C88 = new DataBlock(0x5C88, 0x20);
+    private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
+
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -717,6 +721,7 @@ public class Game implements Runnable {
             update_special_objs_C591();
         }
         clear_scrn_buffer_D567();
+        retrieve_screen_D3C6();
 
     }
 
@@ -724,6 +729,12 @@ public class Game implements Runnable {
         //TODO: implement
     }
 
+    private void retrieve_screen_D3C6() {
+        int de = 0x5C88;
+        int bc = 0x6BD1;
+        int hl = 0x6251;
+
+    }
 
     private void printLookupTable() {
         debugTable("Lookup table:", 0xF100, lookupTable.getCopy());
