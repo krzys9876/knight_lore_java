@@ -176,6 +176,7 @@ public class Game implements Runnable {
         // @label=player_dies
         // CALL $D12A    ;
         player_dies_AFB7();
+        game_loop_AFBA();
 
     //printVariables();
     }
@@ -274,7 +275,7 @@ public class Game implements Runnable {
         // DJNZ $BD15    ; {loop until done
         for (int hl = 0xBDA2; hl < 0xBDA2 + 8; hl++) { menu_colours_BDA2.set(hl, menu_colours_BDA2.get(hl) & 0x7F); }
         //CALL $D567    ;
-        for (int hl = 0xD8F3; hl < 0xD8F3 + 0x1800; hl++) { shadowMemory.setByteAt(hl, 0); }
+        clear_scrn_buffer_D567();
         // CALL $BEB3    ;
         display_menu_BEB3();
         // CALL $BD89
@@ -285,8 +286,10 @@ public class Game implements Runnable {
         display_menu_BEB3();
         // LD DE,$B253   ;
         // CALL $B2B6    ; ignore audio
+    }
 
-
+    private void clear_scrn_buffer_D567() {
+        for (int hl = 0xD8F3; hl < 0xD8F3 + 0x1800; hl++) { shadowMemory.setByteAt(hl, 0); }
     }
 
     private void display_menu_BEB3() {
@@ -701,6 +704,23 @@ public class Game implements Runnable {
 
     private void game_over_BA22() {
         debugPanel2.append("Game over BA22\n");
+        //TODO: implement
+    }
+
+    private void game_loop_AFBA() {
+        build_screen_objects_D1E6();
+    }
+
+    private void build_screen_objects_D1E6() {
+        if(variables.get(0x5BB2) != 0) {
+            // update special objects if not the first screen of the game
+            update_special_objs_C591();
+        }
+        clear_scrn_buffer_D567();
+
+    }
+
+    private void update_special_objs_C591() {
         //TODO: implement
     }
 
