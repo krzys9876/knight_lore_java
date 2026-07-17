@@ -45,6 +45,7 @@ public class Game implements Runnable {
     private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
     private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40);
     private final DataBlock other_objs_here_5C88 = new DataBlock(0x5C88, 0x20);
+    private final DataBlock data_block_5CA8 = new DataBlock(0x5CA8, 0x0460);
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
 
 
@@ -730,9 +731,45 @@ public class Game implements Runnable {
     }
 
     private void retrieve_screen_D3C6() {
-        int de = 0x5C88;
-        int bc = 0x6BD1;
-        int hl = 0x6251;
+        int de = 0x5C88; // target
+        int bc = 0x6BD1; // location table end
+        int hl = 0x6251; // location table start
+        // $D12D LD DE,$5C08   ;
+        // $D130 PUSH DE       ;
+        // $D131 POP IX        ;
+        int ix = 0x5C08; // set in lose_life_D12A
+
+        boolean found = false;
+        int currLocId = graphic_objs_tbl_5C08.get(ix + 8);
+
+        while(hl < bc && !found) {
+            int tableLocId = location_tbl_6251.get(hl);
+            found = tableLocId == currLocId;
+            if(!found) {
+                hl++;
+                int size = location_tbl_6251.get(hl);
+                hl+=size;
+            }
+
+        }
+        if(!found) {
+            // This should be unreachable
+            debugPanel2.append("Location not found: ERROR");
+            for(int i = data_block_5CA8.start; i<data_block_5CA8.start+data_block_5CA8.size; i++) data_block_5CA8.set(i, 0);
+            return;
+        }
+        // HL points to start of the location in location table
+        int roomId = location_tbl_6251.get(hl);
+        debugPanel2.append("Retrieved room: "+roomId);
+        hl++;
+        int size = location_tbl_6251.get(hl);
+        hl++;
+        int attrOrig = (location_tbl_6251.get(hl) & 0x7) | 0x40;
+        int attr = (attrOrig & 0x7) | 0x40;
+        variables.set(0x5BAD, attr); // current room attributes
+
+
+
 
     }
 
