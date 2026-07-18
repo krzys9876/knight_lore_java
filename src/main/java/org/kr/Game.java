@@ -47,7 +47,7 @@ public class Game implements Runnable {
     private final DataBlock other_objs_here_5C88 = new DataBlock(0x5C88, 0x20);
     private final DataBlock data_block_5CA8 = new DataBlock(0x5CA8, 0x0460);
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
-
+    private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -758,18 +758,21 @@ public class Game implements Runnable {
             for(int i = data_block_5CA8.start; i<data_block_5CA8.start+data_block_5CA8.size; i++) data_block_5CA8.set(i, 0);
             return;
         }
+        // @label=found_screen
         // HL points to start of the location in location table
         int roomId = location_tbl_6251.get(hl);
-        debugPanel2.append("Retrieved room: "+roomId);
+        debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
         hl++;
         int size = location_tbl_6251.get(hl);
         hl++;
-        int attrOrig = (location_tbl_6251.get(hl) & 0x7) | 0x40;
-        int attr = (attrOrig & 0x7) | 0x40;
-        variables.set(0x5BAD, attr); // current room attributes
-
-
-
+        int attrOrig = location_tbl_6251.get(hl);
+        int attr = (attrOrig & 0x07) | 0x40;
+        variables.set(0x5BAD, attr); // current room attributes (color)
+        int roomSize = ((attrOrig >> 3) & 0x1F);
+        variables.set(0x5BAB, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3)); // room size X
+        variables.set(0x5BAC, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
+        variables.set(0x5BAE, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Y
+        debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.get(0x5BAB)+" Y:"+variables.get(0x5BAC)+" Z:"+variables.get(0x5BAE));
 
     }
 
