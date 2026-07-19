@@ -824,6 +824,14 @@ public class Game implements Runnable {
             }
             hl++;
         }
+
+        // TODO: implement foreground objects (not present at start screen id=68 / 0x44)
+        // @label=find_fg_objs
+
+        // @label=zero_end_of_graphic_objs_tbl
+        // clear rest of graphics objects table
+        for(int i=targetAddr; i<other_objs_here_5C88.start + other_objs_here_5C88.size; i++) other_objs_here_5C88.set(i, 0);
+
         debugTable("Other objects data:", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
     }
 
