@@ -3,8 +3,7 @@ package org.kr;
 import javax.xml.crypto.Data;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Game implements Runnable {
@@ -44,10 +43,37 @@ public class Game implements Runnable {
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
     private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40);
-    private final DataBlock other_objs_here_5C88 = new DataBlock(0x5C88, 0x20);
+    private final DataBlock other_objs_here_5C88 = new DataBlock(0x5C88, 0x20 + 0x0460);
     private final DataBlock data_block_5CA8 = new DataBlock(0x5CA8, 0x0460);
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
     private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
+    private final DataBlock background_type_tbl_6CE2 = InitialData.block("background_type_tbl_6CE2");
+    private final DataBlock[] backgroundObjects = new DataBlock[]{
+            InitialData.block("arch_n_6D12"),
+            InitialData.block("arch_e_6D23"),
+            InitialData.block("high_arch_e_6D34"),
+            InitialData.block("arch_s_6D45"),
+            InitialData.block("high_arch_s_6D56"),
+            InitialData.block("arch_w_6D67"),
+            InitialData.block("tree_arch_n_6D78"),
+            InitialData.block("tree_arch_e_6D89"),
+            InitialData.block("tree_arch_s_6D9A"),
+            InitialData.block("tree_arch_w_6DAB"),
+            InitialData.block("gate_n_6DBC"),
+            InitialData.block("gate_e_6DC5"),
+            InitialData.block("gate_s_6DCE"),
+            InitialData.block("gate_w_6DD7"),
+            InitialData.block("wall_size_1_6DE0"),
+            InitialData.block("wall_size_2_6E49"),
+            InitialData.block("wall_size_3_6EBA"),
+            InitialData.block("tree_room_size_1_6F2B"),
+            InitialData.block("tree_filler_w_6F8C"),
+            InitialData.block("tree_filler_n_6F9D"),
+            InitialData.block("wizard_6FAE"),
+            InitialData.block("cauldron_6FBF"),
+            InitialData.block("high_arch_e_base_6FD0"),
+            InitialData.block("high_arch_s_base_6FE1"),
+    } ;
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -764,6 +790,7 @@ public class Game implements Runnable {
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
         hl++;
         int size = location_tbl_6251.get(hl);
+        int roomEnd = hl + size - 1;
         hl++;
         int attrOrig = location_tbl_6251.get(hl);
         int attr = (attrOrig & 0x07) | 0x40;
@@ -773,7 +800,31 @@ public class Game implements Runnable {
         variables.set(0x5BAC, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
         variables.set(0x5BAE, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Y
         debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.get(0x5BAB)+" Y:"+variables.get(0x5BAC)+" Z:"+variables.get(0x5BAE));
+        hl++; // background objects start
 
+        // @label=next_bg_obj
+        // decode all background objects
+        // hl - iterates over room background objects
+        int targetAddr = other_objs_here_5C88.start;
+        while(location_tbl_6251.get(hl) != 0xFF && hl<=roomEnd) {
+            DataBlock bkgObj = backgroundObjects[location_tbl_6251.get(hl)];
+            debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.get(hl)));
+            int bkgAddr =  bkgObj.start;
+            while(bkgObj.get(bkgAddr) != 0) { // each object consists of 8-byte sprite info terminated by 0
+                // 8 - byte sprite info
+                debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.get(bkgAddr)));
+                for(int i=0; i<8; i++) other_objs_here_5C88.set(targetAddr+i, bkgObj.get(bkgAddr+i));
+                bkgAddr+=8;
+                // 9th byte
+                targetAddr+=8;
+                other_objs_here_5C88.set(targetAddr, currLocId);
+                targetAddr++;
+                //for(int i=0; i<23; i++) other_objs_here_5C88.set(targetAddr+i, 0); // not sure if this is required
+                targetAddr+=0x17; // ; {8+1+23 = 32 bytes/entry, remaining 23 bytes is empty at this point
+            }
+            hl++;
+        }
+        debugTable("Other objects data:", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
     }
 
     private void printLookupTable() {
