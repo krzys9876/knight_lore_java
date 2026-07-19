@@ -865,7 +865,7 @@ public class Game implements Runnable {
             // @label=enter_arch_e
 
         }
-        //TODO: imple,ent
+        //TODO: implement
 
     }
 
@@ -873,7 +873,7 @@ public class Game implements Runnable {
         int screenOrig = graphic_objs_tbl_5C08.get(0x5C10); // plyr_spr_1 screen
         int screen = (screenOrig >> 3) & 0x1F;
 
-
+        //TODO: continue
     }
 
     private void printLookupTable() {
