@@ -20,7 +20,8 @@ public class Game implements Runnable {
     private final VideoMemoryLinear shadowMemory;
     // $5BA0-$6107 - variables
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
-    private final DataBlock variables = new DataBlock(0x5BA0, 0x6107 - 0x5BA0 + 1);
+    private final DataBlock variables = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
+    private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
     private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
@@ -43,6 +44,8 @@ public class Game implements Runnable {
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
     private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40);
+    private final DataBlock special_objs_here_5C48 = new DataBlock(0x5C48, 0x40);
+    //TODO: replace data_block_5CA8 with other_objs_here_5C88
     private final DataBlock other_objs_here_5C88 = new DataBlock(0x5C88, 0x20 + 0x0460);
     private final DataBlock data_block_5CA8 = new DataBlock(0x5CA8, 0x0460);
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
@@ -165,7 +168,12 @@ public class Game implements Runnable {
         // PUSH AF       ;
         // CALL $D53A    ;
         // POP AF        ;
-        for (int i = 0x5BA0; i < 0x5BA0 + 0x0568; i++) { variables.set(i, 0);}
+        variables.reset();
+        scrn_visited_5BE8.reset();
+        graphic_objs_tbl_5C08.reset();
+        special_objs_here_5C48.reset();
+        other_objs_here_5C88.reset();
+
         variables.set(0x5BA0, v5C78);
         main_AF88();
     }
@@ -419,44 +427,41 @@ public class Game implements Runnable {
         int ix = 0xBFDB;
         int hl = 0xD2CF;
         // CALL $D24C x4
-        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF); // corners
-        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(8, 0, 0x18, ix, hl, border_data_D2CF); // horizontal lines
-        hl = transfer_and_multiple_print_sprite(8, 0, 0x18, ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF); // vertical lines
-        transfer_and_multiple_print_sprite(0, 1, 0x80, ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF); // corners
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, ix, hl, border_data_D2CF); // horizontal lines
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 0, 1, 0x80, ix, hl, border_data_D2CF); // vertical lines
+        transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 0, 1, 0x80, ix, hl, border_data_D2CF);
     }
 
-    private int transfer_sprite_and_print_D24C(int ix, int hl, DataBlock source) {
+    private int transfer_sprite_and_print_D24C(DataBlock metadata, int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         debugPanel1.append("transfer_sprite_and_print_D24C");
-        transfer_sprite_D237(ix, hl, source);
-        print_sprite_D718(ix, hl);
-
-        debugTable("Sprite scratchpad:", 0xBFD8, sprite_scratchpad_BFDB.getCopy());
+        transfer_sprite_D237(metadata, ix, hl, source);
+        print_sprite_D718(metadata, ix);
 
         return hl+4;
     }
 
     // Populate sprite metadata
-    private void transfer_sprite_D237(int ix, int hl, DataBlock source) {
+    private void transfer_sprite_D237(DataBlock medatada, int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         debugPanel1.append("transfer_sprite_D237 (hl: %02x, ix: %04x)".formatted(hl, ix));
-        sprite_scratchpad_BFDB.set(ix, source.get(hl)); // sprite index
-        sprite_scratchpad_BFDB.set(ix+0x07, source.get(hl+1)); // flags
-        sprite_scratchpad_BFDB.set(ix+0x1A, source.get(hl+2)); // pixel X
-        sprite_scratchpad_BFDB.set(ix+0x1B, source.get(hl+3)); // pixel Y
+        medatada.set(ix, source.get(hl)); // sprite index
+        medatada.set(ix+0x07, source.get(hl+1)); // flags
+        medatada.set(ix+0x1A, source.get(hl+2)); // pixel X
+        medatada.set(ix+0x1B, source.get(hl+3)); // pixel Y
     }
 
-    private void print_sprite_D718(int ix, int hl) {
-        debugPanel1.append("print_sprite_D718 (hl: %02x, ix: %04x)".formatted(hl, ix));
-        int de = flip_sprite_D6EF(ix);
+    private void print_sprite_D718(DataBlock metadata, int ix) {
+        int de = flip_sprite_D6EF(metadata, ix);
         if(de == 0) return; // spr_null used as a flag to return from routine
 
-        int x = sprite_scratchpad_BFDB.get(ix + 0x1A);
-        int y = sprite_scratchpad_BFDB.get(ix + 0x1B);
+        int x = metadata.get(ix + 0x1A);
+        int y = metadata.get(ix + 0x1B);
         int xOffset = (x & 7);
         debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned by %02x".formatted(xOffset));
         // JR Z,$D76F    ; {no, skip
@@ -466,16 +471,16 @@ public class Game implements Runnable {
         int a = sprite_graphics_data_728A.get(de);
         a = (a & 0x7); // width_bytes, ignore rotation flags
         de ++;
-        sprite_scratchpad_BFDB.set(ix + 0x19,   sprite_graphics_data_728A.get(de)); // height_lines
+        metadata.set(ix + 0x19,   sprite_graphics_data_728A.get(de)); // height_lines
         // off bottom of screen?
-        if(y + sprite_scratchpad_BFDB.get(ix + 0x19)>0xC0) sprite_scratchpad_BFDB.set(ix + 0x19, 0xC0);
+        if(y + metadata.get(ix + 0x19)>0xC0) metadata.set(ix + 0x19, 0xC0);
         de ++;
         int bc = calc_vidbuf_addr_D811(y, x);
 
         if(xOffset == 0) {
             //@label=loc_D76F
-            sprite_scratchpad_BFDB.set(ix + 0x18, a);
-            for(int lineNo = 0; lineNo<sprite_scratchpad_BFDB.get(ix + 0x19); lineNo++) {
+            metadata.set(ix + 0x18, a);
+            for(int lineNo = 0; lineNo<metadata.get(ix + 0x19); lineNo++) {
                 for (int i = 0; i < a; i++) {
                     int bufByte = shadowMemory.getByteAt(bc);
                     int e_mask = sprite_graphics_data_728A.get(de);
@@ -490,9 +495,9 @@ public class Game implements Runnable {
                 bc+=(32-a);
             }
         } else {
-            sprite_scratchpad_BFDB.set(ix + 0x18, a + 1);
+            metadata.set(ix + 0x18, a + 1);
             int lookupBase = 0xF000 + (xOffset << 9);
-            for(int lineNo = 0; lineNo<sprite_scratchpad_BFDB.get(ix + 0x19); lineNo++) {
+            for(int lineNo = 0; lineNo<metadata.get(ix + 0x19); lineNo++) {
                 // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
                 for (int i = 0; i < a; i++) {
                     int bufByteLeft = shadowMemory.getByteAt(bc);
@@ -522,15 +527,15 @@ public class Game implements Runnable {
     }
 
     // Returns address of sprite graphics data or 0 if null sprite
-    private int flip_sprite_D6EF(int ix) {
+    private int flip_sprite_D6EF(DataBlock metadata, int ix) {
         debugPanel1.append("flip_sprite_D6EF (ix: %04x)".formatted(ix));
-        int l = sprite_scratchpad_BFDB.get(ix);
+        int l = metadata.get(ix);
         int hl = l * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
         int de = sprite_tbl_7112.get(hl) + sprite_tbl_7112.get(hl+1)*256; // sprite actual address
         debugPanel2.append("sprite address (DE): %04x".formatted(de));
         int width = sprite_graphics_data_728A.get(de);
         // returns sprite address or 0 if sprite is spr_null
-        int flagsScratch = sprite_scratchpad_BFDB.get(ix + 0x07);
+        int flagsScratch = metadata.get(ix + 0x07);
         boolean flipVScratch = (flagsScratch & 0x80) > 0;
         boolean flipHScratch = (flagsScratch & 0x40) > 0;
         int flagsSpriteData = sprite_graphics_data_728A.get(de) & 0xC0;
@@ -573,16 +578,16 @@ public class Game implements Runnable {
         return width == 0 ? 0 : de;
     }
 
-    private int transfer_and_multiple_print_sprite(int dx, int dy, int times, int ix, int hl, DataBlock dataBlock) {
-        transfer_sprite_D237(ix, hl, dataBlock);
-        return multiple_print_sprite_BEE4(dx, dy, times, ix, hl);
+    private int transfer_and_multiple_print_sprite(DataBlock metadata, int dx, int dy, int times, int ix, int hl, DataBlock dataBlock) {
+        transfer_sprite_D237(metadata, ix, hl, dataBlock);
+        return multiple_print_sprite_BEE4(metadata, dx, dy, times, ix, hl);
     }
 
-    private int multiple_print_sprite_BEE4(int dx, int dy, int times, int ix, int hl) {
+    private int multiple_print_sprite_BEE4(DataBlock metadata, int dx, int dy, int times, int ix, int hl) {
         for(int i=0; i<times; i++) {
-            print_sprite_D718(ix, hl);
-            sprite_scratchpad_BFDB.set(ix + 0x1A, sprite_scratchpad_BFDB.get(ix + 0x1A) + dx);
-            sprite_scratchpad_BFDB.set(ix + 0x1B, sprite_scratchpad_BFDB.get(ix + 0x1B) + dy);
+            print_sprite_D718(metadata, ix);
+            metadata.set(ix + 0x1A, metadata.get(ix + 0x1A) + dx);
+            metadata.set(ix + 0x1B, metadata.get(ix + 0x1B) + dy);
         }
         return hl+4;
     }
@@ -749,7 +754,18 @@ public class Game implements Runnable {
         }
         clear_scrn_buffer_D567();
         retrieve_screen_D3C6();
+        // TODO: implement
+        //find_special_objs_here_C525();
+        //adjust_plyr_xyz_for_room_size_D320();
 
+        variables.set(0x5BAF, 0);
+        variables.set(0x5BB0, 0);
+        variables.set(0x5BBD, 0);
+        variables.set(0x5BBF, 0);
+        variables.set(0x5BB7, 1);
+        variables.set(0x5BC0, graphic_objs_tbl_5C08.get(0x5C10) & 1);
+
+        flag_room_visited_D219();
     }
 
     private void update_special_objs_C591() {
@@ -833,6 +849,31 @@ public class Game implements Runnable {
         for(int i=targetAddr; i<other_objs_here_5C88.start + other_objs_here_5C88.size; i++) other_objs_here_5C88.set(i, 0);
 
         debugTable("Other objects data:", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
+    }
+
+    private void find_special_objs_here_C525() {
+        // TODO: implement
+    }
+
+    private void adjust_plyr_xyz_for_room_size_D320() {
+        debugTable("Graphic objects table:", graphic_objs_tbl_5C08.start, graphic_objs_tbl_5C08.getCopy());
+        int roomSizeX = variables.get(0x5BAB) - 2;
+        int roomSizeY = variables.get(0x5BAC) - 2;
+        int ix = 0x5C08;
+        int x = graphic_objs_tbl_5C08.get(ix + 1);
+        if(x == 0) {
+            // @label=enter_arch_e
+
+        }
+        //TODO: imple,ent
+
+    }
+
+    private void flag_room_visited_D219() {
+        int screenOrig = graphic_objs_tbl_5C08.get(0x5C10); // plyr_spr_1 screen
+        int screen = (screenOrig >> 3) & 0x1F;
+
+
     }
 
     private void printLookupTable() {

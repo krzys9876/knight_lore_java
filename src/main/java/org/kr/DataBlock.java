@@ -26,4 +26,8 @@ public class DataBlock {
     public void set(int address, int value) { data[address - start]=value; }
     public int get(int address) { return data[address - start]; }
     public int[] getCopy() { return Arrays.copyOf(data, data.length); }
+
+    public void reset() {
+        for (int i = start; i < size+size-1; i++) { set(i, 0);}
+    }
 }
