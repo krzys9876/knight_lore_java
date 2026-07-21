@@ -744,7 +744,25 @@ public class Game implements Runnable {
     }
 
     private void game_loop_AFBA() {
+        debugPanel2.append("Game loop AFBA\n");
         build_screen_objects_D1E6();
+        // @label=onscreen_loop
+        variables.set(0x5BA2, variables.get(0x5BBC));
+        /*int ix = graphic_objs_tbl_5C08.start; // NOTE: player's sprites data
+        save_2d_info_CE49(ix, graphic_objs_tbl_5C08);
+
+        print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
+        int ix = other_objs_here_5C88.start; // NOTE: player's sprites data
+        for(int i=0;i<20;i++) {
+            save_2d_info_CE49(ix, other_objs_here_5C88);
+
+            calc_pixel_XY_D6C9(ix, other_objs_here_5C88);
+
+            print_sprite_D718(other_objs_here_5C88, ix);
+            ix+=32;
+        }
+        for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
+
     }
 
     private void build_screen_objects_D1E6() {
@@ -765,7 +783,9 @@ public class Game implements Runnable {
         variables.set(0x5BB7, 1);
         variables.set(0x5BC0, graphic_objs_tbl_5C08.get(0x5C10) & 1);
 
-        flag_room_visited_D219();
+        //flag_room_visited_D219();
+
+
     }
 
     private void update_special_objs_C591() {
@@ -873,7 +893,37 @@ public class Game implements Runnable {
         int screenOrig = graphic_objs_tbl_5C08.get(0x5C10); // plyr_spr_1 screen
         int screen = (screenOrig >> 3) & 0x1F;
 
-        //TODO: continue
+        //TODO: implement
+    }
+
+    private void save_2d_info_CE49(int ix, DataBlock block) {
+        int widthBytes = block.get(ix + 0x18);
+        block.set(ix + 0x1c, widthBytes);
+        int heightLines = block.get(ix + 0x19);
+        block.set(ix + 0x1d, heightLines);
+        int pixelX = block.get(ix + 0x1a);
+        block.set(ix + 0x1e, pixelX);
+        int pixelY = block.get(ix + 0x1b);
+        block.set(ix + 0x1f, pixelY);
+    }
+
+    private void calc_pixel_XY_D6C9(int ix, DataBlock block) {
+        int x = block.get(ix + 0x01);
+        x = x + block.get(ix + 0x02);
+        x = x - 0x80;
+        x = x + block.get(ix + 0x12);
+        block.set(ix + 0x1a, x);
+        int y = block.get(ix + 0x02);
+        y = y - block.get(ix + 0x01);
+        y = y + 0x80;
+        y = y >> 1;
+        y = y + block.get(ix + 0x03);
+        y = y - 0x68;
+        y = y + block.get(ix + 0x13);
+        block.set(ix + 0x1b, y);
+        // TODO: implement:
+        // $D6EC CP $C0         ; bottom line of screen?
+        // $D6EE RET            ;
     }
 
     private void printLookupTable() {
