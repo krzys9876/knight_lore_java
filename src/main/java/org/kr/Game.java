@@ -752,7 +752,27 @@ public class Game implements Runnable {
         save_2d_info_CE49(ix, graphic_objs_tbl_5C08);
 
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
-        int ix = other_objs_here_5C88.start; // NOTE: player's sprites data
+        // This is all just to verify if objects render at all
+        int ix;
+        ix = graphic_objs_tbl_5C08.start; // NOTE: player's sprites data
+        for(int i=0;i<2;i++) {
+            save_2d_info_CE49(ix, graphic_objs_tbl_5C08);
+
+            calc_pixel_XY_D6C9(ix, graphic_objs_tbl_5C08);
+
+            print_sprite_D718(graphic_objs_tbl_5C08, ix);
+            ix+=32;
+        }
+        ix = special_objs_here_5C48.start; // NOTE: player's sprites data
+        for(int i=0;i<2;i++) {
+            save_2d_info_CE49(ix, special_objs_here_5C48);
+
+            calc_pixel_XY_D6C9(ix, special_objs_here_5C48);
+
+            print_sprite_D718(special_objs_here_5C48, ix);
+            ix+=32;
+        }
+        ix = other_objs_here_5C88.start; // NOTE: player's sprites data
         for(int i=0;i<20;i++) {
             save_2d_info_CE49(ix, other_objs_here_5C88);
 
