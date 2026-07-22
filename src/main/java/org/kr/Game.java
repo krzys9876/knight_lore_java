@@ -53,9 +53,7 @@ public class Game implements Runnable {
     private final DataBlock[] backgroundObjects = new DataBlock[]{
             InitialData.block("arch_n_6D12"),
             InitialData.block("arch_e_6D23"),
-            InitialData.block("high_arch_e_6D34"),
             InitialData.block("arch_s_6D45"),
-            InitialData.block("high_arch_s_6D56"),
             InitialData.block("arch_w_6D67"),
             InitialData.block("tree_arch_n_6D78"),
             InitialData.block("tree_arch_e_6D89"),
@@ -73,8 +71,10 @@ public class Game implements Runnable {
             InitialData.block("tree_filler_n_6F9D"),
             InitialData.block("wizard_6FAE"),
             InitialData.block("cauldron_6FBF"),
+            InitialData.block("high_arch_e_6D34"),
+            InitialData.block("high_arch_s_6D56"),
             InitialData.block("high_arch_e_base_6FD0"),
-            InitialData.block("high_arch_s_base_6FE1"),
+            InitialData.block("high_arch_s_base_6FE1")
     } ;
 
     // Repaint every fixed interval
@@ -472,7 +472,7 @@ public class Game implements Runnable {
         de ++;
         metadata.set(ix + 0x19,   sprite_graphics_data_728A.get(de)); // height_lines
         // off bottom of screen?
-        if(y + metadata.get(ix + 0x19)>0xC0) metadata.set(ix + 0x19, 0xC0);
+        if(y + metadata.get(ix + 0x19)>0xC0) metadata.set(ix + 0x19, 0xC0 - y);
         de ++;
         int bc = calc_vidbuf_addr_D811(y, x);
 
@@ -683,6 +683,9 @@ public class Game implements Runnable {
         byte_D191.set(0xD191, 0x22);
         int a = variables.get(0x5BA0) & 0x3; // random
         int randomLoc = start_locations_D1E2.get(0xD1E2 + a);
+        // For testing only
+        randomLoc = start_locations_D1E2.get(start_locations_D1E2.start + 2);
+        //randomLoc = 0x04;
         start_loc_1_D169.set(0xD169, randomLoc);
         start_loc_2_D189.set(0xD189, randomLoc);
     }
@@ -760,17 +763,17 @@ public class Game implements Runnable {
 
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
         // This is all just to verify if objects render at all
-        renderAllSprites(graphic_objs_tbl_5C08);
-        renderAllSprites(special_objs_here_5C48);
-        renderAllSprites(other_objs_here_5C88);
+        //renderAllSprites(graphic_objs_tbl_5C08, 0, 2);
+        //renderAllSprites(special_objs_here_5C48, 0,2);
+        renderAllSprites(other_objs_here_5C88, 0,36);
         debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
     }
 
-    private void renderAllSprites(DataBlock block) {
-        for(int i=0;i<block.size/32;i++) {
+    private void renderAllSprites(DataBlock block, int from, int cnt) {
+        for(int i=from;i<from+cnt;i++) {
             int ix = block.start + i*32;
             if(block.get(ix)!=0) {
                 save_2d_info_CE49(ix, block);
