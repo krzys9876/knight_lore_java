@@ -684,8 +684,8 @@ public class Game implements Runnable {
         int a = variables.get(0x5BA0) & 0x3; // random
         int randomLoc = start_locations_D1E2.get(0xD1E2 + a);
         // For testing only
-        randomLoc = start_locations_D1E2.get(start_locations_D1E2.start + 2);
-        //randomLoc = 0x04;
+        //randomLoc = start_locations_D1E2.get(start_locations_D1E2.start + 3);
+        //randomLoc = 8;
         start_loc_1_D169.set(0xD169, randomLoc);
         start_loc_2_D189.set(0xD189, randomLoc);
     }
@@ -758,6 +758,7 @@ public class Game implements Runnable {
         build_screen_objects_D1E6();
         // @label=onscreen_loop
         variables.set(0x5BA2, variables.get(0x5BBC));
+        update_sprite_loop_AFC7(other_objs_here_5C88);
         /*int ix = graphic_objs_tbl_5C08.start; // NOTE: player's sprites data
         save_2d_info_CE49(ix, graphic_objs_tbl_5C08);
 
@@ -772,11 +773,101 @@ public class Game implements Runnable {
 
     }
 
+    private void update_sprite_loop_AFC7(DataBlock block) {
+        // block contains sprite metadata (32 bytes each)
+        int ix = block.start;
+        while(ix < block.start + block.size) {
+            updateOneSprite(block, ix);
+            ix+=32;
+        }
+    }
+
+    private void updateOneSprite(DataBlock block, int ix) {
+        save_2d_info_CE49(ix, block);
+        // @label=upd_sprite_jmp_tbl
+        switch(block.get(ix)) {
+            case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
+            case 0x02, 0x04: upd_2_4_C73C(block, ix); break;
+            case 0x03, 0x05: upd_3_5_C722(block, ix); break;
+            case 0x0A: upd_10_C4E8(block, ix); break;
+            case 0x0B: upd_11_C4ED(block, ix); break;
+            case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
+
+            default: break;
+        }
+    }
+
+    private void upd_2_4_C73C(DataBlock block, int ix) {
+        boolean hFlip = (block.get(ix + 7) & 0x40) > 0; // BIT 6,(IX+$07)
+        if(hFlip) {
+            // LD HL,$FEEF
+            block.set(ix + 0x12, -17); // EF
+            block.set(ix + 0x13, -2); // FE
+            int x = block.get(ix + 1) - 0x0D;
+            block.set(ix + 9, x); // dX
+            int y = block.get(ix + 2);
+            block.set(ix + 0x0A, y); // dY=Y
+            // LD HL,$0F06   ; +15, +6
+            int z = block.get(ix + 3);
+            block.set(ix + 0x0B, z); // dZ=Z
+            // TODO: implement chk_plyr_spec_near_arch_C7DB
+            // TODO: implement $C785 (check special objects)
+        } else {
+            if(block.get(ix) == 4) {
+                //TODO: implement
+            } else {
+                // LD HL,$FDF9    ; -3, -7
+                block.set(ix + 0x12, -7); // F9
+                block.set(ix + 0x13, -3); // FD
+                int y = block.get(ix + 2) + 0x0D;
+                block.set(ix + 0x0A, y); // dY
+                int x = block.get(ix + 1);
+                block.set(ix + 9, x); // dX
+                // LD HL,$060F   ; +6, +15
+                int z = block.get(ix + 3);
+                block.set(ix + 0x0B, z); // dZ=Z
+                // TODO: implement chk_plyr_spec_near_arch_C7DB
+                // TODO: implement $C785 (check special objects)
+            }
+        }
+    }
+
+    private void upd_3_5_C722(DataBlock block, int ix) {
+        boolean hFlip = (block.get(ix + 7) & 0x40) > 0; // BIT 6,(IX+$07)
+        if(hFlip) {
+            //LD HL,$FEF9
+            block.set(ix + 0x12, -7); // F9
+            block.set(ix + 0x13, -2); // FE
+
+        } else {
+            // LD HL,$FDF7    ; -3, -9
+            block.set(ix + 0x12, -9); // F9
+            block.set(ix + 0x13, -3); // FD
+        }
+    }
+
+    private void upd_10_C4E8(DataBlock block, int ix) {
+        //LD HL,$FFEC   ;
+        block.set(ix + 0x12, -20); // EC
+        block.set(ix + 0x13, -1); // FF
+    }
+
+    private void upd_11_C4ED(DataBlock block, int ix) {
+        //LD HL,$FEF4   ; -2, -12
+        block.set(ix + 0x12, -12); // F4
+        block.set(ix + 0x13, -2); // FE
+    }
+
+    private void upd_12_to_15_C4F2(DataBlock block, int ix) {
+        //LD HL,$FCF8   ; -4, -8
+        block.set(ix + 0x12, -8); // F8
+        block.set(ix + 0x13, -4); // FC
+    }
+
     private void renderAllSprites(DataBlock block, int from, int cnt) {
         for(int i=from;i<from+cnt;i++) {
             int ix = block.start + i*32;
             if(block.get(ix)!=0) {
-                save_2d_info_CE49(ix, block);
                 calc_pixel_XY_D6C9(ix, block);
                 print_sprite_D718(block, ix);
             }
