@@ -562,15 +562,23 @@ public class Game implements Runnable {
             int lines = sprite_graphics_data_728A.get(de+1);
             int bytesInLine = (sprite_graphics_data_728A.get(de) & 0x07) * 2;
             for(int line = 0; line<lines; line++) {
-                for(int b = 0; b < (bytesInLine >> 1); b++) {
-                    int leftByteAddress = de + 2 + line * bytesInLine + b;
-                    int rightByteAddress = de + 2 + line * bytesInLine + (bytesInLine - b -1);
+                int firstByteAddress = de + 2 + line * bytesInLine;
+                int lastByteAddress = firstByteAddress + bytesInLine - 1;
+                int bytePairs = bytesInLine >> 1;
+                for(int b = 0; b < bytePairs; b++) {
+                    boolean isMask = (b & 1) == 0;
+                    // Middle pair means that we have off number of data bytes so we must only flip bits and leave bytes in place
+                    boolean isMiddlePair = ((bytePairs & 1) == 1) && (b == bytePairs - 1);
+                    int shift = isMiddlePair ? 0 : (isMask ? -1 : 1);
+                    // NOTE: the data bytes and mask bytes must not be mixed
+                    int leftByteAddress = firstByteAddress + b;
+                    int rightByteAddress = lastByteAddress - b + shift;
                     int leftBuffer = sprite_graphics_data_728A.get(leftByteAddress);
                     leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
                     int rightBuffer = sprite_graphics_data_728A.get(rightByteAddress);
                     rightBuffer = lookupTable.get(0xF100 + rightBuffer);
-                    sprite_graphics_data_728A.set(leftByteAddress, rightBuffer);
-                    sprite_graphics_data_728A.set(rightByteAddress, leftBuffer);
+                    sprite_graphics_data_728A.set(leftByteAddress, isMiddlePair ? leftBuffer : rightBuffer);
+                    sprite_graphics_data_728A.set(rightByteAddress, isMiddlePair ? rightBuffer : leftBuffer);
                 }
             }
             sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.get(de) ^ 0x40);
@@ -754,7 +762,7 @@ public class Game implements Runnable {
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
         // This is all just to verify if objects render at all
         int ix;
-        ix = graphic_objs_tbl_5C08.start; // NOTE: player's sprites data
+        /*ix = graphic_objs_tbl_5C08.start; // NOTE: player's sprites data
         for(int i=0;i<2;i++) {
             save_2d_info_CE49(ix, graphic_objs_tbl_5C08);
 
@@ -771,16 +779,20 @@ public class Game implements Runnable {
 
             print_sprite_D718(special_objs_here_5C48, ix);
             ix+=32;
-        }
+        }*/
         ix = other_objs_here_5C88.start; // NOTE: player's sprites data
-        for(int i=0;i<20;i++) {
-            save_2d_info_CE49(ix, other_objs_here_5C88);
-
-            calc_pixel_XY_D6C9(ix, other_objs_here_5C88);
-
-            print_sprite_D718(other_objs_here_5C88, ix);
-            ix+=32;
+        for(int i=0;i<other_objs_here_5C88.size/32;i++) {
+            ix = other_objs_here_5C88.start + i*32;
+            if(other_objs_here_5C88.get(ix)!=0) {
+                save_2d_info_CE49(ix, other_objs_here_5C88);
+                calc_pixel_XY_D6C9(ix, other_objs_here_5C88);
+                //other_objs_here_5C88.set(ix + 0x1a, 0x80);
+                //other_objs_here_5C88.set(ix + 0x1b, 0x40);
+                print_sprite_D718(other_objs_here_5C88, ix);
+            }
+            //ix+=32;
         }
+        debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
     }
