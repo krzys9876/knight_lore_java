@@ -813,6 +813,7 @@ public class Game implements Runnable {
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
+            case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
 
             default: IO.println("Not updated: %02x (%d)".formatted(block.get(ix),block.get(ix))); break;
         }
@@ -892,6 +893,12 @@ public class Game implements Runnable {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -16); //F0
+    }
+
+    private void upd_128_to_130_C4D3(DataBlock block, int ix) {
+        //LD HL,$FEF8   ; -2, -8
+        block.set(ix + 0x12, -8); //F8
+        block.set(ix + 0x13, -2); //FE
     }
 
 
