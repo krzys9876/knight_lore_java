@@ -810,10 +810,16 @@ public class Game implements Runnable {
             case 0x02, 0x04: upd_2_4_C73C(block, ix); break;
             case 0x03, 0x05: upd_3_5_C722(block, ix); break;
             case 0x06, 0x07: upd_6_7_C4E3(block, ix); break;
+            case 0x08: upd_8_C661(block, ix);
+            case 0x09: upd_9_C6BD(block, ix);
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
+            case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
+            case 0x8D: upd_141_B99C(block, ix); break;
+            case 0x8E: upd_142_B99F(block, ix); break;
+            case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(block, ix); break;
 
             default: IO.println("Not updated: %02x (%d)".formatted(block.get(ix),block.get(ix))); break;
         }
@@ -823,8 +829,8 @@ public class Game implements Runnable {
         boolean hFlip = (block.get(ix + 7) & 0x40) > 0; // BIT 6,(IX+$07)
         if(hFlip) {
             // LD HL,$FEEF
-            block.set(ix + 0x12, -17); // EF
-            block.set(ix + 0x13, -2); // FE
+            block.set(ix + 0x12, -17); // L=x - EF
+            block.set(ix + 0x13, -2); // H=y - FE
             int x = block.get(ix + 1) - 0x0D;
             block.set(ix + 9, x); // dX
             int y = block.get(ix + 2);
@@ -838,8 +844,8 @@ public class Game implements Runnable {
             if(block.get(ix) == 4) {
                 //@label=adj_m3_p1
                 //c$C737 LD HL,$FD01   ;
-                block.set(ix + 0x12, 1); //01
-                block.set(ix + 0x12, -3);
+                block.set(ix + 0x12, 1); // L=x - 01
+                block.set(ix + 0x12, -3); // H=y - FD
             } else {
                 // LD HL,$FDF9    ; -3, -7
                 block.set(ix + 0x12, -7); // F9
@@ -866,7 +872,7 @@ public class Game implements Runnable {
 
         } else {
             // LD HL,$FDF7    ; -3, -9
-            block.set(ix + 0x12, -9); // F9
+            block.set(ix + 0x12, -9); // F7
             block.set(ix + 0x13, -3); // FD
         }
     }
@@ -891,8 +897,8 @@ public class Game implements Runnable {
 
     private void upd_6_7_C4E3(DataBlock block, int ix) {
         //LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -8); //F8
-        block.set(ix + 0x13, -16); //F0
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
     }
 
     private void upd_128_to_130_C4D3(DataBlock block, int ix) {
@@ -901,6 +907,45 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -2); //FE
     }
 
+    private void upd_8_C661(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        // TODO: implement rest of routine
+    }
+
+    private void upd_9_C6BD(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        // TODO: implement rest of routine
+    }
+
+    private void upd_141_B99C(DataBlock block, int ix) {
+        //LD HL,$F4F0   ;
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -12); //F4
+    }
+
+    private void upd_142_B99F(DataBlock block, int ix) {
+        //LD HL,$0CE8   ;
+        block.set(ix + 0x12, -24); //E8
+        block.set(ix + 0x13, 12); //0C
+    }
+
+    private void upd_144_to_149_152_to_157_B6F9(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        // TODO: implement rest of routine
+    }
+
+    private void upd_30_31_158_159_B9A5(DataBlock block, int ix) {
+        //c$C510 LD HL,$03F4   ; +3, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, 3); //03
+        // TODO: implement rest of routine
+    }
 
     private void renderAllSprites(DataBlock block, int from, int cnt) {
         for(int i=from;i<from+cnt;i++) {
