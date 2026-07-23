@@ -23,6 +23,8 @@ public class DataBlock {
         return new DataBlock(start, Arrays.copyOf(data, data.length));
     }
 
+    public int last() { return start + size - 1; }
+    public int endExcl() { return start + size; }
     public void set(int address, int value) { data[address - start]=value; }
     public int get(int address) { return data[address - start]; }
     public int[] getCopy() { return Arrays.copyOf(data, data.length); }

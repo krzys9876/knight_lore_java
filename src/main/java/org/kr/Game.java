@@ -1,6 +1,7 @@
 package org.kr;
 
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -197,7 +198,7 @@ public class Game implements Runnable {
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-        menu_loop_BD23(); // returns when game starts
+        menu_loop_BD23(true); // returns when game starts
 
         debugPanel2.append("START THE GAME");
 
@@ -206,7 +207,14 @@ public class Game implements Runnable {
         // CALL $B544    ; randomise order of required objects
         shuffle_objects_required_B544();
         // CALL $D1B1    ; {randomise player start location
-        init_start_location_D1B1();
+
+        int a = location_tbl_6251.start;
+        while(a < location_tbl_6251.endExcl()) {
+            int id = location_tbl_6251.get(a);
+            IO.println("id "+id);
+
+
+        init_start_location_D1B1(id);
         // CALL $C46D    ; }
         init_sun_C46D();
         // CALL $C47E    ; randomise special object locations
@@ -216,7 +224,18 @@ public class Game implements Runnable {
         player_dies_AFB7();
         game_loop_AFBA();
 
-    //printVariables();
+        try {
+            updateShadowMemory();
+            shadowPanel.saveImage("images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+            int size = location_tbl_6251.get(a+1);
+            a+=size+1;
+        }
+
+        //printVariables();
     }
 
     private void build_lookup_tables_D69E() {
@@ -618,11 +637,12 @@ public class Game implements Runnable {
     }
 
     // exiting means game starts
-    private void menu_loop_BD23() {
+    private void menu_loop_BD23(boolean skip) {
         debugPanel1.append("menu_loop_BD23");
         // @label=menu_loop
 
         boolean startGame = false;
+        if(skip) keyQueue.add(KeyEvent.VK_0);
         while(!startGame) {
             if (!keyQueue.isEmpty()) {
                 int a = variables.get(0x5BA4);
@@ -668,7 +688,7 @@ public class Game implements Runnable {
         //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
     }
 
-    private void init_start_location_D1B1() {
+    private void init_start_location_D1B1(int override) {
         for(int i=0; i<8; i++)
             plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i,
                     plyr_spr_init_data_D1A1.get(plyr_spr_init_data_D1A1.start+i));
@@ -684,8 +704,8 @@ public class Game implements Runnable {
         int a = variables.get(0x5BA0) & 0x3; // random
         int randomLoc = start_locations_D1E2.get(0xD1E2 + a);
         // For testing only
-        //randomLoc = start_locations_D1E2.get(start_locations_D1E2.start + 3);
-        //randomLoc = 8;
+        if(override != -1) randomLoc = override;
+
         start_loc_1_D169.set(0xD169, randomLoc);
         start_loc_2_D189.set(0xD189, randomLoc);
     }
@@ -699,7 +719,7 @@ public class Game implements Runnable {
     private void init_special_objects_C47E() {
         int rnd = variables.get(0x5BA0) & 0x07; // random
         int hl = special_objs_tbl_6FF2.start;
-        while(hl < special_objs_tbl_6FF2.start + special_objs_tbl_6FF2.size) {
+        while(hl < special_objs_tbl_6FF2.endExcl()) {
             rnd = (rnd & 0x07) | 0x60; // set numbers between 0x60 and 0x67 starting from random number to special object indexes
             special_objs_tbl_6FF2.set(hl, rnd);
             hl++;
@@ -776,7 +796,7 @@ public class Game implements Runnable {
     private void update_sprite_loop_AFC7(DataBlock block) {
         // block contains sprite metadata (32 bytes each)
         int ix = block.start;
-        while(ix < block.start + block.size) {
+        while(ix < block.endExcl()) {
             updateOneSprite(block, ix);
             ix+=32;
         }
@@ -789,11 +809,12 @@ public class Game implements Runnable {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
             case 0x02, 0x04: upd_2_4_C73C(block, ix); break;
             case 0x03, 0x05: upd_3_5_C722(block, ix); break;
+            case 0x06, 0x07: upd_6_7_C4E3(block, ix); break;
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
 
-            default: break;
+            default: IO.println("Not updated: %02x (%d)".formatted(block.get(ix),block.get(ix))); break;
         }
     }
 
@@ -814,21 +835,24 @@ public class Game implements Runnable {
             // TODO: implement $C785 (check special objects)
         } else {
             if(block.get(ix) == 4) {
-                //TODO: implement
+                //@label=adj_m3_p1
+                //c$C737 LD HL,$FD01   ;
+                block.set(ix + 0x12, 1); //01
+                block.set(ix + 0x12, -3);
             } else {
                 // LD HL,$FDF9    ; -3, -7
                 block.set(ix + 0x12, -7); // F9
                 block.set(ix + 0x13, -3); // FD
-                int y = block.get(ix + 2) + 0x0D;
-                block.set(ix + 0x0A, y); // dY
-                int x = block.get(ix + 1);
-                block.set(ix + 9, x); // dX
-                // LD HL,$060F   ; +6, +15
-                int z = block.get(ix + 3);
-                block.set(ix + 0x0B, z); // dZ=Z
-                // TODO: implement chk_plyr_spec_near_arch_C7DB
-                // TODO: implement $C785 (check special objects)
             }
+            int y = block.get(ix + 2) + 0x0D;
+            block.set(ix + 0x0A, y); // dY
+            int x = block.get(ix + 1);
+            block.set(ix + 9, x); // dX
+            // LD HL,$060F   ; +6, +15
+            int z = block.get(ix + 3);
+            block.set(ix + 0x0B, z); // dZ=Z
+            // TODO: implement chk_plyr_spec_near_arch_C7DB
+            // TODO: implement $C785 (check special objects)
         }
     }
 
@@ -863,6 +887,13 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -8); // F8
         block.set(ix + 0x13, -4); // FC
     }
+
+    private void upd_6_7_C4E3(DataBlock block, int ix) {
+        //LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -8); //F8
+        block.set(ix + 0x13, -16); //F0
+    }
+
 
     private void renderAllSprites(DataBlock block, int from, int cnt) {
         for(int i=from;i<from+cnt;i++) {
