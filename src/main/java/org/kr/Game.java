@@ -50,7 +50,7 @@ public class Game implements Runnable {
     private final DataBlock data_block_5CA8 = new DataBlock(0x5CA8, 0x0460);
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
     private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
-    private final DataBlock background_type_tbl_6CE2 = InitialData.block("background_type_tbl_6CE2");
+    //private final DataBlock background_type_tbl_6CE2 = InitialData.block("background_type_tbl_6CE2");
     private final DataBlock[] backgroundObjects = new DataBlock[]{
             InitialData.block("arch_n_6D12"),
             InitialData.block("arch_e_6D23"),
@@ -76,7 +76,39 @@ public class Game implements Runnable {
             InitialData.block("high_arch_s_6D56"),
             InitialData.block("high_arch_e_base_6FD0"),
             InitialData.block("high_arch_s_base_6FE1")
-    } ;
+    };
+    private final DataBlock block_type_tbl_6BD1 = InitialData.block("block_type_tbl_6BD1");
+    private final DataBlock[] foregroundObjects = new DataBlock[]{
+            InitialData.block("block_6C0B"),
+            InitialData.block("fire_6C3C"),
+            InitialData.block("ball_ud_y_6C43"),
+            InitialData.block("rock_6C66"),
+            InitialData.block("gargoyle_6C6D"),
+            InitialData.block("spike_6C74"),
+            InitialData.block("chest_6C90"),
+            InitialData.block("table_6C97"),
+            InitialData.block("guard_ew_6C9E"),
+            InitialData.block("ghost_6CB8"),
+            InitialData.block("fire_ns_6CBF"),
+            InitialData.block("block_high_6C12"),
+            InitialData.block("ball_ud_xy_6C4A"),
+            InitialData.block("guard_square_6CAB"),
+            InitialData.block("block_ew_6C19"),
+            InitialData.block("block_ns_6C20"),
+            InitialData.block("moveable_block_6C27"),
+            InitialData.block("spike_high_6C7B"),
+            InitialData.block("spike_ball_fall_6C82"),
+            InitialData.block("spike_ball_high_fall_6C89"),
+            InitialData.block("fire_ew_6CC6"),
+            InitialData.block("dropping_block_6C2E"),
+            InitialData.block("collapsing_block_6C35"),
+            InitialData.block("ball_bounce_6C5F"),
+            InitialData.block("ball_ud_6C51"),
+            InitialData.block("repel_spell_6CCD"),
+            InitialData.block("gate_ud_1_6CD4"),
+            InitialData.block("gate_ud_2_6CDB"),
+            InitialData.block("ball_ud_x_6C58")
+    };
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -1032,7 +1064,7 @@ public class Game implements Runnable {
 
         // @label=next_bg_obj
         // decode all background objects
-        // hl - iterates over room background objects
+        // hl - iterates over room background objects (until end of room data or 0xFF separator)
         int targetAddr = other_objs_here_5C88.start;
         while(location_tbl_6251.get(hl) != 0xFF && hl<=roomEnd) {
             DataBlock bkgObj = backgroundObjects[location_tbl_6251.get(hl)];
@@ -1054,7 +1086,25 @@ public class Game implements Runnable {
         }
 
         // TODO: implement foreground objects (not present at start screen id=68 / 0x44)
-        // @label=find_fg_objs
+        hl ++;
+        while(hl < roomEnd) {
+            // @label=find_fg_objs
+            int blockCtrl = location_tbl_6251.get(hl);
+            int blockCnt = (blockCtrl & 0x07) + 1;
+            int blockType = (blockCtrl >> 3) & 0x1F;
+            IO.print("Block type: %02x, count: %d ".formatted(blockType, blockCnt));
+            hl++;
+            for(int i=0; i<blockCnt; i++) {
+                int locByte = location_tbl_6251.get(hl+i);
+                int x = (locByte & 0b00000111);
+                int y = (locByte & 0b00111000) >> 3;
+                int z = (locByte & 0b11000000) >> 6;
+                IO.print("(%d,%d,%d)".formatted(x, y, z));
+            }
+            IO.println();
+            hl+=blockCnt;
+        }
+
 
         // @label=zero_end_of_graphic_objs_tbl
         // clear rest of graphics objects table
