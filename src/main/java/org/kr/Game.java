@@ -848,6 +848,7 @@ public class Game implements Runnable {
             case 0x0B: upd_11_C4ED(block, ix); break;
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
+            case 0x5B: upd_91_B683(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
@@ -950,6 +951,13 @@ public class Game implements Runnable {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
+        // TODO: implement rest of routine
+    }
+
+    private void upd_91_B683(DataBlock block, int ix) {
+        //LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
         // TODO: implement rest of routine
     }
 
