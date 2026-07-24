@@ -1085,13 +1085,13 @@ public class Game implements Runnable {
             hl++;
         }
 
-        // TODO: implement foreground objects (not present at start screen id=68 / 0x44)
         hl ++;
         while(hl < roomEnd) {
             // @label=find_fg_objs
             int blockCtrl = location_tbl_6251.get(hl);
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
+            DataBlock blockDef = foregroundObjects[blockType];
             IO.print("Block type: %02x, count: %d ".formatted(blockType, blockCnt));
             hl++;
             for(int i=0; i<blockCnt; i++) {
@@ -1100,6 +1100,20 @@ public class Game implements Runnable {
                 int y = (locByte & 0b00111000) >> 3;
                 int z = (locByte & 0b11000000) >> 6;
                 IO.print("(%d,%d,%d)".formatted(x, y, z));
+                other_objs_here_5C88.set(targetAddr, blockDef.get(blockDef.start)); // object ID
+                other_objs_here_5C88.set(targetAddr+4, blockDef.get(blockDef.start+1)); // width
+                other_objs_here_5C88.set(targetAddr+5, blockDef.get(blockDef.start+2)); // depth
+                other_objs_here_5C88.set(targetAddr+6, blockDef.get(blockDef.start+3)); // height
+                other_objs_here_5C88.set(targetAddr+7, blockDef.get(blockDef.start+4)); // flags
+                other_objs_here_5C88.set(targetAddr+8, currLocId); // screen
+                int off5 = blockDef.get(blockDef.start+5);
+                int x1 = ((off5 >> 3) & 8);
+                int y1 = ((off5 >> 2) & 8);
+                other_objs_here_5C88.set(targetAddr+1, x1 + x*16 + 0x48); // X
+                other_objs_here_5C88.set(targetAddr+2, y1 + y*16 + 0x48); // Y
+                int off6 = blockDef.get(blockDef.start+6);
+                other_objs_here_5C88.set(targetAddr+3, ((z*12+off6) & 0xFC) + variables.get(0x5BAE)); // Y, variable stores room size Z
+                targetAddr+=32;
             }
             IO.println();
             hl+=blockCnt;
