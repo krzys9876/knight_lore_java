@@ -243,7 +243,7 @@ public class Game implements Runnable {
         int a = location_tbl_6251.start;
         while(a < location_tbl_6251.endExcl()) {
             int id = location_tbl_6251.get(a);
-            IO.println("id "+id);
+            IO.println("Room id: "+id);
 
 
         init_start_location_D1B1(id);
@@ -817,9 +817,9 @@ public class Game implements Runnable {
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
         // This is all just to verify if objects render at all
         //renderAllSprites(graphic_objs_tbl_5C08, 0, 2);
-        //renderAllSprites(special_objs_here_5C48, 0,2);
+        renderAllSprites(special_objs_here_5C48, 0,2);
         renderAllSprites(other_objs_here_5C88, 0,36);
-        debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
+        //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
@@ -1193,7 +1193,7 @@ public class Game implements Runnable {
         while(location_tbl_6251.get(hl) != 0xFF && hl<=roomEnd) {
             DataBlock bkgObj = backgroundObjects[location_tbl_6251.get(hl)];
             debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.get(hl)));
-            IO.print("Background block type: %02x".formatted(location_tbl_6251.get(hl)));
+            //IO.print("Background block type: %02x".formatted(location_tbl_6251.get(hl)));
             int bkgAddr =  bkgObj.start;
             while(bkgObj.get(bkgAddr) != 0) { // each object consists of 8-byte sprite info terminated by 0
                 // 8 - byte sprite info
@@ -1208,7 +1208,7 @@ public class Game implements Runnable {
                 targetAddr+=0x17; // ; {8+1+23 = 32 bytes/entry, remaining 23 bytes is empty at this point
             }
             hl++;
-            IO.println();
+            //IO.println();
         }
 
         hl ++;
@@ -1218,14 +1218,14 @@ public class Game implements Runnable {
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
             DataBlock blockDef = foregroundObjects[blockType];
-            IO.print("Foreground block type: %02x, count: %d ".formatted(blockType, blockCnt));
+            //IO.print("Foreground block type: %02x, count: %d ".formatted(blockType, blockCnt));
             hl++;
             for(int i=0; i<blockCnt; i++) {
                 int locByte = location_tbl_6251.get(hl+i);
                 int x = (locByte & 0b00000111);
                 int y = (locByte & 0b00111000) >> 3;
                 int z = (locByte & 0b11000000) >> 6;
-                IO.print("(%d,%d,%d)".formatted(x, y, z));
+                //IO.print("(%d,%d,%d)".formatted(x, y, z));
                 other_objs_here_5C88.set(targetAddr, blockDef.get(blockDef.start)); // object ID
                 other_objs_here_5C88.set(targetAddr+4, blockDef.get(blockDef.start+1)); // width
                 other_objs_here_5C88.set(targetAddr+5, blockDef.get(blockDef.start+2)); // depth
@@ -1241,7 +1241,7 @@ public class Game implements Runnable {
                 other_objs_here_5C88.set(targetAddr+3, ((z*12+off6) & 0xFC) + variables.get(0x5BAE)); // Y, variable stores room size Z
                 targetAddr+=32;
             }
-            IO.println();
+            //IO.println();
             hl+=blockCnt;
         }
 
