@@ -850,14 +850,23 @@ public class Game implements Runnable {
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
             case 0x16: upd_22_B7A3(block, ix); break;
             case 0x17: upd_23_B7E7(block, ix); break;
+            case 0x36: upd_54_B6B9(block, ix); break;
+            case 0x37: upd_55_B6B1(block, ix); break;
+            case 0x3E: upd_62_C4AA(block, ix); break;
             case 0x3F: upd_63_B7A9(block, ix); break;
             case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
+            case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
+            case 0x8F: upd_143_B6A2(block, ix); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(block, ix); break;
             case 0x96, 0x97: upd_150_151_B73C(block, ix); break;
+            case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(block, ix); break;
+            case 0xB2, 0xB3: upd_178_179_B865(block, ix); break;
+            case 0xB4, 0xB5: upd_180_181_B80F(block, ix); break;
+            case 0xB6, 0xB7: upd_182_183_B5FF(block, ix); break;
 
             default: IO.println("Not updated: %02x (%d)".formatted(block.get(ix),block.get(ix))); break;
         }
@@ -915,6 +924,20 @@ public class Game implements Runnable {
         }
     }
 
+    private void upd_8_C661(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        // TODO: implement rest of routine
+    }
+
+    private void upd_9_C6BD(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        // TODO: implement rest of routine
+    }
+
     private void upd_10_C4E8(DataBlock block, int ix) {
         //LD HL,$FFEC   ;
         block.set(ix + 0x12, -20); // EC
@@ -945,20 +968,6 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -2); //FE
     }
 
-    private void upd_8_C661(DataBlock block, int ix) {
-        // c$C4DD LD HL,$FAF4   ; -6, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
-        // TODO: implement rest of routine
-    }
-
-    private void upd_9_C6BD(DataBlock block, int ix) {
-        // c$C4DD LD HL,$FAF4   ; -6, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
-        // TODO: implement rest of routine
-    }
-
     private void upd_22_B7A3(DataBlock block, int ix) {
         set_both_deadly_flags_B85C(block, ix);
         //c$C4FC LD HL,$F9F4   ; -7, -12
@@ -974,11 +983,53 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -8); //F8
     }
 
+    private void upd_30_31_158_159_B9A5(DataBlock block, int ix) {
+        //c$C510 LD HL,$03F4   ; +3, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, 3); //03
+        // TODO: implement rest of routine
+    }
+
+    private void upd_54_B6B9(DataBlock block, int ix) {
+        // c$C4E3 LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
+    private void upd_55_B6B1(DataBlock block, int ix) {
+        // c$C4E3 LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
+    private void upd_62_C4AA(DataBlock block, int ix) {
+        // c$C4E3 LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
     private void upd_63_B7A9(DataBlock block, int ix) {
         set_both_deadly_flags_B85C(block, ix);
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
+    private void upd_80_to_83_C5C8(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        // TODO: implement rest of routine
+    }
+
+    private void upd_86_87_B7ED(DataBlock block, int ix) {
+        // c$C4F2 LD HL,$FCF8   ; -4, -8
+        block.set(ix + 0x12, -8); //F8
+        block.set(ix + 0x13, -4); //FC
         // TODO: implement rest of routine
     }
 
@@ -1001,17 +1052,17 @@ public class Game implements Runnable {
         block.set(ix + 0x13, 12); //0C
     }
 
+    private void upd_143_B6A2(DataBlock block, int ix) {
+        // c$C4E3 LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
     private void upd_144_to_149_152_to_157_B6F9(DataBlock block, int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
-        // TODO: implement rest of routine
-    }
-
-    private void upd_30_31_158_159_B9A5(DataBlock block, int ix) {
-        //c$C510 LD HL,$03F4   ; +3, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, 3); //03
         // TODO: implement rest of routine
     }
 
@@ -1022,12 +1073,35 @@ public class Game implements Runnable {
         // TODO: implement rest of routine
     }
 
-    private void upd_80_to_83_C5C8(DataBlock block, int ix) {
-        // c$C4DD LD HL,$FAF4   ; -6, -12
+    private void upd_164_to_167_B92C(DataBlock block, int ix) {
+        // c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
+        block.set(ix + 0x13, -4); // FC
         // TODO: implement rest of routine
     }
+
+    private void upd_178_179_B865(DataBlock block, int ix) {
+        // c$C4F2 LD HL,$FCF8   ; -4, -8
+        block.set(ix + 0x12, -8); //F8
+        block.set(ix + 0x13, -4); //FC
+        // TODO: implement rest of routine
+    }
+
+    private void upd_180_181_B80F(DataBlock block, int ix) {
+        // c$C4F2 LD HL,$FCF8   ; -4, -8
+        block.set(ix + 0x12, -8); //F8
+        block.set(ix + 0x13, -4); //FC
+        // TODO: implement rest of routine
+    }
+
+    private void upd_182_183_B5FF(DataBlock block, int ix) {
+        // c$C4F2 LD HL,$FCF8   ; -4, -8
+        block.set(ix + 0x12, -8); //F8
+        block.set(ix + 0x13, -4); //FC
+        // TODO: implement rest of routine
+
+    }
+
 
     private void renderAllSprites(DataBlock block, int from, int cnt) {
         for(int i=from;i<from+cnt;i++) {
