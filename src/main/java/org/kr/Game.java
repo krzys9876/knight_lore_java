@@ -848,11 +848,14 @@ public class Game implements Runnable {
             case 0x0B: upd_11_C4ED(block, ix); break;
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
+            case 0x16: upd_22_B7A3(block, ix); break;
+            case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(block, ix); break;
+            case 0x96, 0x97: upd_150_151_B73C(block, ix); break;
 
             default: IO.println("Not updated: %02x (%d)".formatted(block.get(ix),block.get(ix))); break;
         }
@@ -954,6 +957,14 @@ public class Game implements Runnable {
         // TODO: implement rest of routine
     }
 
+    private void upd_22_B7A3(DataBlock block, int ix) {
+        set_both_deadly_flags_B85C(block, ix);
+        //c$C4FC LD HL,$F9F4   ; -7, -12
+        // $C4FF JR $C4E0      ;
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -7); //F9
+    }
+
     private void upd_91_B683(DataBlock block, int ix) {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
@@ -984,6 +995,20 @@ public class Game implements Runnable {
         //c$C510 LD HL,$03F4   ; +3, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, 3); //03
+        // TODO: implement rest of routine
+    }
+
+    private void upd_150_151_B73C(DataBlock block, int ix) {
+        //c$C50B LD HL,$07F4   ; +7, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, 7); //07
+        // TODO: implement rest of routine
+    }
+
+    private void upd_80_to_83_C5C8(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
         // TODO: implement rest of routine
     }
 
@@ -1188,6 +1213,10 @@ public class Game implements Runnable {
         // TODO: implement:
         // $D6EC CP $C0         ; bottom line of screen?
         // $D6EE RET            ;
+    }
+
+    private void set_both_deadly_flags_B85C(DataBlock block, int ix) {
+        block.set(ix + 0x0D, block.get(ix + 0x0D) | 0xA0);
     }
 
     private void printLookupTable() {
