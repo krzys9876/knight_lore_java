@@ -246,22 +246,22 @@ public class Game implements Runnable {
             IO.println("Room id: "+id);
 
 
-        init_start_location_D1B1(id);
-        // CALL $C46D    ; }
-        init_sun_C46D();
-        // CALL $C47E    ; randomise special object locations
-        init_special_objects_C47E();
-        // @label=player_dies
-        // CALL $D12A    ;
-        player_dies_AFB7();
-        game_loop_AFBA();
+            init_start_location_D1B1(id);
+            // CALL $C46D    ; }
+            init_sun_C46D();
+            // CALL $C47E    ; randomise special object locations
+            init_special_objects_C47E();
+            // @label=player_dies
+            // CALL $D12A    ;
+            player_dies_AFB7();
+            game_loop_AFBA();
 
-        try {
-            updateShadowMemory();
-            shadowPanel.saveImage("images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            try {
+                updateShadowMemory();
+                shadowPanel.saveImage("images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             int size = location_tbl_6251.get(a+1);
             a+=size+1;
@@ -817,7 +817,7 @@ public class Game implements Runnable {
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
         // This is all just to verify if objects render at all
         //renderAllSprites(graphic_objs_tbl_5C08, 0, 2);
-        renderAllSprites(special_objs_here_5C48, 0,2);
+        //renderAllSprites(special_objs_here_5C48, 0,2);
         renderAllSprites(other_objs_here_5C88, 0,36);
         //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
         // set attributes so the buffer contents are visible
@@ -842,14 +842,14 @@ public class Game implements Runnable {
             case 0x02, 0x04: upd_2_4_C73C(block, ix); break;
             case 0x03, 0x05: upd_3_5_C722(block, ix); break;
             case 0x06, 0x07: upd_6_7_C4E3(block, ix); break;
-            case 0x08: upd_8_C65E(block, ix);
-            case 0x09: upd_9_C6BD(block, ix);
+            case 0x08: upd_8_C65E(block, ix); break;
+            case 0x09: upd_9_C6BD(block, ix); break;
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
-            case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
             case 0x16: upd_22_B7A3(block, ix); break;
             case 0x17: upd_23_B7E7(block, ix); break;
+            case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x36: upd_54_B6B9(block, ix); break;
             case 0x37: upd_55_B6B1(block, ix); break;
             case 0x3E: upd_62_C4AA(block, ix); break;
@@ -1121,8 +1121,8 @@ public class Game implements Runnable {
         clear_scrn_buffer_D567();
         retrieve_screen_D3C6();
         // TODO: implement
-        //find_special_objs_here_C525();
-        //adjust_plyr_xyz_for_room_size_D320();
+        find_special_objs_here_C525();
+        adjust_plyr_xyz_for_room_size_D320();
 
         variables.set(0x5BAF, 0);
         variables.set(0x5BB0, 0);
@@ -1182,8 +1182,9 @@ public class Game implements Runnable {
         int roomSize = ((attrOrig >> 3) & 0x1F);
         variables.set(0x5BAB, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3)); // room size X
         variables.set(0x5BAC, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
-        variables.set(0x5BAE, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Y
+        variables.set(0x5BAE, room_size_tbl_6248.get(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Z
         debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.get(0x5BAB)+" Y:"+variables.get(0x5BAC)+" Z:"+variables.get(0x5BAE));
+        //IO.println("Retrieved room size: "+roomSize+" X:"+variables.get(0x5BAB)+" Y:"+variables.get(0x5BAC)+" Z:"+variables.get(0x5BAE));
         hl++; // background objects start
 
         // @label=next_bg_obj
@@ -1232,13 +1233,13 @@ public class Game implements Runnable {
                 other_objs_here_5C88.set(targetAddr+6, blockDef.get(blockDef.start+3)); // height
                 other_objs_here_5C88.set(targetAddr+7, blockDef.get(blockDef.start+4)); // flags
                 other_objs_here_5C88.set(targetAddr+8, currLocId); // screen
-                int off5 = blockDef.get(blockDef.start+5);
-                int x1 = ((off5 << 3) & 8);
-                int y1 = ((off5 << 2) & 8);
+                int offsets = blockDef.get(blockDef.start+5);
+                int x1 = ((offsets << 3) & 8);
+                int y1 = ((offsets << 2) & 8);
                 other_objs_here_5C88.set(targetAddr+1, x1 + x*16 + 0x48); // X
                 other_objs_here_5C88.set(targetAddr+2, y1 + y*16 + 0x48); // Y
-                int off6 = blockDef.get(blockDef.start+6);
-                other_objs_here_5C88.set(targetAddr+3, ((z*12+off6) & 0xFC) + variables.get(0x5BAE)); // Y, variable stores room size Z
+                other_objs_here_5C88.set(targetAddr+3, ((z*12+offsets) & 0xFC) + variables.get(0x5BAE)); // Y, variable stores room size Z
+                //IO.print("/(%d,%d,%d)".formatted(other_objs_here_5C88.get(targetAddr+1), other_objs_here_5C88.get(targetAddr+2), other_objs_here_5C88.get(targetAddr+3)));
                 targetAddr+=32;
             }
             //IO.println();
