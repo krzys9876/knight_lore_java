@@ -77,7 +77,7 @@ public class Game implements Runnable {
             InitialData.block("high_arch_e_base_6FD0"),
             InitialData.block("high_arch_s_base_6FE1")
     };
-    private final DataBlock block_type_tbl_6BD1 = InitialData.block("block_type_tbl_6BD1");
+    //private final DataBlock block_type_tbl_6BD1 = InitialData.block("block_type_tbl_6BD1");
     private final DataBlock[] foregroundObjects = new DataBlock[]{
             InitialData.block("block_6C0B"),
             InitialData.block("fire_6C3C"),
@@ -849,6 +849,8 @@ public class Game implements Runnable {
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
             case 0x16: upd_22_B7A3(block, ix); break;
+            case 0x17: upd_23_B7E7(block, ix); break;
+            case 0x3F: upd_63_B7A9(block, ix); break;
             case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
@@ -963,6 +965,21 @@ public class Game implements Runnable {
         // $C4FF JR $C4E0      ;
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -7); //F9
+    }
+
+    private void upd_23_B7E7(DataBlock block, int ix) {
+        set_both_deadly_flags_B85C(block, ix);
+        // c$C4E3 LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+    }
+
+    private void upd_63_B7A9(DataBlock block, int ix) {
+        set_both_deadly_flags_B85C(block, ix);
+        // c$C4E3 LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
     }
 
     private void upd_91_B683(DataBlock block, int ix) {
@@ -1102,6 +1119,7 @@ public class Game implements Runnable {
         while(location_tbl_6251.get(hl) != 0xFF && hl<=roomEnd) {
             DataBlock bkgObj = backgroundObjects[location_tbl_6251.get(hl)];
             debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.get(hl)));
+            IO.print("Background block type: %02x".formatted(location_tbl_6251.get(hl)));
             int bkgAddr =  bkgObj.start;
             while(bkgObj.get(bkgAddr) != 0) { // each object consists of 8-byte sprite info terminated by 0
                 // 8 - byte sprite info
@@ -1116,6 +1134,7 @@ public class Game implements Runnable {
                 targetAddr+=0x17; // ; {8+1+23 = 32 bytes/entry, remaining 23 bytes is empty at this point
             }
             hl++;
+            IO.println();
         }
 
         hl ++;
@@ -1125,7 +1144,7 @@ public class Game implements Runnable {
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
             DataBlock blockDef = foregroundObjects[blockType];
-            IO.print("Block type: %02x, count: %d ".formatted(blockType, blockCnt));
+            IO.print("Foreground block type: %02x, count: %d ".formatted(blockType, blockCnt));
             hl++;
             for(int i=0; i<blockCnt; i++) {
                 int locByte = location_tbl_6251.get(hl+i);
