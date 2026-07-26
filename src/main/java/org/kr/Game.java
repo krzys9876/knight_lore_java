@@ -842,7 +842,7 @@ public class Game implements Runnable {
             case 0x02, 0x04: upd_2_4_C73C(block, ix); break;
             case 0x03, 0x05: upd_3_5_C722(block, ix); break;
             case 0x06, 0x07: upd_6_7_C4E3(block, ix); break;
-            case 0x08: upd_8_C661(block, ix);
+            case 0x08: upd_8_C65E(block, ix);
             case 0x09: upd_9_C6BD(block, ix);
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
@@ -924,7 +924,7 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_8_C661(DataBlock block, int ix) {
+    private void upd_8_C65E(DataBlock block, int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
@@ -1233,8 +1233,8 @@ public class Game implements Runnable {
                 other_objs_here_5C88.set(targetAddr+7, blockDef.get(blockDef.start+4)); // flags
                 other_objs_here_5C88.set(targetAddr+8, currLocId); // screen
                 int off5 = blockDef.get(blockDef.start+5);
-                int x1 = ((off5 >> 3) & 8);
-                int y1 = ((off5 >> 2) & 8);
+                int x1 = ((off5 << 3) & 8);
+                int y1 = ((off5 << 2) & 8);
                 other_objs_here_5C88.set(targetAddr+1, x1 + x*16 + 0x48); // X
                 other_objs_here_5C88.set(targetAddr+2, y1 + y*16 + 0x48); // Y
                 int off6 = blockDef.get(blockDef.start+6);
