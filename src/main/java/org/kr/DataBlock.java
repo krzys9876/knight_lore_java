@@ -30,6 +30,6 @@ public class DataBlock {
     public int[] getCopy() { return Arrays.copyOf(data, data.length); }
 
     public void reset() {
-        for (int i = start; i < size+size-1; i++) { set(i, 0);}
+        for (int i = start; i < start+size-1; i++) { set(i, 0);}
     }
 }
