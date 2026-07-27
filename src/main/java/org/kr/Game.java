@@ -931,7 +931,8 @@ public class Game implements Runnable {
                 }
                 if(rendered) {
                     // restart
-                    de1 = objects_to_draw_CE8B.start;
+                    //de1 = objects_to_draw_CE8B.start;
+                    de1++;
                 } else {
                     if(isLast || renderList.get(0) == 0xFF) {
                         calc_pixel_XY_D6C9(graphic_objs_tbl_5C08, objectLoc1);
