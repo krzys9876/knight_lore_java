@@ -1202,11 +1202,9 @@ public class Game implements Runnable {
                 for(int i=0; i<8; i++) other_objs_here_5C88.set(targetAddr+i, bkgObj.get(bkgAddr+i));
                 bkgAddr+=8;
                 // 9th byte
-                targetAddr+=8;
-                other_objs_here_5C88.set(targetAddr, currLocId);
-                targetAddr++;
-                //for(int i=0; i<23; i++) other_objs_here_5C88.set(targetAddr+i, 0); // not sure if this is required
-                targetAddr+=0x17; // ; {8+1+23 = 32 bytes/entry, remaining 23 bytes is empty at this point
+                other_objs_here_5C88.set(targetAddr+8, currLocId);
+                for(int t=9; t<32; t++) other_objs_here_5C88.set(targetAddr+t, 0); // reset remaining info
+                targetAddr+=32;
             }
             hl++;
             //IO.println();
@@ -1240,6 +1238,7 @@ public class Game implements Runnable {
                 other_objs_here_5C88.set(targetAddr+2, y1 + y*16 + 0x48); // Y
                 other_objs_here_5C88.set(targetAddr+3, ((z*12+offsets) & 0xFC) + variables.get(0x5BAE)); // Y, variable stores room size Z
                 //IO.print("/(%d,%d,%d)".formatted(other_objs_here_5C88.get(targetAddr+1), other_objs_here_5C88.get(targetAddr+2), other_objs_here_5C88.get(targetAddr+3)));
+                for(int t=9; t<32; t++) other_objs_here_5C88.set(targetAddr+t,0);  // reset remaining info
                 targetAddr+=32;
             }
             //IO.println();
@@ -1256,6 +1255,14 @@ public class Game implements Runnable {
 
     private void find_special_objs_here_C525() {
         // TODO: implement
+        int currLocId = graphic_objs_tbl_5C08.get(graphic_objs_tbl_5C08.start + 8);
+        int iy = special_objs_tbl_6FF2.start;
+        while(iy<special_objs_tbl_6FF2.endExcl() && special_objs_tbl_6FF2.get(iy)!=0) {
+            if(currLocId == special_objs_tbl_6FF2.get(iy+8)) {
+                IO.println("Found special object");
+            }
+            iy+=9;
+        }
     }
 
     private void adjust_plyr_xyz_for_room_size_D320() {
