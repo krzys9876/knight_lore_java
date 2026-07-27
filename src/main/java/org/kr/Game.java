@@ -43,11 +43,10 @@ public class Game implements Runnable {
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
-    private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40);
-    private final DataBlock special_objs_here_5C48 = new DataBlock(0x5C48, 0x40);
+    private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40 + 0x40);
+    //private final DataBlock special_objs_here_5C48 = new DataBlock(0x5C48, 0x40);
     //TODO: replace data_block_5CA8 with other_objs_here_5C88
     private final DataBlock other_objs_here_5C88 = new DataBlock(0x5C88, 0x20 + 0x0460);
-    private final DataBlock data_block_5CA8 = new DataBlock(0x5CA8, 0x0460);
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
     private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
     //private final DataBlock background_type_tbl_6CE2 = InitialData.block("background_type_tbl_6CE2");
@@ -203,7 +202,7 @@ public class Game implements Runnable {
         variables.reset();
         scrn_visited_5BE8.reset();
         graphic_objs_tbl_5C08.reset();
-        special_objs_here_5C48.reset();
+        //special_objs_here_5C48.reset();
         other_objs_here_5C88.reset();
 
         variables.set(0x5BA0, v5C78);
@@ -772,7 +771,7 @@ public class Game implements Runnable {
     }
 
     private void lose_life_$D12A() {
-        int de = graphic_objs_tbl_5C08.start;
+        int de = 0x5C08;
         for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) graphic_objs_tbl_5C08.set(de+i, plyr_spr_1_scratchpad_D161.get(plyr_spr_1_scratchpad_D161.start+i));
         de+=plyr_spr_1_scratchpad_D161.size;
         for(int i=0; i<start_loc_1_D169.size; i++) graphic_objs_tbl_5C08.set(de+i, start_loc_1_D169.get(start_loc_1_D169.start+i));
@@ -815,16 +814,16 @@ public class Game implements Runnable {
         // @label=onscreen_loop
         variables.set(0x5BA2, variables.get(0x5BBC));
         //update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
-        update_sprite_loop_AFC7(special_objs_here_5C48);
+        update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
         update_sprite_loop_AFC7(other_objs_here_5C88);
-        /*int ix = graphic_objs_tbl_5C08.start; // NOTE: player's sprites data
+        /*int ix = 0x5C08; // NOTE: player's sprites data
         save_2d_info_CE49(ix, graphic_objs_tbl_5C08);
 
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
         // This is all just to verify if objects render at all
         //renderAllSprites(graphic_objs_tbl_5C08, 0, 2);
         renderAllSprites(other_objs_here_5C88, 0,36);
-        renderAllSprites(special_objs_here_5C48, 0,2);
+        renderAllSprites(graphic_objs_tbl_5C08, 2,2);
         //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
@@ -1187,7 +1186,7 @@ public class Game implements Runnable {
         if(!found) {
             // This should be unreachable
             debugPanel2.append("Location not found: ERROR");
-            for(int i = data_block_5CA8.start; i<data_block_5CA8.start+data_block_5CA8.size; i++) data_block_5CA8.set(i, 0);
+            other_objs_here_5C88.reset();
             return;
         }
         // @label=found_screen
@@ -1277,26 +1276,26 @@ public class Game implements Runnable {
 
     private void find_special_objs_here_C525() {
         // TODO: implement
-        int currLocId = graphic_objs_tbl_5C08.get(graphic_objs_tbl_5C08.start + 8);
-        special_objs_here_5C48.reset();
+        int currLocId = graphic_objs_tbl_5C08.get(0x5C08 + 8);
+        graphic_objs_tbl_5C08.reset();
         int iy = special_objs_tbl_6FF2.start;
-        int ix = special_objs_here_5C48.start;
+        int ix = 0x5C48;
         while(iy<special_objs_tbl_6FF2.endExcl() && special_objs_tbl_6FF2.get(iy)!=0) {
             if(currLocId == special_objs_tbl_6FF2.get(iy+8)) {
                 IO.println("Found special object");
-                special_objs_here_5C48.set(ix, special_objs_tbl_6FF2.get(iy));
-                special_objs_here_5C48.set(ix+1, special_objs_tbl_6FF2.get(iy+5));
-                special_objs_here_5C48.set(ix+2, special_objs_tbl_6FF2.get(iy+6));
-                special_objs_here_5C48.set(ix+3, special_objs_tbl_6FF2.get(iy+7));
-                special_objs_here_5C48.set(ix+4, 5);
-                special_objs_here_5C48.set(ix+5, 5);
-                special_objs_here_5C48.set(ix+6, 0xC);
-                special_objs_here_5C48.set(ix+7, 0x14);
-                special_objs_here_5C48.set(ix+8, currLocId);
-                for(int i=9; i<16; i++) special_objs_here_5C48.set(ix+i, 0);
-                special_objs_here_5C48.set(ix+16, iy & 0xFF);
-                special_objs_here_5C48.set(ix+17, iy & (0xFF00 >> 8));
-                for(int i=18; i<32; i++) special_objs_here_5C48.set(ix+i, 0);
+                graphic_objs_tbl_5C08.set(ix, special_objs_tbl_6FF2.get(iy));
+                graphic_objs_tbl_5C08.set(ix+1, special_objs_tbl_6FF2.get(iy+5));
+                graphic_objs_tbl_5C08.set(ix+2, special_objs_tbl_6FF2.get(iy+6));
+                graphic_objs_tbl_5C08.set(ix+3, special_objs_tbl_6FF2.get(iy+7));
+                graphic_objs_tbl_5C08.set(ix+4, 5);
+                graphic_objs_tbl_5C08.set(ix+5, 5);
+                graphic_objs_tbl_5C08.set(ix+6, 0xC);
+                graphic_objs_tbl_5C08.set(ix+7, 0x14);
+                graphic_objs_tbl_5C08.set(ix+8, currLocId);
+                //for(int i=9; i<16; i++) graphic_objs_tbl_5C08.set(ix+i, 0);
+                graphic_objs_tbl_5C08.set(ix+16, iy & 0xFF);
+                graphic_objs_tbl_5C08.set(ix+17, iy & (0xFF00 >> 8));
+                //for(int i=18; i<32; i++) graphic_objs_tbl_5C08.set(ix+i, 0);
                 ix+=32;
             }
             iy+=9;
@@ -1304,7 +1303,7 @@ public class Game implements Runnable {
     }
 
     private void adjust_plyr_xyz_for_room_size_D320() {
-        debugTable("Graphic objects table:", graphic_objs_tbl_5C08.start, graphic_objs_tbl_5C08.getCopy());
+        debugTable("Graphic objects table:", 0x5C08, graphic_objs_tbl_5C08.getCopy());
         int roomSizeX = variables.get(0x5BAB) - 2;
         int roomSizeY = variables.get(0x5BAC) - 2;
         int ix = 0x5C08;
