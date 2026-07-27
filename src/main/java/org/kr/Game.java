@@ -823,8 +823,8 @@ public class Game implements Runnable {
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
         // This is all just to verify if objects render at all
         //renderAllSprites(graphic_objs_tbl_5C08, 0, 2);
-        renderAllSprites(special_objs_here_5C48, 0,2);
         renderAllSprites(other_objs_here_5C88, 0,36);
+        renderAllSprites(special_objs_here_5C48, 0,2);
         //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
@@ -864,6 +864,7 @@ public class Game implements Runnable {
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
+            case 0x67: upd_103_C1AB(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
@@ -1051,6 +1052,13 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
+        // TODO: implement rest of routine
+    }
+
+    private void upd_103_C1AB(DataBlock block, int ix) {
+        //c$C4D3 LD HL,$FEF8   ; -2, -8
+        block.set(ix + 0x12, -8); //F8
+        block.set(ix + 0x13, -2); //FE
         // TODO: implement rest of routine
     }
 
