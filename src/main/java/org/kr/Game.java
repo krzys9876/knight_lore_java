@@ -241,6 +241,7 @@ public class Game implements Runnable {
         // CALL $D1B1    ; {randomise player start location
 
         int a = location_tbl_6251.start;
+        boolean specialObjectsInitialized = false;
         while(a < location_tbl_6251.endExcl()) {
             int id = location_tbl_6251.get(a);
             IO.println("Room id: "+id);
@@ -250,7 +251,10 @@ public class Game implements Runnable {
             // CALL $C46D    ; }
             init_sun_C46D();
             // CALL $C47E    ; randomise special object locations
-            init_special_objects_C47E();
+            if(!specialObjectsInitialized) {
+                init_special_objects_C47E();
+                specialObjectsInitialized = true;
+            }
             // @label=player_dies
             // CALL $D12A    ;
             player_dies_AFB7();
@@ -810,6 +814,8 @@ public class Game implements Runnable {
         build_screen_objects_D1E6();
         // @label=onscreen_loop
         variables.set(0x5BA2, variables.get(0x5BBC));
+        //update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
+        update_sprite_loop_AFC7(special_objs_here_5C48);
         update_sprite_loop_AFC7(other_objs_here_5C88);
         /*int ix = graphic_objs_tbl_5C08.start; // NOTE: player's sprites data
         save_2d_info_CE49(ix, graphic_objs_tbl_5C08);
@@ -817,7 +823,7 @@ public class Game implements Runnable {
         print_sprite_D718(graphic_objs_tbl_5C08, ix);*/
         // This is all just to verify if objects render at all
         //renderAllSprites(graphic_objs_tbl_5C08, 0, 2);
-        //renderAllSprites(special_objs_here_5C48, 0,2);
+        renderAllSprites(special_objs_here_5C48, 0,2);
         renderAllSprites(other_objs_here_5C88, 0,36);
         //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
         // set attributes so the buffer contents are visible
@@ -857,6 +863,7 @@ public class Game implements Runnable {
             case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
+            case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
@@ -1037,6 +1044,13 @@ public class Game implements Runnable {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
+    private void upd_96_to_102_C28B(DataBlock block, int ix) {
+        //c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); //FC
         // TODO: implement rest of routine
     }
 
@@ -1256,10 +1270,26 @@ public class Game implements Runnable {
     private void find_special_objs_here_C525() {
         // TODO: implement
         int currLocId = graphic_objs_tbl_5C08.get(graphic_objs_tbl_5C08.start + 8);
+        special_objs_here_5C48.reset();
         int iy = special_objs_tbl_6FF2.start;
+        int ix = special_objs_here_5C48.start;
         while(iy<special_objs_tbl_6FF2.endExcl() && special_objs_tbl_6FF2.get(iy)!=0) {
             if(currLocId == special_objs_tbl_6FF2.get(iy+8)) {
                 IO.println("Found special object");
+                special_objs_here_5C48.set(ix, special_objs_tbl_6FF2.get(iy));
+                special_objs_here_5C48.set(ix+1, special_objs_tbl_6FF2.get(iy+5));
+                special_objs_here_5C48.set(ix+2, special_objs_tbl_6FF2.get(iy+6));
+                special_objs_here_5C48.set(ix+3, special_objs_tbl_6FF2.get(iy+7));
+                special_objs_here_5C48.set(ix+4, 5);
+                special_objs_here_5C48.set(ix+5, 5);
+                special_objs_here_5C48.set(ix+6, 0xC);
+                special_objs_here_5C48.set(ix+7, 0x14);
+                special_objs_here_5C48.set(ix+8, currLocId);
+                for(int i=9; i<16; i++) special_objs_here_5C48.set(ix+i, 0);
+                special_objs_here_5C48.set(ix+16, iy & 0xFF);
+                special_objs_here_5C48.set(ix+17, iy & (0xFF00 >> 8));
+                for(int i=18; i<32; i++) special_objs_here_5C48.set(ix+i, 0);
+                ix+=32;
             }
             iy+=9;
         }
