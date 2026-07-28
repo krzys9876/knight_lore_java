@@ -851,8 +851,16 @@ public class Game implements Runnable {
         }
         //$B04F CALL $BF4E    ; {inventory
         // $B052 CALL $D2EF    ;
+        //@label=colour_panel
+        fill_window_C515(mainMemory, 0x5AB6, 1, 3, 0);
+        fill_window_C515(mainMemory, 0x5ABD, 1, 3, 0);
+        fill_window_C515(mainMemory, 0x5A97, 6, 4, 0x42);
         // $B055 CALL $D30D    ;
-        // TODO: implement
+        // @label=colour_sun_moon
+        boolean isSun = ((sun_moon_scratchpad_C44D.get(0xC44D)) & 1) == 0;
+        int attr = isSun ? 0x46 : 0x47;
+        fill_window_C515(mainMemory, 0x5AB8, 4, 2, attr);
+
         display_panel_D255();
         display_sun_moon_frame_C3A4();
 
@@ -1006,7 +1014,6 @@ public class Game implements Runnable {
 
         int ix = sun_moon_scratchpad_C44D.start;
         // @label=display_frame
-        // TODO: implement
         int a = sun_moon_scratchpad_C44D.get(ix+0x1A);
         if(a == 0xE1) toggle_day_night_C3FF();
         else {
@@ -1015,18 +1022,28 @@ public class Game implements Runnable {
             int hl = 0xC440 + a;
             sun_moon_scratchpad_C44D.set(ix+0x1B, sun_moon_yoff_C440.get(hl));
             // @label=display_frame
-            // TODO: implement
-            fill_window_C515(0xD90A, 6, 0x1F, 0);
+            fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
             print_sprite_D718(sun_moon_scratchpad_C44D, ix);
+
+            ix = sprite_scratchpad_BFDB.start;
+            sprite_scratchpad_BFDB.set(ix+7, 0);
+            sprite_scratchpad_BFDB.set(ix, 0x5A);
+            sprite_scratchpad_BFDB.set(ix+0x1A, 0xB8);
+            sprite_scratchpad_BFDB.set(ix+0x1B, 0);
+            print_sprite_D718(sprite_scratchpad_BFDB, ix);
+            sprite_scratchpad_BFDB.set(ix+0x1A, 0xD0);
+            sprite_scratchpad_BFDB.set(ix, 0xBA);
+            print_sprite_D718(sprite_scratchpad_BFDB, ix);
+
         }
 
     }
 
     // ; Input:HL starting location B  width (bytes) C  height (lines), A - value
-    private void fill_window_C515(int hl, int b, int c, int a) {
+    private void fill_window_C515(VideoMemory memory, int hl, int b, int c, int a) {
         for(int y = 0; y<c; y++) {
             for(int x = 0; x<b; x++) {
-                shadowMemory.setByteAt(hl + x + y*0x20, a);
+                memory.setByteAt(hl + x + y*0x20, a);
             }
         }
     }
