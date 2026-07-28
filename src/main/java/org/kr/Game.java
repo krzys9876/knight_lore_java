@@ -241,6 +241,7 @@ public class Game implements Runnable {
         while(a < location_tbl_6251.endExcl())
         {
             int id = location_tbl_6251.get(a);
+            //int id = 1;
             IO.println("Room id: "+id);
 
 
@@ -837,109 +838,61 @@ public class Game implements Runnable {
         int hl = objects_to_draw_CE8B.start;
         final int cnt = 40;
         for(int i=0; i<cnt; i++) {
-            if(graphic_objs_tbl_5C08.get(ix + i*32) != 0 /*&& (graphic_objs_tbl_5C08.get(ix + i*32 + 7) & 0x10*) > 0*/) {
+            if(graphic_objs_tbl_5C08.get(ix + i*32) != 0 && (graphic_objs_tbl_5C08.get(ix + i*32 + 7) & 0x10) > 0) {
                 objects_to_draw_CE8B.set(hl, i);
                 //IO.println(graphic_objs_tbl_5C08.get(ix + i*32));
                 hl++;
             }
         }
         objects_to_draw_CE8B.set(hl, 0xFF); //flag end of list
+
+
+        /*objects_to_draw_CE8B.set(hl, 0x04);
+        objects_to_draw_CE8B.set(hl+1, 0x05);
+        objects_to_draw_CE8B.set(hl+2, 0x0B);
+        objects_to_draw_CE8B.set(hl+3, 0xFF);*/
     }
 
     private void calc_display_order_and_render_CEBB() {
         variables.set(0x5BBE, 0); // rendered objects cnt
-        int cntToRender = 0;
         int de1 = objects_to_draw_CE8B.start;
-        while(objects_to_draw_CE8B.get(de1) !=0xFF) {
-            cntToRender++;
-            de1++;
-        }
-        de1 = objects_to_draw_CE8B.start;
-        DataBlock renderList = new DataBlock(0, 40);
-        for(int i=0; i<40; i++) renderList.set(i, 0xFF);
+        int i = de1;
+        while(objects_to_draw_CE8B.get(i) !=0xFF) i++;
+        int cntToRender = i - de1;
+        RenderStack renderList = new RenderStack();
         while(variables.get(0x5BBE) < cntToRender) {
             boolean rendered1 = (objects_to_draw_CE8B.get(de1) & 0x80) > 0;
             if(!rendered1) {
-                // index in objects' table
-                int objectLoc1 = objects_to_draw_CE8B.get(de1) * 32 + graphic_objs_tbl_5C08.start;
-                int x1 = graphic_objs_tbl_5C08.get(objectLoc1 + 1);
-                int y1 = graphic_objs_tbl_5C08.get(objectLoc1 + 2);
-                int z1 = graphic_objs_tbl_5C08.get(objectLoc1 + 3);
-                int w1 = graphic_objs_tbl_5C08.get(objectLoc1 + 4);
-                int d1 = graphic_objs_tbl_5C08.get(objectLoc1 + 5);
-                int h1 = graphic_objs_tbl_5C08.get(objectLoc1 + 6);
                 int de2 = objects_to_draw_CE8B.start;
-                IO.println("Object 1: %02x, x/y/z/w/d/h %d/%d/%d/%d/%d/%d".formatted(objects_to_draw_CE8B.get(de1), x1, y1, z1, w1, d1, h1));
-                //boolean is2behind1 = variables.get(0x5BBE) >= cntToRender-1; // if only one object remains, we should render it
-                boolean shouldBreak = false;
+                boolean doneInnerLoop = false;
                 boolean isLast = variables.get(0x5BBE) >= cntToRender-1; // if only one object remains, we should render it
                 boolean rendered = false;
-                while(objects_to_draw_CE8B.get(de2) != 0xFF && !shouldBreak && !isLast) {
-                    int objectLoc2 = objects_to_draw_CE8B.get(de2) * 32 + graphic_objs_tbl_5C08.start;
+                boolean savedToList = false;
+                while(objects_to_draw_CE8B.get(de2) != 0xFF && !doneInnerLoop && !isLast) {
                     boolean rendered2 = (objects_to_draw_CE8B.get(de2) & 0x80) > 0;
                     if(!rendered2 && de1!=de2) {
-                        int x2 = graphic_objs_tbl_5C08.get(objectLoc2 + 1);
-                        int y2 = graphic_objs_tbl_5C08.get(objectLoc2 + 2);
-                        int z2 = graphic_objs_tbl_5C08.get(objectLoc2 + 3);
-                        int w2 = graphic_objs_tbl_5C08.get(objectLoc2 + 4);
-                        int d2 = graphic_objs_tbl_5C08.get(objectLoc2 + 5);
-                        int h2 = graphic_objs_tbl_5C08.get(objectLoc2 + 6);
-                        boolean overlap1 = z1 >= (z2+h2); // $CF05 JR NC,$CF16    ; no overlap (C+=0)
-                        boolean overlap2 = z2 >= (z1+h1); // $CF12 JR C,$CF15     ; overlap (C+=1)
-                        boolean overlap3 = (y1-d1) >= (y2+d2); // $CF23 SUB L          ; Y1-D1-(Y2+d2)
-                        boolean overlap4 = (y2-d2) >= (y1+d1); // $CF33 SUB L          ; Y2-D2-(Y1+D1)
-                        boolean overlap5 = (x1-w1) >= (x2+w2); // $CF49 SUB L          ; X1-W1-(X2+W2)
-                        boolean overlap6 = (x2-w2) >= (x1+w1); // $CF59 SUB L          ; X2-W2-(X1+W1)
-                        int c=0;
-
-                        if(!overlap1)
-                            if(!overlap2) c+=1;
-                            else c+=2;
-                        if(!overlap3)
-                            if(!overlap4) c+=3;
-                            else c+=6;
-                        if(!overlap5)
-                            if(!overlap6) c+=9;
-                            else c+=18;
-
-                        boolean is2behind1 = c==3 || c==4 || c==6 || c==7 || c==12 || c==15 || c==16;
-                        IO.println("Object 2: %02x, x/y/z/w/d/h %d/%d/%d/%d/%d/%d %d".formatted(objects_to_draw_CE8B.get(de2), x2, y2, z2, w2, d2, h2, c));
+                        boolean is2behind1 = is2behind1(de1, de2);
                         if(is2behind1) {
-                            IO.println("Behind: Object 1: %02x, Object 2: %02x".formatted(objects_to_draw_CE8B.get(de1), objects_to_draw_CE8B.get(de2)));
-                            int i=0;
-                            boolean saved = false;
-                            while(i<40 && !saved) {
-                                if(renderList.get(i)==0xFF) {
-                                    renderList.set(i, objects_to_draw_CE8B.get(de2));
-                                    renderList.set(i+1, 0xFF);
-                                    saved = true;
-                                } else if(renderList.get(i)==objects_to_draw_CE8B.get(de2)) {
-                                    calc_pixel_XY_D6C9(graphic_objs_tbl_5C08, objectLoc2);
-                                    print_sprite_D718(graphic_objs_tbl_5C08, objectLoc2);
-                                    objects_to_draw_CE8B.set(de2, objects_to_draw_CE8B.get(de2) | 0x80);
-                                    variables.set(0x5BBE, variables.get(0x5BBE) + 1);
-                                    renderList.set(0, 0xFF);
-                                    saved = true;
-                                    rendered = true;
-                                }
-                                i++;
+                            if(renderList.contains(objects_to_draw_CE8B.get(de2))) {
+                                renderOne(de2);
+                                renderList.reset();
+                                rendered = true;
+                            } else {
+                                renderList.add(objects_to_draw_CE8B.get(de2));
+                                savedToList = true;
                             }
-                            shouldBreak = true;
+                            doneInnerLoop = true;
                         }
                     }
-                    de2++;
+                    if(!doneInnerLoop) de2++;
                 }
-                if(rendered) {
-                    // restart
-                    //de1 = objects_to_draw_CE8B.start;
-                    de1++;
-                } else {
-                    if(isLast || renderList.get(0) == 0xFF) {
-                        calc_pixel_XY_D6C9(graphic_objs_tbl_5C08, objectLoc1);
-                        print_sprite_D718(graphic_objs_tbl_5C08, objectLoc1);
-                        objects_to_draw_CE8B.set(de1, objects_to_draw_CE8B.get(de1) | 0x80);
-                        variables.set(0x5BBE, variables.get(0x5BBE) + 1);
-                        renderList.set(0, 0xFF);
+                // Analyze inner loop results
+                if(savedToList) de1 = de2; // since 2 is behind 1 we should now examine 2 if there is anything behind it. If not it should be rendered later
+                else if(rendered) de1 = objects_to_draw_CE8B.start; // restart the loop after rendering (the rendered object will be ignored)
+                else {
+                    if(isLast || renderList.isEmpty() || renderList.isLast(objects_to_draw_CE8B.get(de1))) {
+                        renderOne(de1);
+                        renderList.reset();
                     }
                     de1++;
                 }
@@ -949,6 +902,61 @@ public class Game implements Runnable {
             // restart loop if not all objects are rendered
             if(objects_to_draw_CE8B.get(de1) == 0xFF) de1 = objects_to_draw_CE8B.start;
         }
+    }
+
+    private void renderOne(int de) {
+        int objectLoc = objects_to_draw_CE8B.get(de) * 32 + graphic_objs_tbl_5C08.start;
+        calc_pixel_XY_D6C9(graphic_objs_tbl_5C08, objectLoc);
+        print_sprite_D718(graphic_objs_tbl_5C08, objectLoc);
+        objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.get(de) | 0x80);
+        variables.set(0x5BBE, variables.get(0x5BBE) + 1);
+    }
+
+    private boolean is2behind1(int de1, int de2) {
+        if(de1==de2) return false;
+
+        int objectLoc1 = objects_to_draw_CE8B.get(de1) * 32 + graphic_objs_tbl_5C08.start;
+        int objectLoc2 = objects_to_draw_CE8B.get(de2) * 32 + graphic_objs_tbl_5C08.start;
+
+        int x1 = graphic_objs_tbl_5C08.get(objectLoc1 + 1);
+        int y1 = graphic_objs_tbl_5C08.get(objectLoc1 + 2);
+        int z1 = graphic_objs_tbl_5C08.get(objectLoc1 + 3);
+        int w1 = graphic_objs_tbl_5C08.get(objectLoc1 + 4);
+        int d1 = graphic_objs_tbl_5C08.get(objectLoc1 + 5);
+        int h1 = graphic_objs_tbl_5C08.get(objectLoc1 + 6);
+
+        int x2 = graphic_objs_tbl_5C08.get(objectLoc2 + 1);
+        int y2 = graphic_objs_tbl_5C08.get(objectLoc2 + 2);
+        int z2 = graphic_objs_tbl_5C08.get(objectLoc2 + 3);
+        int w2 = graphic_objs_tbl_5C08.get(objectLoc2 + 4);
+        int d2 = graphic_objs_tbl_5C08.get(objectLoc2 + 5);
+        int h2 = graphic_objs_tbl_5C08.get(objectLoc2 + 6);
+
+        boolean overlap1 = z1 >= (z2+h2); // $CF05 JR NC,$CF16    ; no overlap (C+=0)
+        boolean overlap2 = z2 >= (z1+h1); // $CF12 JR C,$CF15     ; overlap (C+=1)
+        boolean overlap3 = (y1-d1) >= (y2+d2); // $CF23 SUB L          ; Y1-D1-(Y2+d2)
+        boolean overlap4 = (y2-d2) >= (y1+d1); // $CF33 SUB L          ; Y2-D2-(Y1+D1)
+        boolean overlap5 = (x1-w1) >= (x2+w2); // $CF49 SUB L          ; X1-W1-(X2+W2)
+        boolean overlap6 = (x2-w2) >= (x1+w1); // $CF59 SUB L          ; X2-W2-(X1+W1)
+        int c=0;
+
+        //IO.println("Object 2: %02x, x/y/z/w/d/h %d/%d/%d/%d/%d/%d %d".formatted(objects_to_draw_CE8B.get(de2), x2, y2, z2, w2, d2, h2, c));
+
+        if(!overlap1)
+            if(!overlap2) c+=1;
+            else c+=2;
+        if(!overlap3)
+            if(!overlap4) c+=3;
+            else c+=6;
+        if(!overlap5)
+            if(!overlap6) c+=9;
+            else c+=18;
+
+        boolean isBehind = c==3 || c==4 || c==6 || c==7 || c==12 || c==15 || c==16;
+        /*if(isBehind) {
+            IO.println("Behind: Object 1: %02x, Object 2: %02x".formatted(objects_to_draw_CE8B.get(de1), objects_to_draw_CE8B.get(de2)));
+        }*/
+        return isBehind;
     }
 
 
@@ -1345,11 +1353,13 @@ public class Game implements Runnable {
         while(location_tbl_6251.get(hl) != 0xFF && hl<=roomEnd) {
             DataBlock bkgObj = backgroundObjects[location_tbl_6251.get(hl)];
             debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.get(hl)));
-            //IO.print("Background block type: %02x".formatted(location_tbl_6251.get(hl)));
+            //IO.println("Background block type: %02x".formatted(location_tbl_6251.get(hl)));
             int bkgAddr =  bkgObj.start;
             while(bkgObj.get(bkgAddr) != 0) { // each object consists of 8-byte sprite info terminated by 0
                 // 8 - byte sprite info
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.get(bkgAddr)));
+                //IO.println("Sprite: %02x x/y/z/w/d/h %d/%d/%d/%d/%d/%d".formatted(bkgObj.get(bkgAddr),
+                //        bkgObj.get(bkgAddr+1),bkgObj.get(bkgAddr+2),bkgObj.get(bkgAddr+3),bkgObj.get(bkgAddr+4),bkgObj.get(bkgAddr+5),bkgObj.get(bkgAddr+6)));
                 for(int i=0; i<8; i++) graphic_objs_tbl_5C08.set(targetAddr+i, bkgObj.get(bkgAddr+i));
                 bkgAddr+=8;
                 // 9th byte
