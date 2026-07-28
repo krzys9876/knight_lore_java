@@ -260,7 +260,8 @@ public class Game implements Runnable {
 
             try {
                 updateShadowMemory();
-                shadowPanel.saveImage("images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
+                updateMainMemory();
+                mainPanel.saveImage("images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -841,6 +842,8 @@ public class Game implements Runnable {
             mainMemory.setByteAt(addr, a);
             shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
         }
+
+        update_screen_D56F();
 
     }
 
