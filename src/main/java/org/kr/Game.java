@@ -814,7 +814,6 @@ public class Game implements Runnable {
         variables.set(0x5BA2, variables.get(0x5BBC));
         update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
         // loc_B000
-        //TODO: implement
         list_objects_to_draw_CE62();
         debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
 
@@ -829,6 +828,19 @@ public class Game implements Runnable {
         //renderAllSprites(other_objs_here_5C88, 2,36);
         //renderAllSprites(graphic_objs_tbl_5C08, 0,2 + 2 + 36);
         //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
+
+        //@label=delay_loop
+        //TODO: implement
+
+        //@label=no_delay
+        //TODO: implement checking if first render ($B042 AND A         ; rendered before?)
+
+        variables.set(0x5BB7, 0);
+        int a = variables.get(0x5BAD); // screen attribute
+        for(int addr = 0x5800; addr<0x5800+0x0300; addr++) {
+            mainMemory.setByteAt(addr, a);
+            shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
+        }
 
     }
 
