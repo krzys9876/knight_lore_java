@@ -107,6 +107,7 @@ public class Game implements Runnable {
             InitialData.block("ball_ud_x_6C58")
     };
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
+    private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -194,7 +195,6 @@ public class Game implements Runnable {
         //@label=all_objs_in_cauldron
         //b$5BC3 DEFS $01
         variables.set(0x5BC3, 0);
-
 
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
@@ -863,8 +863,20 @@ public class Game implements Runnable {
 
         display_panel_D255();
         display_sun_moon_frame_C3A4();
+        display_day_BCCA();
+        // TODO: implement
 
         update_screen_D56F(false);
+    }
+
+    private void display_day_BCCA() {
+        int attr = variables.get(0x5BAD); // room attribute
+        attr = (((attr ^ 0xFF) + 2) & 0x0F) | 0x40;
+        day_txt_BCE7.set(day_txt_BCE7.start, attr);
+
+
+
+
     }
 
     private void list_objects_to_draw_CE62() {
