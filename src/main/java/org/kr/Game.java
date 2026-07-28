@@ -105,6 +105,7 @@ public class Game implements Runnable {
             InitialData.block("gate_ud_2_6CDB"),
             InitialData.block("ball_ud_x_6C58")
     };
+    private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -189,6 +190,9 @@ public class Game implements Runnable {
         // @label=transform_flag_graphic
         // b$5BB1 DEFS $01
         variables.set(0x5BB1, 0);
+        //@label=all_objs_in_cauldron
+        //b$5BC3 DEFS $01
+        variables.set(0x5BC3, 0);
 
 
 
@@ -400,7 +404,7 @@ public class Game implements Runnable {
         if(a == 0) {
             variables.set(0x5BB8,1);
             print_border_D296();
-            update_screen_D56F();
+            update_screen_D56F(true);
         }
     }
 
@@ -653,7 +657,7 @@ public class Game implements Runnable {
         return hl+4;
     }
 
-    private void update_screen_D56F() {
+    private void update_screen_D56F(boolean clearBuffer) {
         int bytesX = VideoMemory.WIDTH / 8;
         for(int bufferY = 0; bufferY<VideoMemory.HEIGHT; bufferY++) {
             int screenY = ((bufferY & 0b111) <<3) + ((bufferY & 0b111000) >> 3) + (bufferY & 0b11000000);
@@ -661,13 +665,15 @@ public class Game implements Runnable {
             int bufferBase = (VideoMemory.HEIGHT - bufferY -1) * bytesX + shadowMemory.start;
             for(int b = 0; b<VideoMemory.WIDTH / 8; b++) {
                 mainMemory.setByteAt(screenBase+b, shadowMemory.getByteAt(bufferBase+b));
-                shadowMemory.setByteAt(bufferBase+b, 0); // wipe buffer
+                if(clearBuffer) shadowMemory.setByteAt(bufferBase+b, 0); // wipe buffer
             }
         }
         // wipe buffer attributes (non-existent in original game)
-        for(int attr = shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE;
-            attr<shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE + VideoMemory.HEIGHT /8 * VideoMemory.WIDTH / 8; attr++) {
-            shadowMemory.setByteAt(attr, 0);
+        if(clearBuffer) {
+            for (int attr = shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE;
+                 attr < shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE + VideoMemory.HEIGHT / 8 * VideoMemory.WIDTH / 8; attr++) {
+                shadowMemory.setByteAt(attr, 0);
+            }
         }
     }
 
@@ -840,11 +846,16 @@ public class Game implements Runnable {
         int a = variables.get(0x5BAD); // screen attribute
         for(int addr = 0x5800; addr<0x5800+0x0300; addr++) {
             mainMemory.setByteAt(addr, a);
-            shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
+            //shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
         }
+        //$B04F CALL $BF4E    ; {inventory
+        // $B052 CALL $D2EF    ;
+        // $B055 CALL $D30D    ;
+        // TODO: implement
+        display_panel_D255();
+        display_sun_moon_frame_C3A4();
 
-        update_screen_D56F();
-
+        update_screen_D56F(false);
     }
 
     private void list_objects_to_draw_CE62() {
@@ -975,6 +986,30 @@ public class Game implements Runnable {
             IO.println("Behind: Object 1: %02x, Object 2: %02x".formatted(objects_to_draw_CE8B.get(de1), objects_to_draw_CE8B.get(de2)));
         }*/
         return isBehind;
+    }
+
+    private void display_panel_D255() {
+        sprite_scratchpad_BFDB.reset();
+        int ix = sprite_scratchpad_BFDB.start;
+        int hl = panel_data_D27E.start;
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 16, -8, 5, ix, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 16, 8, 5, ix, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
+        transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
+    }
+
+    private void display_sun_moon_frame_C3A4() {
+        if(variables.get(0x5BC3)!=0) return;
+
+        sun_moon_scratchpad_C44D.reset();
+        int ix = sun_moon_scratchpad_C44D.start;
+        // @label=display_frame
+        // TODO: implement
+
+        // @label=display_frame
+        // TODO: implement
     }
 
 
