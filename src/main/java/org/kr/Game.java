@@ -863,53 +863,56 @@ public class Game implements Runnable {
         while(variables.get(0x5BBE) < cntToRender) {
             boolean rendered1 = (objects_to_draw_CE8B.get(de1) & 0x80) > 0;
             if(!rendered1) {
-                int de2 = objects_to_draw_CE8B.start;
-                boolean doneInnerLoop = false;
-                boolean isLast = variables.get(0x5BBE) >= cntToRender-1; // if only one object remains, we should render it
-                boolean rendered = false;
-                boolean savedToList = false;
-                while(objects_to_draw_CE8B.get(de2) != 0xFF && !doneInnerLoop && !isLast) {
-                    boolean rendered2 = (objects_to_draw_CE8B.get(de2) & 0x80) > 0;
-                    if(!rendered2 && de1!=de2) {
-                        boolean is2behind1 = is2behind1(de1, de2);
-                        if(is2behind1) {
-                            if(renderList.contains(objects_to_draw_CE8B.get(de2))) {
-                                renderOne(de2);
-                                renderList.reset();
-                                rendered = true;
-                            } else {
-                                renderList.add(objects_to_draw_CE8B.get(de2));
-                                savedToList = true;
-                            }
-                            doneInnerLoop = true;
-                        }
-                    }
-                    if(!doneInnerLoop) de2++;
-                }
-                // Analyze inner loop results
-                if(savedToList) de1 = de2; // since 2 is behind 1 we should now examine 2 if there is anything behind it. If not it should be rendered later
-                else if(rendered) de1 = objects_to_draw_CE8B.start; // restart the loop after rendering (the rendered object will be ignored)
+                boolean isLast = variables.get(0x5BBE) >= cntToRender-1;
+                // if only one object remains, we should render it and exit
+                if(isLast) renderOne(de1, renderList);
                 else {
-                    if(isLast || renderList.isEmpty() || renderList.isLast(objects_to_draw_CE8B.get(de1))) {
-                        renderOne(de1);
-                        renderList.reset();
+                    int de2 = objects_to_draw_CE8B.start;
+                    boolean doneInnerLoop = false;
+                    boolean rendered = false;
+                    boolean savedToList = false;
+                    while (objects_to_draw_CE8B.get(de2) != 0xFF && !doneInnerLoop) {
+                        boolean rendered2 = (objects_to_draw_CE8B.get(de2) & 0x80) > 0;
+                        if (!rendered2 && de1 != de2) {
+                            boolean is2behind1 = is2behind1(de1, de2);
+                            if (is2behind1) {
+                                if (renderList.contains(objects_to_draw_CE8B.get(de2))) {
+                                    renderOne(de2, renderList);
+                                    rendered = true;
+                                } else {
+                                    renderList.add(objects_to_draw_CE8B.get(de2));
+                                    savedToList = true;
+                                }
+                                doneInnerLoop = true;
+                            }
+                        }
+                        if (!doneInnerLoop) de2++;
                     }
-                    de1++;
+                    // Analyze inner loop results
+                    if (savedToList)
+                        de1 = de2; // since 2 is behind 1 we should now examine 2 if there is anything behind it. If not it should be rendered later
+                    else if (rendered)
+                        de1 = objects_to_draw_CE8B.start; // restart the loop after rendering (the rendered object will be ignored)
+                    else {
+                        // render if nothing changed since last iteration (either stack is empty or last added object is the analyzed object
+                        if (renderList.isEmpty() || renderList.isLast(objects_to_draw_CE8B.get(de1)))
+                            renderOne(de1, renderList);
+                        de1++;
+                    }
                 }
-            } else {
-                de1++;
-            }
+            } else de1++;
             // restart loop if not all objects are rendered
             if(objects_to_draw_CE8B.get(de1) == 0xFF) de1 = objects_to_draw_CE8B.start;
         }
     }
 
-    private void renderOne(int de) {
+    private void renderOne(int de, RenderStack renderList) {
         int objectLoc = objects_to_draw_CE8B.get(de) * 32 + graphic_objs_tbl_5C08.start;
         calc_pixel_XY_D6C9(graphic_objs_tbl_5C08, objectLoc);
         print_sprite_D718(graphic_objs_tbl_5C08, objectLoc);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.get(de) | 0x80);
         variables.set(0x5BBE, variables.get(0x5BBE) + 1);
+        renderList.reset();
     }
 
     private boolean is2behind1(int de1, int de2) {
