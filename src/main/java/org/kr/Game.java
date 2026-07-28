@@ -42,6 +42,7 @@ public class Game implements Runnable {
     private final DataBlock byte_D191 =  InitialData.block("byte_D191");
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
+    private final DataBlock sun_moon_yoff_C440 = InitialData.block("sun_moon_yoff_C440");
     private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
     private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
@@ -1003,13 +1004,35 @@ public class Game implements Runnable {
     private void display_sun_moon_frame_C3A4() {
         if(variables.get(0x5BC3)!=0) return;
 
-        sun_moon_scratchpad_C44D.reset();
         int ix = sun_moon_scratchpad_C44D.start;
         // @label=display_frame
         // TODO: implement
+        int a = sun_moon_scratchpad_C44D.get(ix+0x1A);
+        if(a == 0xE1) toggle_day_night_C3FF();
+        else {
+            a+=0x10;
+            a = (a >> 2) & 0x0F;
+            int hl = 0xC440 + a;
+            sun_moon_scratchpad_C44D.set(ix+0x1B, sun_moon_yoff_C440.get(hl));
+            // @label=display_frame
+            // TODO: implement
+            fill_window_C515(0xD90A, 6, 0x1F, 0);
+            print_sprite_D718(sun_moon_scratchpad_C44D, ix);
+        }
 
-        // @label=display_frame
-        // TODO: implement
+    }
+
+    // ; Input:HL starting location B  width (bytes) C  height (lines), A - value
+    private void fill_window_C515(int hl, int b, int c, int a) {
+        for(int y = 0; y<c; y++) {
+            for(int x = 0; x<b; x++) {
+                shadowMemory.setByteAt(hl + x + y*0x20, a);
+            }
+        }
+    }
+
+    private void toggle_day_night_C3FF() {
+        //TODO: implement
     }
 
 
