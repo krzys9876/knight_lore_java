@@ -892,7 +892,7 @@ public class Game implements Runnable {
         while(!textDone) {
             print_8x8_BE7F(day_txt_BCE7.get(de), videoAddr, day_font_BCEC);
             mainMemory.setByteAt(attrAddr, attr);
-            shadowMemory.setByteAt(attrAddr-mainMemory.start+shadowMemory.start, attr);
+            //shadowMemory.setByteAt(attrAddr-mainMemory.start+shadowMemory.start, attr);
             textDone = (day_txt_BCE7.get(de) & 0x80) > 0;
             videoAddr ++;
             attrAddr ++;
