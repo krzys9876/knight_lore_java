@@ -196,7 +196,9 @@ public class Game implements Runnable {
         //@label=all_objs_in_cauldron
         //b$5BC3 DEFS $01
         variables.set(0x5BC3, 0);
-
+        //@label=days
+        //b$5BB9 DEFS $01
+        variables.set(0x5BB9, 0);
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -871,6 +873,7 @@ public class Game implements Runnable {
         display_panel_D255();
         display_sun_moon_frame_C3A4();
         display_day_BCCA();
+        print_days_BC66();
         // TODO: implement
 
         update_screen_D56F(false);
@@ -898,6 +901,23 @@ public class Game implements Runnable {
             attrAddr ++;
             de ++;
         }
+    }
+
+    private void print_days_BC66() {
+        int videoAddress = 0xD9E2; // (120, 7)
+        print_BCD_number_BCAE(videoAddress, new int[] {variables.get(0x5BB9)});
+    }
+
+    private void print_BCD_number_BCAE(int bc, int[] values) {
+        // NOTE: we assume that the number is already in BCD
+        for(int i = 0; i<values.length; i++) {
+            int digitH = (values[i] >> 4) & 0x0F;
+            int digitL = values[i] & 0x0F;
+            print_8x8_BE7F(digitH, bc, font_6108);
+            print_8x8_BE7F(digitL, bc+1, font_6108);
+        }
+        mainMemory.setByteAt(0x5AEF, 0x47);
+        mainMemory.setByteAt(0x5AEF+1, 0x47);
     }
 
     private void list_objects_to_draw_CE62() {
