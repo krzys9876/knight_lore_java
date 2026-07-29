@@ -108,6 +108,7 @@ public class Game implements Runnable {
     };
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
+    private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC");
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -175,8 +176,8 @@ public class Game implements Runnable {
         //; Data block at 5BC7
         // @label=gfxbase_8x8
         // b$5BC7 DEFB $08,$61
-        variables.set(0x5BC7, 0x08);
-        variables.set(0x5BC8, 0x61);
+        //variables.set(0x5BC7, 0x08); // variables NOT USED (passing DataBlock with font data instead)
+        //variables.set(0x5BC8, 0x61);
         // @label=user_input_method
         // b$5BA4 DEFS $01
         variables.set(0x5BA4, 0);
@@ -232,6 +233,14 @@ public class Game implements Runnable {
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
         menu_loop_BD23(true); // returns when game starts
+
+        try {
+            updateShadowMemory();
+            updateMainMemory();
+            mainPanel.saveImage("images/menu.png");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         debugPanel2.append("START THE GAME");
 
@@ -412,8 +421,6 @@ public class Game implements Runnable {
     private int print_text_single_colour_BE31(int h, int l,int de1, int de2) {
         // h: y, l: x, de1: attribute address, de2: text address (first)
         debugPanel1.append(String.format("print_text_single_colour_BE31 ( y: %02x, x: %02x, attr_addr: %02x, text_addr: %04x)", h, l, de1, de2));
-        variables.set(0x5BC7, 0x08);
-        variables.set(0x5BC8, 0x61);
         int bc = calc_vidbuf_addr_D811(h, l);
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
@@ -429,7 +436,7 @@ public class Game implements Runnable {
 
         boolean textDone = false;
         while(!textDone) {
-            print_8x8_BE7F(menu_text_BDBA.get(de2), bc);
+            print_8x8_BE7F(menu_text_BDBA.get(de2), bc, font_6108);
             mainMemory.setByteAt(hl, variables.get(0x5BB6)); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
             shadowMemory.setByteAt(hl-mainMemory.start+shadowMemory.start, variables.get(0x5BB6));
             textDone = (menu_text_BDBA.get(de2) & 0x80) > 0;
@@ -453,14 +460,14 @@ public class Game implements Runnable {
         return xy + 0x5700;
     }
 
-    private void print_8x8_BE7F(int a, int bc) {
+    private void print_8x8_BE7F(int a, int bc, DataBlock font) {
         // a: character, bc: shadow memory address
         int ch = a & 0x7F;
         //debugPanel1.append("print_8x8_BE7F");
-        int baseChar = variables.get(0x5BC7) + variables.get(0x5BC8)*256;
+        int baseChar = font.start;
         int de2 = ch  * 8 + baseChar; // font address
         for(int b = 8; b>0; b--) {
-            shadowMemory.setByteAt(bc, font_6108.get(de2));
+            shadowMemory.setByteAt(bc, font.get(de2));
             de2++;
             bc-=32;
         }
@@ -871,12 +878,26 @@ public class Game implements Runnable {
 
     private void display_day_BCCA() {
         int attr = variables.get(0x5BAD); // room attribute
-        attr = (((attr ^ 0xFF) + 2) & 0x0F) | 0x40;
+        attr = (((attr ^ 0xFF) + 2) & 0x07) | 0x40;
         day_txt_BCE7.set(day_txt_BCE7.start, attr);
+        int de = day_txt_BCE7.start;
+        //@label=print_text
+        int x = 0x70;
+        int y = 0x0F;
+        int videoAddr = calc_vidbuf_addr_D811(y, x);
+        int attrAddr = calc_attrib_addr_D848(y, x);
+        de++;
 
-
-
-
+        boolean textDone = false;
+        while(!textDone) {
+            print_8x8_BE7F(day_txt_BCE7.get(de), videoAddr, day_font_BCEC);
+            mainMemory.setByteAt(attrAddr, attr);
+            shadowMemory.setByteAt(attrAddr-mainMemory.start+shadowMemory.start, attr);
+            textDone = (day_txt_BCE7.get(de) & 0x80) > 0;
+            videoAddr ++;
+            attrAddr ++;
+            de ++;
+        }
     }
 
     private void list_objects_to_draw_CE62() {
