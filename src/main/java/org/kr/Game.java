@@ -256,6 +256,7 @@ public class Game implements Runnable {
         boolean specialObjectsInitialized = false;
         while(a < location_tbl_6251.endExcl())
         {
+            variables.set(0x5BBA, 5); // important only when looping over rooms
             int id = location_tbl_6251.get(a);
             //int id = 1;
             IO.println("Room id: "+id);
@@ -874,6 +875,8 @@ public class Game implements Runnable {
         display_sun_moon_frame_C3A4();
         display_day_BCCA();
         print_days_BC66();
+        print_lives_gfx_BC7A();
+        print_lives_BCA3();
         // TODO: implement
 
         update_screen_D56F(false);
@@ -918,6 +921,21 @@ public class Game implements Runnable {
         }
         mainMemory.setByteAt(0x5AEF, 0x47);
         mainMemory.setByteAt(0x5AEF+1, 0x47);
+    }
+
+    private void print_lives_gfx_BC7A() {
+        sprite_scratchpad_BFDB.reset();
+        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start, 0x8C);
+        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start + 7, 0);
+        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start + 0x1A, 0x10);
+        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start + 0x1B, 0x20);
+        print_sprite_D718(sprite_scratchpad_BFDB, sprite_scratchpad_BFDB.start);
+        for(int i=0; i<2; i++) mainMemory.setByteAt(0x5A42+i, 0x47);
+        for(int i=0; i<4; i++) mainMemory.setByteAt(0x5A62+i, 0x47);
+    }
+
+    private void print_lives_BCA3() {
+        print_BCD_number_BCAE(0xDDD7, new int[] {variables.get(0x5BBA)});
     }
 
     private void list_objects_to_draw_CE62() {
