@@ -859,7 +859,10 @@ public class Game implements Runnable {
             mainMemory.setByteAt(addr, a);
             //shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
         }
+
+        //TODO: implement
         //$B04F CALL $BF4E    ; {inventory
+
         // $B052 CALL $D2EF    ;
         //@label=colour_panel
         fill_window_C515(mainMemory, 0x5AB6, 1, 3, 0);
@@ -877,9 +880,11 @@ public class Game implements Runnable {
         print_days_BC66();
         print_lives_gfx_BC7A();
         print_lives_BCA3();
-        // TODO: implement
-
         update_screen_D56F(false);
+        // @label=reset_objs_wipe_flag
+        for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32) {
+            graphic_objs_tbl_5C08.set(addr, graphic_objs_tbl_5C08.get(addr) & 0b11011111); // c$B090 RES 5,(HL)    ;
+        }
     }
 
     private void display_day_BCCA() {
