@@ -13,6 +13,12 @@ public class Game implements Runnable {
     private final DebugPanel debugPanel2;
     private final ConcurrentLinkedQueue<Integer> keyQueue;
 
+    private long lastTick = 0;
+    private int sunTick = 0;
+    final long DELAY_MS = 20;
+    final int SUN_TICK_PER_GAME_TICK = 15;
+    final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
+
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
     private final VideoMemoryScreen mainMemory;
@@ -202,6 +208,8 @@ public class Game implements Runnable {
         //@label=days
         //b$5BB9 DEFS $01
         variables.set(0x5BB9, 0);
+        //@label=transform_flag_graphic
+        variables.set(0x5BB1, 0);
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -267,12 +275,13 @@ public class Game implements Runnable {
 
         int a = location_tbl_6251.start;
         boolean specialObjectsInitialized = false;
-        while(a < location_tbl_6251.endExcl())
+        //while(a < location_tbl_6251.endExcl())
         {
             variables.set(0x5BBA, 5); // important only when looping over rooms
-            int id = location_tbl_6251.get(a);
+            //int id = location_tbl_6251.get(a);
+            //IO.println("Room id: "+id);
             //int id = 1;
-            IO.println("Room id: "+id);
+            int id=-1;
 
 
             init_start_location_D1B1(id);
@@ -288,19 +297,23 @@ public class Game implements Runnable {
             player_dies_AFB7();
             game_loop_AFBA();
 
-            try {
-                updateShadowMemory();
-                updateMainMemory();
-                mainPanel.saveImage("images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            saveImage(mainPanel, "images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
 
             int size = location_tbl_6251.get(a+1);
             a+=size+1;
         }
 
         //printVariables();
+    }
+
+    private void saveImage(ScreenPanel panel, String fileName) {
+        try {
+            updateShadowMemory();
+            updateMainMemory();
+            panel.saveImage(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void build_lookup_tables_D69E() {
@@ -520,7 +533,7 @@ public class Game implements Runnable {
 
     private int transfer_sprite_and_print_D24C(DataBlock metadata, int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
-        debugPanel1.append("transfer_sprite_and_print_D24C");
+        //debugPanel1.append("transfer_sprite_and_print_D24C");
         transfer_sprite_D237(metadata, ix, hl, source);
         print_sprite_D718(metadata, ix);
 
@@ -530,7 +543,7 @@ public class Game implements Runnable {
     // Populate sprite metadata
     private void transfer_sprite_D237(DataBlock medatada, int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
-        debugPanel1.append("transfer_sprite_D237 (hl: %02x, ix: %04x)".formatted(hl, ix));
+        //debugPanel1.append("transfer_sprite_D237 (hl: %02x, ix: %04x)".formatted(hl, ix));
         medatada.set(ix, source.get(hl)); // sprite index
         medatada.set(ix+0x07, source.get(hl+1)); // flags
         medatada.set(ix+0x1A, source.get(hl+2)); // pixel X
@@ -544,7 +557,7 @@ public class Game implements Runnable {
         int x = metadata.get(ix + 0x1A);
         int y = metadata.get(ix + 0x1B);
         int xOffset = (x & 7);
-        debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned by %02x".formatted(xOffset));
+        //debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned by %02x".formatted(xOffset));
         // JR Z,$D76F    ; {no, skip
 
         // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
@@ -609,11 +622,11 @@ public class Game implements Runnable {
 
     // Returns address of sprite graphics data or 0 if null sprite
     private int flip_sprite_D6EF(DataBlock metadata, int ix) {
-        debugPanel1.append("flip_sprite_D6EF (ix: %04x)".formatted(ix));
+        //debugPanel1.append("flip_sprite_D6EF (ix: %04x)".formatted(ix));
         int l = metadata.get(ix);
         int hl = l * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
         int de = sprite_tbl_7112.get(hl) + sprite_tbl_7112.get(hl+1)*256; // sprite actual address
-        debugPanel2.append("sprite address (DE): %04x".formatted(de));
+        //debugPanel2.append("sprite address (DE): %04x".formatted(de));
         int width = sprite_graphics_data_728A.get(de);
         // returns sprite address or 0 if sprite is spr_null
         int flagsScratch = metadata.get(ix + 0x07);
@@ -841,12 +854,20 @@ public class Game implements Runnable {
     private void game_loop_AFBA() {
         debugPanel2.append("Game loop AFBA\n");
         build_screen_objects_D1E6();
+        boolean exit = false;
+        while(!exit) {
+            exit = onscreen_loop_AFBD();
+            delay();
+        }
+    }
+
+    private boolean onscreen_loop_AFBD() {
         // @label=onscreen_loop
         variables.set(0x5BA2, variables.get(0x5BBC));
         update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
         // loc_B000
         list_objects_to_draw_CE62();
-        debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
+        //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
 
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
@@ -861,10 +882,11 @@ public class Game implements Runnable {
         //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
 
         //@label=delay_loop
-        //TODO: implement
+        //NOTE: we ignore delay loop (calculated), instead we will schedule game loop every game tick
 
         //@label=no_delay
         //TODO: implement checking if first render ($B042 AND A         ; rendered before?)
+
 
         variables.set(0x5BB7, 0);
         int a = variables.get(0x5BAD); // screen attribute
@@ -899,6 +921,20 @@ public class Game implements Runnable {
         for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32) {
             graphic_objs_tbl_5C08.set(addr, graphic_objs_tbl_5C08.get(addr) & 0b11011111); // c$B090 RES 5,(HL)    ;
         }
+        return false;
+    }
+
+    private void delay() {
+        long currentTick = System.currentTimeMillis();
+        if(lastTick == 0) lastTick = currentTick;
+        while(currentTick - lastTick < DELAY_MS) {
+            currentTick = System.currentTimeMillis();
+        }
+        lastTick = currentTick;
+        sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
+
+        //IO.println("tick");
+        //debugPanel2.append("tick");
     }
 
     private void display_day_BCCA() {
@@ -1126,13 +1162,14 @@ public class Game implements Runnable {
 
         int ix = sun_moon_scratchpad_C44D.start;
         // @label=display_frame
-        int a = sun_moon_scratchpad_C44D.get(ix+0x1A);
-        if(a == 0xE1) toggle_day_night_C3FF();
+        int x = sun_moon_scratchpad_C44D.get(ix+0x1A);
+        if(x == 0xE1-1) toggle_day_night_C3FF();
         else {
-            a+=0x10;
-            a = (a >> 2) & 0x0F;
-            int hl = 0xC440 + a;
+            int y = ((x + 0x10) >> 2) & 0x0F;
+            int hl = 0xC440 + y;
             sun_moon_scratchpad_C44D.set(ix+0x1B, sun_moon_yoff_C440.get(hl));
+            if(sunTick == 0) sun_moon_scratchpad_C44D.set(ix+0x1A, x+1);
+
             // @label=display_frame
             fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
             print_sprite_D718(sun_moon_scratchpad_C44D, ix);
@@ -1161,7 +1198,25 @@ public class Game implements Runnable {
     }
 
     private void toggle_day_night_C3FF() {
-        //TODO: implement
+        int ix = sun_moon_scratchpad_C44D.start;
+        int currentSprite =  sun_moon_scratchpad_C44D.get(ix);
+        int nextSprite = currentSprite ^ 1; // flip last bit
+        sun_moon_scratchpad_C44D.set(ix, nextSprite);
+        sun_moon_scratchpad_C44D.set(ix+0x1A, 0xB0); // ; pixel X
+        variables.set(0x5BB1, 1); // transform flag
+        if((nextSprite & 1) == 0) {
+            // DAA - number must be in BCD
+            int incDays = incBCD(variables.get(0x5BB9));
+            variables.set(0x5BB9, incDays);
+            if(incDays == MAX_DAYS_BCD+1) game_over_BA22();
+            print_days_BC66();
+        }
+    }
+
+    private int incBCD(int num) {
+        int incNum = num+1;
+        if((incNum & 0x0F) == 10) incNum = (incNum & 0xF0) + 0x10;
+        return incNum;
     }
 
 
