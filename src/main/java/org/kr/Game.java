@@ -23,7 +23,7 @@ public class Game implements Runnable {
     private final DataBlock variables = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 4);
-    private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 7);
+    private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12);
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
@@ -212,10 +212,13 @@ public class Game implements Runnable {
         inventory_5BD8.reset();
         objects_carried_5BDC.reset();
         // For testing only
+        inventory_5BD8.set(inventory_5BD8.start, 0x60);
+        inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
+        inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
+        inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
         objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
-        objects_carried_5BDC.set(objects_carried_5BDC.start+1, 0x61);
-        objects_carried_5BDC.set(objects_carried_5BDC.start+2, 0x62);
-        objects_carried_5BDC.set(objects_carried_5BDC.start+3, 0x63);
+        objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
+        objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
         graphic_objs_tbl_5C08.reset();
         //special_objs_here_5C48.reset();
         //other_objs_here_5C88.reset();
@@ -925,15 +928,15 @@ public class Game implements Runnable {
     private void display_objects_BF4E() {
         int ix = sprite_scratchpad_BFDB.start;
         for(int b=0; b<3; b++) {
-            if(objects_carried_5BDC.get(objects_carried_5BDC.start+b)!=0) {
+            if(objects_carried_5BDC.get(objects_carried_5BDC.start + b*4)!=0) {
                 int x = (2-b)*24+16;
                 int y = 0;
                 sprite_scratchpad_BFDB.set(ix + 0x1A, x);
                 sprite_scratchpad_BFDB.set(ix + 0x1B, y);
                 int hl = calc_vidbuf_addr_D811(y, x);
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
-                int spriteIndex = objects_carried_5BDC.get(objects_carried_5BDC.start+b);
-                sprite_scratchpad_BFDB.set(ix, objects_carried_5BDC.get(objects_carried_5BDC.start+b));
+                int spriteIndex = objects_carried_5BDC.get(objects_carried_5BDC.start + b*4);
+                sprite_scratchpad_BFDB.set(ix, spriteIndex);
                 print_sprite_D718(sprite_scratchpad_BFDB, ix);
                 // TODO: implement blit_to_screen
                 // $BFA2 CALL $D67C    ;
