@@ -1159,33 +1159,32 @@ public class Game implements Runnable {
     }
 
     private void display_sun_moon_frame_C3A4() {
-        if(variables.get(0x5BC3)!=0) return;
+        //if(variables.get(0x5BC3)!=0) return; //NOTE: if we redraw the while screen every time we do not want to skip this
 
         int ix = sun_moon_scratchpad_C44D.start;
         // @label=display_frame
-        int x = sun_moon_scratchpad_C44D.get(ix+0x1A);
-        if(x == 0xE1-1) toggle_day_night_C3FF();
-        else {
-            int y = ((x + 0x10) >> 2) & 0x0F;
-            int hl = 0xC440 + y;
-            sun_moon_scratchpad_C44D.set(ix+0x1B, sun_moon_yoff_C440.get(hl));
-            if(sunTick == 0) sun_moon_scratchpad_C44D.set(ix+0x1A, x+1);
+        int x = sun_moon_scratchpad_C44D.get(ix + 0x1A);
+        if (x == 0xE1 - 1) toggle_day_night_C3FF();
 
-            // @label=display_frame
-            fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
-            print_sprite_D718(sun_moon_scratchpad_C44D, ix);
+        int y = ((x + 0x10) >> 2) & 0x0F;
+        int hl = 0xC440 + y;
+        sun_moon_scratchpad_C44D.set(ix + 0x1B, sun_moon_yoff_C440.get(hl));
+        if (sunTick == 0) sun_moon_scratchpad_C44D.set(ix + 0x1A, x + 1);
 
-            ix = sprite_scratchpad_BFDB.start;
-            sprite_scratchpad_BFDB.set(ix+7, 0);
-            sprite_scratchpad_BFDB.set(ix, 0x5A);
-            sprite_scratchpad_BFDB.set(ix+0x1A, 0xB8);
-            sprite_scratchpad_BFDB.set(ix+0x1B, 0);
-            print_sprite_D718(sprite_scratchpad_BFDB, ix);
-            sprite_scratchpad_BFDB.set(ix+0x1A, 0xD0);
-            sprite_scratchpad_BFDB.set(ix, 0xBA);
-            print_sprite_D718(sprite_scratchpad_BFDB, ix);
+        // @label=display_frame
+        fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
+        print_sprite_D718(sun_moon_scratchpad_C44D, ix);
 
-        }
+        ix = sprite_scratchpad_BFDB.start;
+        sprite_scratchpad_BFDB.set(ix + 7, 0);
+        sprite_scratchpad_BFDB.set(ix, 0x5A);
+        sprite_scratchpad_BFDB.set(ix + 0x1A, 0xB8);
+        sprite_scratchpad_BFDB.set(ix + 0x1B, 0);
+        print_sprite_D718(sprite_scratchpad_BFDB, ix);
+        sprite_scratchpad_BFDB.set(ix + 0x1A, 0xD0);
+        sprite_scratchpad_BFDB.set(ix, 0xBA);
+        print_sprite_D718(sprite_scratchpad_BFDB, ix);
+
 
     }
 
@@ -1498,6 +1497,7 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -4); //FC
         block.set(ix + 0x0D, block.get(ix + 0x0D) & 0b10111111);
         block.set(ix, block.get(ix + 0x10));
+        updateOneSprite(block, ix); // update after sparkes change to player
     }
 
     private void upd_141_B99C(DataBlock block, int ix) {
