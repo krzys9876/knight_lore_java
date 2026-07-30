@@ -15,8 +15,8 @@ public class Game implements Runnable {
 
     private long lastTick = 0;
     private int sunTick = 0;
-    final long DELAY_MS = 20;
-    final int SUN_TICK_PER_GAME_TICK = 15;
+    final long DELAY_MS = 40;
+    final int SUN_TICK_PER_GAME_TICK = 10;
     final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
     // $4000-$57FF - spectrum video memory
@@ -842,7 +842,7 @@ public class Game implements Runnable {
         playerGraphicsNo = (playerGraphicsNo & 0x1F) + dayNight;
         graphic_objs_tbl_5C08.set(0x5C08+0x10, playerGraphicsNo);
         int playerGraphicsNoTop = graphic_objs_tbl_5C08.get(0x5C08+0x30);
-        playerGraphicsNoTop = (playerGraphicsNoTop & 0xF0) + dayNight + 0x20;
+        playerGraphicsNoTop = (playerGraphicsNoTop & 0x0F) + dayNight + 0x20;
         graphic_objs_tbl_5C08.set(0x5C08+0x30, playerGraphicsNoTop);
     }
 
@@ -1242,19 +1242,23 @@ public class Game implements Runnable {
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
+            case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(block, ix); break;
             case 0x16: upd_22_B7A3(block, ix); break;
             case 0x17: upd_23_B7E7(block, ix); break;
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
+            case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(block, ix); break;
             case 0x36: upd_54_B6B9(block, ix); break;
             case 0x37: upd_55_B6B1(block, ix); break;
             case 0x3E: upd_62_C4AA(block, ix); break;
             case 0x3F: upd_63_B7A9(block, ix); break;
+            case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(block, ix); break;
             case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
             case 0x67: upd_103_C1AB(block, ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
+            case 0x7F: upd_127_BF11(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
@@ -1366,6 +1370,14 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -2); //FE
     }
 
+    private void upd_16_to_21_24_to_29_C823(DataBlock block, int ix) {
+        // c$C4DD LD HL,$FAF4   ; -6, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
+        // TODO: implement rest of the routine
+    }
+
     private void upd_22_B7A3(DataBlock block, int ix) {
         set_both_deadly_flags_B85C(block, ix);
         //c$C4FC LD HL,$F9F4   ; -7, -12
@@ -1385,6 +1397,13 @@ public class Game implements Runnable {
         //c$C510 LD HL,$03F4   ; +3, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, 3); //03
+        // TODO: implement rest of routine
+    }
+
+    private void upd_32_to_47_CDDA(DataBlock block, int ix) {
+        // c$C4F7 LD HL,$F8F4   ; -8, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -8); //F8
         // TODO: implement rest of routine
     }
 
@@ -1414,6 +1433,13 @@ public class Game implements Runnable {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
+    private void upd_64_to_79_CDDF(DataBlock block, int ix) {
+        // c$C501 LD HL,$F4F4   ; -12, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -12); //F4
         // TODO: implement rest of routine
     }
 
@@ -1456,7 +1482,21 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
+        block.set(ix, block.get(ix)+1); // next sprite
+        set_wipe_and_draw_flags_C692(block, ix);
         // TODO: implement rest of routine
+    }
+
+    private void set_wipe_and_draw_flags_C692(DataBlock block, int ix) {
+        block.set(ix + 7, block.get(ix + 7) | 0x30);
+    }
+
+    private void upd_127_BF11(DataBlock block, int ix) {
+        //c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); //FC
+        block.set(ix + 0x0D, block.get(ix + 0x0D) & 0b10111111);
+        block.set(ix, block.get(ix + 0x10));
     }
 
     private void upd_141_B99C(DataBlock block, int ix) {
