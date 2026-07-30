@@ -22,6 +22,9 @@ public class Game implements Runnable {
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
     private final DataBlock variables = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
+    private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 4);
+    private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 7);
+    private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
     private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
@@ -108,7 +111,7 @@ public class Game implements Runnable {
     };
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
-    private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC");
+    private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
 
     // Repaint every fixed interval
     final long repaintIntervalMs = 50;
@@ -206,6 +209,13 @@ public class Game implements Runnable {
         // POP AF        ;
         variables.reset();
         scrn_visited_5BE8.reset();
+        inventory_5BD8.reset();
+        objects_carried_5BDC.reset();
+        // For testing only
+        objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
+        objects_carried_5BDC.set(objects_carried_5BDC.start+1, 0x61);
+        objects_carried_5BDC.set(objects_carried_5BDC.start+2, 0x62);
+        objects_carried_5BDC.set(objects_carried_5BDC.start+3, 0x63);
         graphic_objs_tbl_5C08.reset();
         //special_objs_here_5C48.reset();
         //other_objs_here_5C88.reset();
@@ -862,6 +872,7 @@ public class Game implements Runnable {
 
         //TODO: implement
         //$B04F CALL $BF4E    ; {inventory
+        display_objects_BF4E();
 
         // $B052 CALL $D2EF    ;
         //@label=colour_panel
@@ -908,6 +919,28 @@ public class Game implements Runnable {
             videoAddr ++;
             attrAddr ++;
             de ++;
+        }
+    }
+
+    private void display_objects_BF4E() {
+        int ix = sprite_scratchpad_BFDB.start;
+        for(int b=0; b<3; b++) {
+            if(objects_carried_5BDC.get(objects_carried_5BDC.start+b)!=0) {
+                int x = (2-b)*24+16;
+                int y = 0;
+                sprite_scratchpad_BFDB.set(ix + 0x1A, x);
+                sprite_scratchpad_BFDB.set(ix + 0x1B, y);
+                int hl = calc_vidbuf_addr_D811(y, x);
+                fill_window_C515(shadowMemory, hl, 3, 24, 0);
+                int spriteIndex = objects_carried_5BDC.get(objects_carried_5BDC.start+b);
+                sprite_scratchpad_BFDB.set(ix, objects_carried_5BDC.get(objects_carried_5BDC.start+b));
+                print_sprite_D718(sprite_scratchpad_BFDB, ix);
+                // TODO: implement blit_to_screen
+                // $BFA2 CALL $D67C    ;
+                int attr = object_attributes_BFD3.get(object_attributes_BFD3.start + (spriteIndex & 0x0F));
+                hl = calc_attrib_addr_D848(y + 0x17, x);
+                fill_window_C515(mainMemory, hl, 3, 3, attr);
+            }
         }
     }
 
