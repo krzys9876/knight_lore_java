@@ -15,7 +15,7 @@ public class Game implements Runnable {
 
     private long lastTick = 0;
     private int sunTick = 0;
-    final long DELAY_MS = 40;
+    final long DELAY_MS = 100;
     final int SUN_TICK_PER_GAME_TICK = 10;
     final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
@@ -872,6 +872,7 @@ public class Game implements Runnable {
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
+        clear_scrn_buffer_D567(); // For testing
         calc_display_order_and_render_CEBB();
 
         //print_sprite_D718(graphic_objs_tbl_5C08, ix);
