@@ -865,6 +865,7 @@ public class Game implements Runnable {
 
     private boolean onscreen_loop_AFBD() {
         // @label=onscreen_loop
+        //IO.println("Onscreen loop AFBD");
         variables.set(0x5BA2, variables.get(0x5BBC));
         update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
         // loc_B000
@@ -1051,7 +1052,8 @@ public class Game implements Runnable {
             if(!rendered1) {
                 boolean isLast = variables.get(0x5BBE) >= cntToRender-1;
                 // if only one object remains, we should render it and exit
-                if(isLast) renderOne(de1, renderList);
+                if(isLast)
+                    renderOne(de1, renderList);
                 else {
                     int de2 = objects_to_draw_CE8B.start;
                     boolean doneInnerLoop = false;
@@ -1099,6 +1101,7 @@ public class Game implements Runnable {
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.get(de) | 0x80);
         variables.set(0x5BBE, variables.get(0x5BBE) + 1);
         renderList.reset();
+        //IO.println("Rendered: "+graphic_objs_tbl_5C08.get(objectLoc));
     }
 
     private boolean is2behind1(int de1, int de2) {
@@ -1186,8 +1189,6 @@ public class Game implements Runnable {
         sprite_scratchpad_BFDB.set(ix + 0x1A, 0xD0);
         sprite_scratchpad_BFDB.set(ix, 0xBA);
         print_sprite_D718(sprite_scratchpad_BFDB, ix);
-
-
     }
 
     // ; Input:HL starting location B  width (bytes) C  height (lines), A - value
@@ -1416,9 +1417,13 @@ public class Game implements Runnable {
         int sprite = block.get(ix);
         variables.set(0x5BB1, sprite);
         block.set(ix + 0x10, 8); // transform counter
+
+        block.set(ix + 0x20, 1); // update player top
+        block.set(ix + 0x20 + 7, block.get(ix + 0x20 + 7) | 0x30);
         //@label=rand_legs_sprite
         int rnd = new Random().nextInt(0xFF); //variables.get(0x5BA5);
         int newSprite = (rnd & 0x03) | 0x5C;
+        //IO.println("chk_and_init_transform_C306 sprite = " + newSprite);
         if(block.get(ix) == newSprite) newSprite^=1; // change if same as current
         block.set(ix, newSprite);
         int flip = (block.get(ix + 7)) ^ 0x40;
@@ -1483,6 +1488,7 @@ public class Game implements Runnable {
                 sprite = (sprite & 0xF8) | 7; // ; look the other way
                 block.set(ix + 0x0D, 8);
             }
+            //IO.println("upd_player_top_CDE2 sprite = " + sprite);
             block.set(ix, sprite + 0x10);
         } else {
             block.set(ix + 0x0D, a - 1);
@@ -1552,7 +1558,6 @@ public class Game implements Runnable {
         //c$C4ED LD HL,$FEF4   ; -2, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -2); //FE
-        // TODO: implement rest of routine
         boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
         if(flag) {
             if (variables.get(0x5BC3) != 0) {
@@ -1562,17 +1567,29 @@ public class Game implements Runnable {
         }
         int rnd = new Random().nextInt(0xFF) & 3; //variables.get(0x5BA2);
         if(rnd != 0) return;
-        block.set(ix + 0x10, block.get(ix + 0x10)-1);
+        int counter = block.get(ix + 0x10) -1;
+        block.set(ix + 0x10, counter);
+        //IO.println("upd_92_to_95_C337 sprite = "+block.get(ix));
+        //debugTableConsole("Graphics while transforming:", graphic_objs_tbl_5C08.start, graphic_objs_tbl_5C08.getCopy());
 
-        int a = variables.get(0x5BB1) ^ 0x20;
-        block.set(ix, a);
-        a+=0x10;
-        block.set(ix + 0x20, a);
-        variables.set(0x5BB1, 0);
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
-        int spriteFlag = block.get(ix) & 0b00100000;
-        if(spriteFlag != 0) block.set(ix + 0x13, block.get(ix + 0x13)-1);
+        if(counter == 0) {
+            // End transformation
+            int a = variables.get(0x5BB1) ^ 0x20;
+            block.set(ix, a);
+            a += 0x10;
+            block.set(ix + 0x20, a);
+            variables.set(0x5BB1, 0);
+            block.set(ix + 0x12, -12); //F4
+            block.set(ix + 0x13, -6); //FA
+            int spriteFlag = block.get(ix) & 0b00100000;
+            if (spriteFlag != 0) block.set(ix + 0x13, block.get(ix + 0x13) - 1);
+        } else {
+            // Continue transformation
+            int nextSprite = (new Random().nextInt(0xFF) & 3) | 0x5C;
+            if(nextSprite != block.get(ix)) nextSprite = nextSprite ^ 1;
+            block.set(ix, nextSprite);
+            block.set(ix + 7, block.get(ix + 7) ^ 0x40);
+        }
     }
 
     private void upd_96_to_102_C28B(DataBlock block, int ix) {
@@ -1931,6 +1948,19 @@ public class Game implements Runnable {
         for(int i = 0; i < table.length; i++) {
             if((i % 16) == 0) {
                 debugPanel2.append(t.toString());
+                t = new StringBuilder(String.format("%04x:", i + offset));
+            }
+            t.append(" ").append(String.format("%02x", table[i]));
+        }
+        debugPanel2.append(t.toString());
+    }
+
+    private void debugTableConsole(String title, int offset, int[] table) {
+        StringBuilder t= new StringBuilder();
+        t.append(title);
+        for(int i = 0; i < table.length; i++) {
+            if((i % 16) == 0) {
+                IO.println(t.toString());
                 t = new StringBuilder(String.format("%04x:", i + offset));
             }
             t.append(" ").append(String.format("%02x", table[i]));
