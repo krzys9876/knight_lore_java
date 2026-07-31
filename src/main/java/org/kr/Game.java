@@ -1250,6 +1250,7 @@ public class Game implements Runnable {
             case 0x17: upd_23_B7E7(block, ix); break;
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(block, ix); break;
+            case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(block, ix); break;
             case 0x36: upd_54_B6B9(block, ix); break;
             case 0x37: upd_55_B6B1(block, ix); break;
             case 0x3E: upd_62_C4AA(block, ix); break;
@@ -1402,8 +1403,6 @@ public class Game implements Runnable {
         // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
         // $C853 JR NC,$C86D   ; player_OOB
         // @label=loc_C855
-
-
     }
 
     private void chk_and_init_transform_C306(DataBlock block, int ix) {
@@ -1497,6 +1496,13 @@ public class Game implements Runnable {
         block.set(ix + 3, bottomY + 0x0C);
     }
 
+    private void upd_48_to_53_56_to_61_C828(DataBlock block, int ix) {
+        // c$C4FC LD HL,$F9F4   ; -7, -12
+        block.set(ix + 0x12, -12); // F4
+        block.set(ix + 0x13, -7); // F9
+        upd_player_bottom_C82B(block, ix);
+    }
+
     private void upd_54_B6B9(DataBlock block, int ix) {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
@@ -1530,7 +1536,7 @@ public class Game implements Runnable {
         // c$C501 LD HL,$F4F4   ; -12, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -12); //F4
-        // TODO: implement rest of routine
+        upd_player_top_CDE2(block, ix);
     }
 
     private void upd_80_to_83_C5C8(DataBlock block, int ix) {
