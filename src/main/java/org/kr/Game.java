@@ -15,8 +15,8 @@ public class Game implements Runnable {
 
     private long lastTick = 0;
     private int sunTick = 0;
-    final long DELAY_MS = 100;
-    final int SUN_TICK_PER_GAME_TICK = 10;
+    final long DELAY_MS = 10;
+    final int SUN_TICK_PER_GAME_TICK = 5;
     final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
     // $4000-$57FF - spectrum video memory
@@ -182,6 +182,10 @@ public class Game implements Runnable {
         // b$5BA2 DEFS $02
         variables.set(0x5BA2, 0);
         variables.set(0x5BA3, 0);
+        //; Data block at 5BA5
+        //@label=seed_3
+        //b$5BA5 DEFS $01
+        variables.set(0x5BA5, 0);
         //; Data block at 5BC7
         // @label=gfxbase_8x8
         // b$5BC7 DEFB $08,$61
@@ -208,8 +212,6 @@ public class Game implements Runnable {
         //@label=days
         //b$5BB9 DEFS $01
         variables.set(0x5BB9, 0);
-        //@label=transform_flag_graphic
-        variables.set(0x5BB1, 0);
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -1159,7 +1161,7 @@ public class Game implements Runnable {
     }
 
     private void display_sun_moon_frame_C3A4() {
-        //if(variables.get(0x5BC3)!=0) return; //NOTE: if we redraw the while screen every time we do not want to skip this
+        if(variables.get(0x5BC3)!=0) return;
 
         int ix = sun_moon_scratchpad_C44D.start;
         // @label=display_frame
@@ -1255,6 +1257,7 @@ public class Game implements Runnable {
             case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
+            case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(block, ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
             case 0x67: upd_103_C1AB(block, ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
@@ -1374,8 +1377,46 @@ public class Game implements Runnable {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
+        upd_player_bottom_C82B(block, ix);
+    }
+
+    private void upd_player_bottom_C82B(DataBlock block, int ix) {
         boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
+        if(flag) {
+            if (variables.get(0x5BC3) != 0) {
+                block.set(ix + 0x2D, block.get(ix + 0x2D) | 0b01000000); // SET 6,(IX+$2D)
+                init_death_sparkles_BF21(block, ix);
+                return;
+            }
+        }
         // TODO: implement rest of the routine
+        // @label=loc_C83E
+        // c$C83E CALL $C306    ;
+        chk_and_init_transform_C306(block, ix);
+    }
+
+    private void chk_and_init_transform_C306(DataBlock block, int ix) {
+        boolean transforming = variables.get(0x5BB1) > 0;
+        if(!transforming) return;
+        int a =  block.get(ix + 0x0C) & 0xF0; // counter when entering the room
+        if (a > 0) return;
+        boolean jumping = (block.get(ix + 0xC) & 0b00001000)>0;
+        if (jumping) return;
+
+        int sprite = block.get(ix);
+        variables.set(0x5BB1, sprite);
+        block.set(ix + 0x10, 8); // transform counter
+        //@label=rand_legs_sprite
+        int random = variables.get(0x5BA5);
+        int newSprite = (random & 0x03) | 0x5C;
+        if(block.get(ix) == newSprite) newSprite^=1; // change if same as current
+        block.set(ix, newSprite);
+        int flip = (block.get(ix + 7)) ^ 0x40;
+        block.set(ix + 7, flip);
+    }
+
+    private void init_death_sparkles_BF21(DataBlock block, int ix) {
+        //TODO: implement
     }
 
     private void upd_22_B7A3(DataBlock block, int ix) {
@@ -1404,7 +1445,40 @@ public class Game implements Runnable {
         // c$C4F7 LD HL,$F8F4   ; -8, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+        upd_player_top_CDE2(block, ix);
+    }
+
+    private void upd_player_top_CDE2(DataBlock block, int ix) {
+        if(variables.get(0x5BC3)!=0) return;
+
+        boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
+        if(flag) {
+            init_death_sparkles_BF21(block, ix);
+            return;
+        }
+
+        // Player top is +32 from block start, player bottom is at block start
+        // ; copy x,y,z,w,d,h,flags
+        for(int i=0; i<7; i++) block.set(ix+1+i, block.get(ix-32+1+i));
+        block.set(ix + 6, 0);
+        block.set(ix + 7, block.get(ix + 7) | 0b00000010);
+        int a =  block.get(ix + 0x0D) & 0x0F;
+        if(a == 0) { // look around again
+            int rnd = variables.get(0x5BA5);
+            int sprite = block.get(ix - 32); // bottom half
+            if(rnd == 2) {
+                sprite =  (sprite & 0xF8) | 6; // ; look one way
+                block.set(ix + 0x0D, 8);
+            } else if(rnd == 0xFE) {
+                sprite = (sprite & 0xF8) | 7; // ; look the other way
+                block.set(ix + 0x0D, 8);
+            }
+            block.set(ix, sprite + 0x10);
+        } else {
+            block.set(ix + 0x0D, a - 1);
+        }
+        int bottomY = block.get(ix -32 + 3);
+        block.set(ix + 3, bottomY + 0x0C);
     }
 
     private void upd_54_B6B9(DataBlock block, int ix) {
@@ -1461,6 +1535,13 @@ public class Game implements Runnable {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
+    private void upd_92_to_95_C337(DataBlock block, int ix) {
+        //c$C4ED LD HL,$FEF4   ; -2, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -2); //FE
         // TODO: implement rest of routine
     }
 
