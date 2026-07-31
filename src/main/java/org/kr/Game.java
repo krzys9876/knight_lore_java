@@ -1393,6 +1393,16 @@ public class Game implements Runnable {
         // @label=loc_C83E
         // c$C83E CALL $C306    ;
         chk_and_init_transform_C306(block, ix);
+        // $C841 CALL $D022    ; check_user_input
+        // $C844 CALL $C00E    ; handle_pickup_drop
+        // $C847 CALL $C89F    ; handle_left_right
+        // $C84A CALL $C948    ; handle_jump
+        // $C84D CALL $C969    ; handle_forward
+        // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
+        // $C853 JR NC,$C86D   ; player_OOB
+        // @label=loc_C855
+
+
     }
 
     private void chk_and_init_transform_C306(DataBlock block, int ix) {
@@ -1407,8 +1417,8 @@ public class Game implements Runnable {
         variables.set(0x5BB1, sprite);
         block.set(ix + 0x10, 8); // transform counter
         //@label=rand_legs_sprite
-        int random = variables.get(0x5BA5);
-        int newSprite = (random & 0x03) | 0x5C;
+        int rnd = new Random().nextInt(0xFF); //variables.get(0x5BA5);
+        int newSprite = (rnd & 0x03) | 0x5C;
         if(block.get(ix) == newSprite) newSprite^=1; // change if same as current
         block.set(ix, newSprite);
         int flip = (block.get(ix + 7)) ^ 0x40;
@@ -1464,7 +1474,7 @@ public class Game implements Runnable {
         block.set(ix + 7, block.get(ix + 7) | 0b00000010);
         int a =  block.get(ix + 0x0D) & 0x0F;
         if(a == 0) { // look around again
-            int rnd = variables.get(0x5BA5);
+            int rnd = new Random().nextInt(0xFF); // variables.get(0x5BA5);
             int sprite = block.get(ix - 32); // bottom half
             if(rnd == 2) {
                 sprite =  (sprite & 0xF8) | 6; // ; look one way
@@ -1543,6 +1553,26 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -2); //FE
         // TODO: implement rest of routine
+        boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
+        if(flag) {
+            if (variables.get(0x5BC3) != 0) {
+                block.set(ix + 0x2D, block.get(ix + 0x2D) | 0b01000000); // SET 6,(IX+$2D)
+                return;
+            }
+        }
+        int rnd = new Random().nextInt(0xFF) & 3; //variables.get(0x5BA2);
+        if(rnd != 0) return;
+        block.set(ix + 0x10, block.get(ix + 0x10)-1);
+
+        int a = variables.get(0x5BB1) ^ 0x20;
+        block.set(ix, a);
+        a+=0x10;
+        block.set(ix + 0x20, a);
+        variables.set(0x5BB1, 0);
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -6); //FA
+        int spriteFlag = block.get(ix) & 0b00100000;
+        if(spriteFlag != 0) block.set(ix + 0x13, block.get(ix + 0x13)-1);
     }
 
     private void upd_96_to_102_C28B(DataBlock block, int ix) {

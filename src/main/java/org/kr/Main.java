@@ -40,14 +40,11 @@ public class Main {
         gameThread.start();
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
-                .addKeyEventDispatcher(new KeyEventDispatcher() {
-                    @Override
-                    public boolean dispatchKeyEvent(KeyEvent e) {
-                        if (e.getID() == KeyEvent.KEY_PRESSED) {
-                            keyQueue.add(e.getKeyCode());   // e.g. KeyEvent.VK_LEFT
-                        }
-                        return false; // false = let the event continue to normal processing
+                .addKeyEventDispatcher(e -> {
+                    if (e.getID() == KeyEvent.KEY_PRESSED) {
+                        keyQueue.add(e.getKeyCode());   // e.g. KeyEvent.VK_LEFT
                     }
+                    return false; // false = let the event continue to normal processing
                 });
 
 

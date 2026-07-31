@@ -25,7 +25,11 @@ public class DataBlock {
 
     public int last() { return start + size - 1; }
     public int endExcl() { return start + size; }
-    public void set(int address, int value) { data[address - start]=value; }
+    public void set(int address, int value) {
+        if(value < -256 || value > 255)
+            throw new IllegalArgumentException("value must be between 0 and 255");
+        data[address - start]=value;
+    }
     public int get(int address) { return data[address - start]; }
     public int[] getCopy() { return Arrays.copyOf(data, data.length); }
 
