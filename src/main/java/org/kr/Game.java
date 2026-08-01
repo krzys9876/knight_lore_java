@@ -15,7 +15,8 @@ public class Game implements Runnable {
 
     private long lastTick = 0;
     private int sunTick = 0;
-    final long DELAY_MS = 10;
+    private long tickNo = 0;
+    final long DELAY_MS = 100;
     final int SUN_TICK_PER_GAME_TICK = 5;
     final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
@@ -936,6 +937,7 @@ public class Game implements Runnable {
         }
         lastTick = currentTick;
         sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
+        tickNo ++;
 
         //IO.println("tick");
         //debugPanel2.append("tick");
@@ -1571,8 +1573,10 @@ public class Game implements Runnable {
                 return;
             }
         }
-        int rnd = new Random().nextInt(0xFF) & 3; //variables.get(0x5BA2);
-        if(rnd != 0) return;
+        //int rnd = new Random().nextInt(0xFF) & 3; //variables.get(0x5BA2);
+        //if(rnd != 0) return;
+        // No randomness
+        if((tickNo % 3) != 0) return;
         int counter = block.get(ix + 0x10) -1;
         block.set(ix + 0x10, counter);
         //IO.println("upd_92_to_95_C337 sprite = "+block.get(ix));
