@@ -1385,7 +1385,7 @@ public class Game implements Runnable {
     }
 
     private void upd_player_bottom_C82B(DataBlock block, int ix) {
-        boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
+        boolean flag = (block.get(ix + 0x0D) & 0b01000000)>0;
         if(flag) {
             if (variables.get(0x5BC3) != 0) {
                 block.set(ix + 0x2D, block.get(ix + 0x2D) | 0b01000000); // SET 6,(IX+$2D)
@@ -1467,7 +1467,7 @@ public class Game implements Runnable {
     private void upd_player_top_CDE2(DataBlock block, int ix) {
         if(variables.get(0x5BC3)!=0) return;
 
-        boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
+        boolean flag = (block.get(ix + 0x0D) & 0b01000000)>0;
         if(flag) {
             init_death_sparkles_BF21(block, ix);
             return;
@@ -1566,7 +1566,7 @@ public class Game implements Runnable {
         //c$C4ED LD HL,$FEF4   ; -2, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -2); //FE
-        boolean flag = (block.get(ix + 0x0D) & 0x01000000)>0;
+        boolean flag = (block.get(ix + 0x0D) & 0b01000000)>0;
         if(flag) {
             if (variables.get(0x5BC3) != 0) {
                 block.set(ix + 0x2D, block.get(ix + 0x2D) | 0b01000000); // SET 6,(IX+$2D)
