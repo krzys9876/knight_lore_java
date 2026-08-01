@@ -5,7 +5,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Main {
     static void main() {
@@ -34,16 +34,16 @@ public class Main {
             e.printStackTrace();
         }*/
 
-        ConcurrentLinkedQueue<Integer> keyQueue = new ConcurrentLinkedQueue<>();
+        panel1.requestFocus();
+        ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
         Game game = new Game(panel1, panel2, panel3, panel4, keyQueue);
         Thread gameThread = new Thread(game);
         gameThread.start();
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
                 .addKeyEventDispatcher(e -> {
-                    if (e.getID() == KeyEvent.KEY_PRESSED) {
-                        keyQueue.add(e.getKeyCode());   // e.g. KeyEvent.VK_LEFT
-                    }
+                    if (e.getID() == KeyEvent.KEY_PRESSED) keyQueue.add(e.getKeyCode());   // e.g. KeyEvent.VK_LEFT
+                    else if (e.getID() == KeyEvent.KEY_RELEASED)keyQueue.remove(e.getKeyCode());
                     return false; // false = let the event continue to normal processing
                 });
 

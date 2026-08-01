@@ -10,6 +10,7 @@ public class DebugPanel extends JPanel {
         setLayout(new BorderLayout());
         add(new JScrollPane(text), BorderLayout.CENTER);
         text.setEditable(false);
+        text.setFocusable(false);
     }
 
     public void setText(String t) {

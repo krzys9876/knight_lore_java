@@ -20,6 +20,7 @@ public class ScreenPanel extends JPanel {
         for(int i=0; i<pixelData.length; i++){
             pixelData[i] = (int)(Math.random()*256*256*256);
         }
+        setFocusable(true);
         prepareImage();
     }
 

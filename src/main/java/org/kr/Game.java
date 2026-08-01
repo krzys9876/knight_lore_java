@@ -4,14 +4,14 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Game implements Runnable {
     private final ScreenPanel mainPanel;
     private final ScreenPanel shadowPanel;
     private final DebugPanel debugPanel1;
     private final DebugPanel debugPanel2;
-    private final ConcurrentLinkedQueue<Integer> keyQueue;
+    private final ConcurrentSkipListSet<Integer> keyQueue;
 
     private long lastTick = 0;
     private int sunTick = 0;
@@ -133,7 +133,7 @@ public class Game implements Runnable {
     };
 
     public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
-                ConcurrentLinkedQueue<Integer> keyQueue) {
+                ConcurrentSkipListSet<Integer> keyQueue) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
         this.debugPanel1 = debugPanel1;
@@ -157,14 +157,6 @@ public class Game implements Runnable {
         shadowPanel.setPixelData(shadowMemory.toPixels(LocalDateTime.now()));
         shadowPanel.repaint();
     }
-
-    private void printKeys() {
-        if(keyQueue.isEmpty()) return;
-
-        Integer key = keyQueue.poll();
-        IO.println("Key: " + key);
-    }
-
 
     @Override
     public void run() {
@@ -213,6 +205,18 @@ public class Game implements Runnable {
         //@label=days
         //b$5BB9 DEFS $01
         variables.set(0x5BB9, 0);
+        //; #TABLE(default,centre,:w)
+        //; { =h Bit(n) | =h Description }
+        //; { b5 | ??? }
+        //; { b4 | pickup/drop }
+        //; { b3 | jump }
+        //; { b2 | forward }
+        //; { b1 | right }
+        //; { b0 | left }
+        //; TABLE#
+        //@label=user_input
+        //b$5BB5 DEFS $01
+        variables.set(0x5BB5, 0);
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -728,7 +732,8 @@ public class Game implements Runnable {
             if (!keyQueue.isEmpty()) {
                 int a = variables.get(0x5BA4);
                 variables.set(0x5BA6, a);
-                Integer key = keyQueue.poll();
+                Integer key = keyQueue.first();
+                keyQueue.remove(key);
                 IO.println("Key: " + key);
                 // 1,2,3,4,5
                 if (key == KeyEvent.VK_1) a &= 0xF9;
@@ -932,8 +937,15 @@ public class Game implements Runnable {
     private void delay() {
         long currentTick = System.currentTimeMillis();
         if(lastTick == 0) lastTick = currentTick;
-        while(currentTick - lastTick < DELAY_MS) {
-            currentTick = System.currentTimeMillis();
+
+        long sleepMs = DELAY_MS - (currentTick - lastTick);
+        if(sleepMs > 0) {
+            try {
+                Thread.sleep(sleepMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            currentTick = currentTick + sleepMs;
         }
         lastTick = currentTick;
         sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
@@ -1393,11 +1405,12 @@ public class Game implements Runnable {
                 return;
             }
         }
-        // TODO: implement rest of the routine
         // @label=loc_C83E
         // c$C83E CALL $C306    ;
         chk_and_init_transform_C306(block, ix);
         // $C841 CALL $D022    ; check_user_input
+        check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
+        // TODO: implement rest of the routine
         // $C844 CALL $C00E    ; handle_pickup_drop
         // $C847 CALL $C89F    ; handle_left_right
         // $C84A CALL $C948    ; handle_jump
@@ -1429,6 +1442,27 @@ public class Game implements Runnable {
         block.set(ix, newSprite);
         int flip = (block.get(ix + 7)) ^ 0x40;
         block.set(ix + 7, flip);
+    }
+
+    private void check_user_input_D022() {
+        // NOTE: we ignore other methods than keyboard
+        // NOTE2: we do not poll from the queue here, we simply read what's in the queue. The main class takes care of key press/release event
+        int c = 0;
+
+        if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_Z || k == KeyEvent.VK_C || k == KeyEvent.VK_B || k == KeyEvent.VK_M))
+            c |= 0b00001;
+        if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_X || k == KeyEvent.VK_V || k == KeyEvent.VK_N))
+            c |= 0b00010;
+        if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_A || k == KeyEvent.VK_S || k == KeyEvent.VK_D || k == KeyEvent.VK_F || k == KeyEvent.VK_G || k == KeyEvent.VK_H || k == KeyEvent.VK_J || k == KeyEvent.VK_K || k == KeyEvent.VK_L))
+            c |= 0b00100;
+        if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_Q || k == KeyEvent.VK_W || k == KeyEvent.VK_E || k == KeyEvent.VK_R || k == KeyEvent.VK_T || k == KeyEvent.VK_Y || k == KeyEvent.VK_U || k == KeyEvent.VK_I || k == KeyEvent.VK_O || k == KeyEvent.VK_P))
+            c |= 0b01000;
+        if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_1 || k == KeyEvent.VK_2 || k == KeyEvent.VK_3 || k == KeyEvent.VK_4 || k == KeyEvent.VK_5 || k == KeyEvent.VK_6 || k == KeyEvent.VK_7 || k == KeyEvent.VK_8 || k == KeyEvent.VK_9 || k == KeyEvent.VK_0))
+            c |= 0b10000;
+        if(c!=variables.get(0x5BB5)) {
+            variables.set(0x5BB5, c);
+            IO.println("Pressed: "+Integer.toBinaryString(c));
+        }
     }
 
     private void init_death_sparkles_BF21(DataBlock block, int ix) {
