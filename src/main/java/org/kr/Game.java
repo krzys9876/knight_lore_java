@@ -16,9 +16,10 @@ public class Game implements Runnable {
     private long lastTick = 0;
     private int sunTick = 0;
     private long tickNo = 0;
-    final long DELAY_MS = 100;
-    final int SUN_TICK_PER_GAME_TICK = 5;
-    final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
+    private final long REPAINT_MS = 50;
+    private final long DELAY_MS = 100;
+    private final int SUN_TICK_PER_GAME_TICK = 5;
+    private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
@@ -121,14 +122,12 @@ public class Game implements Runnable {
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
 
     // Repaint every fixed interval
-    final long repaintIntervalMs = 50;
     Timer timer = new Timer();
     TimerTask task = new TimerTask() {
         @Override
         public void run() {
             updateMainMemory();
             updateShadowMemory();
-            //printKeys();
         }
     };
 
@@ -146,7 +145,7 @@ public class Game implements Runnable {
         mainMemory = new VideoMemoryScreen(0x4000);
         shadowMemory = new VideoMemoryLinear(0xD8F3);
 
-        timer.scheduleAtFixedRate(task, repaintIntervalMs * 2, repaintIntervalMs);
+        timer.scheduleAtFixedRate(task, REPAINT_MS * 2, REPAINT_MS);
     }
 
     public void updateMainMemory() {
@@ -273,6 +272,7 @@ public class Game implements Runnable {
         }
 
         debugPanel2.append("START THE GAME");
+        debugPanel2.append("Input method: "+variables.get(0x5BA4));
 
         // LD DE,$B20E   ; }
         // CALL $B2CF    ; play tune // ignore audio
@@ -440,7 +440,7 @@ public class Game implements Runnable {
         int de2 = 0xBDBA; // menu text
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
             variables.set(0x5BB6, menu_colours_BDA2.get(de1));
-            debugPanel2.append("menu attrib: %02x".formatted(variables.get(0x5BB6))) ;
+            //debugPanel2.append("menu attrib: %02x".formatted(variables.get(0x5BB6))) ;
             int l = menu_xy_BDAA.get(hl2); // x - menu position
             int h = menu_xy_BDAA.get(hl2+1); // y
             hl2 += 2;
@@ -1413,6 +1413,7 @@ public class Game implements Runnable {
         // TODO: implement rest of the routine
         // $C844 CALL $C00E    ; handle_pickup_drop
         // $C847 CALL $C89F    ; handle_left_right
+        handle_left_right_C89F(block, ix);
         // $C84A CALL $C948    ; handle_jump
         // $C84D CALL $C969    ; handle_forward
         // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
@@ -1463,6 +1464,41 @@ public class Game implements Runnable {
             variables.set(0x5BB5, c);
             IO.println("Pressed: "+Integer.toBinaryString(c));
         }
+    }
+
+    private void handle_left_right_C89F(DataBlock block, int ix) {
+        //NOTE: we ignore input method and react to keyboard only
+        // @label=left_right_rotational
+        int counter = block.get(ix + 0x0D);
+        if((counter & 0x07) > 0) { // ; too soon to turn again?
+            block.set(ix + 0x0D, (counter & 0x07)-1);
+            return;
+        }
+        int keys = variables.get(0x5BB5);
+        if((keys & 3) == 0) return; // ; left or right?
+
+        int flags = block.get(ix + 0x0C);
+        if((flags & 0xF0) >0) return; // ; entering screen?
+        if((flags & 0b1000) > 0) return; // ; already jumping?
+        // $C911 CALL $B4C1     ;
+        // ignore audio
+        // @label=loc_C915
+        counter |= 2; // ; init turning delay counter
+        block.set(ix + 0x0D, counter);
+        boolean right = (keys & 1)>0;
+        boolean left = (keys & 2)>0;
+        int flip = block.get(ix + 7);
+        boolean hflip = (flip & 0b01000000) == 0;
+        if((right & hflip) || (left & !hflip)) {
+            int sprite = block.get(ix);
+            sprite ^= 8;
+            block.set(ix, sprite);
+        }
+        flip^= 0x40; // ; toggle hflip
+        block.set(ix + 7, flip);
+        int sprite = block.get(ix);
+        sprite += 0x10; // ; top half
+        block.set(ix + 0x20, sprite); // ; set sprite for top half
     }
 
     private void init_death_sparkles_BF21(DataBlock block, int ix) {
