@@ -1443,7 +1443,7 @@ public class Game implements Runnable {
         block.set(ix, newSprite);
         int flip = (block.get(ix + 7)) ^ 0x40;
         block.set(ix + 7, flip);
-        //TODO: debug transofrmation, sometimes other sprites (e.g. special objects) appear during transformation
+        //TODO: debug transformation, sometimes other sprites (e.g. special objects) appear during transformation
     }
 
     private void check_user_input_D022() {
