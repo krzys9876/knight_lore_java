@@ -1408,17 +1408,21 @@ public class Game implements Runnable {
         // @label=loc_C83E
         // c$C83E CALL $C306    ;
         chk_and_init_transform_C306(block, ix);
-        // $C841 CALL $D022    ; check_user_input
-        check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
-        // TODO: implement rest of the routine
-        // $C844 CALL $C00E    ; handle_pickup_drop
-        // $C847 CALL $C89F    ; handle_left_right
-        handle_left_right_C89F(block, ix);
-        // $C84A CALL $C948    ; handle_jump
-        // $C84D CALL $C969    ; handle_forward
-        // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
-        // $C853 JR NC,$C86D   ; player_OOB
-        // @label=loc_C855
+        boolean transforming = variables.get(0x5BB1) > 0;
+        if(!transforming) {
+            // $C841 CALL $D022    ; check_user_input
+            check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
+            // TODO: implement rest of the routine
+            // $C844 CALL $C00E    ; handle_pickup_drop
+            // $C847 CALL $C89F    ; handle_left_right
+            handle_left_right_C89F(block, ix);
+            // $C84A CALL $C948    ; handle_jump
+            // $C84D CALL $C969    ; handle_forward
+            handle_forward_C969(block, ix);
+            // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
+            // $C853 JR NC,$C86D   ; player_OOB
+            // @label=loc_C855
+        }
     }
 
     private void chk_and_init_transform_C306(DataBlock block, int ix) {
@@ -1443,7 +1447,6 @@ public class Game implements Runnable {
         block.set(ix, newSprite);
         int flip = (block.get(ix + 7)) ^ 0x40;
         block.set(ix + 7, flip);
-        //TODO: debug transformation, sometimes other sprites (e.g. special objects) appear during transformation
     }
 
     private void check_user_input_D022() {
@@ -1500,6 +1503,24 @@ public class Game implements Runnable {
         int sprite = block.get(ix);
         sprite += 0x10; // ; top half
         block.set(ix + 0x20, sprite); // ; set sprite for top half
+    }
+
+    private void handle_forward_C969(DataBlock block, int ix) {
+        int flags = block.get(ix + 0x0C);
+        boolean enteringScreen = (flags & 0xF0) > 0;
+        boolean jumping = (flags & 0b1000) > 0;
+        boolean forward = (variables.get(0x5BB5) & 0b100) > 0;
+        // ignore audio: @label=loc_C97A
+        if(!enteringScreen && !jumping &!forward) {
+            //@label=loc_C994
+            int sprite = block.get(ix) & 0x07;
+            if(sprite == 2 || sprite == 4) return;
+        }
+        // @label=animate_human_legs
+        int sprite = block.get(ix);
+        int nextSprite = ((sprite+1) & 7) % 6; // ; wrap?
+        // @label=loc_C98B
+        block.set(ix, (sprite & 0xF8) | nextSprite); //  ; update sprite - NOTE we update only bottom half
     }
 
     private void init_death_sparkles_BF21(DataBlock block, int ix) {
