@@ -1423,9 +1423,9 @@ public class Game implements Runnable {
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
             boolean oob = chk_plyr_OOB_C87A(block, ix);
             // $C853 JR NC,$C86D   ; player_OOB
+            // @label=loc_C855
             if(!oob) plyr_OOB_C86D(block, ix);
             else loc_C855(block, ix) ;
-            // @label=loc_C855
         }
     }
 
