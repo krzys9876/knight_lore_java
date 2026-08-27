@@ -1421,9 +1421,29 @@ public class Game implements Runnable {
             // $C84D CALL $C969    ; handle_forward
             handle_forward_C969(block, ix);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
+            boolean oob = chk_plyr_OOB_C87A(block, ix);
             // $C853 JR NC,$C86D   ; player_OOB
+            if(!oob) plyr_OOB_C86D(block, ix);
+            else loc_C855(block, ix) ;
             // @label=loc_C855
         }
+    }
+
+    private boolean chk_plyr_OOB_C87A(DataBlock block, int ix) {
+        // TODO: implement
+        return false;
+    }
+
+    private void plyr_OOB_C86D(DataBlock block, int ix) {
+        // TODO: implement
+    }
+
+    private void loc_C855(DataBlock block, int ix) {
+        //TODO: implement
+    }
+
+    private void move_player_C9A1(DataBlock block, int ix) {
+        // TODO: implement
     }
 
     private void chk_and_init_transform_C306(DataBlock block, int ix) {
