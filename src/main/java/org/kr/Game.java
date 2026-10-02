@@ -216,6 +216,10 @@ public class Game implements Runnable {
         //@label=user_input
         //b$5BB5 DEFS $01
         variables.set(0x5BB5, 0);
+        //@label=obj_dropping_into_cauldron
+        //b$5BC4 DEFS $01
+        variables.set(0x5BC4, 0);
+
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -1422,7 +1426,7 @@ public class Game implements Runnable {
             handle_forward_C969(block, ix);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
             boolean oob = chk_plyr_OOB_C87A(block, ix);
-            // $C853 JR NC,$C86D   ; player_OOB
+            // $C853 JR NC,$C86D   ; plyr_OOB
             // @label=loc_C855
             if(!oob) plyr_OOB_C86D(block, ix);
             else loc_C855(block, ix) ;
@@ -1439,11 +1443,17 @@ public class Game implements Runnable {
     }
 
     private void loc_C855(DataBlock block, int ix) {
-        //TODO: implement
+        block.set(ix, block.get(ix + 0x27) | 0b10);
+        move_player_C9A1(block, ix);
+        block.set(ix, block.get(ix + 0x27) & 0b11111101);
+        int a = block.get(ix + 0x0C) - 0x10;
+        if(a>=0) block.set(ix + 0x0C, a);
+        set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void move_player_C9A1(DataBlock block, int ix) {
         // TODO: implement
+
     }
 
     private void chk_and_init_transform_C306(DataBlock block, int ix) {
