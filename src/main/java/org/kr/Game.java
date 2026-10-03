@@ -220,6 +220,12 @@ public class Game implements Runnable {
         //b$5BC4 DEFS $01
         variables.set(0x5BC4, 0);
 
+        //; Data block at 5BC1
+        //@label=tmp_dZ
+        //b$5BC1 DEFS $01
+        variables.set(0x5BC1, 0);
+
+
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -1439,8 +1445,7 @@ public class Game implements Runnable {
     }
 
     private void plyr_OOB_C86D(DataBlock block, int ix) {
-        int a = block.get(ix + 0x0B);
-        if(a<0) block.set(ix + 0x0B, 0);
+        if(block.getN(ix + 0x08) < 0) block.set(ix + 0x0B, 0);
         move_player_C9A1(block, ix);
     }
 
@@ -1448,30 +1453,58 @@ public class Game implements Runnable {
         block.set(ix, block.get(ix + 0x27) | 0b10);
         move_player_C9A1(block, ix);
         block.set(ix, block.get(ix + 0x27) & 0b11111101);
-        int a = block.get(ix + 0x0C);
+        int a = block.getN(ix + 0x0C);
         if(a>=0x10) block.set(ix + 0x0C, a-0x10);
         set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void move_player_C9A1(DataBlock block, int ix) {
+        IO.println("move_player_C9A1");
         if(variables.get(0x5BC4)!=0) block.set(ix + 0x0B, 2); // D (IX+$0B),$02 ; dZ=2
         int a = block.get(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
         int c = variables.get(0x5BB5);
         if(((a & 0b1000)!=0) || ((a & 0xF0) != 0) || ((c & 0b100)==0)) calc_plyr_dXY_C9FB(block, ix);
 
+        boolean jumping = (block.get(ix + 0xC) & 0b00001000)>0;
+        int dz = block.getN(ix + 0x0B);
+        if(dz < 0) block.set(ix + 0x0B, dz - 2);
+        else if(jumping) block.set(ix + 0x0B, dz - 1);
+        variables.set(0x5BC1, dz);
+        //$C9D6 CALL M,$B451   ; ignore audio
+
+        //TODO: implement
+        //$C9D9 CALL $CB45     ;
+        // TODO: implement
+        //$C9DC CALL $CA70     ;
+
+        add_dXYZ_C706(block, ix);
+        int flags = block.get(ix + 0x0C);
+        if((flags & 0x100)>0) {
+            int tmpDz = variables.get(0x5BC1);
+            if(tmpDz > 0) block.set(ix + 0x0C, flags & 0b11110111);
+        }
+        block.set(ix + 0x09, 0);
+        block.set(ix + 0x0A, 0);
+
         // TODO: implement rest of the routine
     }
 
+    private void add_dXYZ_C706(DataBlock block, int ix) {
+        block.set(ix + 0x01, block.getN(ix + 0x01) + block.getN(ix + 0x09));
+        block.set(ix + 0x02, block.getN(ix + 0x02) + block.getN(ix + 0x0A));
+        block.set(ix + 0x03, block.getN(ix + 0x03) + block.getN(ix + 0x0B));
+    }
+
     private void calc_plyr_dXY_C9FB(DataBlock block, int ix) {
-        block.set(ix + 0x09, block.get(ix + 0x09) + block.get(ix + 0x0E)); // dX
-        block.set(ix + 0x0A, block.get(ix + 0x0A) + block.get(ix + 0x0F)); // dY
+        block.set(ix + 0x09, block.getN(ix + 0x09) + block.getN(ix + 0x0E)); // dX
+        block.set(ix + 0x0A, block.getN(ix + 0x0A) + block.getN(ix + 0x0F)); // dY
         block.set(ix + 0x0E, 0); // dX_adj
         block.set(ix + 0x0F, 0); // dY_adj
         switch(get_sprite_dir_CA1E(block, ix)) {
-            case 0: block.set(ix + 0x09, (block.get(ix + 0x09) - 3) & 0xFF); break;
-            case 1: block.set(ix + 0x09, (block.get(ix + 0x09) + 3) & 0xFF); break;
-            case 2: block.set(ix + 0x0A, (block.get(ix + 0x0A) - 3) & 0xFF); break;
-            case 3: block.set(ix + 0x0A, (block.get(ix + 0x0A) + 3) & 0xFF); break;
+            case 0: block.set(ix + 0x09, (block.getN(ix + 0x09) - 3)); break;
+            case 1: block.set(ix + 0x09, (block.getN(ix + 0x09) + 3)); break;
+            case 2: block.set(ix + 0x0A, (block.getN(ix + 0x0A) - 3)); break;
+            case 3: block.set(ix + 0x0A, (block.getN(ix + 0x0A) + 3)); break;
         }
         IO.println("aaaa");
     }
@@ -2079,18 +2112,18 @@ public class Game implements Runnable {
     }
 
     private void calc_pixel_XY_D6C9(DataBlock block, int ix) {
-        int x = block.get(ix + 0x01);
-        x = x + block.get(ix + 0x02);
+        int x = block.getA(ix + 0x01);
+        x = x + block.getA(ix + 0x02);
         x = x - 0x80;
-        x = x + block.get(ix + 0x12);
+        x = (x + block.getN(ix + 0x12)) & 0xFF;
         block.set(ix + 0x1a, x);
-        int y = block.get(ix + 0x02);
-        y = y - block.get(ix + 0x01);
+        int y = block.getA(ix + 0x02);
+        y = y - block.getA(ix + 0x01);
         y = y + 0x80;
         y = y >> 1;
-        y = y + block.get(ix + 0x03);
+        y = y + block.getA(ix + 0x03);
         y = y - 0x68;
-        y = y + block.get(ix + 0x13);
+        y = (y + block.getN(ix + 0x13) & 0xFF);
         block.set(ix + 0x1b, y);
         // TODO: implement:
         // $D6EC CP $C0         ; bottom line of screen?

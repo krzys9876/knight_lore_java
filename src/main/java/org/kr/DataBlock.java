@@ -27,10 +27,20 @@ public class DataBlock {
     public int endExcl() { return start + size; }
     public void set(int address, int value) {
         if(value < -256 || value > 255)
-            throw new IllegalArgumentException("value must be between 0 and 255");
+            throw new IllegalArgumentException("value must be between 0 and 255 ("+value+")");
         data[address - start]=value;
     }
     public int get(int address) { return data[address - start]; }
+    public int getN(int address) {
+        int value = data[address - start];
+        if(value >= 128) value = 127 - value;
+        return value;
+    }
+    public int getA(int address) {
+        int value = data[address - start];
+        if(value < 0) value = value + 128;
+        return value;
+    }
     public int[] getCopy() { return Arrays.copyOf(data, data.length); }
 
     public void reset() {
