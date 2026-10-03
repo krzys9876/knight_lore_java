@@ -1439,21 +1439,50 @@ public class Game implements Runnable {
     }
 
     private void plyr_OOB_C86D(DataBlock block, int ix) {
-        // TODO: implement
+        int a = block.get(ix + 0x0B);
+        if(a<0) block.set(ix + 0x0B, 0);
+        move_player_C9A1(block, ix);
     }
 
     private void loc_C855(DataBlock block, int ix) {
         block.set(ix, block.get(ix + 0x27) | 0b10);
         move_player_C9A1(block, ix);
         block.set(ix, block.get(ix + 0x27) & 0b11111101);
-        int a = block.get(ix + 0x0C) - 0x10;
-        if(a>=0) block.set(ix + 0x0C, a);
+        int a = block.get(ix + 0x0C);
+        if(a>=0x10) block.set(ix + 0x0C, a-0x10);
         set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void move_player_C9A1(DataBlock block, int ix) {
-        // TODO: implement
+        if(variables.get(0x5BC4)!=0) block.set(ix + 0x0B, 2); // D (IX+$0B),$02 ; dZ=2
+        int a = block.get(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
+        int c = variables.get(0x5BB5);
+        if(((a & 0b1000)!=0) || ((a & 0xF0) != 0) || ((c & 0b100)==0)) calc_plyr_dXY_C9FB(block, ix);
 
+        // TODO: implement rest of the routine
+    }
+
+    private void calc_plyr_dXY_C9FB(DataBlock block, int ix) {
+        block.set(ix + 0x09, block.get(ix + 0x09) + block.get(ix + 0x0E)); // dX
+        block.set(ix + 0x0A, block.get(ix + 0x0A) + block.get(ix + 0x0F)); // dY
+        block.set(ix + 0x0E, 0); // dX_adj
+        block.set(ix + 0x0F, 0); // dY_adj
+        switch(get_sprite_dir_CA1E(block, ix)) {
+            case 0: block.set(ix + 0x09, (block.get(ix + 0x09) - 3) & 0xFF); break;
+            case 1: block.set(ix + 0x09, (block.get(ix + 0x09) + 3) & 0xFF); break;
+            case 2: block.set(ix + 0x0A, (block.get(ix + 0x0A) - 3) & 0xFF); break;
+            case 3: block.set(ix + 0x0A, (block.get(ix + 0x0A) + 3) & 0xFF); break;
+        }
+        IO.println("aaaa");
+    }
+
+    private int get_sprite_dir_CA1E(DataBlock block, int ix) {
+        int a = block.get(ix + 0x07);
+        a = (a >> 2) & 0x10;
+        int l = a;
+        a = (block.get(ix) & 8) | l;
+        a = (a >> 3) & 3;
+        return a;
     }
 
     private void chk_and_init_transform_C306(DataBlock block, int ix) {
