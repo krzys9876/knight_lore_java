@@ -38,7 +38,7 @@ public class DataBlock {
     }
     public int getA(int address) {
         int value = data[address - start];
-        if(value < 0) value = value + 128;
+        if(value < 0) value = 127 - value;
         return value;
     }
     public int[] getCopy() { return Arrays.copyOf(data, data.length); }

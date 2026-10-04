@@ -1463,7 +1463,7 @@ public class Game implements Runnable {
         if(variables.get(0x5BC4)!=0) block.set(ix + 0x0B, 2); // D (IX+$0B),$02 ; dZ=2
         int a = block.get(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
         int c = variables.get(0x5BB5);
-        if(((a & 0b1000)!=0) || ((a & 0xF0) != 0) || ((c & 0b100)==0)) calc_plyr_dXY_C9FB(block, ix);
+        if(((a & 0b1000)!=0) || ((a & 0xF0) != 0) || ((c & 0b100)!=0)) calc_plyr_dXY_C9FB(block, ix);
 
         boolean jumping = (block.get(ix + 0xC) & 0b00001000)>0;
         int dz = block.getN(ix + 0x0B);
@@ -1490,9 +1490,9 @@ public class Game implements Runnable {
     }
 
     private void add_dXYZ_C706(DataBlock block, int ix) {
-        block.set(ix + 0x01, block.getN(ix + 0x01) + block.getN(ix + 0x09));
-        block.set(ix + 0x02, block.getN(ix + 0x02) + block.getN(ix + 0x0A));
-        block.set(ix + 0x03, block.getN(ix + 0x03) + block.getN(ix + 0x0B));
+        block.set(ix + 0x01, block.getA(ix + 0x01) + block.getN(ix + 0x09));
+        block.set(ix + 0x02, block.getA(ix + 0x02) + block.getN(ix + 0x0A));
+        block.set(ix + 0x03, block.getA(ix + 0x03) + block.getN(ix + 0x0B));
     }
 
     private void calc_plyr_dXY_C9FB(DataBlock block, int ix) {
@@ -1503,19 +1503,18 @@ public class Game implements Runnable {
         switch(get_sprite_dir_CA1E(block, ix)) {
             case 0: block.set(ix + 0x09, (block.getN(ix + 0x09) - 3)); break;
             case 1: block.set(ix + 0x09, (block.getN(ix + 0x09) + 3)); break;
-            case 2: block.set(ix + 0x0A, (block.getN(ix + 0x0A) - 3)); break;
-            case 3: block.set(ix + 0x0A, (block.getN(ix + 0x0A) + 3)); break;
+            case 2: block.set(ix + 0x0A, (block.getN(ix + 0x0A) + 3)); break;
+            case 3: block.set(ix + 0x0A, (block.getN(ix + 0x0A) - 3)); break;
         }
         IO.println("aaaa");
     }
 
     private int get_sprite_dir_CA1E(DataBlock block, int ix) {
-        int a = block.get(ix + 0x07);
-        a = (a >> 2) & 0x10;
-        int l = a;
-        a = (block.get(ix) & 8) | l;
-        a = (a >> 3) & 3;
-        return a;
+        int flags = block.get(ix + 0x07);
+        flags = (flags >> 2) & 0x10;
+        int grNo = (block.get(ix) & 8) | flags;
+        grNo = (grNo >> 3) & 3;
+        return grNo;
     }
 
     private void chk_and_init_transform_C306(DataBlock block, int ix) {
@@ -2123,7 +2122,7 @@ public class Game implements Runnable {
         y = y >> 1;
         y = y + block.getA(ix + 0x03);
         y = y - 0x68;
-        y = (y + block.getN(ix + 0x13) & 0xFF);
+        y = y + block.getN(ix + 0x13);
         block.set(ix + 0x1b, y);
         // TODO: implement:
         // $D6EC CP $C0         ; bottom line of screen?
