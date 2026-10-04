@@ -1459,13 +1459,12 @@ public class Game implements Runnable {
     }
 
     private void move_player_C9A1(DataBlock block, int ix) {
-        IO.println("move_player_C9A1");
         if(variables.get(0x5BC4)!=0) block.set(ix + 0x0B, 2); // D (IX+$0B),$02 ; dZ=2
-        int a = block.get(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
+        int flags = block.get(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
+        boolean jumping = (flags & 0b1000)>0;
         int c = variables.get(0x5BB5);
-        if(((a & 0b1000)!=0) || ((a & 0xF0) != 0) || ((c & 0b100)!=0)) calc_plyr_dXY_C9FB(block, ix);
+        if(jumping || ((flags & 0xF0) != 0) || ((c & 0b100)!=0)) calc_plyr_dXY_C9FB(block, ix);
 
-        boolean jumping = (block.get(ix + 0xC) & 0b00001000)>0;
         int dz = block.getN(ix + 0x0B);
         if(dz < 0) block.set(ix + 0x0B, dz - 2);
         else if(jumping) block.set(ix + 0x0B, dz - 1);
@@ -1478,7 +1477,7 @@ public class Game implements Runnable {
         //$C9DC CALL $CA70     ;
 
         add_dXYZ_C706(block, ix);
-        int flags = block.get(ix + 0x0C);
+        flags = block.get(ix + 0x0C);
         if((flags & 0x100)>0) {
             int tmpDz = variables.get(0x5BC1);
             if(tmpDz > 0) block.set(ix + 0x0C, flags & 0b11110111);
@@ -1506,7 +1505,6 @@ public class Game implements Runnable {
             case 2: block.set(ix + 0x0A, (block.getN(ix + 0x0A) + 3)); break;
             case 3: block.set(ix + 0x0A, (block.getN(ix + 0x0A) - 3)); break;
         }
-        IO.println("aaaa");
     }
 
     private int get_sprite_dir_CA1E(DataBlock block, int ix) {
@@ -1522,7 +1520,7 @@ public class Game implements Runnable {
         if(!transforming) return;
         int a =  block.get(ix + 0x0C) & 0xF0; // counter when entering the room
         if (a > 0) return;
-        boolean jumping = (block.get(ix + 0xC) & 0b00001000)>0;
+        boolean jumping = (block.get(ix + 0x0C) & 0b00001000)>0;
         if (jumping) return;
 
         int sprite = block.get(ix);
