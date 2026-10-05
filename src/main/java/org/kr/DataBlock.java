@@ -30,13 +30,14 @@ public class DataBlock {
             throw new IllegalArgumentException("value must be between 0 and 255 ("+value+")");
         data[address - start]=value;
     }
-    public int get(int address) { return data[address - start]; }
-    public int getN(int address) {
+    // signed byte value
+    public int getS(int address) {
         int value = data[address - start];
         if(value >= 128) value = 127 - value;
         return value;
     }
-    public int getA(int address) {
+    // unsigned byte value
+    public int getU(int address) {
         int value = data[address - start];
         if(value < 0) value = 127 - value;
         return value;
