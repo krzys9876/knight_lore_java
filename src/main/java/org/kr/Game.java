@@ -1496,38 +1496,42 @@ public class Game implements Runnable {
         block.set(ix + 0x0C, flags2);
         int dz = block.getN(ix + 0x0B);
         IO.println("dz: "+dz);
-        if(dz !=0) {
-            int h = adj_dZ_for_out_of_bounds_CA5A(block, ix);
-            if(h!=0) adj_dZ_for_obj_intersect_CC38(block, ix); //TODO: analyze what to do with H (returned by previous call)
+        int dzAdj = dz;
+        if(dzAdj != 0) {
+            dzAdj = adj_dZ_for_out_of_bounds_CA5A(block, ix);
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dzAdj); //TODO: analyze what to do with H (returned by previous call)
         }
         //TODO: implement rest of the routine
         flags &= 0b11111101;
         block.set(ix + 0x07, flags);
+
+        block.set(ix + 0x0B, dzAdj);
     }
 
-    private void adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix) {
+    private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dzAdj) {
         //TODO: implement
+        return dzAdj;
     }
 
     private int adj_dZ_for_out_of_bounds_CA5A(DataBlock block, int ix) {
         //TODO: implement
         int roomSize = variables.get(0x5BAE);
         int dz = block.getN(ix + 0x0B);
-        int z = block.getN(ix + 0x03);
+        int z = block.getA(ix + 0x03);
         IO.println("z: "+z+" dz: "+dz);
         while(true) {
-            if (z + dz >= roomSize) return 1;
+            if (z + dz >= roomSize) return dz;
             int flags = block.get(ix + 0x0C);
             flags |= 0b100;
             block.set(ix + 0x0C, flags);
             dz = adj_d_for_out_of_bounds_CA89(dz);
-            if (dz == 0) return 0;
+            if (dz == 0) return dz;
         }
     }
 
     private int adj_d_for_out_of_bounds_CA89(int a) {
         if(a==0) return 0;
-        if(a<0) return a+2;
+        if(a<0) return a+1;
         return a-1;
     }
 
