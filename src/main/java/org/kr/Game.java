@@ -1505,6 +1505,7 @@ public class Game implements Runnable {
         flags &= 0b11111101;
         block.set(ix + 0x07, flags);
 
+        //TODO: implement rest of the routine (here we set dZ only to stop jumping)
         block.set(ix + 0x0B, dzAdj);
     }
 
