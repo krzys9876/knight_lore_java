@@ -1471,8 +1471,8 @@ public class Game implements Runnable {
         variables.set(0x5BC1, dz);
         //$C9D6 CALL M,$B451   ; ignore audio
 
-        //TODO: implement
         //$C9D9 CALL $CB45     ;
+        adj_for_out_of_bounds_$CB45(block, ix);
         // TODO: implement
         //$C9DC CALL $CA70     ;
 
@@ -1484,8 +1484,10 @@ public class Game implements Runnable {
         }
         block.set(ix + 0x09, 0);
         block.set(ix + 0x0A, 0);
+    }
 
-        // TODO: implement rest of the routine
+    private void adj_for_out_of_bounds_$CB45(DataBlock block, int ix) {
+        //TODO: implement
     }
 
     private void add_dXYZ_C706(DataBlock block, int ix) {
