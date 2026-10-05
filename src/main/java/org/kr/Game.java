@@ -1466,8 +1466,11 @@ public class Game implements Runnable {
         if(jumping || ((flags & 0xF0) != 0) || ((c & 0b100)!=0)) calc_plyr_dXY_C9FB(block, ix);
 
         int dz = block.getN(ix + 0x0B);
-        if(dz < 0) block.set(ix + 0x0B, dz - 2);
-        else if(jumping) block.set(ix + 0x0B, dz - 1);
+        if(dz < 0) dz -= 2;
+        else
+            if(jumping) dz -= 1;
+            else dz -= 2;
+        block.set(ix + 0x0B, dz);
         variables.set(0x5BC1, dz);
         //$C9D6 CALL M,$B451   ; ignore audio
 
@@ -1478,9 +1481,9 @@ public class Game implements Runnable {
 
         add_dXYZ_C706(block, ix);
         flags = block.get(ix + 0x0C);
-        if((flags & 0x100)>0) {
-            int tmpDz = variables.get(0x5BC1);
-            if(tmpDz > 0) block.set(ix + 0x0C, flags & 0b11110111);
+        if((flags & 0b100)>0) {
+            int tmpDz = variables.getN(0x5BC1);
+            if(tmpDz <= 0) block.set(ix + 0x0C, flags & 0b11110111);
         }
         block.set(ix + 0x09, 0);
         block.set(ix + 0x0A, 0);
