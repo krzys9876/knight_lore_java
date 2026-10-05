@@ -1472,7 +1472,7 @@ public class Game implements Runnable {
         //$C9D6 CALL M,$B451   ; ignore audio
 
         //$C9D9 CALL $CB45     ;
-        adj_for_out_of_bounds_$CB45(block, ix);
+        adj_for_out_of_bounds_CB45(block, ix);
         // TODO: implement
         //$C9DC CALL $CA70     ;
 
@@ -1486,8 +1486,49 @@ public class Game implements Runnable {
         block.set(ix + 0x0A, 0);
     }
 
-    private void adj_for_out_of_bounds_$CB45(DataBlock block, int ix) {
+    private void adj_for_out_of_bounds_CB45(DataBlock block, int ix) {
+        int flags = block.get(ix + 0x07);
+        if((flags & 0b10) > 0) return;
+        flags |= 0b10;
+        block.set(ix + 0x07, flags);
+        int flags2 = block.get(ix + 0x0C);
+        flags2 &= 0xF8; // ; clear X,Y,Z OOB
+        block.set(ix + 0x0C, flags2);
+        int dz = block.getN(ix + 0x0B);
+        IO.println("dz: "+dz);
+        if(dz !=0) {
+            int h = adj_dZ_for_out_of_bounds_CA5A(block, ix);
+            if(h!=0) adj_dZ_for_obj_intersect_CC38(block, ix); //TODO: analyze what to do with H (returned by previous call)
+        }
+        //TODO: implement rest of the routine
+        flags &= 0b11111101;
+        block.set(ix + 0x07, flags);
+    }
+
+    private void adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix) {
         //TODO: implement
+    }
+
+    private int adj_dZ_for_out_of_bounds_CA5A(DataBlock block, int ix) {
+        //TODO: implement
+        int roomSize = variables.get(0x5BAE);
+        int dz = block.getN(ix + 0x0B);
+        int z = block.getN(ix + 0x03);
+        IO.println("z: "+z+" dz: "+dz);
+        while(true) {
+            if (z + dz >= roomSize) return 1;
+            int flags = block.get(ix + 0x0C);
+            flags |= 0b100;
+            block.set(ix + 0x0C, flags);
+            dz = adj_d_for_out_of_bounds_CA89(dz);
+            if (dz == 0) return 0;
+        }
+    }
+
+    private int adj_d_for_out_of_bounds_CA89(int a) {
+        if(a==0) return 0;
+        if(a<0) return a+2;
+        return a-1;
     }
 
     private void add_dXYZ_C706(DataBlock block, int ix) {
