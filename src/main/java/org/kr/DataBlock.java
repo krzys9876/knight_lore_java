@@ -47,4 +47,12 @@ public class DataBlock {
     public void reset() {
         for (int i = start; i < start+size-1; i++) { set(i, 0);}
     }
+
+    public boolean isSet(int bit, int address) { return isSetS(bit, getU(address)); }
+    public void setBit(int bit, int address) { set(address, getWithBitSet(bit, address)); }
+    public void resetBit(int bit, int address) { set(address, getWithBitReset(bit, address)); }
+    public int getWithBitSet(int bit, int address) { return getU(address) | (1 << bit);}
+    public int getWithBitReset(int bit, int address) { return getU(address) & ((1 << bit) ^ 0b11111111);}
+
+    public static boolean isSetS(int bit, int value) { return (value & (1 << bit))>0; }
 }

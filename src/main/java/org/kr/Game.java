@@ -938,9 +938,8 @@ public class Game implements Runnable {
         print_lives_BCA3();
         update_screen_D56F(false);
         // @label=reset_objs_wipe_flag
-        for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32) {
-            graphic_objs_tbl_5C08.set(addr, graphic_objs_tbl_5C08.getU(addr) & 0b11011111); // c$B090 RES 5,(HL)    ;
-        }
+        for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32)
+            graphic_objs_tbl_5C08.setBit(5, addr); // c$B090 RES 5,(HL)    ;
         return false;
     }
 
@@ -1401,10 +1400,10 @@ public class Game implements Runnable {
     }
 
     private void upd_player_bottom_C82B(DataBlock block, int ix) {
-        boolean flag = (block.getU(ix + 0x0D) & 0b01000000)>0;
+        boolean flag = block.isSet(6, ix + 0x0D);
         if(flag) {
             if (variables.getU(0x5BC3) != 0) {
-                block.set(ix + 0x2D, block.getU(ix + 0x2D) | 0b01000000); // SET 6,(IX+$2D)
+                block.setBit(6, ix + 0x2D); // SET 6,(IX+$2D)
                 init_death_sparkles_BF21(block, ix);
                 return;
             }
@@ -1444,9 +1443,9 @@ public class Game implements Runnable {
     }
 
     private void loc_C855(DataBlock block, int ix) {
-        block.set(ix, block.getU(ix + 0x27) | 0b10);
+        block.set(ix, block.getWithBitSet(1,ix + 0x27));
         move_player_C9A1(block, ix);
-        block.set(ix, block.getU(ix + 0x27) & 0b11111101);
+        block.set(ix, block.getWithBitReset(2, ix + 0x27));
         int a = block.getU(ix + 0x0C);
         if(a>=0x10) block.set(ix + 0x0C, a-0x10);
         set_wipe_and_draw_flags_C692(block, ix);
@@ -1455,9 +1454,8 @@ public class Game implements Runnable {
     private void move_player_C9A1(DataBlock block, int ix) {
         if(variables.getU(0x5BC4)!=0) block.set(ix + 0x0B, 2); // D (IX+$0B),$02 ; dZ=2
         int flags = block.getU(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
-        boolean jumping = (flags & 0b1000)>0;
-        int c = variables.getU(0x5BB5);
-        if(jumping || ((flags & 0xF0) != 0) || ((c & 0b100)!=0)) calc_plyr_dXY_C9FB(block, ix);
+        boolean jumping = block.isSet(3, ix + 0x0C);
+        if(jumping || ((flags & 0xF0) != 0) || variables.isSet(2, 0x5BB5)) calc_plyr_dXY_C9FB(block, ix);
 
         int dz = block.getS(ix + 0x0B);
         if(dz < 0) dz -= 2;
@@ -1474,20 +1472,17 @@ public class Game implements Runnable {
         //$C9DC CALL $CA70     ;
 
         add_dXYZ_C706(block, ix);
-        flags = block.getU(ix + 0x0C);
-        if((flags & 0b100)>0) {
+        if(block.isSet(2, ix + 0x0C)) {
             int tmpDz = variables.getS(0x5BC1);
-            if(tmpDz <= 0) block.set(ix + 0x0C, flags & 0b11110111);
+            if(tmpDz <= 0) block.resetBit(3, ix + 0x0C);
         }
         block.set(ix + 0x09, 0);
         block.set(ix + 0x0A, 0);
     }
 
     private void adj_for_out_of_bounds_CB45(DataBlock block, int ix) {
-        int flags = block.getU(ix + 0x07);
-        if((flags & 0b10) > 0) return;
-        flags |= 0b10;
-        block.set(ix + 0x07, flags);
+        if(block.isSet(1, ix + 0x07)) return;
+        block.setBit(1, ix + 0x07);
         int flags2 = block.getU(ix + 0x0C);
         flags2 &= 0xF8; // ; clear X,Y,Z OOB
         block.set(ix + 0x0C, flags2);
@@ -1498,8 +1493,7 @@ public class Game implements Runnable {
             if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dzAdj); //TODO: analyze what to do with H (returned by previous call)
         }
         //TODO: implement rest of the routine
-        flags &= 0b11111101;
-        block.set(ix + 0x07, flags);
+        block.resetBit(1, ix + 0x07);
 
         //TODO: implement rest of the routine (here we set dZ only to stop jumping)
         block.set(ix + 0x0B, dzAdj);
@@ -1517,9 +1511,7 @@ public class Game implements Runnable {
         int z = block.getU(ix + 0x03);
         while(true) {
             if (z + dz >= roomSize) return dz;
-            int flags = block.getU(ix + 0x0C);
-            flags |= 0b100;
-            block.set(ix + 0x0C, flags);
+            block.setBit(2, ix + 0x0C);
             dz = adj_d_for_out_of_bounds_CA89(dz);
             if (dz == 0) return dz;
         }
@@ -1563,7 +1555,7 @@ public class Game implements Runnable {
         if(!transforming) return;
         int a =  block.getU(ix + 0x0C) & 0xF0; // counter when entering the room
         if (a > 0) return;
-        boolean jumping = (block.getU(ix + 0x0C) & 0b00001000)>0;
+        boolean jumping = block.isSet(3, ix + 0x0C); //TODO: analyze transformation during jump
         if (jumping) return;
 
         int sprite = block.getU(ix);
@@ -1616,7 +1608,7 @@ public class Game implements Runnable {
 
         int flags = block.getU(ix + 0x0C);
         if((flags & 0xF0) >0) return; // ; entering screen?
-        if((flags & 0b1000) > 0) return; // ; already jumping?
+        if(DataBlock.isSetS(3, flags)) return; // ; already jumping?
         // $C911 CALL $B4C1     ;
         // ignore audio
         // @label=loc_C915
@@ -1625,7 +1617,7 @@ public class Game implements Runnable {
         boolean right = (keys & 1)>0;
         boolean left = (keys & 2)>0;
         int flip = block.getU(ix + 0x07);
-        boolean hflip = (flip & 0b01000000) == 0;
+        boolean hflip = !DataBlock.isSetS(6, flip);
         if((right & hflip) || (left & !hflip)) {
             int sprite = block.getU(ix);
             sprite ^= 8;
@@ -1641,21 +1633,21 @@ public class Game implements Runnable {
     private void handle_jump_C948(DataBlock block, int ix) {
         int flags = block.getU(ix + 0x0C);
         boolean enteringScreen = (flags & 0xF0) > 0;
-        boolean jumping = (flags & 0b1000) > 0;
-        boolean jump = (variables.getU(0x5BB5) & 0b1000) > 0;
+        boolean jumping = DataBlock.isSetS(3, flags);
+        boolean jump = DataBlock.isSetS(3, variables.getU(0x5BB5));
         if(!jump || enteringScreen || jumping) return;
         int dz = block.getS(ix + 0x0B);
         dz++;
         if(dz < -1) return;
-        block.set(ix + 0x0C, flags | 0b1000); // ; flag jumping
+        block.setBit(3, ix + 0x0C); // ; flag jumping
         block.set(ix + 0x0B, 8);
     }
 
     private void handle_forward_C969(DataBlock block, int ix) {
         int flags = block.getU(ix + 0x0C);
         boolean enteringScreen = (flags & 0xF0) > 0;
-        boolean jumping = (flags & 0b1000) > 0;
-        boolean forward = (variables.getU(0x5BB5) & 0b100) > 0;
+        boolean jumping = DataBlock.isSetS(3, flags);
+        boolean forward = DataBlock.isSetS(2, variables.getU(0x5BB5));
         // ignore audio: @label=loc_C97A
         if(!enteringScreen && !jumping &!forward) {
             //@label=loc_C994
@@ -1705,7 +1697,7 @@ public class Game implements Runnable {
     private void upd_player_top_CDE2(DataBlock block, int ix) {
         if(variables.getU(0x5BC3)!=0) return;
 
-        boolean flag = (block.getU(ix + 0x0D) & 0b01000000)>0;
+        boolean flag = block.isSet(6,ix + 0x0D);
         if(flag) {
             init_death_sparkles_BF21(block, ix);
             return;
@@ -1715,7 +1707,7 @@ public class Game implements Runnable {
         // ; copy x,y,z,w,d,h,flags
         for(int i=0; i<7; i++) block.set(ix+1+i, block.getU(ix-32+1+i));
         block.set(ix + 6, 0);
-        block.set(ix + 7, block.getU(ix + 0x07) | 0b00000010);
+        block.setBit(1, ix + 0x07);
         int a =  block.getU(ix + 0x0D) & 0x0F;
         if(a == 0) { // look around again
             int rnd = new Random().nextInt(0xFF); // variables.get(0x5BA5);
@@ -1804,10 +1796,10 @@ public class Game implements Runnable {
         //c$C4ED LD HL,$FEF4   ; -2, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -2); //FE
-        boolean flag = (block.getU(ix + 0x0D) & 0b01000000)>0;
+        boolean flag = block.isSet(6, ix + 0x0D);
         if(flag) {
             if (variables.getU(0x5BC3) != 0) {
-                block.set(ix + 0x2D, block.getU(ix + 0x2D) | 0b01000000); // SET 6,(IX+$2D)
+                block.setBit(6, ix + 0x2D); // SET 6,(IX+$2D)
                 return;
             }
         }
@@ -1829,8 +1821,8 @@ public class Game implements Runnable {
             variables.set(0x5BB1, 0);
             block.set(ix + 0x12, -12); //F4
             block.set(ix + 0x13, -6); //FA
-            int spriteFlag = block.getU(ix) & 0b00100000;
-            if (spriteFlag != 0) block.set(ix + 0x13, block.getU(ix + 0x13) - 1);
+            boolean spriteFlag = block.isSet(5, ix);
+            if (spriteFlag) block.set(ix + 0x13, block.getU(ix + 0x13) - 1);
         } else {
             // Continue transformation
             int nextSprite = (new Random().nextInt(0xFF) & 3) | 0x5C;
@@ -1871,7 +1863,7 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
-        block.set(ix + 0x0D, block.getU(ix + 0x0D) & 0b10111111);
+        block.resetBit(6,ix + 0x0D);
         block.set(ix, block.getU(ix + 0x10));
         updateOneSprite(block, ix); // update after sparkes change to player
     }
