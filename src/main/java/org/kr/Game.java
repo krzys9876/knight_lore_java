@@ -1487,21 +1487,20 @@ public class Game implements Runnable {
         int flags2 = block.getU(ix + 0x0C);
         flags2 &= 0xF8; // ; clear X,Y,Z OOB
         block.set(ix + 0x0C, flags2);
-        int dz = block.getS(ix + 0x0B);
-        int dzAdj = dz;
+        int dzAdj = block.getS(ix + 0x0B);
         if(dzAdj != 0) {
             dzAdj = adj_dZ_for_out_of_bounds_CA5A(block, ix);
-            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dzAdj); //TODO: analyze what to do with H (returned by previous call)
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dzAdj);
         }
-        int dx = block.getS(ix + 0x09);
-        int dxAdj = dx;
+        int dxAdj = block.getS(ix + 0x09);
         if(dxAdj != 0) {
             dxAdj = adj_dX_for_out_of_bounds_CCDD(block, ix);
+            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(block, ix, dxAdj);
         }
-        int dy = block.getS(ix + 0x0A);
-        int dyAdj = dy;
+        int dyAdj = block.getS(ix + 0x0A);
         if(dyAdj != 0) {
-            dyAdj =adj_dY_for_out_of_bounds_CD08(block, ix);
+            dyAdj = adj_dY_for_out_of_bounds_CD08(block, ix);
+            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(block, ix, dyAdj);
         }
 
         //TODO: implement rest of the routine
@@ -1520,6 +1519,16 @@ public class Game implements Runnable {
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dzAdj) {
         //TODO: implement
         return dzAdj;
+    }
+
+    private int adj_dX_for_obj_intersect_CB9A(DataBlock block, int ix, int dxAdj) {
+        //TODO: implement
+        return dxAdj;
+    }
+
+    private int adj_dY_for_obj_intersect_CBE9(DataBlock block, int ix, int dyAdj) {
+        //TODO: implement
+        return dyAdj;
     }
 
     private int adj_dZ_for_out_of_bounds_CA5A(DataBlock block, int ix) {
