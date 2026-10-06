@@ -1469,8 +1469,8 @@ public class Game implements Runnable {
 
         //$C9D9 CALL $CB45     ;
         adj_for_out_of_bounds_CB45(block, ix);
-        // TODO: implement
         //$C9DC CALL $CA70     ;
+        handle_exit_screen_CA70(block, ix);
 
         add_dXYZ_C706(block, ix);
         if(block.isSet(2, ix + 0x0C)) {
@@ -1493,11 +1493,22 @@ public class Game implements Runnable {
             dzAdj = adj_dZ_for_out_of_bounds_CA5A(block, ix);
             if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dzAdj); //TODO: analyze what to do with H (returned by previous call)
         }
+        int dx = block.getS(ix + 0x09);
+        int dxAdj = dx;
+        if(dxAdj != 0) {
+            dxAdj = adj_dX_for_out_of_bounds_CCDD(block, ix);
+        }
+
         //TODO: implement rest of the routine
         block.resetBit(1, ix + 0x07);
 
         //TODO: implement rest of the routine (here we set dZ only to stop jumping)
+        block.set(ix + 0x09, dxAdj);
         block.set(ix + 0x0B, dzAdj);
+    }
+
+    private void handle_exit_screen_CA70(DataBlock block, int ix) {
+        //TODO: implement
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dzAdj) {
@@ -1506,7 +1517,6 @@ public class Game implements Runnable {
     }
 
     private int adj_dZ_for_out_of_bounds_CA5A(DataBlock block, int ix) {
-        //TODO: implement
         int roomSize = variables.getU(0x5BAE);
         int dz = block.getS(ix + 0x0B);
         int z = block.getU(ix + 0x03);
@@ -1515,6 +1525,27 @@ public class Game implements Runnable {
             block.setBit(2, ix + 0x0C);
             dz = adj_d_for_out_of_bounds_CA89(dz);
             if (dz == 0) return dz;
+        }
+    }
+
+    private int adj_dX_for_out_of_bounds_CCDD(DataBlock block, int ix) {
+        int dx = block.getS(ix + 0x09);
+        int flags = block.getU(ix + 0x0C);
+        boolean enteringRoom = (flags & 0xF0)>0;
+        if(enteringRoom) return dx;
+        boolean nearArch = block.isSet(0, ix + 0x07);
+        if(nearArch) return dx;
+
+        int roomSizeX = variables.getU(0x5BAB);
+
+        int x = block.getU(ix + 0x01);
+        while(true) {
+            int a = x + dx - 0x80;
+            if (a <= 0) a = -a;
+            a += block.getU(ix + 0x04);
+            if(a < roomSizeX) return dx;
+            block.setBit(0, ix + 0x0C);
+            dx = adj_d_for_out_of_bounds_CA89(dx);
         }
     }
 
