@@ -1503,10 +1503,8 @@ public class Game implements Runnable {
             if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(block, ix, dyAdj);
         }
 
-        //TODO: implement rest of the routine
         block.resetBit(1, ix + 0x07);
 
-        //TODO: implement rest of the routine (here we set dZ only to stop jumping)
         block.set(ix + 0x09, dxAdj);
         block.set(ix + 0x0A, dyAdj);
         block.set(ix + 0x0B, dzAdj);
