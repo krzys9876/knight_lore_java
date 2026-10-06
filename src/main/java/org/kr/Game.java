@@ -1498,12 +1498,18 @@ public class Game implements Runnable {
         if(dxAdj != 0) {
             dxAdj = adj_dX_for_out_of_bounds_CCDD(block, ix);
         }
+        int dy = block.getS(ix + 0x0A);
+        int dyAdj = dy;
+        if(dyAdj != 0) {
+            dyAdj =adj_dY_for_out_of_bounds_CD08(block, ix);
+        }
 
         //TODO: implement rest of the routine
         block.resetBit(1, ix + 0x07);
 
         //TODO: implement rest of the routine (here we set dZ only to stop jumping)
         block.set(ix + 0x09, dxAdj);
+        block.set(ix + 0x0A, dyAdj);
         block.set(ix + 0x0B, dzAdj);
     }
 
@@ -1546,6 +1552,27 @@ public class Game implements Runnable {
             if(a < roomSizeX) return dx;
             block.setBit(0, ix + 0x0C);
             dx = adj_d_for_out_of_bounds_CA89(dx);
+        }
+    }
+
+    private int adj_dY_for_out_of_bounds_CD08(DataBlock block, int ix) {
+        int dy = block.getS(ix + 0x0A);
+        int flags = block.getU(ix + 0x0C);
+        boolean enteringRoom = (flags & 0xF0)>0;
+        if(enteringRoom) return dy;
+        boolean nearArch = block.isSet(0, ix + 0x07);
+        if(nearArch) return dy;
+
+        int roomSizeY = variables.getU(0x5BAC);
+
+        int y = block.getU(ix + 0x02);
+        while(true) {
+            int a = y + dy - 0x80;
+            if (a <= 0) a = -a;
+            a += block.getU(ix + 0x05);
+            if(a < roomSizeY) return dy;
+            block.setBit(0, ix + 0x0C);
+            dy = adj_d_for_out_of_bounds_CA89(dy);
         }
     }
 
