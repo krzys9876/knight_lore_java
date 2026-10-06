@@ -271,7 +271,7 @@ public class Game implements Runnable {
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-        menu_loop_BD23(false); // returns when game starts
+        menu_loop_BD23(true); // returns when game starts
 
         try {
             updateShadowMemory();
@@ -1275,6 +1275,7 @@ public class Game implements Runnable {
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(block, ix); break;
             case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
+            case 0x58, 0x59, 0x5A: upd_88_to_90_C506(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(block, ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
@@ -1402,18 +1403,18 @@ public class Game implements Runnable {
     private void upd_player_bottom_C82B(DataBlock block, int ix) {
         boolean flag = block.isSet(6, ix + 0x0D);
         if(flag) {
-            if (variables.getU(0x5BC3) != 0) {
+            if (variables.getU(0x5BC3) == 0) {
                 block.setBit(6, ix + 0x2D); // SET 6,(IX+$2D)
                 init_death_sparkles_BF21(block, ix);
                 return;
             }
         }
         // @label=loc_C83E
-        // c$C83E CALL $C306    ;
-        chk_and_init_transform_C306(block, ix);
-        boolean transforming = variables.getU(0x5BB1) > 0;
-        if(!transforming) {
-            // $C841 CALL $D022    ; check_user_input
+            // c$C83E CALL $C306    ;
+        // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317
+        boolean transformStarted = chk_and_init_transform_C306(block, ix);
+        if(!transformStarted) {
+        // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
             // TODO: implement rest of the routine
             // $C844 CALL $C00E    ; handle_pickup_drop
@@ -1550,28 +1551,29 @@ public class Game implements Runnable {
         return grNo;
     }
 
-    private void chk_and_init_transform_C306(DataBlock block, int ix) {
+    private boolean chk_and_init_transform_C306(DataBlock block, int ix) {
         boolean transforming = variables.getU(0x5BB1) > 0;
-        if(!transforming) return;
+        if(!transforming) return false;
         int a =  block.getU(ix + 0x0C) & 0xF0; // counter when entering the room
-        if (a > 0) return;
-        boolean jumping = block.isSet(3, ix + 0x0C); //TODO: analyze transformation during jump
-        if (jumping) return;
+        if (a > 0) return false;
+        boolean jumping = block.isSet(3, ix + 0x0C);
+        if (jumping) return false;
 
         int sprite = block.getU(ix);
         variables.set(0x5BB1, sprite);
         block.set(ix + 0x10, 8); // transform counter
 
         block.set(ix + 0x20, 1); // update player top
-        block.set(ix + 0x20 + 7, block.getU(ix + 0x20 + 7) | 0x30);
+        set_wipe_and_draw_flags_C692(block, ix + 0x20);
         //@label=rand_legs_sprite
         int rnd = new Random().nextInt(0xFF); //variables.get(0x5BA5);
         int newSprite = (rnd & 0x03) | 0x5C;
-        //IO.println("chk_and_init_transform_C306 sprite = " + newSprite);
         if(block.getU(ix) == newSprite) newSprite^=1; // change if same as current
         block.set(ix, newSprite);
         int flip = (block.getU(ix + 0x07)) ^ 0x40;
         block.set(ix + 0x07, flip);
+
+        return true;
     }
 
     private void check_user_input_D022() {
@@ -1649,7 +1651,7 @@ public class Game implements Runnable {
         boolean jumping = DataBlock.isSetS(3, flags);
         boolean forward = DataBlock.isSetS(2, variables.getU(0x5BB5));
         // ignore audio: @label=loc_C97A
-        if(!enteringScreen && !jumping &!forward) {
+        if(!enteringScreen && !jumping & !forward) {
             //@label=loc_C994
             int sprite = block.getU(ix) & 0x07;
             if(sprite == 2 || sprite == 4) return;
@@ -1785,6 +1787,12 @@ public class Game implements Runnable {
         // TODO: implement rest of routine
     }
 
+    private void upd_88_to_90_C506(DataBlock block, int ix) {
+        // c$C506 LD HL,$F4F0   ;
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -16); //F0
+    }
+
     private void upd_91_B683(DataBlock block, int ix) {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
@@ -1798,8 +1806,8 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -2); //FE
         boolean flag = block.isSet(6, ix + 0x0D);
         if(flag) {
-            if (variables.getU(0x5BC3) != 0) {
-                block.setBit(6, ix + 0x2D); // SET 6,(IX+$2D)
+            if (variables.getU(0x5BC3) == 0) {
+                init_death_sparkles_BF21(block, ix);
                 return;
             }
         }
@@ -1822,7 +1830,7 @@ public class Game implements Runnable {
             block.set(ix + 0x12, -12); //F4
             block.set(ix + 0x13, -6); //FA
             boolean spriteFlag = block.isSet(5, ix);
-            if (spriteFlag) block.set(ix + 0x13, block.getU(ix + 0x13) - 1);
+            if (spriteFlag) block.set(ix + 0x13, block.getS(ix + 0x13) - 1);
         } else {
             // Continue transformation
             int nextSprite = (new Random().nextInt(0xFF) & 3) | 0x5C;
