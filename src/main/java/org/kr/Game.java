@@ -1541,7 +1541,16 @@ public class Game implements Runnable {
     }
 
     private void handle_exit_screen_CA70(DataBlock block, int ix) {
-        //TODO: implement
+        int flags = block.getU(ix + 0x0C);
+        boolean enteringRoom = (flags & 0xF0)>0;
+        if(enteringRoom) return;
+        boolean nearArch = block.isSet(0, ix + 0x07);
+        if(!nearArch) return;
+
+        block.resetBit(0, ix + 0x07);
+        IO.println("handle_exit_screen_CA70");
+
+        //TODO: implement rest of the routine
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dzAdj) {
