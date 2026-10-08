@@ -975,9 +975,6 @@ public class Game implements Runnable {
         lastTick = currentTick;
         sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
         tickNo ++;
-
-        //IO.println("tick");
-        //debugPanel2.append("tick");
     }
 
     private void display_day_BCCA() {
@@ -1066,7 +1063,6 @@ public class Game implements Runnable {
         for(int i=0; i<cnt; i++) {
             if(graphic_objs_tbl_5C08.getU(ix + i*32) != 0 && (graphic_objs_tbl_5C08.getU(ix + i*32 + 7) & 0x10) > 0) {
                 objects_to_draw_CE8B.set(hl, i);
-                //IO.println(graphic_objs_tbl_5C08.get(ix + i*32));
                 hl++;
             }
         }
@@ -1134,7 +1130,6 @@ public class Game implements Runnable {
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
         variables.set(0x5BBE, variables.getU(0x5BBE) + 1);
         renderList.reset();
-        //IO.println("Rendered: "+graphic_objs_tbl_5C08.get(objectLoc));
     }
 
     private boolean is2behind1(int de1, int de2) {
@@ -1165,8 +1160,6 @@ public class Game implements Runnable {
         boolean overlap6 = (x2-w2) >= (x1+w1); // $CF59 SUB L          ; X2-W2-(X1+W1)
         int c=0;
 
-        //IO.println("Object 2: %02x, x/y/z/w/d/h %d/%d/%d/%d/%d/%d %d".formatted(objects_to_draw_CE8B.get(de2), x2, y2, z2, w2, d2, h2, c));
-
         if(!overlap1)
             if(!overlap2) c+=1;
             else c+=2;
@@ -1178,9 +1171,6 @@ public class Game implements Runnable {
             else c+=18;
 
         boolean isBehind = c==3 || c==4 || c==6 || c==7 || c==12 || c==15 || c==16;
-        /*if(isBehind) {
-            IO.println("Behind: Object 1: %02x, Object 2: %02x".formatted(objects_to_draw_CE8B.get(de1), objects_to_draw_CE8B.get(de2)));
-        }*/
         return isBehind;
     }
 
@@ -1570,7 +1560,6 @@ public class Game implements Runnable {
         if(!nearArch) return;
 
         block.resetBit(0, ix + 0x07);
-        IO.println("handle_exit_screen_CA70");
 
         // $CA82 LD HL,($5BAB)  ;
         // $CA85 PUSH HL        ;
@@ -1604,11 +1593,7 @@ public class Game implements Runnable {
             byte_D191.set(0xD191, plyr_spr_2_scratchpad_D181.getU(0xD181));
             plyr_spr_1_scratchpad_D161.set(0xD161, 0x78); // sparkly transform #1
             plyr_spr_2_scratchpad_D181.set(0xD181, 0x78);
-        } else {
-            return;
         }
-
-        //TODO: implement rest of the routine
     }
 
     private void copyPlayerData() {
@@ -1631,7 +1616,6 @@ public class Game implements Runnable {
 
 
     private int screen_west_CA9A(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        IO.println("screen_west_CA9A");
         int currentScreen = block.getU(ix + 0x08);
         oldRoomSizeX = 0x80 - oldRoomSizeX;
         int playerX = block.getU(ix + 0x01) + block.getS(ix + 0x09) + block.getU(ix + 0x04);
@@ -1644,7 +1628,6 @@ public class Game implements Runnable {
     }
 
     private int screen_east_CAF3(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        IO.println("screen_east_CAF3");
         int currentScreen = block.getU(ix + 0x08);
         oldRoomSizeX = 0x80 + oldRoomSizeX;
         int playerX = block.getU(ix + 0x01) + block.getS(ix + 0x09) - block.getU(ix + 0x04);
@@ -1657,7 +1640,6 @@ public class Game implements Runnable {
     }
 
     private int screen_north_CB0E(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        IO.println("screen_north_CB0E");
         int currentScreen = block.getU(ix + 0x08);
         oldRoomSizeY = 0x80 + oldRoomSizeY;
         int playerY = block.getU(ix + 0x02) + block.getS(ix + 0x0A) - block.getU(ix + 0x05);
@@ -1669,7 +1651,6 @@ public class Game implements Runnable {
     }
 
     private int screen_south_CB29(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        IO.println("screen_south_CB29");
         int currentScreen = block.getU(ix + 0x08);
         oldRoomSizeY = 0x80 - oldRoomSizeY;
         int playerY = block.getU(ix + 0x02) + block.getS(ix + 0x0A) + block.getU(ix + 0x05);
@@ -2255,7 +2236,6 @@ public class Game implements Runnable {
         variables.set(0x5BAC, room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
         variables.set(0x5BAE, room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Z
         debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.getU(0x5BAB)+" Y:"+variables.getU(0x5BAC)+" Z:"+variables.getU(0x5BAE));
-        //IO.println("Retrieved room size: "+roomSize+" X:"+variables.get(0x5BAB)+" Y:"+variables.get(0x5BAC)+" Z:"+variables.get(0x5BAE));
         hl++; // background objects start
 
         // @label=next_bg_obj
@@ -2265,13 +2245,10 @@ public class Game implements Runnable {
         while(location_tbl_6251.getU(hl) != 0xFF && hl<=roomEnd) {
             DataBlock bkgObj = backgroundObjects[location_tbl_6251.getU(hl)];
             debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.getU(hl)));
-            //IO.println("Background block type: %02x".formatted(location_tbl_6251.get(hl)));
             int bkgAddr =  bkgObj.start;
             while(bkgObj.getU(bkgAddr) != 0) { // each object consists of 8-byte sprite info terminated by 0
                 // 8 - byte sprite info
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.getU(bkgAddr)));
-                //IO.println("Sprite: %02x x/y/z/w/d/h %d/%d/%d/%d/%d/%d".formatted(bkgObj.get(bkgAddr),
-                //        bkgObj.get(bkgAddr+1),bkgObj.get(bkgAddr+2),bkgObj.get(bkgAddr+3),bkgObj.get(bkgAddr+4),bkgObj.get(bkgAddr+5),bkgObj.get(bkgAddr+6)));
                 for(int i=0; i<8; i++) graphic_objs_tbl_5C08.set(targetAddr+i, bkgObj.getU(bkgAddr+i));
                 bkgAddr+=8;
                 // 9th byte
@@ -2280,7 +2257,6 @@ public class Game implements Runnable {
                 targetAddr+=32;
             }
             hl++;
-            //IO.println();
         }
 
         hl ++;
@@ -2290,14 +2266,12 @@ public class Game implements Runnable {
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
             DataBlock blockDef = foregroundObjects[blockType];
-            //IO.print("Foreground block type: %02x, count: %d ".formatted(blockType, blockCnt));
             hl++;
             for(int i=0; i<blockCnt; i++) {
                 int locByte = location_tbl_6251.getU(hl+i);
                 int x = (locByte & 0b00000111);
                 int y = (locByte & 0b00111000) >> 3;
                 int z = (locByte & 0b11000000) >> 6;
-                //IO.print("(%d,%d,%d)".formatted(x, y, z));
                 graphic_objs_tbl_5C08.set(targetAddr, blockDef.getU(blockDef.start)); // object ID
                 graphic_objs_tbl_5C08.set(targetAddr+4, blockDef.getU(blockDef.start+1)); // width
                 graphic_objs_tbl_5C08.set(targetAddr+5, blockDef.getU(blockDef.start+2)); // depth
@@ -2310,11 +2284,9 @@ public class Game implements Runnable {
                 graphic_objs_tbl_5C08.set(targetAddr+1, x1 + x*16 + 0x48); // X
                 graphic_objs_tbl_5C08.set(targetAddr+2, y1 + y*16 + 0x48); // Y
                 graphic_objs_tbl_5C08.set(targetAddr+3, ((z*12+offsets) & 0xFC) + variables.getU(0x5BAE)); // Y, variable stores room size Z
-                //IO.print("/(%d,%d,%d)".formatted(other_objs_here_5C88.get(targetAddr+1), other_objs_here_5C88.get(targetAddr+2), other_objs_here_5C88.get(targetAddr+3)));
                 for(int t=9; t<32; t++) graphic_objs_tbl_5C08.set(targetAddr+t,0);  // reset remaining info
                 targetAddr+=32;
             }
-            //IO.println();
             hl+=blockCnt;
         }
 
@@ -2334,7 +2306,6 @@ public class Game implements Runnable {
         int ix = 0x5C48;
         while(iy<special_objs_tbl_6FF2.endExcl() && special_objs_tbl_6FF2.getU(iy)!=0) {
             if(currLocId == special_objs_tbl_6FF2.getU(iy+8)) {
-                //IO.println("Found special object");
                 graphic_objs_tbl_5C08.set(ix, special_objs_tbl_6FF2.getU(iy));
                 graphic_objs_tbl_5C08.set(ix+1, special_objs_tbl_6FF2.getU(iy+5));
                 graphic_objs_tbl_5C08.set(ix+2, special_objs_tbl_6FF2.getU(iy+6));
@@ -2363,28 +2334,24 @@ public class Game implements Runnable {
         int y = graphic_objs_tbl_5C08.getU(ix + 2);
         if(x == 0) {
             // @label=enter_arch_e
-            IO.println("enter_arch_e");
             adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0x37);
             int a = roomSizeX + 0x80 + graphic_objs_tbl_5C08.getU(ix + 4);
             graphic_objs_tbl_5C08.set(ix + 1, a);
             copy_spr_1_xy_2_D34D(ix);
         } else if(x == 0xFF) {
             // @label=enter_arch_w
-            IO.println("enter_arch_w");
             adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0xAE);
             int a = 0x80 - roomSizeX - graphic_objs_tbl_5C08.getU(ix + 4);
             graphic_objs_tbl_5C08.set(ix + 1, a);
             copy_spr_1_xy_2_D34D(ix);
         } else if(y == 0) {
             // @label=enter_arch_n
-            IO.println("enter_arch_n");
             adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0x51);
             int a = roomSizeY + 0x80 + graphic_objs_tbl_5C08.getU(ix + 5);
             graphic_objs_tbl_5C08.set(ix + 2, a);
             copy_spr_1_xy_2_D34D(ix);
         } else if(y == 0xFF) {
             // @label=enter_arch_s
-            IO.println("enter_arch_s");
             adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0xC8);
             int a = 0x80 - roomSizeY - graphic_objs_tbl_5C08.getU(ix + 5);
             graphic_objs_tbl_5C08.set(ix + 2, a);
@@ -2411,7 +2378,6 @@ public class Game implements Runnable {
                     int archZ = graphic_objs_tbl_5C08.getU(iy + 0x03);
                     block.set(ix + 0x03, archZ);
                     block.set(ix + 0x23, archZ + 0x0C);
-                    IO.println("Z adjusted");
                 }
             }
             iy+=de;
