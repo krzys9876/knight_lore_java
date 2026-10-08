@@ -495,9 +495,8 @@ public class Game implements Runnable {
         return de2;
     }
 
-    private int calc_vidbuf_addr_D811(int b, int c) {
-        // b: y, c: x
-        int xy = (c + b*256) >> 3;
+    private int calc_vidbuf_addr_D811(int y, int x) {
+        int xy = (x + y*256) >> 3;
         return xy + 0xD8F3;
     }
 
