@@ -29,6 +29,7 @@ public class Game implements Runnable {
     // $5BA0-$6107 - variables
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
     private final DataBlock variables = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
+    private boolean exitingScreen = false;
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 4);
     private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12);
@@ -831,7 +832,7 @@ public class Game implements Runnable {
         lose_life_$D12A();
     }
 
-    private void lose_life_$D12A() {
+    private void initPlayerData() {
         int de = 0x5C08;
         for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) graphic_objs_tbl_5C08.set(de+i, plyr_spr_1_scratchpad_D161.getU(plyr_spr_1_scratchpad_D161.start+i));
         de+=plyr_spr_1_scratchpad_D161.size;
@@ -846,7 +847,10 @@ public class Game implements Runnable {
         for(int i=0; i<start_loc_2_D189.size; i++) graphic_objs_tbl_5C08.set(de+i, start_loc_2_D189.getU(start_loc_2_D189.start+i));
         de+=start_loc_2_D189.size;
         for(int i=0; i<byte_D191.size; i++) graphic_objs_tbl_5C08.set(de+i, byte_D191.getU(byte_D191.start+i));
+    }
 
+    private void lose_life_$D12A() {
+        initPlayerData();
         variables.set(0x5BB1, 0);
         int livesLeft = variables.getU(0x5BBA) - 1;
         variables.set(0x5BBA, livesLeft);
@@ -871,11 +875,14 @@ public class Game implements Runnable {
 
     private void game_loop_AFBA() {
         debugPanel2.append("Game loop AFBA\n");
-        build_screen_objects_D1E6();
         boolean exit = false;
         while(!exit) {
-            exit = onscreen_loop_AFBD();
-            delay();
+            exitingScreen = false;
+            build_screen_objects_D1E6();
+            while (!exit & !exitingScreen) {
+                exit = onscreen_loop_AFBD();
+                delay();
+            }
         }
     }
 
@@ -884,6 +891,7 @@ public class Game implements Runnable {
         //IO.println("Onscreen loop AFBD");
         variables.set(0x5BA2, variables.getU(0x5BBC));
         update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
+        if(exitingScreen) return false;
         // loc_B000
         list_objects_to_draw_CE62();
         //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
@@ -1245,6 +1253,7 @@ public class Game implements Runnable {
         int ix = block.start;
         while(ix < block.endExcl()) {
             updateOneSprite(block, ix);
+            if(exitingScreen) return;
             ix+=32;
         }
     }
@@ -1501,14 +1510,15 @@ public class Game implements Runnable {
         adj_for_out_of_bounds_CB45(block, ix);
         //$C9DC CALL $CA70     ;
         handle_exit_screen_CA70(block, ix);
-
-        add_dXYZ_C706(block, ix);
-        if(block.isSet(2, ix + 0x0C)) {
-            int tmpDz = variables.getS(0x5BC1);
-            if(tmpDz <= 0) block.resetBit(3, ix + 0x0C);
+        if(!exitingScreen) {
+            add_dXYZ_C706(block, ix);
+            if (block.isSet(2, ix + 0x0C)) {
+                int tmpDz = variables.getS(0x5BC1);
+                if (tmpDz <= 0) block.resetBit(3, ix + 0x0C);
+            }
+            block.set(ix + 0x09, 0);
+            block.set(ix + 0x0A, 0);
         }
-        block.set(ix + 0x09, 0);
-        block.set(ix + 0x0A, 0);
     }
 
     private void adj_for_out_of_bounds_CB45(DataBlock block, int ix) {
@@ -1550,7 +1560,97 @@ public class Game implements Runnable {
         block.resetBit(0, ix + 0x07);
         IO.println("handle_exit_screen_CA70");
 
+        // $CA82 LD HL,($5BAB)  ;
+        // $CA85 PUSH HL        ;
+        int oldRoomSizeX = variables.getU(0x5BAB); // L
+        int oldRoomSizeY = variables.getU(0x5BAC); // H
+
+        //@label=screen_move_tbl
+        //b$CA92 DEFW $CA9A
+        //$CA94 DEFW $CAF3
+        //$CA96 DEFW $CB0E
+        //$CA98 DEFW $CB29
+        int currentScreen = block.getU(ix + 0x08);
+        int newScreen = switch(get_sprite_dir_CA1E(block, ix)) {
+            case 0 -> screen_west_CA9A(block, ix, oldRoomSizeX, oldRoomSizeY);
+            case 1 -> screen_east_CAF3(block, ix, oldRoomSizeX, oldRoomSizeY);
+            case 2 -> screen_north_CB0E(block, ix, oldRoomSizeX, oldRoomSizeY);
+            case 3 -> screen_south_CB29(block, ix, oldRoomSizeX, oldRoomSizeY);
+            default -> currentScreen;
+        };
+
+        if(currentScreen!=newScreen) {
+            int grNo = block.getU(ix);
+            if(grNo - 0x10 > 0x40) return;
+            IO.println("EXIT: "+currentScreen+" -> "+newScreen);
+            exitingScreen = true; //TODO: rethink if this is the correct way to flag this
+            block.set(ix + 0x08, newScreen);
+            copyPlayerData();
+            byte_D171.set(0xD171, plyr_spr_1_scratchpad_D161.getU(0xD161));
+            byte_D191.set(0xD191, plyr_spr_2_scratchpad_D181.getU(0xD181));
+            plyr_spr_1_scratchpad_D161.set(0xD161, 0x78); // sparkly transform #1
+            plyr_spr_2_scratchpad_D181.set(0xD181, 0x78);
+        } else {
+            return;
+        }
+
         //TODO: implement rest of the routine
+    }
+
+    private void copyPlayerData() {
+        // This is the opposite of the initPlayerData
+        int de = 0x5C08;
+        for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i, graphic_objs_tbl_5C08.getU(de+i));
+        de+=plyr_spr_1_scratchpad_D161.size;
+        for(int i=0; i<start_loc_1_D169.size; i++) start_loc_1_D169.set(start_loc_1_D169.start+i, graphic_objs_tbl_5C08.getU(de+i));
+        de+=start_loc_1_D169.size;
+        for(int i=0; i<flags12_1_D16D.size; i++) flags12_1_D16D.set(flags12_1_D16D.start+i, graphic_objs_tbl_5C08.getU(de+i));
+        de+=flags12_1_D16D.size;
+        for(int i=0; i<byte_D171.size; i++) byte_D171.set(byte_D171.start+i, graphic_objs_tbl_5C08.getU(de+i));
+        de+=byte_D171.size;
+        for(int i=0; i<plyr_spr_2_scratchpad_D181.size; i++) plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start+i, graphic_objs_tbl_5C08.getU(de+i));
+        de+=plyr_spr_2_scratchpad_D181.size;
+        for(int i=0; i<start_loc_2_D189.size; i++) start_loc_2_D189.set(start_loc_2_D189.start+i, graphic_objs_tbl_5C08.getU(de+i));
+        de+=start_loc_2_D189.size;
+        for(int i=0; i<byte_D191.size; i++) byte_D191.set(byte_D191.start+i, graphic_objs_tbl_5C08.getU(de+i));
+    }
+
+
+    private int screen_west_CA9A(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
+        IO.println("screen_west_CA9A");
+        int currentScreen = block.getU(ix + 0x08);
+        oldRoomSizeX = 0x80 -  oldRoomSizeX;
+        int playerX = block.getU(ix + 0x01) + block.getS(ix + 0x09) + block.getU(ix + 0x04);
+        if(oldRoomSizeX < playerX) return currentScreen;
+
+        block.set(ix + 0x01, 0); // x=0
+        //@label=screen_e_w
+        int newScreen = ((currentScreen & 0x0F) - 1) | (currentScreen & 0xF0); // do not change row
+        return newScreen;
+
+        //TODO: implement
+
+    }
+
+    private int screen_east_CAF3(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
+        //TODO: implement
+        IO.println("screen_east_CAF3");
+        int currentScreen = block.getU(ix + 0x08);
+        return currentScreen;
+    }
+
+    private int screen_north_CB0E(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
+        //TODO: implement
+        IO.println("screen_north_CB0E");
+        int currentScreen = block.getU(ix + 0x08);
+        return currentScreen;
+    }
+
+    private int screen_south_CB29(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
+        //TODO: implement
+        IO.println("screen_south_CB29");
+        int currentScreen = block.getU(ix + 0x08);
+        return currentScreen;
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dzAdj) {
@@ -1592,6 +1692,7 @@ public class Game implements Runnable {
 
         int x = block.getU(ix + 0x01);
         while(true) {
+            // TODO: verify why there is infinite loop after changing rooms
             int a = x + dx - 0x80;
             if (a <= 0) a = -a;
             a += block.getU(ix + 0x04);
