@@ -1625,7 +1625,7 @@ public class Game implements Runnable {
     private int screen_west_CA9A(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
         IO.println("screen_west_CA9A");
         int currentScreen = block.getU(ix + 0x08);
-        oldRoomSizeX = 0x80 -  oldRoomSizeX;
+        oldRoomSizeX = 0x80 - oldRoomSizeX;
         int playerX = block.getU(ix + 0x01) + block.getS(ix + 0x09) + block.getU(ix + 0x04);
         if(oldRoomSizeX < playerX) return currentScreen;
 
@@ -1649,17 +1649,27 @@ public class Game implements Runnable {
     }
 
     private int screen_north_CB0E(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        //TODO: implement
         IO.println("screen_north_CB0E");
         int currentScreen = block.getU(ix + 0x08);
-        return currentScreen;
+        oldRoomSizeY = 0x80 + oldRoomSizeY;
+        int playerY = block.getU(ix + 0x02) + block.getS(ix + 0x0A) - block.getU(ix + 0x05);
+        if(oldRoomSizeY > playerY) return currentScreen;
+
+        block.set(ix + 0x02, 0xFF); // y=0xFF
+        int newScreen = (currentScreen + 0x10) & 0xFF;
+        return newScreen;
     }
 
     private int screen_south_CB29(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        //TODO: implement
         IO.println("screen_south_CB29");
         int currentScreen = block.getU(ix + 0x08);
-        return currentScreen;
+        oldRoomSizeY = 0x80 - oldRoomSizeY;
+        int playerY = block.getU(ix + 0x02) + block.getS(ix + 0x0A) + block.getU(ix + 0x05);
+        if(oldRoomSizeY < playerY) return currentScreen;
+
+        block.set(ix + 0x02, 0); // y=0
+        int newScreen = (currentScreen - 0x10) & 0xFF;
+        return newScreen;
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dzAdj) {
@@ -2342,6 +2352,7 @@ public class Game implements Runnable {
         int roomSizeY = variables.getU(0x5BAC) - 2;
         int ix = 0x5C08;
         int x = graphic_objs_tbl_5C08.getU(ix + 1);
+        int y = graphic_objs_tbl_5C08.getU(ix + 2);
         if(x == 0) {
             // @label=enter_arch_e
             IO.println("enter_arch_e");
@@ -2356,9 +2367,21 @@ public class Game implements Runnable {
             int a = 0x80 - roomSizeX - graphic_objs_tbl_5C08.getU(ix + 4);
             graphic_objs_tbl_5C08.set(ix + 1, a);
             copy_spr_1_xy_2_D34D(ix);
+        } else if(y == 0) {
+            // @label=enter_arch_n
+            IO.println("enter_arch_n");
+            adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0x51);
+            int a = roomSizeY + 0x80 + graphic_objs_tbl_5C08.getU(ix + 5);
+            graphic_objs_tbl_5C08.set(ix + 2, a);
+            copy_spr_1_xy_2_D34D(ix);
+        } else if(y == 0xFF) {
+            // @label=enter_arch_s
+            IO.println("enter_arch_s");
+            adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0xC8);
+            int a = 0x80 - roomSizeY - graphic_objs_tbl_5C08.getU(ix + 5);
+            graphic_objs_tbl_5C08.set(ix + 2, a);
+            copy_spr_1_xy_2_D34D(ix);
         }
-        //TODO: implement
-
     }
 
     private void copy_spr_1_xy_2_D34D(int ix) {
