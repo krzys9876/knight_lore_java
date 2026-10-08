@@ -881,6 +881,12 @@ public class Game implements Runnable {
             build_screen_objects_D1E6();
             while (!exit & !exitingScreen) {
                 exit = onscreen_loop_AFBD();
+                debugPanel2.setText("");
+                for(int ix = graphic_objs_tbl_5C08.start; ix < graphic_objs_tbl_5C08.endExcl(); ix+=0x20) {
+                    if(graphic_objs_tbl_5C08.getU(ix)!=0) {
+                        debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(ix));
+                    }
+                }
                 delay();
             }
         }
