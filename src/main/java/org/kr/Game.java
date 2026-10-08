@@ -1466,20 +1466,23 @@ public class Game implements Runnable {
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
             boolean oob = chk_plyr_OOB_C87A(block, ix);
             // $C853 JR NC,$C86D   ; plyr_OOB
-            // @label=loc_C855
-            if(!oob) plyr_OOB_C86D(block, ix);
-            else loc_C855(block, ix) ;
+            // @label=plyr_OOB
+            if(oob && block.getS(ix + 0x0B) > 0) block.set(ix + 0x0B, 0);
+            loc_C855(block, ix) ;
         }
     }
 
     private boolean chk_plyr_OOB_C87A(DataBlock block, int ix) {
-        // TODO: implement
-        return false;
-    }
+        int roomSizeX = variables.getU(0x5BAB);
+        int roomSizeY = variables.getU(0x5BAC);
+        int xMax = roomSizeX - block.getU(ix + 0x04);
+        int yMax = roomSizeY - block.getU(ix + 0x05);
 
-    private void plyr_OOB_C86D(DataBlock block, int ix) {
-        if(block.getS(ix + 0x0B) > 0) block.set(ix + 0x0B, 0);
-        loc_C855(block, ix);
+        int xCalc = Math.abs(block.getU(ix + 0x01) - 0x80);
+        int yCalc = Math.abs(block.getU(ix + 0x02) - 0x80);
+
+        // True if player is outside the room (entering or exitin
+        return xCalc > xMax || yCalc > yMax;
     }
 
     private void loc_C855(DataBlock block, int ix) {
@@ -1511,7 +1514,7 @@ public class Game implements Runnable {
         //$C9DC CALL $CA70     ;
         handle_exit_screen_CA70(block, ix);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
-        if(!exitingScreen && block.getU(ix+1)!=0xFF && block.getU(ix+2)!=0xFF) {
+        if(!exitingScreen) {
             add_dXYZ_C706(block, ix);
             if (block.isSet(2, ix + 0x0C)) {
                 int tmpDz = variables.getS(0x5BC1);
@@ -1736,6 +1739,9 @@ public class Game implements Runnable {
     }
 
     private void add_dXYZ_C706(DataBlock block, int ix) {
+        // skip this when entering room
+        if(block.getU(ix + 0x01)==0xFF || block.getU(ix + 0x02)==0xFF) return;
+
         block.set(ix + 0x01, block.getU(ix + 0x01) + block.getS(ix + 0x09));
         block.set(ix + 0x02, block.getU(ix + 0x02) + block.getS(ix + 0x0A));
         block.set(ix + 0x03, block.getU(ix + 0x03) + block.getS(ix + 0x0B));
