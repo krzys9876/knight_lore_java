@@ -1478,16 +1478,16 @@ public class Game implements Runnable {
     }
 
     private void plyr_OOB_C86D(DataBlock block, int ix) {
-        if(block.getS(ix + 0x08) < 0) block.set(ix + 0x0B, 0);
-        move_player_C9A1(block, ix);
+        if(block.getS(ix + 0x0B) > 0) block.set(ix + 0x0B, 0);
+        loc_C855(block, ix);
     }
 
     private void loc_C855(DataBlock block, int ix) {
-        block.set(ix, block.getWithBitSet(1,ix + 0x27));
+        block.setBit(1, ix + 0x27);
         move_player_C9A1(block, ix);
-        block.set(ix, block.getWithBitReset(2, ix + 0x27));
-        int a = block.getU(ix + 0x0C);
-        if(a>=0x10) block.set(ix + 0x0C, a-0x10);
+        block.resetBit(1,ix + 0x27);
+        int flags = block.getU(ix + 0x0C);
+        if(flags>=0x10) block.set(ix + 0x0C, flags-0x10); // decrement entering screen counter (upper 4 bits)
         set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -1585,6 +1585,7 @@ public class Game implements Runnable {
             IO.println("EXIT: "+currentScreen+" -> "+newScreen);
             exitingScreen = true; //TODO: rethink if this is the correct way to flag this
             block.set(ix + 0x08, newScreen);
+            block.set(ix + 0x0C, block.getU(ix + 0x0C) | 0x30);
             copyPlayerData();
             byte_D171.set(0xD171, plyr_spr_1_scratchpad_D161.getU(0xD161));
             byte_D191.set(0xD191, plyr_spr_2_scratchpad_D181.getU(0xD181));
@@ -2332,10 +2333,40 @@ public class Game implements Runnable {
         int x = graphic_objs_tbl_5C08.getU(ix + 1);
         if(x == 0) {
             // @label=enter_arch_e
-
+            IO.println("enter_arch_e");
+            adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0x37);
+            int a = roomSizeX + 0x80 + graphic_objs_tbl_5C08.getU(ix + 4);
+            graphic_objs_tbl_5C08.set(ix + 1, a);
+            copy_spr_1_xy_2_D34D(ix);
         }
         //TODO: implement
 
+    }
+
+    private void copy_spr_1_xy_2_D34D(int ix) {
+        graphic_objs_tbl_5C08.setBit(4, ix + 0x07);
+        graphic_objs_tbl_5C08.setBit(4, ix + 0x27);
+        graphic_objs_tbl_5C08.set(ix + 0x21, graphic_objs_tbl_5C08.getU(ix + 1));
+        graphic_objs_tbl_5C08.set(ix + 0x22, graphic_objs_tbl_5C08.getU(ix + 2));
+    }
+
+    private void adjust_plyr_Z_for_arch_D38C(DataBlock block, int ix, int c) {
+        int iy = 0x5C88;
+        int de = 0x40;
+        for(int b=0; b<4; b++) {
+            if(graphic_objs_tbl_5C08.getU(iy) < 0x06) { // is arch
+                // Arches are recognized by sum of their coordinates (8-bit unsigned, meaning & 0xFF or module 256)
+                int xy = (graphic_objs_tbl_5C08.getU(iy + 0x01)+graphic_objs_tbl_5C08.getU(iy + 0x02)) & 0xFF;
+                if(xy == c) {
+                    // @label=adj_plyr_Z
+                    int archZ = graphic_objs_tbl_5C08.getU(iy + 0x03);
+                    block.set(ix + 0x03, archZ);
+                    block.set(ix + 0x23, archZ + 0x0C);
+                    IO.println("Z adjusted");
+                }
+            }
+            iy+=de;
+        }
     }
 
     private void flag_room_visited_D219() {
