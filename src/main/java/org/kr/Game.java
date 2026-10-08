@@ -1125,8 +1125,7 @@ public class Game implements Runnable {
 
     private void renderOne(int de, RenderStack renderList) {
         int objectLoc = objects_to_draw_CE8B.getU(de) * 32 + graphic_objs_tbl_5C08.start;
-        calc_pixel_XY_D6C9(graphic_objs_tbl_5C08, objectLoc);
-        print_sprite_D718(graphic_objs_tbl_5C08, objectLoc);
+        if(calc_pixel_XY_D6C9(graphic_objs_tbl_5C08, objectLoc)) print_sprite_D718(graphic_objs_tbl_5C08, objectLoc);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
         variables.set(0x5BBE, variables.getU(0x5BBE) + 1);
         renderList.reset();
@@ -2159,8 +2158,7 @@ public class Game implements Runnable {
         for(int i=from;i<from+cnt;i++) {
             int ix = block.start + i*32;
             if(block.getU(ix)!=0) {
-                calc_pixel_XY_D6C9(block, ix);
-                print_sprite_D718(block, ix);
+                if(calc_pixel_XY_D6C9(block, ix)) print_sprite_D718(block, ix);
             }
         }
     }
@@ -2402,7 +2400,7 @@ public class Game implements Runnable {
         block.set(ix + 0x1f, pixelY);
     }
 
-    private void calc_pixel_XY_D6C9(DataBlock block, int ix) {
+    private boolean calc_pixel_XY_D6C9(DataBlock block, int ix) {
         int x = block.getU(ix + 0x01);
         x = x + block.getU(ix + 0x02);
         x = x - 0x80;
@@ -2416,9 +2414,8 @@ public class Game implements Runnable {
         y = y - 0x68;
         y = y + block.getS(ix + 0x13);
         block.set(ix + 0x1b, y);
-        // TODO: implement:
         // $D6EC CP $C0         ; bottom line of screen?
-        // $D6EE RET            ;
+        return y < 0xC0; // 192
     }
 
     private void set_both_deadly_flags_B85C(DataBlock block, int ix) {
