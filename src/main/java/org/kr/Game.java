@@ -299,7 +299,8 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int id = 1;
-            int id=-1;
+            //int id=-1;
+            int id = 249;
 
 
             init_start_location_D1B1(id);
@@ -587,6 +588,8 @@ public class Game implements Runnable {
         // off bottom of screen?
         if(y + metadata.getU(ix + 0x19)>0xC0) metadata.set(ix + 0x19, 0xC0 - y);
         de ++;
+
+        if(y > 191 || x > 255) return; // do not attempt do draw out of screen
         int bc = calc_vidbuf_addr_D811(y, x);
 
         if(xOffset == 0) {
