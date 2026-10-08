@@ -1510,7 +1510,8 @@ public class Game implements Runnable {
         adj_for_out_of_bounds_CB45(block, ix);
         //$C9DC CALL $CA70     ;
         handle_exit_screen_CA70(block, ix);
-        if(!exitingScreen) {
+        // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
+        if(!exitingScreen && block.getU(ix+1)!=0xFF && block.getU(ix+2)!=0xFF) {
             add_dXYZ_C706(block, ix);
             if (block.isSet(2, ix + 0x0C)) {
                 int tmpDz = variables.getS(0x5BC1);
@@ -1580,6 +1581,7 @@ public class Game implements Runnable {
         };
 
         if(currentScreen!=newScreen) {
+            // @label=exit_screen
             int grNo = block.getU(ix);
             if(grNo - 0x10 > 0x40) return;
             IO.println("EXIT: "+currentScreen+" -> "+newScreen);
@@ -1624,20 +1626,23 @@ public class Game implements Runnable {
         int playerX = block.getU(ix + 0x01) + block.getS(ix + 0x09) + block.getU(ix + 0x04);
         if(oldRoomSizeX < playerX) return currentScreen;
 
-        block.set(ix + 0x01, 0); // x=0
+        block.set(ix + 0x01, 0); // x=0 - used later when determining which arch the player enters the room
         //@label=screen_e_w
         int newScreen = ((currentScreen & 0x0F) - 1) | (currentScreen & 0xF0); // do not change row
         return newScreen;
-
-        //TODO: implement
-
     }
 
     private int screen_east_CAF3(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        //TODO: implement
         IO.println("screen_east_CAF3");
         int currentScreen = block.getU(ix + 0x08);
-        return currentScreen;
+        oldRoomSizeX = 0x80 + oldRoomSizeX;
+        int playerX = block.getU(ix + 0x01) + block.getS(ix + 0x09) - block.getU(ix + 0x04);
+        if(oldRoomSizeX > playerX) return currentScreen;
+
+        block.set(ix + 0x01, 0xFF); // x=0xFF
+        //@label=screen_e_w
+        int newScreen = ((currentScreen & 0x0F) + 1) | (currentScreen & 0xF0); // do not change row
+        return newScreen;
     }
 
     private int screen_north_CB0E(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
@@ -2336,6 +2341,13 @@ public class Game implements Runnable {
             IO.println("enter_arch_e");
             adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0x37);
             int a = roomSizeX + 0x80 + graphic_objs_tbl_5C08.getU(ix + 4);
+            graphic_objs_tbl_5C08.set(ix + 1, a);
+            copy_spr_1_xy_2_D34D(ix);
+        } else if(x == 0xFF) {
+            // @label=enter_arch_w
+            IO.println("enter_arch_w");
+            adjust_plyr_Z_for_arch_D38C(graphic_objs_tbl_5C08, ix,0xAE);
+            int a = 0x80 - roomSizeX - graphic_objs_tbl_5C08.getU(ix + 4);
             graphic_objs_tbl_5C08.set(ix + 1, a);
             copy_spr_1_xy_2_D34D(ix);
         }
