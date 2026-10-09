@@ -1530,17 +1530,17 @@ public class Game implements Runnable {
         int flags2 = block.getU(ix + 0x0C);
         flags2 &= 0xF8; // ; clear X,Y,Z OOB
         block.set(ix + 0x0C, flags2);
-        int dxAdj = block.getS(ix + 0x09); // C
-        int dyAdj = block.getS(ix + 0x0A); // L
         int dzAdj = block.getS(ix + 0x0B); // H
         if(dzAdj != 0) {
             dzAdj = adj_dZ_for_out_of_bounds_CA5A(block, ix);
-            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dxAdj, dyAdj, dzAdj);
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, 0, 0, dzAdj);
         }
+        int dxAdj = block.getS(ix + 0x09); // C
         if(dxAdj != 0) {
             dxAdj = adj_dX_for_out_of_bounds_CCDD(block, ix);
-            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(block, ix, dxAdj, dyAdj, dzAdj);
+            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(block, ix, dxAdj, 0, dzAdj);
         }
+        int dyAdj = block.getS(ix + 0x0A); // L
         if(dyAdj != 0) {
             dyAdj = adj_dY_for_out_of_bounds_CD08(block, ix);
             if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(block, ix, dxAdj, dyAdj, dzAdj);
@@ -1695,7 +1695,8 @@ public class Game implements Runnable {
         int objZ = block.getU(ix + 0x03);
         int thisZ = block.getU(iy + 0x03);
         int objH = block.getU(ix + 0x06);
-        return Math.abs(objZ + dzAdj - thisZ) - (objH) < 0;
+        int thisH = block.getU(iy + 0x06);
+        return Math.abs(objZ + dzAdj - thisZ) - (Math.min(objH, thisH)) < 0;
     }
 
     private void setDestroyedFlags(DataBlock block, int ix, int iy) {
@@ -1727,9 +1728,9 @@ public class Game implements Runnable {
                         if (movable) {
                             if (block.getS(ix + 0x09) == 0) block.set(ix + 0x09, block.getS(iy + 0x09)); //copy dX
                             if (block.getS(ix + 0x0A) == 0) block.set(ix + 0x0A, block.getS(iy + 0x0A)); //copy dY
-                            dzAdj = adj_d_for_out_of_bounds_CA89(dzAdj);
-                            if (dzAdj == 0) return dzAdj;
                         }
+                        dzAdj = adj_d_for_out_of_bounds_CA89(dzAdj);
+                        if (dzAdj == 0) return dzAdj;
                     }
                 }
             }
@@ -1753,9 +1754,9 @@ public class Game implements Runnable {
                         boolean movable = block.isSet(2, ix + 0x07);
                         if(movable) {
                             block.set(iy + 0x09, block.getS(ix + 0x09)); //copy dX
-                            dxAdj = adj_d_for_out_of_bounds_CA89(dxAdj);
-                            if (dxAdj == 0) return dxAdj;
                         }
+                        dxAdj = adj_d_for_out_of_bounds_CA89(dxAdj);
+                        if (dxAdj == 0) return dxAdj;
                     }
                 }
 
@@ -1780,9 +1781,10 @@ public class Game implements Runnable {
                         boolean movable = block.isSet(2, ix + 0x07);
                         if(movable) {
                             block.set(iy + 0x0A, block.getS(ix + 0x0A)); //copy dY
-                            dyAdj = adj_d_for_out_of_bounds_CA89(dyAdj);
-                            if (dyAdj == 0) return dyAdj;
                         }
+                        dyAdj = adj_d_for_out_of_bounds_CA89(dyAdj);
+                        if (dyAdj == 0) return dyAdj;
+
                     }
                 }
             }
@@ -1841,7 +1843,7 @@ public class Game implements Runnable {
             if (a <= 0) a = -a;
             a += block.getU(ix + 0x05);
             if(a < roomSizeY) return dy;
-            block.setBit(0, ix + 0x0C);
+            block.setBit(1, ix + 0x0C);
             dy = adj_d_for_out_of_bounds_CA89(dy);
         }
     }
