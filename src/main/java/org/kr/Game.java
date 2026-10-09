@@ -1699,7 +1699,7 @@ public class Game implements Runnable {
         int thisZ = block.getU(iy + 0x03);
         int objH = block.getU(ix + 0x06);
         int thisH = block.getU(iy + 0x06);
-        return Math.abs(objZ + dzAdj - thisZ) - (Math.min(objH, thisH)) < 0;
+        return Math.abs(objZ + dzAdj - thisZ) - (objZ < thisZ ? objH : thisH) < 0;
     }
 
     private void setDestroyedFlags(DataBlock block, int ix, int iy) {
@@ -1754,10 +1754,8 @@ public class Game implements Runnable {
 
                         setDestroyedFlags(block, ix, iy);
 
-                        boolean movable = block.isSet(2, ix + 0x07);
-                        if(movable) {
-                            block.set(iy + 0x09, block.getS(ix + 0x09)); //copy dX
-                        }
+                        boolean moveable = block.isSet(2, iy + 0x07);
+                        if(moveable) block.set(iy + 0x09, block.getS(ix + 0x09)); //copy dX
                         dxAdj = adj_d_for_out_of_bounds_CA89(dxAdj);
                         if (dxAdj == 0) return dxAdj;
                     }
@@ -1781,10 +1779,8 @@ public class Game implements Runnable {
 
                         setDestroyedFlags(block, ix, iy);
 
-                        boolean movable = block.isSet(2, ix + 0x07);
-                        if(movable) {
-                            block.set(iy + 0x0A, block.getS(ix + 0x0A)); //copy dY
-                        }
+                        boolean moveable = block.isSet(2, iy + 0x07);
+                        if(moveable) block.set(iy + 0x0A, block.getS(ix + 0x0A)); //copy dY
                         dyAdj = adj_d_for_out_of_bounds_CA89(dyAdj);
                         if (dyAdj == 0) return dyAdj;
 
