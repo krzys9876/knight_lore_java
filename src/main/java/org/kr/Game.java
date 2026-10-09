@@ -302,7 +302,7 @@ public class Game implements Runnable {
             //IO.println("Room id: "+id);
             //int id = 1;
             //int id=-1;
-            int id = 0x0B;
+            int id = 0x44;
 
 
             init_start_location_D1B1(id);
@@ -1496,14 +1496,17 @@ public class Game implements Runnable {
     private void move_player_C9A1(DataBlock block, int ix) {
         if(variables.getU(0x5BC4)!=0) block.set(ix + 0x0B, 2); // D (IX+$0B),$02 ; dZ=2
         int flags = block.getU(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
-        boolean jumping = block.isSet(3, ix + 0x0C);
-        if(jumping || ((flags & 0xF0) != 0) || variables.isSet(2, 0x5BB5)) calc_plyr_dXY_C9FB(block, ix);
+        boolean jumping = DataBlock.isSetS(3, flags);
+        boolean forward = variables.isSet(2, 0x5BB5);
+        if(jumping || ((flags & 0xF0) != 0) || forward) calc_plyr_dXY_C9FB(block, ix);
 
         int dz = block.getS(ix + 0x0B);
         if(dz < 0) dz -= 2;
-        else
-            if(jumping) dz -= 1;
+        else {
+            boolean jumpingKey = variables.isSet(3, 0x5BB5);
+            if (jumpingKey) dz -= 1;
             else dz -= 2;
+        }
         block.set(ix + 0x0B, dz);
         variables.set(0x5BC1, dz);
         //$C9D6 CALL M,$B451   ; ignore audio
@@ -1970,7 +1973,7 @@ public class Game implements Runnable {
         if(!jump || enteringScreen || jumping) return;
         int dz = block.getS(ix + 0x0B);
         dz++;
-        if(dz < -1) return;
+        if(dz < 0) return;
         block.setBit(3, ix + 0x0C); // ; flag jumping
         block.set(ix + 0x0B, 8);
     }
