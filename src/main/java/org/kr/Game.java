@@ -957,7 +957,7 @@ public class Game implements Runnable {
         update_screen_D56F(false);
         // @label=reset_objs_wipe_flag
         for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32)
-            graphic_objs_tbl_5C08.setBit(5, addr); // c$B090 RES 5,(HL)    ;
+            graphic_objs_tbl_5C08.resetBit(5, addr); // c$B090 RES 5,(HL)    ;
         return false;
     }
 
