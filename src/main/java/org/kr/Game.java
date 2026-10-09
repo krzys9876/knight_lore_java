@@ -300,7 +300,7 @@ public class Game implements Runnable {
             //IO.println("Room id: "+id);
             //int id = 1;
             //int id=-1;
-            int id = 249;
+            int id =253;
 
 
             init_start_location_D1B1(id);
@@ -1231,7 +1231,7 @@ public class Game implements Runnable {
         variables.set(0x5BB1, 1); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
-            int incDays = incBCD(variables.getU(0x5BB9));
+            int incDays = incBCD(variables.getU(0x5BB9)) % 0xA0; // wrap days at 99
             variables.set(0x5BB9, incDays);
             if(incDays == MAX_DAYS_BCD+1) game_over_BA22();
             print_days_BC66();
@@ -1362,7 +1362,7 @@ public class Game implements Runnable {
                     if((Math.abs(archCentreX - objX) < centreX) && (Math.abs(archCentreY - objY) < centreY) &&
                             (Math.abs(archCentreZ - objZ) < 4)) {
                         // C7F5 SET 0,(IY+$07)
-                        IO.println("is near");
+                        // IO.println("is near");
                         graphic_objs_tbl_5C08.setBit(0, iy + 0x07);
                     }
                 }
@@ -1583,7 +1583,7 @@ public class Game implements Runnable {
             // @label=exit_screen
             int grNo = block.getU(ix);
             if(grNo - 0x10 > 0x40) return;
-            IO.println("EXIT: "+currentScreen+" -> "+newScreen);
+            IO.println(String.format("EXIT: %d (%02X) -> %d (%02X)",currentScreen,currentScreen,newScreen,newScreen));
             exitingScreen = true; //TODO: rethink if this is the correct way to flag this
             block.set(ix + 0x08, newScreen);
             block.set(ix + 0x0C, block.getU(ix + 0x0C) | 0x30);
@@ -1808,7 +1808,7 @@ public class Game implements Runnable {
             c |= 0b10000;
         if(c!=variables.getU(0x5BB5)) {
             variables.set(0x5BB5, c);
-            IO.println("Pressed: "+Integer.toBinaryString(c));
+            //IO.println("Pressed: "+Integer.toBinaryString(c));
         }
     }
 
