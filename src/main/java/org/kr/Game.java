@@ -302,7 +302,7 @@ public class Game implements Runnable {
             //IO.println("Room id: "+id);
             //int id = 1;
             //int id=-1;
-            int id = 0xFD;
+            int id = 0x0B;
 
 
             init_start_location_D1B1(id);
@@ -1817,13 +1817,11 @@ public class Game implements Runnable {
 
         int x = block.getU(ix + 0x01);
         while(true) {
-            // TODO: verify why there is infinite loop after changing rooms
-            int a = x + dx - 0x80;
-            if (a <= 0) a = -a;
-            a += block.getU(ix + 0x04);
+            int a = Math.abs(((x + dx) & 0xFF) - 0x80) + block.getU(ix + 0x04);
             if(a < roomSizeX) return dx;
             block.setBit(0, ix + 0x0C);
             dx = adj_d_for_out_of_bounds_CA89(dx);
+            if(dx == 0) return dx;
         }
     }
 
@@ -1839,12 +1837,11 @@ public class Game implements Runnable {
 
         int y = block.getU(ix + 0x02);
         while(true) {
-            int a = y + dy - 0x80;
-            if (a <= 0) a = -a;
-            a += block.getU(ix + 0x05);
+            int a = Math.abs(((y + dy) & 0xFF) - 0x80) + block.getU(ix + 0x05);
             if(a < roomSizeY) return dy;
             block.setBit(1, ix + 0x0C);
             dy = adj_d_for_out_of_bounds_CA89(dy);
+            if(dy == 0) return dy;
         }
     }
 
