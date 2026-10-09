@@ -1481,7 +1481,7 @@ public class Game implements Runnable {
         int yCalc = Math.abs(block.getU(ix + 0x02) - 0x80);
 
         // True if player is outside the room (entering or exitin
-        return xCalc > xMax || yCalc > yMax;
+        return xCalc >= xMax || yCalc >= yMax;
     }
 
     private void loc_C855(DataBlock block, int ix) {
@@ -1517,7 +1517,7 @@ public class Game implements Runnable {
             add_dXYZ_C706(block, ix);
             if (block.isSet(2, ix + 0x0C)) {
                 int tmpDz = variables.getS(0x5BC1);
-                if (tmpDz <= 0) block.resetBit(3, ix + 0x0C);
+                if (tmpDz < 0) block.resetBit(3, ix + 0x0C);
             }
             block.set(ix + 0x09, 0);
             block.set(ix + 0x0A, 0);
