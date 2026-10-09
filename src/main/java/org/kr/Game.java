@@ -1699,7 +1699,9 @@ public class Game implements Runnable {
         int thisZ = block.getU(iy + 0x03);
         int objH = block.getU(ix + 0x06);
         int thisH = block.getU(iy + 0x06);
-        return Math.abs(objZ + dzAdj - thisZ) - (objZ < thisZ ? objH : thisH) < 0;
+        int check = objZ + dzAdj - thisZ;
+        int d = check > 0 ? thisH : objH;
+        return Math.abs(check) - d < 0;
     }
 
     private void setDestroyedFlags(DataBlock block, int ix, int iy) {
