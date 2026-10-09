@@ -21,6 +21,8 @@ public class Game implements Runnable {
     private final int SUN_TICK_PER_GAME_TICK = 5;
     private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
+    private final boolean skipDeath = true;
+
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
     private final VideoMemoryScreen mainMemory;
@@ -1697,13 +1699,15 @@ public class Game implements Runnable {
     }
 
     private void setDestroyedFlags(DataBlock block, int ix, int iy) {
+        // TODO: replace this with proper configuration
+        if(skipDeath) return;
+
         int flagsObj1 = block.getU(ix + 0x0D);
         int flagsObj2 = block.getU(iy + 0x0D);
         int obj2DestroyedFlags = ((flagsObj1 >> 1) & 0x40) | flagsObj2; // bit 7->6
         block.set(iy + 0x0D, obj2DestroyedFlags);
         int obj1DestroyedFlags = (obj2DestroyedFlags << 1) & 0x40 | flagsObj1; // bit 5->6
         block.set(ix + 0x0D, obj1DestroyedFlags);
-
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
