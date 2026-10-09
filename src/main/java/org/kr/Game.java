@@ -17,8 +17,8 @@ public class Game implements Runnable {
     private int sunTick = 0;
     private long tickNo = 0;
     private final long REPAINT_MS = 50;
-    private final long DELAY_MS = 100;
-    private final int SUN_TICK_PER_GAME_TICK = 5;
+    private final long DELAY_MS = 90;
+    private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
     private final boolean skipDeath = true;
@@ -302,7 +302,7 @@ public class Game implements Runnable {
             //IO.println("Room id: "+id);
             //int id = 1;
             //int id=-1;
-            int id = 0x44;
+            int id = 0xB3;
 
 
             init_start_location_D1B1(id);
