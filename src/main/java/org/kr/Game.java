@@ -300,7 +300,7 @@ public class Game implements Runnable {
             //IO.println("Room id: "+id);
             //int id = 1;
             //int id=-1;
-            int id =253;
+            int id = 0xFD;
 
 
             init_start_location_D1B1(id);
@@ -1528,17 +1528,17 @@ public class Game implements Runnable {
         int flags2 = block.getU(ix + 0x0C);
         flags2 &= 0xF8; // ; clear X,Y,Z OOB
         block.set(ix + 0x0C, flags2);
-        int dzAdj = block.getS(ix + 0x0B);
+        int dxAdj = block.getS(ix + 0x09); // C
+        int dyAdj = block.getS(ix + 0x0A); // L
+        int dzAdj = block.getS(ix + 0x0B); // H
         if(dzAdj != 0) {
             dzAdj = adj_dZ_for_out_of_bounds_CA5A(block, ix);
-            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dzAdj);
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, dxAdj, dyAdj, dzAdj);
         }
-        int dxAdj = block.getS(ix + 0x09);
         if(dxAdj != 0) {
             dxAdj = adj_dX_for_out_of_bounds_CCDD(block, ix);
             if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(block, ix, dxAdj);
         }
-        int dyAdj = block.getS(ix + 0x0A);
         if(dyAdj != 0) {
             dyAdj = adj_dY_for_out_of_bounds_CD08(block, ix);
             if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(block, ix, dyAdj);
@@ -1660,8 +1660,71 @@ public class Game implements Runnable {
         return newScreen;
     }
 
-    private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dzAdj) {
-        //TODO: implement
+    private boolean is_object_not_ignored_B538(DataBlock block, int iy) {
+        return block.getU(iy) != 0 && !block.isSet(1, iy + 0x07);
+    }
+
+    //; abs(objX+newdX-thisX)-(objW+thisW)
+    private boolean do_objs_intersect_on_x_CC9D(DataBlock block, int ix, int iy, int dxAdj) {
+        // dxAdj - C register
+        // ix: obj, iy: this
+        int objW = block.getU(ix + 0x04);
+        int thisW = block.getU(iy + 0x04);
+        int objX = block.getU(ix + 0x01);
+        int thisX = block.getU(iy + 0x01);
+        return Math.abs(objX + dxAdj - thisX) - (objW + thisW) < 0;
+    }
+
+    //; (objY+l-thisY)-(objD+thisD) - note: there is an error in comment in original source
+    private boolean do_objs_intersect_on_y_CCB2(DataBlock block, int ix, int iy, int dyAdj) {
+        // dyAdj - L register
+        // ix: obj, iy: this
+        int objD = block.getU(ix + 0x05);
+        int thisD = block.getU(iy + 0x05);
+        int objY = block.getU(ix + 0x02);
+        int thisY = block.getU(iy + 0x02);
+        return Math.abs(objY + dyAdj - thisY) - (objD + thisD) < 0;
+    }
+
+    //; (objZ+H-thisZ)-(objH or thisH)
+    private boolean do_objs_intersect_on_z_CCC7(DataBlock block, int ix, int iy, int dzAdj) {
+        // dzAdj - H register
+        // ix: obj, iy: this
+        int objZ = block.getU(ix + 0x03);
+        int thisZ = block.getU(iy + 0x03);
+        int objH = block.getU(ix + 0x06);
+        return Math.abs(objZ + dzAdj - thisZ) - (objH) < 0;
+    }
+
+    private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
+        int iy = graphic_objs_tbl_5C08.start;
+        for(int i=0; i<0x28; i++) {
+            if(is_object_not_ignored_B538(block, iy)) {
+                //IO.println("Analyze: "+i+":"+block.getU(iy));
+                if (do_objs_intersect_on_x_CC9D(block, ix, iy, dxAdj) && do_objs_intersect_on_y_CCB2(block, ix, iy, dyAdj)) {
+                    while (do_objs_intersect_on_z_CCC7(block, ix, iy, dzAdj)) {
+                        //IO.println("Intersects " + i + ":" + block.getU(iy));
+                        block.setBit(2, ix + 0x0C); // set Z OOB
+                        int flagsObj1 = block.getU(ix + 0x0D);
+                        int flagsObj2 = block.getU(iy + 0x0D);
+                        int obj2DestroyedFlags = ((flagsObj1 >> 1) & 0x40) | flagsObj2; // bit 7->6
+                        block.set(iy + 0x0D, obj2DestroyedFlags);
+                        int obj1DestroyedFlags = (obj2DestroyedFlags << 1) & 0x40 | flagsObj1; // bit 5->6
+                        block.set(ix + 0x0D, obj1DestroyedFlags);
+
+                        block.setBit(3, iy + 0x0D); //triggered (falling, collapsing blocks)
+                        boolean movable = block.isSet(2, ix + 0x07);
+                        if (movable) {
+                            if (block.getS(ix + 0x09) == 0) block.set(ix + 0x09, block.getS(iy + 0x09)); //copy dX
+                            if (block.getS(ix + 0x0A) == 0) block.set(ix + 0x0A, block.getS(iy + 0x0A)); //copy dY
+                            dzAdj = adj_d_for_out_of_bounds_CA89(dzAdj);
+                            if (dzAdj == 0) return dzAdj;
+                        }
+                    }
+                }
+            }
+            iy += 0x20;
+        }
         return dzAdj;
     }
 
