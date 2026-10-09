@@ -1700,7 +1700,7 @@ public class Game implements Runnable {
         int objH = block.getU(ix + 0x06);
         int thisH = block.getU(iy + 0x06);
         int check = objZ + dzAdj - thisZ;
-        int d = check > 0 ? thisH : objH;
+        int d = check >= 0 ? thisH : objH;
         return Math.abs(check) - d < 0;
     }
 
