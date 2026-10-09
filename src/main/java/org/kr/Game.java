@@ -1537,11 +1537,11 @@ public class Game implements Runnable {
         }
         if(dxAdj != 0) {
             dxAdj = adj_dX_for_out_of_bounds_CCDD(block, ix);
-            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(block, ix, dxAdj);
+            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(block, ix, dxAdj, dyAdj, dzAdj);
         }
         if(dyAdj != 0) {
             dyAdj = adj_dY_for_out_of_bounds_CD08(block, ix);
-            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(block, ix, dyAdj);
+            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(block, ix, dxAdj, dyAdj, dzAdj);
         }
 
         block.resetBit(1, ix + 0x07);
@@ -1696,6 +1696,16 @@ public class Game implements Runnable {
         return Math.abs(objZ + dzAdj - thisZ) - (objH) < 0;
     }
 
+    private void setDestroyedFlags(DataBlock block, int ix, int iy) {
+        int flagsObj1 = block.getU(ix + 0x0D);
+        int flagsObj2 = block.getU(iy + 0x0D);
+        int obj2DestroyedFlags = ((flagsObj1 >> 1) & 0x40) | flagsObj2; // bit 7->6
+        block.set(iy + 0x0D, obj2DestroyedFlags);
+        int obj1DestroyedFlags = (obj2DestroyedFlags << 1) & 0x40 | flagsObj1; // bit 5->6
+        block.set(ix + 0x0D, obj1DestroyedFlags);
+
+    }
+
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphic_objs_tbl_5C08.start;
         for(int i=0; i<0x28; i++) {
@@ -1705,12 +1715,8 @@ public class Game implements Runnable {
                     while (do_objs_intersect_on_z_CCC7(block, ix, iy, dzAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         block.setBit(2, ix + 0x0C); // set Z OOB
-                        int flagsObj1 = block.getU(ix + 0x0D);
-                        int flagsObj2 = block.getU(iy + 0x0D);
-                        int obj2DestroyedFlags = ((flagsObj1 >> 1) & 0x40) | flagsObj2; // bit 7->6
-                        block.set(iy + 0x0D, obj2DestroyedFlags);
-                        int obj1DestroyedFlags = (obj2DestroyedFlags << 1) & 0x40 | flagsObj1; // bit 5->6
-                        block.set(ix + 0x0D, obj1DestroyedFlags);
+
+                        setDestroyedFlags(block, ix, iy);
 
                         block.setBit(3, iy + 0x0D); //triggered (falling, collapsing blocks)
                         boolean movable = block.isSet(2, ix + 0x07);
@@ -1728,13 +1734,56 @@ public class Game implements Runnable {
         return dzAdj;
     }
 
-    private int adj_dX_for_obj_intersect_CB9A(DataBlock block, int ix, int dxAdj) {
-        //TODO: implement
+    private int adj_dX_for_obj_intersect_CB9A(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
+        int iy = graphic_objs_tbl_5C08.start;
+        for(int i=0; i<0x28; i++) {
+            if(is_object_not_ignored_B538(block, iy)) {
+                //IO.println("Analyze: "+i+":"+block.getU(iy));
+                if(do_objs_intersect_on_y_CCB2(block, ix, iy, dyAdj) && do_objs_intersect_on_z_CCC7(block, ix, iy, dzAdj)) {
+                    while(do_objs_intersect_on_x_CC9D(block, ix, iy, dxAdj)) {
+                        //IO.println("Intersects " + i + ":" + block.getU(iy));
+                        block.setBit(0, ix + 0x0C); // set X OOB
+
+                        setDestroyedFlags(block, ix, iy);
+
+                        boolean movable = block.isSet(2, ix + 0x07);
+                        if(movable) {
+                            block.set(iy + 0x09, block.getS(ix + 0x09)); //copy dX
+                            dxAdj = adj_d_for_out_of_bounds_CA89(dxAdj);
+                            if (dxAdj == 0) return dxAdj;
+                        }
+                    }
+                }
+
+            }
+            iy += 0x20;
+        }
         return dxAdj;
     }
 
-    private int adj_dY_for_obj_intersect_CBE9(DataBlock block, int ix, int dyAdj) {
-        //TODO: implement
+    private int adj_dY_for_obj_intersect_CBE9(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
+        int iy = graphic_objs_tbl_5C08.start;
+        for(int i=0; i<0x28; i++) {
+            if(is_object_not_ignored_B538(block, iy)) {
+                //IO.println("Analyze: "+i+":"+block.getU(iy));
+                if(do_objs_intersect_on_x_CC9D(block, ix, iy, dxAdj) && do_objs_intersect_on_z_CCC7(block, ix, iy, dzAdj)) {
+                    while(do_objs_intersect_on_y_CCB2(block, ix, iy, dyAdj)) {
+                        //IO.println("Intersects " + i + ":" + block.getU(iy));
+                        block.setBit(1, ix + 0x0C); // set Y OOB
+
+                        setDestroyedFlags(block, ix, iy);
+
+                        boolean movable = block.isSet(2, ix + 0x07);
+                        if(movable) {
+                            block.set(iy + 0x0A, block.getS(ix + 0x0A)); //copy dY
+                            dyAdj = adj_d_for_out_of_bounds_CA89(dyAdj);
+                            if (dyAdj == 0) return dyAdj;
+                        }
+                    }
+                }
+            }
+            iy += 0x20;
+        }
         return dyAdj;
     }
 
