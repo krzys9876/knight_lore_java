@@ -1352,7 +1352,44 @@ public class Game implements Runnable {
         int z = block.getU(ix + 3);
         block.set(ix + 0x0B, z); // dZ=Z
         chk_plyr_spec_near_arch_C7DB(block, ix, centreY, centreX);
-        // TODO: implement $C785 (check special objects)
+
+        // @label=loc_C785
+        int iy = graphic_objs_tbl_5C08.start; // player
+        for(int objToCheck = 0; objToCheck<4; objToCheck++) {
+            int grNo = block.getU(ix);
+            if(grNo!=0) {
+                boolean autoAdjust = graphic_objs_tbl_5C08.isSet(3, iy + 7);
+                if(autoAdjust) {
+                    if(is_near_to_C7FE(block, ix, iy, 0x0F, 0x0F)) {
+                        IO.println("is near 2");
+                        switch(get_sprite_dir_CA1E(block, ix)) {
+                            case 0, 1: adj_ew_C7B1(block, ix, iy); break;
+                            case 2, 3: adj_ns_C7C4(block, ix, iy); break;
+                        }
+                    }
+                }
+
+            }
+            iy+=0x20;
+        }
+    }
+
+    private void adj_ew_C7B1(DataBlock block, int ix, int iy) {
+        // ix - arch, iy - player
+        int dyArch = block.getU(ix + 0x0A);
+        int yPlayer = block.getU(iy + 0x02);
+        if(dyArch == yPlayer) return;
+        int newDy = (dyArch > yPlayer) ? 1 : -1;
+        block.set(iy + 0x0F, newDy);
+    }
+
+    private void adj_ns_C7C4(DataBlock block, int ix, int iy) {
+        // ix - arch, iy - player
+        int dxArch = block.getU(ix + 0x09);
+        int xPlayer = block.getU(iy + 0x01);
+        if(dxArch == xPlayer) return;
+        int newDx = (dxArch > xPlayer) ? 1 : -1;
+        block.set(iy + 0x0E, newDx);
     }
 
     // centre Y -> H, centre x -> L
