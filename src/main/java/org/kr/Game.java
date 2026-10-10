@@ -1317,7 +1317,7 @@ public class Game implements Runnable {
     }
 
     private void upd_2_4_C73C(DataBlock block, int ix) {
-        boolean hFlip = (block.getU(ix + 0x07) & 0x40) > 0; // BIT 6,(IX+$07)
+        boolean hFlip = block.isSet(6, ix + 0x07); // BIT 6,(IX+$07)
         int centreX, centreY;
         if(hFlip) {
             // LD HL,$FEEF
@@ -1363,25 +1363,30 @@ public class Game implements Runnable {
             if(grNo!=0) {
                 boolean autoAdjust = graphic_objs_tbl_5C08.isSet(3, iy + 7);
                 if(autoAdjust) {
-                    // NOTE: we compare unsigned values - the dX, dY and dZ values are set as temporary variables and contain x, y and z
-                    int archCentreX = block.getU(ix + 0x09);
-                    int archCentreY = block.getU(ix + 0x0A);
-                    int archCentreZ = block.getU(ix + 0x0B);
-                    int objX = graphic_objs_tbl_5C08.getU(iy + 0x01);
-                    int objY = graphic_objs_tbl_5C08.getU(iy + 0x02);
-                    int objZ = graphic_objs_tbl_5C08.getU(iy + 0x03);
-
-                    //@label=is_near_to
-                    if((Math.abs(archCentreX - objX) < centreX) && (Math.abs(archCentreY - objY) < centreY) &&
-                            (Math.abs(archCentreZ - objZ) < 4)) {
+                    if(is_near_to_C7FE(block, ix, iy, centreY, centreX)) {
                         // C7F5 SET 0,(IY+$07)
-                        // IO.println("is near");
+                        IO.println("is near");
                         graphic_objs_tbl_5C08.setBit(0, iy + 0x07);
                     }
                 }
             }
             iy += 0x20;
         }
+    }
+
+    private boolean is_near_to_C7FE(DataBlock block, int ix, int iy, int centreY, int centreX) {
+        //@label=is_near_to
+        // ix - arch, iy - object (player), centreY - H, centreX - L
+        // NOTE: we compare unsigned values - the dX, dY and dZ values are set as temporary variables and contain x, y and z
+        int archCentreX = block.getU(ix + 0x09);
+        int archCentreY = block.getU(ix + 0x0A);
+        int archCentreZ = block.getU(ix + 0x0B);
+        int objX = graphic_objs_tbl_5C08.getU(iy + 0x01);
+        int objY = graphic_objs_tbl_5C08.getU(iy + 0x02);
+        int objZ = graphic_objs_tbl_5C08.getU(iy + 0x03);
+
+        return (Math.abs(archCentreX - objX) < centreX) && (Math.abs(archCentreY - objY) < centreY) &&
+                (Math.abs(archCentreZ - objZ) < 4);
     }
 
     private void upd_3_5_C722(DataBlock block, int ix) {
