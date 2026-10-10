@@ -1281,25 +1281,36 @@ public class Game implements Runnable {
             case 0x3E: upd_62_C4AA(block, ix); break;
             case 0x3F: upd_63_B7A9(block, ix); break;
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(block, ix); break;
-            case 0x52, 0x53, 0x54, 0x55: upd_80_to_83_C5C8(block, ix); break;
+            case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(block, ix); break;
+            case 0x54: upd_84_C4C3(block, ix); break;
+            case 0x55: upd_85_B6B1(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(block, ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
             case 0x67: upd_103_C1AB(block, ix); break;
+            case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(block, ix); break;
+            case 0x6F: upd_111_B95E(block, ix); break;
+            case 0x70, 0x71, 0x72, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(block, ix); break;
+            case 0x77: upd_119_BF3F(block, ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
             case 0x7F: upd_127_BF11(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
+            case 0x83, 0x84, 0x85: upd_131_to_133_B566(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
             case 0x8F: upd_143_B6A2(block, ix); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(block, ix); break;
             case 0x96, 0x97: upd_150_151_B73C(block, ix); break;
+            case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(block, ix); break;
             case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(block, ix); break;
+            case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(block, ix); break;
+            case 0xB0, 0xB1: upd_176_177_B83F(block, ix); break;
             case 0xB2, 0xB3: upd_178_179_B865(block, ix); break;
             case 0xB4, 0xB5: upd_180_181_B80F(block, ix); break;
             case 0xB6, 0xB7: upd_182_183_B5FF(block, ix); break;
+            case 0xB9, 0xBB: upd_185_187_BF37(block, ix); break;
 
             default: IO.println("Not updated: %02x (%d)".formatted(block.getU(ix),block.getU(ix))); break;
         }
@@ -1429,6 +1440,13 @@ public class Game implements Runnable {
         //LD HL,$FEF8   ; -2, -8
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -2); //FE
+    }
+
+    private void upd_131_to_133_B566(DataBlock block, int ix) {
+        //c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); //FC
+        // TODO: implement rest of routine
     }
 
     private void upd_16_to_21_24_to_29_C823(DataBlock block, int ix) {
@@ -2111,6 +2129,20 @@ public class Game implements Runnable {
         // TODO: implement rest of routine
     }
 
+    private void upd_84_C4C3(DataBlock block, int ix) {
+        //LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
+    private void upd_85_B6B1(DataBlock block, int ix) {
+        //LD HL,$F8F0   ; -8, -16
+        block.set(ix + 0x12, -16); //F0
+        block.set(ix + 0x13, -8); //F8
+        // TODO: implement rest of routine
+    }
+
     private void upd_86_87_B7ED(DataBlock block, int ix) {
         // c$C4F2 LD HL,$FCF8   ; -4, -8
         block.set(ix + 0x12, -8); //F8
@@ -2185,6 +2217,37 @@ public class Game implements Runnable {
         // TODO: implement rest of routine
     }
 
+    private void upd_104_to_110_C1F1(DataBlock block, int ix) {
+        //c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); //FC
+        // TODO: implement rest of routine
+    }
+
+    private void upd_111_B95E(DataBlock block, int ix) {
+        // ; invalid
+        // @label=upd_111
+        block.set(ix, 1);
+        // ignore audip
+    }
+
+    private void upd_112_to_118_184_BF2B(DataBlock block, int ix) {
+        //c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); //FC
+
+        block.set(ix, block.getU(ix)+1);
+        // ignore audio
+    }
+
+    private void upd_119_BF3F(DataBlock block, int ix) {
+        //c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); //FC
+
+        upd_111_B95E(block, ix);
+    }
+
     private void upd_120_to_126_BEFE(DataBlock block, int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
@@ -2240,10 +2303,31 @@ public class Game implements Runnable {
         // TODO: implement rest of routine
     }
 
+    private void upd_160_to_163_B8DA(DataBlock block, int ix) {
+        // c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); // FC
+        // TODO: implement rest of routine
+    }
+
     private void upd_164_to_167_B92C(DataBlock block, int ix) {
         // c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); // FC
+        // TODO: implement rest of routine
+    }
+
+    private void upd_168_to_175_B923(DataBlock block, int ix) {
+        // c$C4D8 LD HL,$FCF4   ; -4, -12
+        block.set(ix + 0x12, -12); //F4
+        block.set(ix + 0x13, -4); // FC
+
+        block.set(ix, 0xA0);
+    }
+
+    // NOTE: commented as: not used
+    private void upd_176_177_B83F(DataBlock block, int ix) {
+        upd_12_to_15_C4F2(block, ix);
         // TODO: implement rest of routine
     }
 
@@ -2266,7 +2350,11 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -4); //FC
         // TODO: implement rest of routine
+    }
 
+    private void upd_185_187_BF37(DataBlock block, int ix) {
+        // TODO: implement
+        // TODO: analyze comment about the bug
     }
 
 
