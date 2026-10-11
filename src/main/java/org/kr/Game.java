@@ -2240,7 +2240,7 @@ public class Game implements Runnable {
     }
 
     private void dec_dZ_and_update_XYZ_C700(DataBlock block, int ix) {
-        block.set(ix + 0x0B, block.getU(ix + 0x0B)-1); // ; dec dZ?
+        block.set(ix + 0x0B, block.getS(ix + 0x0B)-1); // ; dec dZ?
         adj_for_out_of_bounds_CB45(block, ix);
         add_dXYZ_C706(block, ix);
 
