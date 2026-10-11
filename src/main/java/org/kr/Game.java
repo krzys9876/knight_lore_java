@@ -899,7 +899,8 @@ public class Game implements Runnable {
     private boolean onscreen_loop_AFBD() {
         // @label=onscreen_loop
         //IO.println("Onscreen loop AFBD");
-        variables.set(0x5BA2, variables.getU(0x5BBC));
+        variables.set(0x5BBC, variables.getU(0x5BA2));
+        variables.set(0x5BA2, (variables.getU(0x5BA2)+1) & 0xFF);
         update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
         if(exitingScreen) return false;
         // loc_B000
@@ -2294,13 +2295,15 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
-        block.set(ix, block.getU(ix)+1); // next sprite
-        set_wipe_and_draw_flags_C692(block, ix);
+        int seed = variables.getU(0x5BA2);
+        if(((seed ^ 0xFF) & 0x01) == 0) block.set(ix, block.getU(ix)+1); // next sprite on odd frames
+        //set_wipe_and_draw_flags_C692(block, ix);
         // TODO: implement rest of routine
     }
 
     private void set_wipe_and_draw_flags_C692(DataBlock block, int ix) {
-        block.set(ix + 7, block.getU(ix + 0x07) | 0x30);
+        // block.set(ix + 7, block.getU(ix + 0x07) | 0x30);
+        // Not used - all frame is redrawn
     }
 
     private void upd_127_BF11(DataBlock block, int ix) {
