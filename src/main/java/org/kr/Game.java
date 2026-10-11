@@ -300,12 +300,13 @@ public class Game implements Runnable {
             variables.set(0x5BBA, 5); // important only when looping over rooms
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
-            //int id = 1;
-            //int id=-1;
-            int id = 0xB3;
+            //int overrideRoomId=-1;
+            int overrideRoomId = 0x14;
+            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = -60; // -S +N
+            int overrideZ = 60; // + only : 60 is a little above upper entrance
 
-
-            init_start_location_D1B1(id);
+            init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
             init_sun_C46D();
             // CALL $C47E    ; randomise special object locations
@@ -789,13 +790,27 @@ public class Game implements Runnable {
         //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
     }
 
-    private void init_start_location_D1B1(int override) {
+    private void init_start_location_D1B1(int override, int overrideWE, int overrideNS, int overrideZ) {
         for(int i=0; i<8; i++)
             plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i,
                     plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i));
         for(int i=0; i<8; i++)
             plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start+i,
                     plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i+8));
+
+        if(overrideWE != 0) {
+            start_loc_1_D169.set(start_loc_1_D169.start + 1, overrideWE);
+            start_loc_2_D189.set(start_loc_2_D189.start + 1, overrideWE);
+        }
+        if(overrideNS != 0) {
+            start_loc_1_D169.set(start_loc_1_D169.start + 2, overrideNS);
+            start_loc_2_D189.set(start_loc_2_D189.start + 2, overrideNS);
+        }
+        if(overrideZ != 0) {
+            plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start + 3, -overrideZ); // negative convention
+            plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start + 3, -overrideZ);
+        }
+
         // LD A,$12      ; graphic_no (player top half)
         // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
         byte_D171.set(0xD171, 0x12);
@@ -1362,7 +1377,6 @@ public class Game implements Runnable {
                 boolean autoAdjust = graphic_objs_tbl_5C08.isSet(3, iy + 7);
                 if(autoAdjust) {
                     if(is_near_to_C7FE(block, ix, iy, 0x0F, 0x0F)) {
-                        IO.println("is near 2");
                         switch(get_sprite_dir_CA1E(block, ix)) {
                             case 0, 1: adj_ew_C7B1(block, ix, iy); break;
                             case 2, 3: adj_ns_C7C4(block, ix, iy); break;
@@ -1403,7 +1417,6 @@ public class Game implements Runnable {
                 if(autoAdjust) {
                     if(is_near_to_C7FE(block, ix, iy, centreY, centreX)) {
                         // C7F5 SET 0,(IY+$07)
-                        IO.println("is near");
                         graphic_objs_tbl_5C08.setBit(0, iy + 0x07);
                     }
                 }
@@ -2203,7 +2216,20 @@ public class Game implements Runnable {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+
+        boolean triggered = block.isSet(3, ix + 0x0D);
+        if(!triggered) return;
+        block.resetBit(3, ix + 0x0D); // ; reset triggered
+        block.set(ix + 0x0B, 0); // ; dZ=0
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        // $B69C CALL $B451      ; } // ignore audio
+    }
+
+    private void dec_dZ_and_update_XYZ_C700(DataBlock block, int ix) {
+        block.set(ix + 0x0B, block.getU(ix + 0x0B)-1); // ; dec dZ?
+        adj_for_out_of_bounds_CB45(block, ix);
+        add_dXYZ_C706(block, ix);
+
     }
 
     private void upd_92_to_95_C337(DataBlock block, int ix) {
