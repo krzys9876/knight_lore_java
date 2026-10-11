@@ -301,9 +301,9 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0xF6;
-            int overrideWE = -40; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = 50; // -S +N
+            int overrideRoomId = 0xF9;
+            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
@@ -2173,7 +2173,32 @@ public class Game implements Runnable {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+
+        // This flag is set in every odd room and is cleared after user picks up an object -
+        // these are deliberate traps
+        boolean disableSpikeBallDrop =  variables.getU(0x5BC0) != 0;
+        if(disableSpikeBallDrop) return;
+        boolean isDropping = block.isSet(2,ix + 0x0D);
+        if(isDropping) {
+            dec_dZ_and_update_XYZ_C700(block, ix);
+            boolean zOob = block.isSet(2,ix + 0x0C); // ; Z OOB? (hit the floor?)
+            if(zOob) {
+                block.resetBit(2, ix + 0x0D);
+                variables.set(0x5BBF, 0); // ; flag no spiked balls dropping
+            }
+            // $B7D6 CALL $B451     ; } // ignore audio
+        } else {
+            boolean isOtherDropping = variables.getU(0x5BBF) != 0;
+            if(!isOtherDropping) {
+                int rnd = new Random().nextInt(0x0F); //variables.get(0x5BA5);
+                // ; 1-in-16 chance
+                if(rnd == 0x01) {
+                    block.setBit(2, ix + 0x0D); // ; flag this one as dropping
+                    variables.set(0x5BBF, 1); // ; flag a spike ball dropping
+                }
+            }
+        }
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_64_to_79_CDDF(DataBlock block, int ix) {
@@ -2468,6 +2493,9 @@ public class Game implements Runnable {
         variables.set(0x5BBD, 0);
         variables.set(0x5BBF, 0);
         variables.set(0x5BB7, 1);
+        // NOTE: this means that in odd rooms spike balls do not drop until an object is picked up.
+        // This is not straightforward but these are the traps - a player may be killed when picking up an object
+        // and these traps are only in odd rooms
         variables.set(0x5BC0, graphic_objs_tbl_5C08.getU(0x5C10) & 1);
 
         //flag_room_visited_D219();
