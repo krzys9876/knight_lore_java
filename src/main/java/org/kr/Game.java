@@ -301,10 +301,10 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x14;
+            int overrideRoomId = 0x08;
             int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = -60; // -S +N
-            int overrideZ = 60; // + only : 60 is a little above upper entrance
+            int overrideNS = 60; // -S +N
+            int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -2160,7 +2160,12 @@ public class Game implements Runnable {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+        block.set(ix + 0x09, 0);
+        block.set(ix + 0x0A, 0);
+        // $C4B0 CALL $B3E9    ; // ignore audio
+
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_63_B7A9(DataBlock block, int ix) {
