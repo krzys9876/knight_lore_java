@@ -917,6 +917,7 @@ public class Game implements Runnable {
         variables.set(0x5BBC, variables.getU(0x5BA2));
         variables.set(0x5BA2, (variables.getU(0x5BA2)+1) & 0xFF);
         update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
+
         if(exitingScreen) return false;
         // loc_B000
         list_objects_to_draw_CE62();
@@ -974,6 +975,7 @@ public class Game implements Runnable {
         // @label=reset_objs_wipe_flag
         for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32)
             graphic_objs_tbl_5C08.resetBit(5, addr); // c$B090 RES 5,(HL)    ;
+
         return false;
     }
 
@@ -1270,6 +1272,11 @@ public class Game implements Runnable {
             updateOneSprite(block, ix);
             if(exitingScreen) return;
             ix+=32;
+
+            // update seed_3
+            variables.set(0x5BA5, (variables.getU(0x5BA5) + 1) & 0xFF);
+            if(variables.getU(0x5BA5) == 0xFF) IO.println("FF");
+            //IO.println(variables.getU(0x5BA5));
         }
     }
 
@@ -1972,6 +1979,7 @@ public class Game implements Runnable {
         set_wipe_and_draw_flags_C692(block, ix + 0x20);
         //@label=rand_legs_sprite
         int rnd = new Random().nextInt(0xFF); //variables.get(0x5BA5);
+        //int rnd = variables.getU(0x5BA5) & 0x0F | ((variables.getU(0x5BA5) & 0xF0) >> 4);
         int newSprite = (rnd & 0x03) | 0x5C;
         if(block.getU(ix) == newSprite) newSprite^=1; // change if same as current
         block.set(ix, newSprite);
@@ -2118,6 +2126,7 @@ public class Game implements Runnable {
         int a =  block.getU(ix + 0x0D) & 0x0F;
         if(a == 0) { // look around again
             int rnd = new Random().nextInt(0xFF); // variables.get(0x5BA5);
+            //int rnd = variables.getU(0x5BA5);
             int sprite = block.getU(ix - 32); // bottom half
             if(rnd == 2) {
                 sprite =  (sprite & 0xF8) | 6; // ; look one way
@@ -2176,7 +2185,7 @@ public class Game implements Runnable {
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
-        boolean disableSpikeBallDrop =  variables.getU(0x5BC0) != 0;
+        boolean disableSpikeBallDrop = variables.getU(0x5BC0) != 0;
         if(disableSpikeBallDrop) return;
         boolean isDropping = block.isSet(2,ix + 0x0D);
         if(isDropping) {
@@ -2190,9 +2199,10 @@ public class Game implements Runnable {
         } else {
             boolean isOtherDropping = variables.getU(0x5BBF) != 0;
             if(!isOtherDropping) {
-                int rnd = new Random().nextInt(0x0F); //variables.get(0x5BA5);
+                //int rnd = new Random().nextInt(0xFF); //variables.get(0x5BA5);
+                int rnd = variables.getU(0x5BA5);
                 // ; 1-in-16 chance
-                if(rnd == 0x01) {
+                if((rnd & 0xF0) > 0) {
                     block.setBit(2, ix + 0x0D); // ; flag this one as dropping
                     variables.set(0x5BBF, 1); // ; flag a spike ball dropping
                 }
@@ -2304,7 +2314,9 @@ public class Game implements Runnable {
             if (spriteFlag) block.set(ix + 0x13, block.getS(ix + 0x13) - 1);
         } else {
             // Continue transformation
-            int nextSprite = (new Random().nextInt(0xFF) & 3) | 0x5C;
+            int random = variables.getU(0x5BA5);
+            //int random = new Random().nextInt(0xFF);
+            int nextSprite = (random & 3) | 0x5C;
             if(nextSprite != block.getU(ix)) nextSprite = nextSprite ^ 1;
             block.set(ix, nextSprite);
             block.set(ix + 7, block.getU(ix + 0x07) ^ 0x40);
