@@ -1299,7 +1299,7 @@ public class Game implements Runnable {
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(block, ix); break;
             case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(block, ix); break;
             case 0x54: upd_84_C4C3(block, ix); break;
-            case 0x55: upd_85_B6B1(block, ix); break;
+            case 0x55: upd_85_C4B6(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(block, ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
@@ -2205,7 +2205,7 @@ public class Game implements Runnable {
         return block.getU(ix + 0x09)!=0 || block.getU(ix + 0x0A)!=0 || block.getU(ix + 0x0B)!=0;
     }
 
-    private void upd_85_B6B1(DataBlock block, int ix) {
+    private void upd_85_C4B6(DataBlock block, int ix) {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
