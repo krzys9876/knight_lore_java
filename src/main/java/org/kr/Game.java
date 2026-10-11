@@ -301,9 +301,9 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x08;
-            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = 60; // -S +N
+            int overrideRoomId = 0xF6;
+            int overrideWE = -40; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = 50; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
@@ -2194,14 +2194,23 @@ public class Game implements Runnable {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        if(is_obj_moving_C1A1(block, ix)) {
+            block.set(ix + 0x09, 0);
+            block.set(ix + 0x0A, 0);
+        }
+    }
+
+    private boolean is_obj_moving_C1A1(DataBlock block, int ix) {
+        return block.getU(ix + 0x09)!=0 || block.getU(ix + 0x0A)!=0 || block.getU(ix + 0x0B)!=0;
     }
 
     private void upd_85_B6B1(DataBlock block, int ix) {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        // $C4C0 JP $C232      ;// ignore audio
     }
 
     private void upd_86_87_B7ED(DataBlock block, int ix) {
