@@ -1275,8 +1275,6 @@ public class Game implements Runnable {
 
             // update seed_3
             variables.set(0x5BA5, (variables.getU(0x5BA5) + 1) & 0xFF);
-            if(variables.getU(0x5BA5) == 0xFF) IO.println("FF");
-            //IO.println(variables.getU(0x5BA5));
         }
     }
 
