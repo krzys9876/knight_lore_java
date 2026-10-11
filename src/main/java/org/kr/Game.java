@@ -848,6 +848,7 @@ public class Game implements Runnable {
     }
 
     private void player_dies_AFB7() {
+        IO.println("player_dies");
         lose_life_$D12A();
     }
 
@@ -972,9 +973,16 @@ public class Game implements Runnable {
         print_lives_gfx_BC7A();
         print_lives_BCA3();
         update_screen_D56F(false);
+
+        // @label=loc_B074
+        variables.set(0x5BC5, 0);
+        int ix = 0x5C08;
+        if(graphic_objs_tbl_5C08.getU(ix)==0 && graphic_objs_tbl_5C08.getU(ix + 0x20)==0) player_dies_AFB7();
+
         // @label=reset_objs_wipe_flag
         for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32)
             graphic_objs_tbl_5C08.resetBit(5, addr); // c$B090 RES 5,(HL)    ;
+
 
         return false;
     }
@@ -2732,6 +2740,13 @@ public class Game implements Runnable {
     }
 
     private boolean calc_pixel_XY_D6C9(DataBlock block, int ix) {
+        // first check if object should disappear (including player)
+        //@label=calc_pixel_XY_and_render
+        if(block.getU(ix) == 1) { //; flagged as ???
+            block.set(ix, 0);
+            return false;
+        }
+
         int x = block.getU(ix + 0x01);
         x = x + block.getU(ix + 0x02);
         x = x - 0x80;
