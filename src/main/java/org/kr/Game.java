@@ -21,7 +21,7 @@ public class Game implements Runnable {
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
-    private final boolean skipDeath = true;
+    private final boolean disableDeath = false;
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
@@ -1313,7 +1313,7 @@ public class Game implements Runnable {
             case 0x67: upd_103_C1AB(block, ix); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(block, ix); break;
             case 0x6F: upd_111_B95E(block, ix); break;
-            case 0x70, 0x71, 0x72, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(block, ix); break;
+            case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(block, ix); break;
             case 0x77: upd_119_BF3F(block, ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
             case 0x7F: upd_127_BF11(block, ix); break;
@@ -1785,7 +1785,7 @@ public class Game implements Runnable {
 
     private void setDestroyedFlags(DataBlock block, int ix, int iy) {
         // TODO: replace this with proper configuration
-        if(skipDeath) return;
+        if(disableDeath) return;
 
         int flagsObj1 = block.getU(ix + 0x0D);
         int flagsObj2 = block.getU(iy + 0x0D);
@@ -2075,7 +2075,11 @@ public class Game implements Runnable {
     }
 
     private void init_death_sparkles_BF21(DataBlock block, int ix) {
-        //TODO: implement
+        IO.println("death");
+        block.set(ix, 0x70);
+        block.setBit(1, ix + 0x07);
+        // c$BF31 CALL $B403    ; // ignore audio
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_22_B7A3(DataBlock block, int ix) {
@@ -2183,7 +2187,7 @@ public class Game implements Runnable {
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
-        boolean disableSpikeBallDrop = variables.getU(0x5BC0) != 0;
+        boolean disableSpikeBallDrop = false;// variables.getU(0x5BC0) != 0;
         if(disableSpikeBallDrop) return;
         boolean isDropping = block.isSet(2,ix + 0x0D);
         if(isDropping) {
@@ -2363,7 +2367,7 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
 
-        upd_111_B95E(block, ix);
+        upd_111_B95E(block, ix); // Fix bug/feature in the source (writing to ROM)
     }
 
     private void upd_120_to_126_BEFE(DataBlock block, int ix) {
