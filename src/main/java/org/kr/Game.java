@@ -301,8 +301,8 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0xF8;
-            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0x03;
+            int overrideWE = 40; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -2423,7 +2423,12 @@ public class Game implements Runnable {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+
+        boolean triggered = block.isSet(3, ix + 0x0D);
+        if(triggered) {
+            block.set(ix, 0xB8); // ; graphic_no = sparkles
+            upd_112_to_118_184_BF2B(block, ix);
+        }
     }
 
     private void upd_144_to_149_152_to_157_B6F9(DataBlock block, int ix) {
@@ -2490,10 +2495,13 @@ public class Game implements Runnable {
     }
 
     private void upd_185_187_BF37(DataBlock block, int ix) {
-        // TODO: implement
-        // TODO: analyze comment about the bug
+        int l = block.getU(ix + 0x10);
+        int h = block.getU(ix + 0x11);
+        if(l!=0 && h!=0) {
+            variables.set(h*256+l, 0); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
+        }
+        upd_119_BF3F(block, ix);
     }
-
 
     private void renderAllSprites(DataBlock block, int from, int cnt) {
         for(int i=from;i<from+cnt;i++) {
