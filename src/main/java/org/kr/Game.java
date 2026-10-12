@@ -2513,7 +2513,7 @@ public class Game implements Runnable {
             block.set(ix + 0x0B, 3);
             dec_dZ_and_update_XYZ_C700(block, ix);
             int z = block.getU(ix + 3);
-            if(z >= variables.getU(0x5BBD))
+            if(z > variables.getU(0x5BBD))
                 block.resetBit(2, ix + 0x0D); // ; set dir=down
         } else {
             dec_dZ_and_update_XYZ_C700(block, ix);
