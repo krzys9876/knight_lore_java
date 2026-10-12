@@ -2497,9 +2497,7 @@ public class Game implements Runnable {
     private void upd_185_187_BF37(DataBlock block, int ix) {
         int l = block.getU(ix + 0x10);
         int h = block.getU(ix + 0x11);
-        if(l!=0 && h!=0) {
-            variables.set(h*256+l, 0); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
-        }
+        if(l!=0 || h!=0) special_objs_tbl_6FF2.set(h*256+l, 0); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
         upd_119_BF3F(block, ix);
     }
 
