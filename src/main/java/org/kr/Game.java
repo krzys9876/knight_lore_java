@@ -301,8 +301,8 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x7A;
-            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0x9B;
+            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -2167,17 +2167,37 @@ public class Game implements Runnable {
     }
 
     private void upd_54_B6B9(DataBlock block, int ix) {
-        // c$C4E3 LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+        // c$B6B9 CALL $B45D    ; // ignore audio
+        loc_B6BF(block, ix, 1, 0x09);
     }
 
     private void upd_55_B6B1(DataBlock block, int ix) {
+        // c$B6B1 CALL $B462    ; // ignore audio
+        loc_B6BF(block, ix, 2, 0x0A);
+    }
+
+    private void loc_B6BF(DataBlock block, int ix, int offsetXY, int offsetDXY) {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        // TODO: implement rest of routine
+
+        int c = ix & 0xFF; // $B6CD LD A,C        ;
+        c = (c >> 1) & 0x10;
+        int seed2 = variables.getU(0x5BA2);
+        //int seed2 = new Random().nextInt(0xFF);
+        c = (c + seed2) & 0xFF;
+        if((c & 0b10000) > 0) c = c ^ 0xFF;
+        c = c & 0x0F;
+
+        int xy = block.getU(ix + offsetXY);
+        xy = (xy + 0x08) & 0x0F;
+        if(c != xy) {
+            int a = xy < c ? 1 : -1;
+            block.set(ix + offsetDXY, a);
+            block.set(ix + 0x0B, 1);
+            dec_dZ_and_update_XYZ_C700(block, ix);
+        }
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_62_C4AA(DataBlock block, int ix) {
