@@ -2275,9 +2275,13 @@ public class Game implements Runnable {
         // $B801 CALL $B45D     ; // ignore audio
         dec_dZ_and_update_XYZ_C700(block, ix);
         boolean xOob = block.isSet(0, ix + 0x0C);
-        if(xOob) {
-           block.set(ix + 0x0D, block.getU(ix + 0x0D) ^ 0x01); // ; toggle bit 1/2
-           //  $B837 CALL $B42E    ; // ignore audio
+        loc_B82F(block, ix, xOob, 1);
+    }
+
+    private void loc_B82F(DataBlock block, int ix, boolean oob, int a) {
+        if(oob) {
+            block.set(ix + 0x0D, block.getU(ix + 0x0D) ^ a); // ; toggle bit 1/2
+            //  $B837 CALL $B42E    ; // ignore audio
         }
         toggle_next_prev_sprite_B985(block, ix);
         set_both_deadly_flags_B85C(block, ix);
@@ -2502,7 +2506,15 @@ public class Game implements Runnable {
         // c$C4F2 LD HL,$FCF8   ; -4, -8
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -4); //FC
-        // TODO: implement rest of routine
+
+        block.set(ix + 0x0B, 1); // ; pre-load dZ=1
+        boolean movingNorth = block.isSet(1, ix + 0x0D);
+        if(movingNorth) block.set(ix + 0x0A, 2);
+        else block.set(ix + 0x0A, -2);
+        // $B801 CALL $B45D     ; // ignore audio
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        boolean yOob = block.isSet(1, ix + 0x0C);
+        loc_B82F(block, ix, yOob, 2);
     }
 
     private void upd_182_183_B5FF(DataBlock block, int ix) {
