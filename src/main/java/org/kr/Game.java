@@ -21,7 +21,7 @@ public class Game implements Runnable {
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
-    private final boolean disableDeath = false;
+    private final boolean disableDeath = true;
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
@@ -301,8 +301,8 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x03;
-            int overrideWE = 40; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0xD8;
+            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -2267,7 +2267,25 @@ public class Game implements Runnable {
         // c$C4F2 LD HL,$FCF8   ; -4, -8
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -4); //FC
-        // TODO: implement rest of routine
+
+        block.set(ix + 0x0B, 1); // ; pre-load dZ=1
+        boolean movingEast = block.isSet(0, ix + 0x0D);
+        if(movingEast) block.set(ix + 0x09, 2);
+        else block.set(ix + 0x09, -2);
+        // $B801 CALL $B45D     ; // ignore audio
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        boolean xOob = block.isSet(0, ix + 0x0C);
+        if(xOob) {
+           block.set(ix + 0x0D, block.getU(ix + 0x0D) ^ 0x01); // ; toggle bit 1/2
+           //  $B837 CALL $B42E    ; // ignore audio
+        }
+        toggle_next_prev_sprite_B985(block, ix);
+        set_both_deadly_flags_B85C(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
+    }
+
+    private void toggle_next_prev_sprite_B985(DataBlock block, int ix) {
+        block.set(ix, block.getU(ix) ^ 0x01);
     }
 
     private void upd_88_to_90_C506(DataBlock block, int ix) {
