@@ -301,8 +301,8 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0xF9;
-            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0xF8;
+            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -791,6 +791,7 @@ public class Game implements Runnable {
     }
 
     private void init_start_location_D1B1(int override, int overrideWE, int overrideNS, int overrideZ) {
+        IO.println("init_start_location_D1B1");
         for(int i=0; i<8; i++)
             plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i,
                     plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i));
@@ -849,7 +850,7 @@ public class Game implements Runnable {
 
     private void player_dies_AFB7() {
         IO.println("player_dies");
-        lose_life_$D12A();
+        lose_life_D12A();
     }
 
     private void initPlayerData() {
@@ -869,7 +870,7 @@ public class Game implements Runnable {
         for(int i=0; i<byte_D191.size; i++) graphic_objs_tbl_5C08.set(de+i, byte_D191.getU(byte_D191.start+i));
     }
 
-    private void lose_life_$D12A() {
+    private void lose_life_D12A() {
         initPlayerData();
         variables.set(0x5BB1, 0);
         int livesLeft = variables.getU(0x5BBA) - 1;
@@ -977,7 +978,11 @@ public class Game implements Runnable {
         // @label=loc_B074
         variables.set(0x5BC5, 0);
         int ix = 0x5C08;
-        if(graphic_objs_tbl_5C08.getU(ix)==0 && graphic_objs_tbl_5C08.getU(ix + 0x20)==0) player_dies_AFB7();
+        if(graphic_objs_tbl_5C08.getU(ix)==0 && graphic_objs_tbl_5C08.getU(ix + 0x20)==0) {
+            player_dies_AFB7();
+            exitingScreen = true;
+            return false;
+        }
 
         // @label=reset_objs_wipe_flag
         for(int addr = graphic_objs_tbl_5C08.start+7; addr<graphic_objs_tbl_5C08.endExcl(); addr+=32)
