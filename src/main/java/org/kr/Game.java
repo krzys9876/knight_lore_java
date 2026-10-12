@@ -21,7 +21,7 @@ public class Game implements Runnable {
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
 
-    private final boolean disableDeath = true;
+    private final boolean disableDeath = false;
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
@@ -301,7 +301,7 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0xD8;
+            int overrideRoomId = 0x7A;
             int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
@@ -2499,7 +2499,30 @@ public class Game implements Runnable {
         // c$C4F2 LD HL,$FCF8   ; -4, -8
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -4); //FC
-        // TODO: implement rest of routine
+
+        int bouncingHeight = variables.getU(0x5BBD);
+        if(bouncingHeight == 0) {
+            IO.println("bouncing height: " + bouncingHeight);
+            int z = block.getU(ix + 3);
+            variables.set(0x5BBD, z + 0x20); // ; calc bounce height
+        }
+        toggle_next_prev_sprite_B985(block, ix);
+        // $B879 CALL $B451     ; // ignore audio
+        boolean dirUp = block.isSet(2, ix + 0x0D);
+        if(dirUp) {
+            block.set(ix + 0x0B, 3);
+            dec_dZ_and_update_XYZ_C700(block, ix);
+            int z = block.getU(ix + 3);
+            if(z >= variables.getU(0x5BBD))
+                block.resetBit(2, ix + 0x0D); // ; set dir=down
+        } else {
+            dec_dZ_and_update_XYZ_C700(block, ix);
+            boolean zOob = block.isSet(2, ix + 0x0C);
+            if(zOob) block.setBit(2, ix + 0x0D);
+            // $B88F CALL $B42E     ; // ignore audio
+        }
+        set_both_deadly_flags_B85C(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_180_181_B80F(DataBlock block, int ix) {
