@@ -2502,7 +2502,6 @@ public class Game implements Runnable {
 
         int bouncingHeight = variables.getU(0x5BBD);
         if(bouncingHeight == 0) {
-            IO.println("bouncing height: " + bouncingHeight);
             int z = block.getU(ix + 3);
             variables.set(0x5BBD, z + 0x20); // ; calc bounce height
         }
