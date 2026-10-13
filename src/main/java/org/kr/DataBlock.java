@@ -33,13 +33,13 @@ public class DataBlock {
     // signed byte value
     public int getS(int address) {
         int value = data[address - start];
-        if(value >= 128) value = 127 - value;
+        if(value >= 128) value = value - 256;
         return value;
     }
     // unsigned byte value
     public int getU(int address) {
         int value = data[address - start];
-        if(value < 0) value = 127 - value;
+        if(value < 0) value = 256 + value;
         return value;
     }
     public int[] getCopy() { return Arrays.copyOf(data, data.length); }
