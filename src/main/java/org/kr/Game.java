@@ -2295,7 +2295,7 @@ public class Game implements Runnable {
     }
 
     private int get_delta_from_tbl_C645(int a) {
-        final int[] delta_tbl = { -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6, -7, 7, -8, 8};
+        final int[] delta_tbl = { 0xFF, 1, 0xFE, 2, 0xFD, 3, 0xFC, 4, 0xFB, 5, 0xFA, 6, 0xF9, 7, 0xF8, 8};
         return delta_tbl[a];
     }
 
