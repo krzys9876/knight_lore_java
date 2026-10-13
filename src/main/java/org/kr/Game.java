@@ -301,8 +301,8 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x9B;
-            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0x02;
+            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -2257,7 +2257,46 @@ public class Game implements Runnable {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
-        // TODO: implement rest of routine
+
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        boolean moving = block.getU(ix + 0x09) != 0 || block.getU(ix + 0x0A) != 0;
+        boolean xyOob = (block.getU(ix + 0x0C) & 0x03) > 0; // ; OOB X/Y?
+        if(!moving || xyOob) {
+            // @label=loc_C5DD
+            //int seed3 = variables.getU(0x5BA5);
+            int seed3 = new Random().nextInt(0xFF);
+            int rnd3 = (seed3 & 0x03) + 4;
+            int dx = get_delta_from_tbl_C645(rnd3);
+            block.set(ix + 0x09, dx);
+            int seed2 = variables.getU(0x5BA2);
+            int rnd2 = (seed2 & 0x03) + 4;
+            int dy = get_delta_from_tbl_C645(rnd2);
+            block.set(ix + 0x0A, dy);
+            calc_ghost_sprite_C603(block, ix);
+            // $C5FA CALL $B467    ; // ignore audio
+        }
+        toggle_next_prev_sprite_B985(block, ix);
+        set_both_deadly_flags_B85C(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
+    }
+
+    private void calc_ghost_sprite_C603(DataBlock block, int ix) {
+        int dx = block.getS(ix + 0x09);
+        int dy = block.getS(ix + 0x0A);
+        if(Math.abs(dy) < Math.abs(dx)) {
+            if(dx > 0) block.resetBit(1, ix); // ; sprite=80/81
+            else block.setBit(1, ix); // ; sprite=80/81
+            block.setBit(6, ix + 0x07); // set hflip
+        } else {
+            if(dy > 0) block.setBit(1, ix);
+            else block.resetBit(1, ix);
+            block.resetBit(6, ix + 0x07); // reset hflip
+        }
+    }
+
+    private int get_delta_from_tbl_C645(int a) {
+        final int[] delta_tbl = { -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6, -7, 7, -8, 8};
+        return delta_tbl[a];
     }
 
     private void upd_84_C4C3(DataBlock block, int ix) {
