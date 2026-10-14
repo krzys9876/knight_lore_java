@@ -302,9 +302,9 @@ public class Game implements Runnable {
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
             int overrideRoomId = 0x02;
-            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = 0; // -S +N
-            int overrideZ = 0; // + only : 60 is a little above upper entrance
+            int overrideWE = -10; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = -10; // -S +N
+            int overrideZ = 60; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -792,6 +792,20 @@ public class Game implements Runnable {
 
     private void init_start_location_D1B1(int override, int overrideWE, int overrideNS, int overrideZ) {
         IO.println("init_start_location_D1B1");
+
+        if(overrideWE != 0) {
+            plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 1, (128 + overrideWE) & 0xFF);
+            plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 1 + 8, (128 + overrideWE) & 0xFF);
+        }
+        if(overrideNS != 0) {
+            plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 2, (128 + overrideNS) & 0xFF);
+            plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 2 + 8, (128 + overrideNS) & 0xFF);
+        }
+        if(overrideZ != 0) {
+            plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 3, (128+overrideZ) & 0xFF); // negative convention
+            plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 3 + 8, 12 + (128+overrideZ) & 0xFF); // negative convention
+        }
+
         for(int i=0; i<8; i++)
             plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i,
                     plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i));
@@ -799,18 +813,6 @@ public class Game implements Runnable {
             plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start+i,
                     plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i+8));
 
-        if(overrideWE != 0) {
-            start_loc_1_D169.set(start_loc_1_D169.start + 1, overrideWE);
-            start_loc_2_D189.set(start_loc_2_D189.start + 1, overrideWE);
-        }
-        if(overrideNS != 0) {
-            start_loc_1_D169.set(start_loc_1_D169.start + 2, overrideNS);
-            start_loc_2_D189.set(start_loc_2_D189.start + 2, overrideNS);
-        }
-        if(overrideZ != 0) {
-            plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start + 3, -overrideZ); // negative convention
-            plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start + 3, -overrideZ);
-        }
 
         // LD A,$12      ; graphic_no (player top half)
         // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
