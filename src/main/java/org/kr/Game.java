@@ -2123,7 +2123,6 @@ public class Game implements Runnable {
 
         dec_dZ_and_update_XYZ_C700(block, ix);
         move_guard_wizard_NSEW_B9CC(block, ix);
-        // TODO: implement rest of routine
     }
 
     private void move_guard_wizard_NSEW_B9CC(DataBlock block, int ix) {
