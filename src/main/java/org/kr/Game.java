@@ -2082,6 +2082,10 @@ public class Game implements Runnable {
             int sprite = block.getU(ix) & 0x07;
             if(sprite == 2 || sprite == 4) return;
         }
+        animate_human_legs_C97F(block, ix);
+    }
+
+    private void animate_human_legs_C97F(DataBlock block, int ix) {
         // @label=animate_human_legs
         int sprite = block.getU(ix);
         int nextSprite = ((sprite+1) & 7) % 6; // ; wrap?
@@ -2519,7 +2523,25 @@ public class Game implements Runnable {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
-        // TODO: implement rest of routine
+
+        int dx = block.getS(ix + 0x09);
+        int dy = block.getS(ix + 0x0A);
+        if(dx ==0 && dy == 0) return;
+        // $B703 CALL $B4AD     ; // ignore audio
+        int dxU = block.getU(ix + 0x09);
+        int dyU = block.getU(ix + 0x0A);
+        if(dxU > dyU) {
+            if(dx >= 0) block.setBit(3, ix); // ; graphic_no
+            else block.resetBit(3, ix);
+            block.resetBit(6, ix + 0x07); // ; clear hflip
+        } else {
+            if (dy >= 0) block.resetBit(3, ix);
+            else block.setBit(3, ix);
+            block.setBit(6, ix + 0x07);
+        }
+
+        animate_human_legs_C97F(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_150_151_B73C(DataBlock block, int ix) {
@@ -2542,12 +2564,20 @@ public class Game implements Runnable {
     }
 
     private void set_guard_wizard_sprite_B76C(DataBlock block, int ix) {
-        int dxS = block.getS(ix + 0x09);
-        int dyS = block.getS(ix + 0x0A);
-        if(dxS ==0 && dyS == 0) return;
-        if(dxS < dyS) block.resetBit(0, ix); // ; sprite 31/159
-        else block.setBit(0, ix);
-        block.resetBit(0, ix + 0x07);
+        int dx = block.getS(ix + 0x09);
+        int dy = block.getS(ix + 0x0A);
+        if(dx ==0 && dy == 0) return;
+        int dxU = block.getU(ix + 0x09);
+        int dyU = block.getU(ix + 0x0A);
+        if(dxU > dyU) {
+            if(dx >= 0) block.setBit(0, ix); // ; sprite 31/159
+            else block.resetBit(0, ix); // ; sprite 31/159
+            block.resetBit(6, ix + 0x07); // ; clear hflip
+        } else {
+            if(dy >=0) block.setBit(0, ix); // ; sprite 31/159
+            else block.resetBit(0, ix); // ; sprite 31/159
+            block.setBit(0, ix);
+        }
     }
 
     private void upd_160_to_163_B8DA(DataBlock block, int ix) {
