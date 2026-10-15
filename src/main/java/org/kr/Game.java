@@ -301,9 +301,9 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x02;
-            int overrideWE = -10; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = -10; // -S +N
+            int overrideRoomId = 0x40;
+            int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = 0; // -S +N
             int overrideZ = 60; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
@@ -2120,7 +2120,68 @@ public class Game implements Runnable {
         //c$C510 LD HL,$03F4   ; +3, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, 3); //03
+
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        move_guard_wizard_NSEW_B9CC(block, ix);
         // TODO: implement rest of routine
+    }
+
+    private void move_guard_wizard_NSEW_B9CC(DataBlock block, int ix) {
+        int direction = block.getU(ix + 0x0D) & 0x03;
+        int dydx = switch(direction) {
+            case 0 -> guard_W_B9E0(block, ix);
+            case 1 -> guard_N_B9FB(block, ix);
+            case 2 -> guard_E_BA08(block, ix);
+            case 3 -> guard_S_BA15(block, ix);
+            default -> 0;
+        };
+        int dx = dydx & 0xFF;
+        block.set(ix + 0x09, dx);
+        block.set(ix + 0x29, dx); // ; next obj dX
+        int dy = (dydx & 0xFF00) >> 8;
+        block.set(ix + 0x0A, dy);
+        block.set(ix + 0x2A, dy); // ; next obj dY
+        block.set(ix + 0x21, block.getU(ix + 1)); // ; copy to next obj X
+        block.set(ix + 0x22, block.getU(ix + 2)); // ; copy to next obj Y
+        set_guard_wizard_sprite_B76C(block, ix);
+        set_both_deadly_flags_B85C(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
+    }
+
+    // returns HL: H - dY, L - dX
+    private int guard_W_B9E0(DataBlock block, int ix) {
+        boolean xOob = block.isSet(0, ix + 0x0C);
+        if(!xOob) return 0x00FE; // ; dY=0, dX=-2
+        next_guard_dir_B9EB(block, ix);
+        return 0x0200; // ; dY=2, dX=0
+    }
+
+    private void next_guard_dir_B9EB(DataBlock block, int ix) {
+        int flags = block.getU(ix + 0x0D);
+        int c = flags & 0xFC;
+        int b = (flags + 1) & 0x03;
+        block.set(ix + 0x0D, c | b); // ; inc lowest 2 bits (mod 4)
+    }
+
+    private int guard_N_B9FB(DataBlock block, int ix) {
+        boolean yOob = block.isSet(1, ix + 0x0C);
+        if(!yOob) return 0x0200; // ; dY=+2, dX=0
+        next_guard_dir_B9EB(block, ix);
+        return 0x0002; // ; dY=0, dX=+2
+    }
+
+    private int guard_E_BA08(DataBlock block, int ix) {
+        boolean xOob = block.isSet(0, ix + 0x0C);
+        if(!xOob) return 0x0002; // ; dY=0, dX=+2
+        next_guard_dir_B9EB(block, ix);
+        return 0xFE00; // ; dY=-2, dX=0
+    }
+
+    private int guard_S_BA15(DataBlock block, int ix) {
+        boolean yOob = block.isSet(1, ix + 0x0C);
+        if(!yOob) return 0xFE00; // ; dY=-2, dX=0
+        next_guard_dir_B9EB(block, ix);
+        return 0x00FE; // ; dY=0, dX=-2
     }
 
     private void upd_32_to_47_CDDA(DataBlock block, int ix) {
@@ -2574,9 +2635,9 @@ public class Game implements Runnable {
             else block.resetBit(0, ix); // ; sprite 31/159
             block.resetBit(6, ix + 0x07); // ; clear hflip
         } else {
-            if(dy >=0) block.setBit(0, ix); // ; sprite 31/159
-            else block.resetBit(0, ix); // ; sprite 31/159
-            block.setBit(0, ix);
+            if(dy >=0) block.resetBit(0, ix); // ; sprite 31/159
+            else block.setBit(0, ix); // ; sprite 31/159
+            block.setBit(6, ix + 0x07); // ; set hflip
         }
     }
 
