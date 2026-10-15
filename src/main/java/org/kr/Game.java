@@ -2531,12 +2531,12 @@ public class Game implements Runnable {
         int a = directionE ? 2 : -2;
 
         block.set(ix + 0x09, a);
-        //block.set(ix + 0x29, a); // ; and for bottom half
+        block.set(ix + 0x29, a); // ; and for bottom half
         set_guard_wizard_sprite_B76C(block, ix);
         dec_dZ_and_update_XYZ_C700(block, ix);
         boolean xOob =  block.isSet(0, ix + 0x0C);
         if(xOob) block.set(ix + 0x0D, (block.getU(ix + 0x0D) ^ 0x01)); // ; toggle direction
-        //block.set(ix + 0x21, block.getU(ix + 0x01)); // ; copy to bottom half
+        block.set(ix + 0x21, block.getU(ix + 0x01)); // ; copy to bottom half
         set_both_deadly_flags_B85C(block, ix);
         //set_wipe_and_draw_flags_C692(block, ix);*/
     }
@@ -2751,24 +2751,31 @@ public class Game implements Runnable {
             DataBlock blockDef = foregroundObjects[blockType];
             hl++;
             for(int i=0; i<blockCnt; i++) {
-                int locByte = location_tbl_6251.getU(hl+i);
-                int x = (locByte & 0b00000111);
-                int y = (locByte & 0b00111000) >> 3;
-                int z = (locByte & 0b11000000) >> 6;
-                graphic_objs_tbl_5C08.set(targetAddr, blockDef.getU(blockDef.start)); // object ID
-                graphic_objs_tbl_5C08.set(targetAddr+4, blockDef.getU(blockDef.start+1)); // width
-                graphic_objs_tbl_5C08.set(targetAddr+5, blockDef.getU(blockDef.start+2)); // depth
-                graphic_objs_tbl_5C08.set(targetAddr+6, blockDef.getU(blockDef.start+3)); // height
-                graphic_objs_tbl_5C08.set(targetAddr+7, blockDef.getU(blockDef.start+4)); // flags
-                graphic_objs_tbl_5C08.set(targetAddr+8, currLocId); // screen
-                int offsets = blockDef.getU(blockDef.start+5);
-                int x1 = ((offsets << 3) & 8);
-                int y1 = ((offsets << 2) & 8);
-                graphic_objs_tbl_5C08.set(targetAddr+1, x1 + x*16 + 0x48); // X
-                graphic_objs_tbl_5C08.set(targetAddr+2, y1 + y*16 + 0x48); // Y
-                graphic_objs_tbl_5C08.set(targetAddr+3, ((z*12+offsets) & 0xFC) + variables.getU(0x5BAE)); // Y, variable stores room size Z
-                for(int t=9; t<32; t++) graphic_objs_tbl_5C08.set(targetAddr+t,0);  // reset remaining info
-                targetAddr+=32;
+                int templatePart = 0;
+                boolean templateDone = false;
+                while(!templateDone) {
+
+                    int locByte = location_tbl_6251.getU(hl + i);
+                    int x = (locByte & 0b00000111);
+                    int y = (locByte & 0b00111000) >> 3;
+                    int z = (locByte & 0b11000000) >> 6;
+                    graphic_objs_tbl_5C08.set(targetAddr, blockDef.getU(blockDef.start + templatePart * 6)); // object ID
+                    graphic_objs_tbl_5C08.set(targetAddr + 4, blockDef.getU(blockDef.start + templatePart * 6 + 1)); // width
+                    graphic_objs_tbl_5C08.set(targetAddr + 5, blockDef.getU(blockDef.start + templatePart * 6 + 2)); // depth
+                    graphic_objs_tbl_5C08.set(targetAddr + 6, blockDef.getU(blockDef.start + templatePart * 6 + 3)); // height
+                    graphic_objs_tbl_5C08.set(targetAddr + 7, blockDef.getU(blockDef.start + templatePart * 6 + 4)); // flags
+                    graphic_objs_tbl_5C08.set(targetAddr + 8, currLocId); // screen
+                    int offsets = blockDef.getU(blockDef.start + templatePart * 6 + 5);
+                    int x1 = ((offsets << 3) & 8);
+                    int y1 = ((offsets << 2) & 8);
+                    graphic_objs_tbl_5C08.set(targetAddr + 1, x1 + x * 16 + 0x48); // X
+                    graphic_objs_tbl_5C08.set(targetAddr + 2, y1 + y * 16 + 0x48); // Y
+                    graphic_objs_tbl_5C08.set(targetAddr + 3, ((z * 12 + offsets) & 0xFC) + variables.getU(0x5BAE)); // Y, variable stores room size Z
+                    for (int t = 9; t < 32; t++) graphic_objs_tbl_5C08.set(targetAddr + t, 0);  // reset remaining info
+                    targetAddr += 32;
+                    templateDone = blockDef.getU(blockDef.start + templatePart * 6 + 6) == 0; // some templates consists of two objects (guards)
+                    templatePart++;
+                }
             }
             hl+=blockCnt;
         }
