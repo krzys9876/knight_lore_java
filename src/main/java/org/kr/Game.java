@@ -2271,6 +2271,7 @@ public class Game implements Runnable {
             int dx = get_delta_from_tbl_C645(rnd3);
             block.set(ix + 0x09, dx);
             int seed2 = variables.getU(0x5BA2);
+            //int seed2 = new Random().nextInt(0xFF);
             int rnd2 = (seed2 & 0x03) + 4;
             int dy = get_delta_from_tbl_C645(rnd2);
             block.set(ix + 0x0A, dy);
@@ -2525,7 +2526,28 @@ public class Game implements Runnable {
         //c$C50B LD HL,$07F4   ; +7, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, 7); //07
-        // TODO: implement rest of routine
+
+        boolean directionE =  block.isSet(0, ix + 0x0D);
+        int a = directionE ? 2 : -2;
+
+        block.set(ix + 0x09, a);
+        //block.set(ix + 0x29, a); // ; and for bottom half
+        set_guard_wizard_sprite_B76C(block, ix);
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        boolean xOob =  block.isSet(0, ix + 0x0C);
+        if(xOob) block.set(ix + 0x0D, (block.getU(ix + 0x0D) ^ 0x01)); // ; toggle direction
+        //block.set(ix + 0x21, block.getU(ix + 0x01)); // ; copy to bottom half
+        set_both_deadly_flags_B85C(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);*/
+    }
+
+    private void set_guard_wizard_sprite_B76C(DataBlock block, int ix) {
+        int dxS = block.getS(ix + 0x09);
+        int dyS = block.getS(ix + 0x0A);
+        if(dxS ==0 && dyS == 0) return;
+        if(dxS < dyS) block.resetBit(0, ix); // ; sprite 31/159
+        else block.setBit(0, ix);
+        block.resetBit(0, ix + 0x07);
     }
 
     private void upd_160_to_163_B8DA(DataBlock block, int ix) {
