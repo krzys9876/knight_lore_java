@@ -1493,9 +1493,9 @@ public class Game implements Runnable {
             block.set(ix + 0x0B, 1); // ; dZ=1 (up)
         } else {
             int moveCnt = variables.getU(0x5BB0);
-            if(moveCnt > 4) {
+            if(moveCnt >= 4) {
                 if((seed3 & 0x1F) != 0) return;
-                moveCnt+=0x80; // ; arbitrarily large count
+                moveCnt = 0x80; // ; arbitrarily large count
             }
             // @label=init_portcullis_down
             variables.set(0x5BB0, moveCnt + 1);
@@ -1512,18 +1512,18 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -6); //FA
 
         block.setBit(7, ix + 0x0D);
-        int playerFlags =  graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x0D);
+        int playerFlags =  graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x0C);
         boolean enteringRoom = (playerFlags & 0xF0)>0;
         if(enteringRoom) return;
         int dZ =  block.getS(ix + 0x0B);
-        if(dZ > 0) {
+        if(dZ >= 0) {
             // @label=move_portcullis_up
             block.set(ix + 0x0B, 2);
             // $C6EE CALL $B467      ; // ignore audio
             dec_dZ_and_update_XYZ_C700(block, ix);
             int roomSizeZ = variables.getU(0x5BAE);
             int z = block.getU(ix + 0x03);
-            if(z >=  roomSizeZ + 0x1F) stop_portcullis_C6E0(block, ix);
+            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(block, ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         } else {
             block.set(ix + 0x0B, dZ - 1); // ; accelerate speed?
