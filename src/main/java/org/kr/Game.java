@@ -301,10 +301,10 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x40;
-            int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0x0A;
+            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
-            int overrideZ = 60; // + only : 60 is a little above upper entrance
+            int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -1478,14 +1478,66 @@ public class Game implements Runnable {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
-        // TODO: implement rest of routine
+
+        boolean moving = variables.getU(0x5BAF) > 0;
+        if(moving) return;
+        int roomSizeZ = variables.getU(0x5BAE);
+        int z = block.getU(ix + 0x03);
+        int seed3 = new Random().nextInt(0xFF);
+        if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
+            // @label=init_portcullis_up
+            //int seed3 = variables.getU(0x5BA5);
+            if((seed3 & 0x1F) != 0) return; // ; 1in32 chance?
+
+            block.setBit(0, ix); // ; graphic_no=9
+            block.set(ix + 0x0B, 1); // ; dZ=1 (up)
+        } else {
+            int moveCnt = variables.getU(0x5BB0);
+            if(moveCnt > 4) {
+                if((seed3 & 0x1F) != 0) return;
+                moveCnt+=0x80; // ; arbitrarily large count
+            }
+            // @label=init_portcullis_down
+            variables.set(0x5BB0, moveCnt + 1);
+            block.setBit(0, ix); // ; graphic_no=9
+            block.set(ix + 0x0B, -1); // ; dZ=-1 (down)
+        }
+        variables.set(0x5BAF, variables.getU(0x5BAF) + 1);
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_9_C6BD(DataBlock block, int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
-        // TODO: implement rest of routine
+
+        block.setBit(7, ix + 0x0D);
+        int playerFlags =  graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x0D);
+        boolean enteringRoom = (playerFlags & 0xF0)>0;
+        if(enteringRoom) return;
+        int dZ =  block.getS(ix + 0x0B);
+        if(dZ > 0) {
+            // @label=move_portcullis_up
+            block.set(ix + 0x0B, 2);
+            // $C6EE CALL $B467      ; // ignore audio
+            dec_dZ_and_update_XYZ_C700(block, ix);
+            int roomSizeZ = variables.getU(0x5BAE);
+            int z = block.getU(ix + 0x03);
+            if(z >=  roomSizeZ + 0x1F) stop_portcullis_C6E0(block, ix);
+            //set_wipe_and_draw_flags_C692(block, ix);
+        } else {
+            block.set(ix + 0x0B, dZ - 1); // ; accelerate speed?
+            dec_dZ_and_update_XYZ_C700(block, ix);
+            boolean oob = block.isSet(2, ix + 0x0C);
+            if(oob) stop_portcullis_C6E0(block, ix);
+            //set_wipe_and_draw_flags_C692(block, ix);
+        }
+    }
+
+    private void stop_portcullis_C6E0(DataBlock block, int ix) {
+        // @label=stop_portcullis
+        variables.set(0x5BAF, 0);
+        block.resetBit(0, ix); // graphic_no=8
     }
 
     private void upd_10_C4E8(DataBlock block, int ix) {
