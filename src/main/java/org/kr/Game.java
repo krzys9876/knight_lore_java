@@ -2723,7 +2723,7 @@ public class Game implements Runnable {
 
         if(cauldronRoom) {
             int grNo = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start);
-            if (((grNo - 0x10) & 0xFF) > 0x40) { // is player dead (sparkles)
+            if (((grNo - 0x10) & 0xFF) >= 0x40) { // is player dead (sparkles)
                 upd_111_B95E(block, ix); // ; final sparkles in cauldron
                 return;
             }
