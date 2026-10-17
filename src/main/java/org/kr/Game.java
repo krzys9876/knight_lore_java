@@ -2782,7 +2782,7 @@ public class Game implements Runnable {
         block.set(ix + 0x09, dx); // ; preserve old dX
         block.set(ix + 0x0A, dy); // ; preserve old dY
         int playerGrNo = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start);
-        boolean isWolf = (playerGrNo - 0x10) >= 0x20;
+        boolean isWolf = ((playerGrNo - 0x10) & 0xFF) >= 0x20;
         int screen = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x08);
         boolean screenFlg = (screen & 0x01) == 0;
         int newDz = 4;
@@ -2797,13 +2797,13 @@ public class Game implements Runnable {
             int rnd = new Random().nextInt(0xFF) & 0x01;
             if(rnd == 1) {
                 int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
-                int newdY = block.getU(ix + 2) >= playerY ? 2 : -2;
+                int newdY = block.getU(ix + 2) > playerY ? 2 : -2;
                 if(isWolf) newdY = -newdY; // ; towards player
                 block.set(ix + 0x0A, newdY);
                 block.set(ix + 0x09, 0); // ; new dX=0
             } else {
                 int playerX = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 1);
-                int newdX = block.getU(ix + 1) >= playerX ? 2 : -2;
+                int newdX = block.getU(ix + 1) > playerX ? 2 : -2;
                 if(isWolf) newdX = -newdX; // ; towards player
                 block.set(ix + 0x09, newdX);
                 block.set(ix + 0x0A, 0); // ; new dY=0
