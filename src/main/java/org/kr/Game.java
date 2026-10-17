@@ -884,13 +884,13 @@ public class Game implements Runnable {
             game_over_BA22();
             return;
         }
-        int a = sun_moon_scratchpad_C44D.getU(0xC44D);
-        int dayNight = (a >> 3) & 0x20; // ; day/night?
+        int scratch = sun_moon_scratchpad_C44D.getU(0xC44D);
+        scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
         int playerGraphicsNo = graphic_objs_tbl_5C08.getU(0x5C08+0x10);
-        playerGraphicsNo = (playerGraphicsNo & 0x1F) + dayNight;
+        playerGraphicsNo = (playerGraphicsNo & 0x1F) + scratch;
         graphic_objs_tbl_5C08.set(0x5C08+0x10, playerGraphicsNo);
         int playerGraphicsNoTop = graphic_objs_tbl_5C08.getU(0x5C08+0x30);
-        playerGraphicsNoTop = (playerGraphicsNoTop & 0x0F) + dayNight + 0x20;
+        playerGraphicsNoTop = (playerGraphicsNoTop & 0x0F) + scratch + 0x20;
         graphic_objs_tbl_5C08.set(0x5C08+0x30, playerGraphicsNoTop);
     }
 
