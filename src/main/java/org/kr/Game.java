@@ -304,8 +304,8 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x0C;
-            int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0x75;
+            int overrideWE = 50; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -2706,7 +2706,49 @@ public class Game implements Runnable {
         // c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); // FC
-        // TODO: implement rest of routine
+
+        boolean cauldronRoom = block.getU(ix + 0x08) == 0x88;
+        int dx = 4;
+        int dy = 4;
+        if(!cauldronRoom) {
+            boolean nearArch = graphic_objs_tbl_5C08.isSet(0,graphic_objs_tbl_5C08.start + 0x07);
+            if(!nearArch) {
+                dx = 1;
+                dy = 1;
+            }
+        }
+        move_towards_plyr_B965(block, ix, dx, dy);
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        next_graphic_no_mod_4_B98C(block, ix);
+
+        if(!cauldronRoom) {
+            int grNo = block.getU(ix);
+            if (((grNo - 0x10) & 0xFF) < 0x40) {
+                upd_111_B95E(block, ix); // ; final sparkles in cauldron
+                return;
+            }
+        }
+
+        //set_wipe_and_draw_flags_C692();
+    }
+
+    private void move_towards_plyr_B965(DataBlock block, int ix, int dx, int dy) {
+        int playerX = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 1);
+        int x = block.getU(ix + 1);
+        if(x > playerX) dx = -dx; // player W
+        block.set(ix + 0x09, dx);
+
+        int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
+        int y = block.getU(ix + 2);
+        if(y > playerY) dy = -dy; // player S
+        block.set(ix + 0x0A, dy);
+    }
+
+    private void next_graphic_no_mod_4_B98C(DataBlock block, int ix) {
+        int grNo = block.getU(ix);
+        int grNo2Bits = grNo & 0x03;
+        int newGrNo = grNo & 0xFC | ((grNo2Bits + 1) & 0x03); // ; inc low 2 bits
+        block.set(ix, newGrNo);
     }
 
     private void upd_168_to_175_B923(DataBlock block, int ix) {
