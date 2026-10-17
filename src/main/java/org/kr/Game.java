@@ -242,14 +242,14 @@ public class Game implements Runnable {
         inventory_5BD8.reset();
         objects_carried_5BDC.reset();
         // For testing only
-        inventory_5BD8.set(inventory_5BD8.start, 0x60);
-        inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
-        inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
-        inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
-        objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
-        objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
-        objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
-        graphic_objs_tbl_5C08.reset();
+        //inventory_5BD8.set(inventory_5BD8.start, 0x60);
+        //inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
+        //inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
+        //inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
+        //objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
+        //objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
+        //objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
+        //graphic_objs_tbl_5C08.reset();
         //special_objs_here_5C48.reset();
         //other_objs_here_5C88.reset();
 
@@ -2712,7 +2712,7 @@ public class Game implements Runnable {
         int dy = 4;
         if(!cauldronRoom) {
             boolean nearArch = graphic_objs_tbl_5C08.isSet(0,graphic_objs_tbl_5C08.start + 0x07);
-            if(!nearArch) {
+            if(nearArch) {
                 dx = 1;
                 dy = 1;
             }
@@ -2721,26 +2721,25 @@ public class Game implements Runnable {
         dec_dZ_and_update_XYZ_C700(block, ix);
         next_graphic_no_mod_4_B98C(block, ix);
 
-        if(!cauldronRoom) {
+        if(cauldronRoom) {
             int grNo = block.getU(ix);
-            if (((grNo - 0x10) & 0xFF) < 0x40) {
+            if (((grNo - 0x10) & 0xFF) <= 0x40) { // is player dead (sparkles)
                 upd_111_B95E(block, ix); // ; final sparkles in cauldron
                 return;
             }
         }
-
         //set_wipe_and_draw_flags_C692();
     }
 
     private void move_towards_plyr_B965(DataBlock block, int ix, int dx, int dy) {
         int playerX = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 1);
         int x = block.getU(ix + 1);
-        if(x > playerX) dx = -dx; // player W
+        if(x >= playerX) dx = -dx; // player W
         block.set(ix + 0x09, dx);
 
         int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
         int y = block.getU(ix + 2);
-        if(y > playerY) dy = -dy; // player S
+        if(y >= playerY) dy = -dy; // player S
         block.set(ix + 0x0A, dy);
     }
 
