@@ -228,7 +228,10 @@ public class Game implements Runnable {
         //b$5BC1 DEFS $01
         variables.set(0x5BC1, 0);
 
-
+        //; Data block at 5BC2
+        //@label=tmp_bouncing_ball_dZ
+        //b$5BC2 DEFS $01
+        variables.set(0x5BC2, 0);
 
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
@@ -301,7 +304,7 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x0A;
+            int overrideRoomId = 0x0C;
             int overrideWE = -60; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
@@ -2768,7 +2771,47 @@ public class Game implements Runnable {
         // c$C4F2 LD HL,$FCF8   ; -4, -8
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -4); //FC
-        // TODO: implement rest of routine
+
+        int dx = block.getU(ix + 0x09);
+        int dy = block.getU(ix + 0x0A);
+        int dz = block.getU(ix + 0x0B);
+
+        variables.set(0x5BC2, dz); // ; {tmp store
+        dec_dZ_and_update_XYZ_C700(block, ix);
+
+        block.set(ix + 0x09, dx); // ; preserve old dX
+        block.set(ix + 0x0A, dy); // ; preserve old dY
+        int playerGrNo = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start);
+        boolean isWolf = (playerGrNo - 0x10) >= 0x20;
+        int screen = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x08);
+        boolean screenFlg = (screen & 0x01) == 0;
+        int newDz = 4;
+        if(!screenFlg) {
+            int seed3 = new Random().nextInt(0xFF);
+            newDz += seed3 & 0x03;
+        }
+        boolean zOob = block.isSet(2, ix + 0x0C);
+        if(zOob) {
+            block.set(ix + 0x0B, newDz);
+            // $B64C CALL $B42E     ; } // ignore audio
+            int rnd = new Random().nextInt(0xFF) & 0x01;
+            if(rnd == 1) {
+                int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
+                int newdY = block.getU(ix + 2) >= playerY ? 2 : -2;
+                if(isWolf) newdY = -newdY; // ; towards player
+                block.set(ix + 0x0A, newdY);
+                block.set(ix + 0x09, 0); // ; new dX=0
+            } else {
+                int playerX = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 1);
+                int newdX = block.getU(ix + 1) >= playerX ? 2 : -2;
+                if(isWolf) newdX = -newdX; // ; towards player
+                block.set(ix + 0x09, newdX);
+                block.set(ix + 0x0A, 0); // ; new dY=0
+            }
+        }
+        toggle_next_prev_sprite_B985(block, ix);
+        set_both_deadly_flags_B85C(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_185_187_BF37(DataBlock block, int ix) {
