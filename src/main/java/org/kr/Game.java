@@ -304,10 +304,10 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x75;
-            int overrideWE = 50; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = 0; // -S +N
-            int overrideZ = 0; // + only : 60 is a little above upper entrance
+            int overrideRoomId = 0xFD;
+            int overrideWE = -50; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = 50; // -S +N
+            int overrideZ = 70; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -2545,7 +2545,18 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
-        // TODO: implement rest of routine
+
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        boolean dropped = block.isSet(0, ix + 0x0D);
+        if(dropped) {
+            boolean moving = block.getU(ix + 0x09) != 0 || block.getU(ix + 0x0A) != 0 || block.getU(ix + 0x0A) != 0;
+            if(!moving) return;
+        }
+        block.resetBit(0, ix + 0x0D);
+        block.set(ix + 0x09, 0);
+        block.set(ix + 0x0A, 0);
+        // c$C232 CALL $B467    ; // ignore audio
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_103_C1AB(DataBlock block, int ix) {
@@ -2593,7 +2604,6 @@ public class Game implements Runnable {
         int seed = variables.getU(0x5BA2);
         if(((seed ^ 0xFF) & 0x01) == 0) block.set(ix, block.getU(ix)+1); // next sprite on odd frames
         //set_wipe_and_draw_flags_C692(block, ix);
-        // TODO: implement rest of routine
     }
 
     private void set_wipe_and_draw_flags_C692(DataBlock block, int ix) {
