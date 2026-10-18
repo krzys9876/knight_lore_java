@@ -34,6 +34,7 @@ public class Game implements Runnable {
     private boolean exitingScreen = false;
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 4);
+    private final DataBlock cant_drop_5BD4 = new DataBlock(0x5BD4, 4);
     private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12);
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
@@ -242,16 +243,31 @@ public class Game implements Runnable {
         inventory_5BD8.reset();
         objects_carried_5BDC.reset();
         // For testing only
-        //inventory_5BD8.set(inventory_5BD8.start, 0x60);
-        //inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
-        //inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
-        //inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
-        //objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
-        //objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
-        //objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
+        inventory_5BD8.set(inventory_5BD8.start, 0x60);
+        inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
+        inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
+        inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
+        objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
+        objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
+        objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
         //graphic_objs_tbl_5C08.reset();
         //special_objs_here_5C48.reset();
         //other_objs_here_5C88.reset();
+
+        //; Data block at 5BB3
+        //@label=pickup_drop_pressed
+        //b$5BB3 DEFS $01
+        variables.set(0x5BB3, 0);
+
+        //; Data block at 5BB4
+        //@label=objects_carried_changed
+        //b$5BB4 DEFS $01
+        variables.set(0x5BB4, 0);
+
+        //; Data block at 5BD3
+        //@label=cant_drop
+        //b$5BD3 DEFS $01
+        variables.set(0x5BD3, 0);
 
         variables.set(0x5BA0, v5C78);
         main_AF88();
@@ -305,9 +321,9 @@ public class Game implements Runnable {
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
             int overrideRoomId = 0xFD;
-            int overrideWE = -50; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = 50; // -S +N
-            int overrideZ = 70; // + only : 60 is a little above upper entrance
+            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = 0; // -S +N
+            int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -1603,8 +1619,8 @@ public class Game implements Runnable {
         if(!transformStarted) {
         // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
-            // TODO: implement rest of the routine
             // $C844 CALL $C00E    ; handle_pickup_drop
+            handle_pickup_drop_C00E(block, ix);
             // $C847 CALL $C89F    ; handle_left_right
             handle_left_right_C89F(block, ix);
             // $C84A CALL $C948    ; handle_jump
@@ -1620,6 +1636,44 @@ public class Game implements Runnable {
         }
     }
 
+    private void handle_pickup_drop_C00E(DataBlock block, int ix) {
+        boolean pressed = variables.getU(0x5BB3) != 0;
+        if(!pressed) {
+            if(!chk_pickup_drop_BFFB()) return;
+            if(chk_plyr_OOB_C87A(block, ix)) return;
+            boolean jumping = block.isSet(3,ix + 0x0C);
+            if(jumping) return;
+            boolean zOob = block.isSet(2, ix + 0x0C);
+            if(!zOob) return;
+            variables.set(0x5BD3, 0);
+            int zOrig = block.getU(ix + 3);
+            block.set(ix + 3, zOrig + 12); // ; Z+12
+            boolean intersects = do_any_objs_intersect_B4FD(block, ix);
+            block.set(ix + 3, zOrig); // ; restore original Z
+            if(intersects) { //; we can't drop anything
+                variables.set(0x5BD3, 1);
+            }
+            variables.set(0x5BB3, 1);
+            variables.set(0x5BB4, 1);
+            // TODO: implement rest of the routine
+        } else {
+            // @label=loc_C0A9
+            if(chk_pickup_drop_BFFB()) return;
+            variables.set(0x5BB3, 0);
+        }
+
+    }
+
+    private boolean do_any_objs_intersect_B4FD(DataBlock block, int ix) {
+        // TODO: implement rest of the routine
+        return false;
+    }
+
+    private boolean chk_pickup_drop_BFFB() {
+        int keys = variables.getU(0x5BB5);
+        return (keys & 0x10) > 0; // only standard keyboard input
+    }
+
     private boolean chk_plyr_OOB_C87A(DataBlock block, int ix) {
         int roomSizeX = variables.getU(0x5BAB);
         int roomSizeY = variables.getU(0x5BAC);
@@ -1629,7 +1683,7 @@ public class Game implements Runnable {
         int xCalc = Math.abs(block.getU(ix + 0x01) - 0x80);
         int yCalc = Math.abs(block.getU(ix + 0x02) - 0x80);
 
-        // True if player is outside the room (entering or exitin
+        // True if player is outside the room (entering or exiting)
         return xCalc >= xMax || yCalc >= yMax;
     }
 
