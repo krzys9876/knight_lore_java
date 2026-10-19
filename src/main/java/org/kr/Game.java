@@ -36,6 +36,7 @@ public class Game implements Runnable {
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 4);
     private final DataBlock cant_drop_5BD4 = new DataBlock(0x5BD4, 4);
     private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12);
+    private final DataBlock object_carried_2_5BE4 = new DataBlock(0x5BE4, 4);
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
@@ -923,10 +924,10 @@ public class Game implements Runnable {
             build_screen_objects_D1E6();
             while (!exit & !exitingScreen) {
                 exit = onscreen_loop_AFBD();
-                debugPanel2.setText("");
+                //debugPanel2.setText("");
                 for(int ix = graphic_objs_tbl_5C08.start; ix < graphic_objs_tbl_5C08.endExcl(); ix+=0x20) {
                     if(graphic_objs_tbl_5C08.getU(ix)!=0) {
-                        debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(ix));
+                        //debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(ix));
                     }
                 }
                 delay();
@@ -1653,8 +1654,23 @@ public class Game implements Runnable {
             if(intersects) { //; we can't drop anything
                 variables.set(0x5BD3, 1);
             }
+            // @label=loc_C041
             variables.set(0x5BB3, 1);
             variables.set(0x5BB4, 1);
+            block.set(ix + 4, block.getU(ix + 4) + 4); // ; width+4
+            block.set(ix + 5, block.getU(ix + 5) + 4); // ; depth+4
+            block.set(ix + 6, block.getU(ix + 6) + 4); // ; height+4
+            int iy = 0x5C48;
+            boolean canPickup = false;
+            int b=0;
+            while(b<2 && !canPickup) {
+                canPickup = can_pickup_spec_obj_C172(block, ix, iy);
+                if(!canPickup) {
+                    b++;
+                    iy+=0x20;
+                }
+            }
+            pickup_object_C141(block, ix, iy);
             // TODO: implement rest of the routine
         } else {
             // @label=loc_C0A9
@@ -1662,6 +1678,61 @@ public class Game implements Runnable {
             variables.set(0x5BB3, 0);
         }
 
+    }
+
+    private void pickup_object_C141(DataBlock block, int ix, int iy) {
+        variables.set(0x5BC0, 0);
+        int grNo = block.getU(iy);
+        int hl = inventory_5BD8.start;
+        inventory_5BD8.set(hl, grNo);
+        hl++;
+        int flags = block.getU(iy + 7);
+        inventory_5BD8.set(hl, flags);
+        hl++;
+        int d = block.getU(iy + 0x11);
+        int e = block.getU(iy + 0x10);
+        int ptr =  d * 256 + e; // ; ptr graphic object
+        IO.println("ptr: " + String.format("%02X", ptr));
+        special_objs_tbl_6FF2.set(ptr, 0);
+        inventory_5BD8.set(hl, e);
+        hl++;
+        inventory_5BD8.set(hl, d);
+        //set_wipe_and_draw_flags_C692(block, ix);
+        block.set(iy, 1);
+
+        hl = object_carried_2_5BE4.start;
+        int a = object_carried_2_5BE4.getU(hl);
+        if(a == 0) {
+            adjust_carried_C12B();
+        } else {
+            block.set(iy, a);
+        }
+    }
+
+    private void adjust_carried_C12B() {
+        // TODO: implement
+    }
+
+    private void done_pickup_drop_C09D(DataBlock block, int ix) {
+        // TODO: implement
+    }
+
+    private boolean can_pickup_spec_obj_C172(DataBlock block, int ix, int iy) {
+        int grNo = block.getU(iy);
+        if (grNo - 0x60 >= 0x07) return false; // special objects base no.
+        return !is_on_or_near_obj_C17A(block, ix, iy);
+    }
+
+    private boolean is_on_or_near_obj_C17A(DataBlock block, int ix, int iy) {
+        boolean intersectsX = do_objs_intersect_on_x_CC9D(block, ix, iy, 0);
+        if(intersectsX) return true;
+        boolean intersectsY = do_objs_intersect_on_y_CCB2(block, ix, iy, 0);
+        if(intersectsY) return true;
+        int z = block.getU(ix + 3);
+        block.set(ix + 3, z - 4);
+        boolean intersectsZ = do_objs_intersect_on_z_CCC7(block, ix, iy, 0);
+        block.set(ix + 3, z);
+        return intersectsZ;
     }
 
     private boolean do_any_objs_intersect_B4FD(DataBlock block, int ix) {
@@ -3097,7 +3168,7 @@ public class Game implements Runnable {
                 graphic_objs_tbl_5C08.set(ix+8, currLocId);
                 //for(int i=9; i<16; i++) graphic_objs_tbl_5C08.set(ix+i, 0);
                 graphic_objs_tbl_5C08.set(ix+16, iy & 0xFF);
-                graphic_objs_tbl_5C08.set(ix+17, iy & (0xFF00 >> 8));
+                graphic_objs_tbl_5C08.set(ix+17, (iy & 0xFF00) >> 8);
                 //for(int i=18; i<32; i++) graphic_objs_tbl_5C08.set(ix+i, 0);
                 ix+=32;
             }
