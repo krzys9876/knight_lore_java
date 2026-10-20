@@ -33,10 +33,9 @@ public class Game implements Runnable {
     private final DataBlock variables = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
     private boolean exitingScreen = false;
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
-    private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 4);
+    private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
     private final DataBlock cant_drop_5BD4 = new DataBlock(0x5BD4, 4);
-    private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12);
-    private final DataBlock object_carried_2_5BE4 = new DataBlock(0x5BE4, 4);
+    //private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12); // contains unk and objects_carried_2
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
@@ -242,15 +241,15 @@ public class Game implements Runnable {
         variables.reset();
         scrn_visited_5BE8.reset();
         inventory_5BD8.reset();
-        objects_carried_5BDC.reset();
+        //objects_carried_5BDC.reset();
         // For testing only
-        inventory_5BD8.set(inventory_5BD8.start, 0x60);
-        inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
-        inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
-        inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
-        objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
-        objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
-        objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
+        //inventory_5BD8.set(inventory_5BD8.start, 0x60);
+        //inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
+        //inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
+        //inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
+        //objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
+        //objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
+        //objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
         //graphic_objs_tbl_5C08.reset();
         //special_objs_here_5C48.reset();
         //other_objs_here_5C88.reset();
@@ -321,7 +320,7 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0xFD;
+            int overrideRoomId = 0xFD - 4;
             int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
@@ -924,12 +923,13 @@ public class Game implements Runnable {
             build_screen_objects_D1E6();
             while (!exit & !exitingScreen) {
                 exit = onscreen_loop_AFBD();
-                //debugPanel2.setText("");
+                debugPanel2.setText("");
                 for(int ix = graphic_objs_tbl_5C08.start; ix < graphic_objs_tbl_5C08.endExcl(); ix+=0x20) {
                     if(graphic_objs_tbl_5C08.getU(ix)!=0) {
-                        //debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(ix));
+                        debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(ix));
                     }
                 }
+                debugTable("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
                 delay();
             }
         }
@@ -1059,14 +1059,14 @@ public class Game implements Runnable {
     private void display_objects_BF4E() {
         int ix = sprite_scratchpad_BFDB.start;
         for(int b=0; b<3; b++) {
-            if(objects_carried_5BDC.getU(objects_carried_5BDC.start + b*4)!=0) {
+            if(inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4)!=0) {
                 int x = (2-b)*24+16;
                 int y = 0;
                 sprite_scratchpad_BFDB.set(ix + 0x1A, x);
                 sprite_scratchpad_BFDB.set(ix + 0x1B, y);
                 int hl = calc_vidbuf_addr_D811(y, x);
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
-                int spriteIndex = objects_carried_5BDC.getU(objects_carried_5BDC.start + b*4);
+                int spriteIndex = inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4);
                 sprite_scratchpad_BFDB.set(ix, spriteIndex);
                 print_sprite_D718(sprite_scratchpad_BFDB, ix);
                 // TODO: implement blit_to_screen
@@ -1657,9 +1657,12 @@ public class Game implements Runnable {
             // @label=loc_C041
             variables.set(0x5BB3, 1);
             variables.set(0x5BB4, 1);
-            block.set(ix + 4, block.getU(ix + 4) + 4); // ; width+4
-            block.set(ix + 5, block.getU(ix + 5) + 4); // ; depth+4
-            block.set(ix + 6, block.getU(ix + 6) + 4); // ; height+4
+            int origW = block.getU(ix + 4);
+            int origD = block.getU(ix + 5);
+            int origH = block.getU(ix + 6);
+            block.set(ix + 4, origW + 4); // ; width+4
+            block.set(ix + 5, origD + 4); // ; depth+4
+            block.set(ix + 6, origH + 4); // ; height+4
             int iy = 0x5C48;
             boolean canPickup = false;
             int b=0;
@@ -1670,7 +1673,8 @@ public class Game implements Runnable {
                     iy+=0x20;
                 }
             }
-            pickup_object_C141(block, ix, iy);
+            if(canPickup) pickup_object_C141(block, ix, iy, origW, origD, origH);
+
             // TODO: implement rest of the routine
         } else {
             // @label=loc_C0A9
@@ -1680,7 +1684,7 @@ public class Game implements Runnable {
 
     }
 
-    private void pickup_object_C141(DataBlock block, int ix, int iy) {
+    private void pickup_object_C141(DataBlock block, int ix, int iy, int origW, int origD, int origH) {
         variables.set(0x5BC0, 0);
         int grNo = block.getU(iy);
         int hl = inventory_5BD8.start;
@@ -1700,27 +1704,43 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
         block.set(iy, 1);
 
-        hl = object_carried_2_5BE4.start;
-        int a = object_carried_2_5BE4.getU(hl);
+        hl = inventory_5BD8.start + 0x0C;
+        int a = inventory_5BD8.getU(hl);
         if(a == 0) {
             adjust_carried_C12B();
+            done_pickup_drop_C09D(block, ix, origW, origD, origH);
         } else {
             block.set(iy, a);
         }
+
+    }
+
+    private void done_pickup_drop_C09D(DataBlock block, int ix, int origW, int origD, int origH) {
+        block.set(ix + 4, origW);
+        block.set(ix + 5, origD);
+        block.set(ix + 6, origH);
     }
 
     private void adjust_carried_C12B() {
-        // TODO: implement
-    }
-
-    private void done_pickup_drop_C09D(DataBlock block, int ix) {
-        // TODO: implement
+        int hl = inventory_5BD8.start + 0x0B; // unk
+        int de = inventory_5BD8.last();
+        for(int bc = 0; bc<0x0c; bc++) { // LDDR
+            inventory_5BD8.set(de, inventory_5BD8.getU(hl));
+            hl--;
+            de--;
+        }
+        de = inventory_5BD8.start;
+        for(int b = 0; b<4; b++) {
+            inventory_5BD8.set(de, 0);
+            de++;
+        }
     }
 
     private boolean can_pickup_spec_obj_C172(DataBlock block, int ix, int iy) {
         int grNo = block.getU(iy);
-        if (grNo - 0x60 >= 0x07) return false; // special objects base no.
-        return !is_on_or_near_obj_C17A(block, ix, iy);
+        if (((grNo - 0x60) & 0xFF) >= 0x07) return false; // special objects base no.
+        //return !is_on_or_near_obj_C17A(block, ix, iy);
+        return true;
     }
 
     private boolean is_on_or_near_obj_C17A(DataBlock block, int ix, int iy) {
@@ -2466,7 +2486,7 @@ public class Game implements Runnable {
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
-        boolean disableSpikeBallDrop = false;// variables.getU(0x5BC0) != 0;
+        boolean disableSpikeBallDrop = variables.getU(0x5BC0) != 0;
         if(disableSpikeBallDrop) return;
         boolean isDropping = block.isSet(2,ix + 0x0D);
         if(isDropping) {
