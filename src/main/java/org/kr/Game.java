@@ -1729,7 +1729,7 @@ public class Game implements Runnable {
                 block.set(ix + 3, block.getU(ix + 3) + 0x0C);
                 block.set(ix + 0x23, block.getU(ix + 0x23) + 0x0C);
                 calc_pixel_XY_D6C9(block, iy);
-                drop_object_C106(block, ix, iy, block.getU(iy + 7), block.getU(iy + 0x11), block.getU(iy + 0x10));
+                drop_object_C106(block, ix, iy);
             }
 
         }
@@ -1761,12 +1761,16 @@ public class Game implements Runnable {
             adjust_carried_C12B();
         } else {
             block.set(iy, a);
-            drop_object_C106(block, ix, iy, flags, d, e);
+            drop_object_C106(block, ix, iy);
         }
 
     }
 
-    private void drop_object_C106(DataBlock block, int ix, int iy, int flags, int d, int e) {
+    private void drop_object_C106(DataBlock block, int ix, int iy) {
+        int hl = inventory_5BD8.start + 0x0C; // current slot
+        int flags = inventory_5BD8.getU(hl + 1);
+        int d = inventory_5BD8.getU(hl + 3); // 2-byte pointer to special objects table
+        int e = inventory_5BD8.getU(hl + 2);
         block.set(iy + 4, 5); // width=5
         block.set(iy + 5, 5); // depth=5
         block.set(iy + 6, 0x0C); // height=12
