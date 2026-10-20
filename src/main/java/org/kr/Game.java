@@ -320,10 +320,10 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0xFD - 4;
+            int overrideRoomId = 0x42 ;
             int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
-            int overrideZ = 0; // + only : 60 is a little above upper entrance
+            int overrideZ = 70; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -1675,6 +1675,7 @@ public class Game implements Runnable {
             }
             if(canPickup) pickup_object_C141(block, ix, iy, origW, origD, origH);
 
+            done_pickup_drop_C09D(block, ix, origW, origD, origH);
             // TODO: implement rest of the routine
         } else {
             // @label=loc_C0A9
@@ -1708,7 +1709,6 @@ public class Game implements Runnable {
         int a = inventory_5BD8.getU(hl);
         if(a == 0) {
             adjust_carried_C12B();
-            done_pickup_drop_C09D(block, ix, origW, origD, origH);
         } else {
             block.set(iy, a);
         }
@@ -1739,15 +1739,14 @@ public class Game implements Runnable {
     private boolean can_pickup_spec_obj_C172(DataBlock block, int ix, int iy) {
         int grNo = block.getU(iy);
         if (((grNo - 0x60) & 0xFF) >= 0x07) return false; // special objects base no.
-        //return !is_on_or_near_obj_C17A(block, ix, iy);
-        return true;
+        return is_on_or_near_obj_C17A(block, ix, iy);
     }
 
     private boolean is_on_or_near_obj_C17A(DataBlock block, int ix, int iy) {
         boolean intersectsX = do_objs_intersect_on_x_CC9D(block, ix, iy, 0);
-        if(intersectsX) return true;
+        if(!intersectsX) return false;
         boolean intersectsY = do_objs_intersect_on_y_CCB2(block, ix, iy, 0);
-        if(intersectsY) return true;
+        if(!intersectsY) return false;
         int z = block.getU(ix + 3);
         block.set(ix + 3, z - 4);
         boolean intersectsZ = do_objs_intersect_on_z_CCC7(block, ix, iy, 0);
