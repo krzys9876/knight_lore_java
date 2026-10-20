@@ -34,7 +34,7 @@ public class Game implements Runnable {
     private boolean exitingScreen = false;
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
-    private final DataBlock cant_drop_5BD4 = new DataBlock(0x5BD4, 4);
+    private final DataBlock cant_drop_5BD3 = new DataBlock(0x5BD3, 5);
     //private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12); // contains unk and objects_carried_2
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
@@ -241,6 +241,7 @@ public class Game implements Runnable {
         variables.reset();
         scrn_visited_5BE8.reset();
         inventory_5BD8.reset();
+        cant_drop_5BD3.reset();
         //objects_carried_5BDC.reset();
         // For testing only
         //inventory_5BD8.set(inventory_5BD8.start, 0x60);
@@ -263,11 +264,6 @@ public class Game implements Runnable {
         //@label=objects_carried_changed
         //b$5BB4 DEFS $01
         variables.set(0x5BB4, 0);
-
-        //; Data block at 5BD3
-        //@label=cant_drop
-        //b$5BD3 DEFS $01
-        variables.set(0x5BD3, 0);
 
         variables.set(0x5BA0, v5C78);
         main_AF88();
@@ -1642,17 +1638,18 @@ public class Game implements Runnable {
         if(!pressed) {
             if(!chk_pickup_drop_BFFB()) return;
             if(chk_plyr_OOB_C87A(block, ix)) return;
+            IO.println("A");
             boolean jumping = block.isSet(3,ix + 0x0C);
             if(jumping) return;
             boolean zOob = block.isSet(2, ix + 0x0C);
             if(!zOob) return;
-            variables.set(0x5BD3, 0);
+            cant_drop_5BD3.set(0x5BD3, 0);
             int zOrig = block.getU(ix + 3);
             block.set(ix + 3, zOrig + 12); // ; Z+12
             boolean intersects = do_any_objs_intersect_B4FD(block, ix);
             block.set(ix + 3, zOrig); // ; restore original Z
             if(intersects) { //; we can't drop anything
-                variables.set(0x5BD3, 1);
+                cant_drop_5BD3.set(0x5BD3, 1);
             }
             // @label=loc_C041
             variables.set(0x5BB3, 1);
@@ -1665,24 +1662,77 @@ public class Game implements Runnable {
             block.set(ix + 6, origH + 4); // ; height+4
             int iy = 0x5C48;
             boolean canPickup = false;
-            int b=0;
-            while(b<2 && !canPickup) {
+            int b=2;
+            while(b>0 && !canPickup) {
                 canPickup = can_pickup_spec_obj_C172(block, ix, iy);
                 if(!canPickup) {
-                    b++;
+                    b--;
                     iy+=0x20;
                 }
             }
-            if(canPickup) pickup_object_C141(block, ix, iy, origW, origD, origH);
+            if(canPickup) {
+                IO.println("C");
+                pickup_object_C141(block, ix, iy, origW, origD, origH);
+            } else {
+                if(chk_pickup_drop_BFFB()) {
+                    b=2;
+                    boolean cauldronRoom = block.getU(ix + 8) == 0x88;
+                    if(cauldronRoom) b=1; // ; only check 1st special object
+                    iy = 0x5C48;
+                    boolean foundPlace = false;
+                    while(b>0 && !foundPlace) {
+                        foundPlace = block.getU(iy) == 0;
+                        if(!foundPlace) {
+                            b--;
+                            iy+=0x20;
+                        }
+                    }
+                    if(foundPlace) {
+                        IO.println("C");
+                        room_to_drop_C0B2(block, ix, iy);
+                    }
+                };
+            }
 
             done_pickup_drop_C09D(block, ix, origW, origD, origH);
+
+
             // TODO: implement rest of the routine
         } else {
+            IO.println("B");
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
             variables.set(0x5BB3, 0);
         }
 
+    }
+
+    private void room_to_drop_C0B2(DataBlock block, int ix, int iy) {
+        int hl = inventory_5BD8.start + 0x0C;
+        if(inventory_5BD8.getU(hl) == 0) {
+            adjust_carried_C12B();
+        } else {
+            if(cant_drop_5BD3.getU(cant_drop_5BD3.start) == 0) {
+                int grNo = inventory_5BD8.getU(hl);
+                block.set(iy, grNo);
+                boolean cauldronRoom = block.getU(ix + 8) == 0x88;
+                if(cauldronRoom) {
+                    int z = block.getU(ix + 3);
+                    if(z >= 0x98) {
+                        block.setBit(3, iy);
+                        variables.set(0x5BC4, 1);
+                    }
+                }
+                block.set(iy + 1, block.getU(ix + 1));
+                block.set(iy + 2, block.getU(ix + 2));
+                block.set(iy + 3, block.getU(ix + 3));
+                block.set(ix + 3, block.getU(ix + 3) + 0x0C);
+                block.set(ix + 0x23, block.getU(ix + 0x23) + 0x0C);
+                calc_pixel_XY_D6C9(block, iy);
+                drop_object_C106(block, ix, iy, block.getU(iy + 7), block.getU(iy + 0x11), block.getU(iy + 0x10));
+            }
+
+        }
     }
 
     private void pickup_object_C141(DataBlock block, int ix, int iy, int origW, int origD, int origH) {
@@ -1711,8 +1761,21 @@ public class Game implements Runnable {
             adjust_carried_C12B();
         } else {
             block.set(iy, a);
+            drop_object_C106(block, ix, iy, flags, d, e);
         }
 
+    }
+
+    private void drop_object_C106(DataBlock block, int ix, int iy, int flags, int d, int e) {
+        block.set(iy + 4, 5); // width=5
+        block.set(iy + 5, 5); // depth=5
+        block.set(iy + 6, 0x0C); // height=12
+        block.set(iy + 7, flags); //flags7
+        block.set(iy + 8, block.getU(ix + 8)); // ; scrn
+        block.set(iy + 0x11, d);
+        block.set(iy + 0x10, e); // set ptr to obj_tbl entry
+        block.setBit(0, iy + 0x0D); // flag just dropped
+        adjust_carried_C12B();
     }
 
     private void done_pickup_drop_C09D(DataBlock block, int ix, int origW, int origD, int origH) {
