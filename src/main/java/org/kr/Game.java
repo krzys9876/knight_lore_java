@@ -940,6 +940,7 @@ public class Game implements Runnable {
 
         if(exitingScreen) return false;
         // loc_B000
+        variables.setBit(0, 0x5BB2);
         list_objects_to_draw_CE62();
         //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
 
@@ -1638,7 +1639,6 @@ public class Game implements Runnable {
         if(!pressed) {
             if(!chk_pickup_drop_BFFB()) return;
             if(chk_plyr_OOB_C87A(block, ix)) return;
-            IO.println("A");
             boolean jumping = block.isSet(3,ix + 0x0C);
             if(jumping) return;
             boolean zOob = block.isSet(2, ix + 0x0C);
@@ -1671,7 +1671,6 @@ public class Game implements Runnable {
                 }
             }
             if(canPickup) {
-                IO.println("C");
                 pickup_object_C141(block, ix, iy, origW, origD, origH);
             } else {
                 if(chk_pickup_drop_BFFB()) {
@@ -1687,24 +1686,16 @@ public class Game implements Runnable {
                             iy+=0x20;
                         }
                     }
-                    if(foundPlace) {
-                        IO.println("C");
-                        room_to_drop_C0B2(block, ix, iy);
-                    }
+                    if(foundPlace) room_to_drop_C0B2(block, ix, iy);
                 };
             }
 
             done_pickup_drop_C09D(block, ix, origW, origD, origH);
-
-
-            // TODO: implement rest of the routine
         } else {
-            IO.println("B");
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
             variables.set(0x5BB3, 0);
         }
-
     }
 
     private void room_to_drop_C0B2(DataBlock block, int ix, int iy) {
@@ -3114,12 +3105,26 @@ public class Game implements Runnable {
         variables.set(0x5BC0, graphic_objs_tbl_5C08.getU(0x5C10) & 1);
 
         //flag_room_visited_D219();
-
-
     }
 
     private void update_special_objs_C591() {
-        //TODO: implement
+        int iy = 0x5C48;
+        for(int i=0; i<2; i++) {
+            int grNo = graphic_objs_tbl_5C08.getU(iy);
+            if(grNo != 0) {
+                int e = graphic_objs_tbl_5C08.getU(iy + 0x10);
+                int d = graphic_objs_tbl_5C08.getU(iy + 0x11);
+                int ptr = d*256 + e;
+                special_objs_tbl_6FF2.set(ptr, grNo);
+                ptr += 5;
+                special_objs_tbl_6FF2.set(ptr, graphic_objs_tbl_5C08.getU(iy + 1));
+                special_objs_tbl_6FF2.set(ptr+1, graphic_objs_tbl_5C08.getU(iy + 2));
+                special_objs_tbl_6FF2.set(ptr+2, graphic_objs_tbl_5C08.getU(iy + 3));
+                int screen = graphic_objs_tbl_5C08.getU(iy + 8);
+                special_objs_tbl_6FF2.set(ptr+3, screen);
+            }
+            iy += 0x20;
+        }
     }
 
     private void retrieve_screen_D3C6() {
