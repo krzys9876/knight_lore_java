@@ -1738,7 +1738,6 @@ public class Game implements Runnable {
         int d = block.getU(iy + 0x11);
         int e = block.getU(iy + 0x10);
         int ptr =  d * 256 + e; // ; ptr graphic object
-        IO.println("ptr: " + String.format("%02X", ptr));
         special_objs_tbl_6FF2.set(ptr, 0);
         inventory_5BD8.set(hl, e);
         hl++;
@@ -3114,14 +3113,16 @@ public class Game implements Runnable {
             if(grNo != 0) {
                 int e = graphic_objs_tbl_5C08.getU(iy + 0x10);
                 int d = graphic_objs_tbl_5C08.getU(iy + 0x11);
-                int ptr = d*256 + e;
-                special_objs_tbl_6FF2.set(ptr, grNo);
-                ptr += 5;
-                special_objs_tbl_6FF2.set(ptr, graphic_objs_tbl_5C08.getU(iy + 1));
-                special_objs_tbl_6FF2.set(ptr+1, graphic_objs_tbl_5C08.getU(iy + 2));
-                special_objs_tbl_6FF2.set(ptr+2, graphic_objs_tbl_5C08.getU(iy + 3));
-                int screen = graphic_objs_tbl_5C08.getU(iy + 8);
-                special_objs_tbl_6FF2.set(ptr+3, screen);
+                int ptr = d*256 + e; // ptr can be 0 for cauldron bubbles
+                if(ptr != 0) {
+                    special_objs_tbl_6FF2.set(ptr, grNo);
+                    ptr += 5;
+                    special_objs_tbl_6FF2.set(ptr, graphic_objs_tbl_5C08.getU(iy + 1));
+                    special_objs_tbl_6FF2.set(ptr + 1, graphic_objs_tbl_5C08.getU(iy + 2));
+                    special_objs_tbl_6FF2.set(ptr + 2, graphic_objs_tbl_5C08.getU(iy + 3));
+                    int screen = graphic_objs_tbl_5C08.getU(iy + 8);
+                    special_objs_tbl_6FF2.set(ptr + 3, screen);
+                }
             }
             iy += 0x20;
         }
