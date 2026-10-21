@@ -3250,7 +3250,7 @@ public class Game implements Runnable {
             int specialObjGrNo = special_objs_tbl_6FF2.getU(iy);
             int ix = 0x5C48;
             boolean saved = false;
-            while(ix <= 0x5C88 && !saved) {
+            while(ix < 0x5C88 && !saved) {
                 int screenObjGrNo = graphic_objs_tbl_5C08.getU(ix);
                 if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == special_objs_tbl_6FF2.getU(iy + 8)) {
                     graphic_objs_tbl_5C08.set(ix, special_objs_tbl_6FF2.getU(iy));
