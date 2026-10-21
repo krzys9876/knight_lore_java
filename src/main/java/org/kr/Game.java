@@ -2750,9 +2750,9 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -4); //FC
 
         dec_dZ_and_update_XYZ_C700(block, ix);
-        boolean dropped = block.isSet(0, ix + 0x0D);
-        if(dropped) {
-            boolean moving = block.getU(ix + 0x09) != 0 || block.getU(ix + 0x0A) != 0 || block.getU(ix + 0x0A) != 0;
+        boolean justDropped = block.isSet(0, ix + 0x0D);
+        if(!justDropped) {
+            boolean moving = block.getU(ix + 0x09) != 0 || block.getU(ix + 0x0A) != 0 || block.getU(ix + 0x0B) != 0;
             if(!moving) return;
         }
         block.resetBit(0, ix + 0x0D);
