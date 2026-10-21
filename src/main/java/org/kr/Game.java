@@ -862,7 +862,7 @@ public class Game implements Runnable {
             hl+=8;
             rnd++;
         }
-        debugTable("Special objects:", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy());
+        debugTable2("Special objects:", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy());
     }
 
     private void player_dies_AFB7() {
@@ -919,13 +919,15 @@ public class Game implements Runnable {
             build_screen_objects_D1E6();
             while (!exit & !exitingScreen) {
                 exit = onscreen_loop_AFBD();
+                debugPanel1.setText("");
                 debugPanel2.setText("");
                 for(int ix = graphic_objs_tbl_5C08.start; ix < graphic_objs_tbl_5C08.endExcl(); ix+=0x20) {
                     if(graphic_objs_tbl_5C08.getU(ix)!=0) {
                         debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(ix));
                     }
                 }
-                debugTable("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
+                debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
+                debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
                 delay();
             }
         }
@@ -3116,12 +3118,11 @@ public class Game implements Runnable {
                 int ptr = d*256 + e; // ptr can be 0 for cauldron bubbles
                 if(ptr != 0) {
                     special_objs_tbl_6FF2.set(ptr, grNo);
-                    ptr += 5;
-                    special_objs_tbl_6FF2.set(ptr, graphic_objs_tbl_5C08.getU(iy + 1));
-                    special_objs_tbl_6FF2.set(ptr + 1, graphic_objs_tbl_5C08.getU(iy + 2));
-                    special_objs_tbl_6FF2.set(ptr + 2, graphic_objs_tbl_5C08.getU(iy + 3));
+                    special_objs_tbl_6FF2.set(ptr + 5, graphic_objs_tbl_5C08.getU(iy + 1));
+                    special_objs_tbl_6FF2.set(ptr + 6, graphic_objs_tbl_5C08.getU(iy + 2));
+                    special_objs_tbl_6FF2.set(ptr + 7, graphic_objs_tbl_5C08.getU(iy + 3));
                     int screen = graphic_objs_tbl_5C08.getU(iy + 8);
-                    special_objs_tbl_6FF2.set(ptr + 3, screen);
+                    special_objs_tbl_6FF2.set(ptr + 8, screen);
                 }
             }
             iy += 0x20;
@@ -3238,38 +3239,43 @@ public class Game implements Runnable {
         // clear rest of graphics objects table
         for(int i=targetAddr; i<graphic_objs_tbl_5C08.start + graphic_objs_tbl_5C08.size; i++) graphic_objs_tbl_5C08.set(i, 0);
 
-        debugTable("Other objects data:", graphic_objs_tbl_5C08.start, graphic_objs_tbl_5C08.getCopy());
+        debugTable2("Other objects data:", graphic_objs_tbl_5C08.start, graphic_objs_tbl_5C08.getCopy());
     }
 
     private void find_special_objs_here_C525() {
-        // TODO: implement
         int currLocId = graphic_objs_tbl_5C08.getU(0x5C08 + 8);
         for(int i=0x5C08 + 2*0x20; i<0x5C08 + 4*0x20; i++) graphic_objs_tbl_5C08.set(i, 0);
         int iy = special_objs_tbl_6FF2.start;
-        int ix = 0x5C48;
-        while(iy<special_objs_tbl_6FF2.endExcl() && special_objs_tbl_6FF2.getU(iy)!=0) {
-            if(currLocId == special_objs_tbl_6FF2.getU(iy+8)) {
-                graphic_objs_tbl_5C08.set(ix, special_objs_tbl_6FF2.getU(iy));
-                graphic_objs_tbl_5C08.set(ix+1, special_objs_tbl_6FF2.getU(iy+5));
-                graphic_objs_tbl_5C08.set(ix+2, special_objs_tbl_6FF2.getU(iy+6));
-                graphic_objs_tbl_5C08.set(ix+3, special_objs_tbl_6FF2.getU(iy+7));
-                graphic_objs_tbl_5C08.set(ix+4, 5);
-                graphic_objs_tbl_5C08.set(ix+5, 5);
-                graphic_objs_tbl_5C08.set(ix+6, 0xC);
-                graphic_objs_tbl_5C08.set(ix+7, 0x14);
-                graphic_objs_tbl_5C08.set(ix+8, currLocId);
-                //for(int i=9; i<16; i++) graphic_objs_tbl_5C08.set(ix+i, 0);
-                graphic_objs_tbl_5C08.set(ix+16, iy & 0xFF);
-                graphic_objs_tbl_5C08.set(ix+17, (iy & 0xFF00) >> 8);
-                //for(int i=18; i<32; i++) graphic_objs_tbl_5C08.set(ix+i, 0);
-                ix+=32;
+        while(iy<special_objs_tbl_6FF2.endExcl()) {
+            int specialObjGrNo = special_objs_tbl_6FF2.getU(iy);
+            int ix = 0x5C48;
+            boolean saved = false;
+            while(ix <= 0x5C88 && !saved) {
+                int screenObjGrNo = graphic_objs_tbl_5C08.getU(ix);
+                if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == special_objs_tbl_6FF2.getU(iy + 8)) {
+                    graphic_objs_tbl_5C08.set(ix, special_objs_tbl_6FF2.getU(iy));
+                    graphic_objs_tbl_5C08.set(ix + 1, special_objs_tbl_6FF2.getU(iy + 5));
+                    graphic_objs_tbl_5C08.set(ix + 2, special_objs_tbl_6FF2.getU(iy + 6));
+                    graphic_objs_tbl_5C08.set(ix + 3, special_objs_tbl_6FF2.getU(iy + 7));
+                    graphic_objs_tbl_5C08.set(ix + 4, 5);
+                    graphic_objs_tbl_5C08.set(ix + 5, 5);
+                    graphic_objs_tbl_5C08.set(ix + 6, 0x0C);
+                    graphic_objs_tbl_5C08.set(ix + 7, 0x14);
+                    graphic_objs_tbl_5C08.set(ix + 8, currLocId);
+                    for (int i = 9; i < 16; i++) graphic_objs_tbl_5C08.set(ix + i, 0);
+                    graphic_objs_tbl_5C08.set(ix + 0x10, iy & 0xFF);
+                    graphic_objs_tbl_5C08.set(ix + 0x11, (iy & 0xFF00) >> 8);
+                    for (int i = 18; i < 32; i++) graphic_objs_tbl_5C08.set(ix + i, 0);
+                    saved = true;
+                }
+                ix += 32;
             }
             iy+=9;
         }
     }
 
     private void adjust_plyr_xyz_for_room_size_D320() {
-        debugTable("Graphic objects table:", 0x5C08, graphic_objs_tbl_5C08.getCopy());
+        debugTable2("Graphic objects table:", 0x5C08, graphic_objs_tbl_5C08.getCopy());
         int roomSizeX = variables.getU(0x5BAB) - 2;
         int roomSizeY = variables.getU(0x5BAC) - 2;
         int ix = 0x5C08;
@@ -3375,32 +3381,36 @@ public class Game implements Runnable {
     }
 
     private void printLookupTable() {
-        debugTable("Lookup table:", 0xF100, lookupTable.getCopy());
+        debugTable2("Lookup table:", 0xF100, lookupTable.getCopy());
     }
 
     private void printVariables() {
-        debugTable("Variables:", 0x5BA0, variables.getCopy());
+        debugTable2("Variables:", 0x5BA0, variables.getCopy());
     }
 
     private void printVideoMemory() {
-        debugTable("Video (main):", 0x4000, mainMemory.getCopy());
+        debugTable2("Video (main):", 0x4000, mainMemory.getCopy());
     }
 
     private void printShadowMemory() {
-        debugTable("Video (shadow):", 0x4000, shadowMemory.getCopy());
+        debugTable2("Video (shadow):", 0x4000, shadowMemory.getCopy());
     }
 
-    private void debugTable(String title, int offset, int[] table) {
+    private void debugTable2(String title, int offset, int[] table) {
+        debugTable(title, offset, table, 16, debugPanel2);
+    }
+
+    private void debugTable(String title, int offset, int[] table, int mod, DebugPanel panel) {
         StringBuilder t= new StringBuilder();
         t.append(title);
         for(int i = 0; i < table.length; i++) {
-            if((i % 16) == 0) {
-                debugPanel2.append(t.toString());
+            if((i % mod) == 0) {
+                panel.append(t.toString());
                 t = new StringBuilder(String.format("%04x:", i + offset));
             }
             t.append(" ").append(String.format("%02x", table[i]));
         }
-        debugPanel2.append(t.toString());
+        panel.append(t.toString());
     }
 
     private void debugTableConsole(String title, int offset, int[] table) {
