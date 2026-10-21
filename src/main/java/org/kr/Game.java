@@ -2793,6 +2793,10 @@ public class Game implements Runnable {
             print_lives_BCA3();
         }
         dec_dZ_and_update_XYZ_C700(block, ix);
+        if(is_obj_moving_C1A1(block, ix)) {
+            block.set(ix + 0x09, 0);
+            block.set(ix + 0x0A, 0);
+        }
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
