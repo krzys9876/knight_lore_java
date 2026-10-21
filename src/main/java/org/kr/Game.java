@@ -2778,7 +2778,7 @@ public class Game implements Runnable {
         block.set(ix + 5, depth); //; restore depth
         ix = iy; // ; restore ix (extra life object)
         if(isNear) {
-            block.setBit(3, ix); // ; graphic_no
+            block.setBit(3, ix); // ; graphic_no: 103 + 8 = 111, see upd_111
             //c$C4D8 LD HL,$FCF4   ; -4, -12
             block.set(ix + 0x12, -12); //F4
             block.set(ix + 0x13, -4); //FC
@@ -2791,14 +2791,9 @@ public class Game implements Runnable {
             variables.set(0x5BC0, 0);
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
-
-
-
         }
-
-
-
-        // TODO: implement rest of routine
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_104_to_110_C1F1(DataBlock block, int ix) {
