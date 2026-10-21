@@ -316,10 +316,10 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x42 ;
+            int overrideRoomId = 0xb4 ;
             int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
-            int overrideZ = 70; // + only : 60 is a little above upper entrance
+            int overrideZ = 80; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -2766,6 +2766,38 @@ public class Game implements Runnable {
         //c$C4D3 LD HL,$FEF8   ; -2, -8
         block.set(ix + 0x12, -8); //F8
         block.set(ix + 0x13, -2); //FE
+
+        int iy = ix; // ; iy=extra life object
+        ix = graphic_objs_tbl_5C08.start; // ; ix = player
+        int width = block.getU(ix + 4);
+        int depth = block.getU(ix + 5);
+        block.set(ix + 4, width+1);
+        block.set(ix + 5, depth+1);
+        boolean isNear = is_on_or_near_obj_C17A(block, ix, iy);
+        block.set(ix + 4, width); //; restore width
+        block.set(ix + 5, depth); //; restore depth
+        ix = iy; // ; restore ix (extra life object)
+        if(isNear) {
+            block.setBit(3, ix); // ; graphic_no
+            //c$C4D8 LD HL,$FCF4   ; -4, -12
+            block.set(ix + 0x12, -12); //F4
+            block.set(ix + 0x13, -4); //FC
+            int l = block.getU(ix + 0x10);
+            int h = block.getU(ix + 0x11);
+            int ptr = h * 256 + l;
+            special_objs_tbl_6FF2.set(ptr, 0); // ; zap ptr object table entry
+            int lives = variables.getU(0x5BBA);
+            variables.set(0x5BBA, lives + 1);
+            variables.set(0x5BC0, 0);
+            // $C1E2 CALL $B4A3     ; // ignore audio
+            print_lives_BCA3();
+
+
+
+        }
+
+
+
         // TODO: implement rest of routine
     }
 
