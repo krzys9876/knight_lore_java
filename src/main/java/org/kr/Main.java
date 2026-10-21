@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Main {
     static void main() {
-        IO.println("START init");
         FlatLightLaf.setup();
 
         ScreenPanel panel1 = new ScreenPanel();
@@ -18,21 +17,26 @@ public class Main {
         DebugPanel panel4 = new DebugPanel();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1400, 900);
+        frame.setSize(1800, 900);
         frame.setTitle("KL");
-        frame.setLayout(new GridLayout(2, 2));
-        frame.add(panel1);
-        frame.add(panel2);
-        frame.add(panel3);
-        frame.add(panel4);
-        frame.setVisible(true);
+        //frame.setLayout(new GridLayout(1, 3));
+        frame.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.weighty = 1.0;
+        c.gridy = 0;
 
-        /*try {
-            panel1.saveImage("p1.png");
-            panel1.saveImage("p2.png");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        c.gridx = 0; c.weightx = 4.0;
+        frame.add(panel1, c);
+
+        c.gridx = 1; c.weightx = 1.0;
+        frame.add(panel3, c);
+
+        c.gridx = 2; c.weightx = 1.0;
+        frame.add(panel4, c);
+
+        //frame.add(panel2);
+        frame.setVisible(true);
 
         panel1.requestFocus();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
@@ -46,9 +50,6 @@ public class Main {
                     else if (e.getID() == KeyEvent.KEY_RELEASED)keyQueue.remove(e.getKeyCode());
                     return false; // false = let the event continue to normal processing
                 });
-
-
-        IO.println("END init");
     }
 }
 
