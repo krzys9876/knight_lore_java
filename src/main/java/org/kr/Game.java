@@ -235,6 +235,11 @@ public class Game implements Runnable {
         //b$5BC2 DEFS $01
         variables.set(0x5BC2, 0);
 
+        //; Data block at 5BBB
+        //@label=objects_put_in_cauldron
+        //b$5BBB DEFS $01
+        variables.set(0x5BBB, 0);
+
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
         // CALL $D53A    ;
@@ -2978,18 +2983,22 @@ public class Game implements Runnable {
             int playerGrNo = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start);
             boolean isWulf = ((playerGrNo - 0x10) & 0xFF) >= 0x30;
             if(!isWulf) {
-                // TODO: implement: reveal next required object
-                //int grNo = block.getU(ix);
-                //if((grNo & 3) == 0) {
-
-                //}
+                int grNo = block.getU(ix);
+                if((grNo & 3) == 0) {
+                    int hl = ret_next_obj_required_C274();
+                    block.set(ix, objects_required_C27D.getU(hl) | 0xA8);
+                }
+            } else {
+                block.setBit(2, ix);
+                block.resetBit(1, ix + 7); // ; don't ignore in 3D calcs
             }
-            block.setBit(2, ix);
-            block.resetBit(1, ix + 7); // ; don't ignore in 3D calcs
         }
         //set_wipe_and_draw_flags_C692(block, ix);
+    }
 
-        // TODO: implement rest of routine
+    private int ret_next_obj_required_C274() {
+        int objsInCauldron = variables.getU(0x5BBB);
+        return objects_required_C27D.start + objsInCauldron;
     }
 
     private void upd_164_to_167_B92C(DataBlock block, int ix) {
