@@ -2981,7 +2981,7 @@ public class Game implements Runnable {
         if(z >= 0xA0) {
             block.set(ix + 0x0B, 1); // dZ=1
             int playerGrNo = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start);
-            boolean isWulf = ((playerGrNo - 0x10) & 0xFF) >= 0x30;
+            boolean isWulf = ((playerGrNo - 0x30) & 0xFF) < 0x10;
             if(!isWulf) {
                 int grNo = block.getU(ix);
                 if((grNo & 3) == 0) {
