@@ -64,6 +64,7 @@ public class Game implements Runnable {
     private final DataBlock objects_to_draw_CE8B = new DataBlock(0xCE8B, 0x2E); // 46, but there should be not more than 40 objects to draw
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
     private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
+    private final DataBlock cauldron_bubbles_B8C8 =  InitialData.block("cauldron_bubbles_B8C8");
     private final DataBlock[] backgroundObjects = new DataBlock[]{
             InitialData.block("arch_n_6D12"),
             InitialData.block("arch_e_6D23"),
@@ -316,10 +317,10 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0xb4 ;
-            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId = 0x88 ;
+            int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
-            int overrideZ = 80; // + only : 60 is a little above upper entrance
+            int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
@@ -942,7 +943,8 @@ public class Game implements Runnable {
 
         if(exitingScreen) return false;
         // loc_B000
-        variables.setBit(0, 0x5BB2);
+        variables.setBit(0, 0x5BB2); // ; update special objects table next time
+        init_cauldron_bubbles_B8A9();
         list_objects_to_draw_CE62();
         //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
 
@@ -1011,6 +1013,24 @@ public class Game implements Runnable {
 
 
         return false;
+    }
+
+    private void init_cauldron_bubbles_B8A9() {
+        int ix = graphic_objs_tbl_5C08.start;
+        boolean cauldronRoom = graphic_objs_tbl_5C08.getU(ix + 8) == 0x88;
+        if(!cauldronRoom) return;
+
+        int de = 0x5C68;
+        int grNo = graphic_objs_tbl_5C08.getU(de); // ; special_objs_here[1]
+        if(grNo != 0) return;
+
+        if(variables.getU(0x5BC3) != 0) return;
+
+        // 18 bytes to copy
+        for(int i=0; i<0x12; i++) graphic_objs_tbl_5C08.set(de+i, cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + i));
+        // c$C4D8 LD HL,$FCF4   ; -4, -12
+        graphic_objs_tbl_5C08.set(de + 0x12, -12); //F4
+        graphic_objs_tbl_5C08.set(de + 0x13, -4); //FC
     }
 
     private void delay() {
