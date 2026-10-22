@@ -253,10 +253,10 @@ public class Game implements Runnable {
 
         // 65 14 F2 6F - bottle
         // 66 14 FB 6F - bottle
-        inventory_5BD8.set(inventory_5BD8.start+4,   0x65);
-        inventory_5BD8.set(inventory_5BD8.start+4+1, 0x14);
-        inventory_5BD8.set(inventory_5BD8.start+4+2, 0xF2);
-        inventory_5BD8.set(inventory_5BD8.start+4+3, 0x6F);
+        inventory_5BD8.set(inventory_5BD8.start+12,   0x65);
+        inventory_5BD8.set(inventory_5BD8.start+12+1, 0x14);
+        inventory_5BD8.set(inventory_5BD8.start+12+2, 0xF2);
+        inventory_5BD8.set(inventory_5BD8.start+12+3, 0x6F);
         inventory_5BD8.set(inventory_5BD8.start+8,   0x66);
         inventory_5BD8.set(inventory_5BD8.start+8+1, 0x14);
         inventory_5BD8.set(inventory_5BD8.start+8+2, 0xFB);
@@ -2892,7 +2892,22 @@ public class Game implements Runnable {
 
     private void cycle_colours_with_sound_C2A5() {
         IO.println("cycle_colours_with_sound_C2A5");
-        // TODO: implement
+
+        for(int d = 0; d<0x10; d++) {
+            int hl = 0x5800;
+            for (int i = 0; i < 0x0300; i++) {
+                int attr = mainMemory.getByteAt(hl);
+                int newAttr = (attr & 0xF8) + ((attr + 1) & 0x07);
+                mainMemory.setByteAt(hl, newAttr);
+                hl++;
+                // $C2BD CALL $B403    ; // ignore audio
+            }
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void upd_111_B95E(DataBlock block, int ix) {
