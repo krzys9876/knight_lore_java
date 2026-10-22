@@ -2963,6 +2963,32 @@ public class Game implements Runnable {
         // c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); // FC
+
+        int firstSpObjGrNo =  block.getU(0x5C48);
+        if(firstSpObjGrNo != 0) upd_111_B95E(block, ix);
+
+        block.setBit(1, ix + 7); // ; ignore in 3D calcs
+        dec_dZ_and_update_XYZ_C700(block, ix); // apply dXYZ now
+        next_graphic_no_mod_4_B98C(block, ix);
+
+        int z = block.getU(ix + 3);
+        block.set(ix + 0x0B, 2); // ; dZ=2 - will be applied next frame as C700 has already been called
+        if(z >= 0xA0) {
+            block.set(ix + 0x0B, 1); // dZ=1
+            int playerGrNo = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start);
+            boolean isWulf = ((playerGrNo - 0x10) & 0xFF) >= 0x30;
+            if(!isWulf) {
+                // TODO: implement: reveal next required object
+                //int grNo = block.getU(ix);
+                //if((grNo & 3) == 0) {
+
+                //}
+            }
+            block.setBit(2, ix);
+            block.resetBit(1, ix + 7); // ; don't ignore in 3D calcs
+        }
+        //set_wipe_and_draw_flags_C692(block, ix);
+
         // TODO: implement rest of routine
     }
 
@@ -3087,7 +3113,7 @@ public class Game implements Runnable {
         block.set(ix + 0x09, dx); // ; preserve old dX
         block.set(ix + 0x0A, dy); // ; preserve old dY
         int playerGrNo = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start);
-        boolean isWolf = ((playerGrNo - 0x10) & 0xFF) >= 0x20;
+        boolean isWulf = ((playerGrNo - 0x10) & 0xFF) >= 0x20;
         int screen = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x08);
         boolean screenFlg = (screen & 0x01) == 0;
         int newDz = 4;
@@ -3103,13 +3129,13 @@ public class Game implements Runnable {
             if(rnd == 1) {
                 int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
                 int newdY = block.getU(ix + 2) > playerY ? 2 : -2;
-                if(isWolf) newdY = -newdY; // ; towards player
+                if(isWulf) newdY = -newdY; // ; towards player
                 block.set(ix + 0x0A, newdY);
                 block.set(ix + 0x09, 0); // ; new dX=0
             } else {
                 int playerX = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 1);
                 int newdX = block.getU(ix + 1) > playerX ? 2 : -2;
-                if(isWolf) newdX = -newdX; // ; towards player
+                if(isWulf) newdX = -newdX; // ; towards player
                 block.set(ix + 0x09, newdX);
                 block.set(ix + 0x0A, 0); // ; new dY=0
             }
