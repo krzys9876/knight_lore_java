@@ -2829,7 +2829,65 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
-        // TODO: implement rest of routine
+
+        int x = block.getU(ix + 1);
+        int dX = x - 0x80;
+        if(dX < 0) dX = 1;
+        else if(dX > 0) dX = -1;
+        block.set(ix + 0x09, dX);
+
+        int y = block.getU(ix + 2);
+        int dY = y - 0x80;
+        if(dY < 0) dY = 1;
+        else if(dX > 0) dY = -1;
+        block.set(ix + 0x0A, dY);
+
+        boolean center = x == 0x80 && y == 0x80;
+        int z = block.getU(ix + 3);
+        if(!center) {
+            int dZ = 1;
+            if(z > 0x98) dZ++;
+            block.set(ix + 0x0B, dZ);
+        } else {
+            if(z < 0x80) {
+                add_obj_to_cauldron_C245(block, ix);
+                return;
+            } else {
+                block.setBit(1, ix + 7); // ; ignore in 3D calcs
+            }
+        }
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        // c$C232 CALL $B467    ; // ignore audio
+        // set_wipe_and_draw_flags_C692(block, ix);
+    }
+
+    private void add_obj_to_cauldron_C245(DataBlock block, int ix) {
+        block.set(ix + 3, 0x80);
+        int hl = ret_next_obj_required_C274();
+        int grNo = block.getU(ix);
+        boolean sameAsRequired = objects_required_C27D.getU(hl) == (grNo & 0x07);
+        if(sameAsRequired) {
+            variables.set(0x5BBB, variables.getU(0x5BBB) + 1);
+            cycle_colours_with_sound_C2A5();
+            boolean gotAllObjects = variables.getU(0x5BBB) == 0x0E;
+            if(gotAllObjects) prepare_final_animation_C2CC();
+            variables.set(0x5BC4, 0);
+            int l = block.getU(ix + 0x10);
+            int h = block.getU(ix + 0x11);
+            int ptr = h * 256 + l;
+            special_objs_tbl_6FF2.set(ptr , 0);
+            upd_111_B95E(block, ix);
+        }
+    }
+
+    private void prepare_final_animation_C2CC() {
+        IO.println("prepare_final_animation_C2CC");
+        // TODO: implement
+    }
+
+    private void cycle_colours_with_sound_C2A5() {
+        IO.println("cycle_colours_with_sound_C2A5");
+        // TODO: implement
     }
 
     private void upd_111_B95E(DataBlock block, int ix) {
