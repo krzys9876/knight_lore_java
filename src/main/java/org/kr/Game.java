@@ -250,13 +250,13 @@ public class Game implements Runnable {
         cant_drop_5BD3.reset();
         //objects_carried_5BDC.reset();
         // For testing only
-        //inventory_5BD8.set(inventory_5BD8.start, 0x60);
-        //inventory_5BD8.set(inventory_5BD8.start+1, 0x61);
-        //inventory_5BD8.set(inventory_5BD8.start+2, 0x62);
-        //inventory_5BD8.set(inventory_5BD8.start+3, 0x63);
-        //objects_carried_5BDC.set(objects_carried_5BDC.start, 0x60);
-        //objects_carried_5BDC.set(objects_carried_5BDC.start+4, 0x61);
-        //objects_carried_5BDC.set(objects_carried_5BDC.start+8, 0x62);
+
+        // 65 14 F2 6F - bottle
+        inventory_5BD8.set(inventory_5BD8.start+4,   0x65);
+        inventory_5BD8.set(inventory_5BD8.start+4+1, 0x14);
+        inventory_5BD8.set(inventory_5BD8.start+4+2, 0xF2);
+        inventory_5BD8.set(inventory_5BD8.start+4+3, 0x6F);
+
         //graphic_objs_tbl_5C08.reset();
         //special_objs_here_5C48.reset();
         //other_objs_here_5C88.reset();
@@ -2970,7 +2970,10 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -4); // FC
 
         int firstSpObjGrNo =  block.getU(0x5C48);
-        if(firstSpObjGrNo != 0) upd_111_B95E(block, ix);
+        if(firstSpObjGrNo != 0) {
+            upd_111_B95E(block, ix);
+            return;
+        }
 
         block.setBit(1, ix + 7); // ; ignore in 3D calcs
         dec_dZ_and_update_XYZ_C700(block, ix); // apply dXYZ now
