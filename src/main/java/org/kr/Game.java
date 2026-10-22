@@ -252,10 +252,15 @@ public class Game implements Runnable {
         // For testing only
 
         // 65 14 F2 6F - bottle
+        // 66 14 FB 6F - bottle
         inventory_5BD8.set(inventory_5BD8.start+4,   0x65);
         inventory_5BD8.set(inventory_5BD8.start+4+1, 0x14);
         inventory_5BD8.set(inventory_5BD8.start+4+2, 0xF2);
         inventory_5BD8.set(inventory_5BD8.start+4+3, 0x6F);
+        inventory_5BD8.set(inventory_5BD8.start+8,   0x66);
+        inventory_5BD8.set(inventory_5BD8.start+8+1, 0x14);
+        inventory_5BD8.set(inventory_5BD8.start+8+2, 0xFB);
+        inventory_5BD8.set(inventory_5BD8.start+8+3, 0x6F);
 
         //graphic_objs_tbl_5C08.reset();
         //special_objs_here_5C48.reset();
@@ -2839,17 +2844,17 @@ public class Game implements Runnable {
         int y = block.getU(ix + 2);
         int dY = y - 0x80;
         if(dY < 0) dY = 1;
-        else if(dX > 0) dY = -1;
+        else if(dY > 0) dY = -1;
         block.set(ix + 0x0A, dY);
 
         boolean center = x == 0x80 && y == 0x80;
         int z = block.getU(ix + 3);
         if(!center) {
             int dZ = 1;
-            if(z > 0x98) dZ++;
+            if(z < 0x98) dZ++;
             block.set(ix + 0x0B, dZ);
         } else {
-            if(z < 0x80) {
+            if(z <= 0x80) {
                 add_obj_to_cauldron_C245(block, ix);
                 return;
             } else {
@@ -2871,13 +2876,13 @@ public class Game implements Runnable {
             cycle_colours_with_sound_C2A5();
             boolean gotAllObjects = variables.getU(0x5BBB) == 0x0E;
             if(gotAllObjects) prepare_final_animation_C2CC();
-            variables.set(0x5BC4, 0);
-            int l = block.getU(ix + 0x10);
-            int h = block.getU(ix + 0x11);
-            int ptr = h * 256 + l;
-            special_objs_tbl_6FF2.set(ptr , 0);
-            upd_111_B95E(block, ix);
         }
+        variables.set(0x5BC4, 0);
+        int l = block.getU(ix + 0x10);
+        int h = block.getU(ix + 0x11);
+        int ptr = h * 256 + l;
+        special_objs_tbl_6FF2.set(ptr , 0);
+        upd_111_B95E(block, ix);
     }
 
     private void prepare_final_animation_C2CC() {
