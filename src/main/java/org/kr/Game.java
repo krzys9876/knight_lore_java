@@ -262,6 +262,10 @@ public class Game implements Runnable {
             //b$5BC5 DEFS $01
             variables.set(0x5BC5, 0);
 
+            //; Data block at 5BC6
+            //@label=num_scrns_visited
+            //b$5BC6 DEFS $01
+            variables.set(0x5BC6, 0);
 
             int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
             // PUSH AF       ;
@@ -964,6 +968,34 @@ public class Game implements Runnable {
         else print_BCD_number_BCAE(daysAddr, new int[] { days });
         calc_and_display_percent_BC10();
 
+        // TODO: calculate rating
+
+        int objectsInCauldron = variables.getU(0x5BBB);
+        int objBCD = byteToBCD(objectsInCauldron);
+        int objAddr = 0xE2EA;
+        if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
+        else print_BCD_number_BCAE(objAddr, new int[] { objBCD });
+
+        int screens = variables.getU(0x5BC6);
+        int allObjInCauldron = variables.getU(0x5BC3);
+
+        int a = screens + 105;
+        int c = ((a << 1) & 0xFF) | ((a >> 7) & 1);
+        c = c & 0xC0;
+        a = allObjInCauldron;
+        a = a & 1;
+        a = a | c;
+        a = ((a << 3) & 0xFF) | ((a >> 5) & 7);
+        a = a & 0x0E;
+        IO.println("rating "+a);
+        int rating = a;
+
+        int ratingAddrL = rating_tbl_BBB7.getU(rating_tbl_BBB7.start + rating);
+        int ratingAddrH = rating_tbl_BBB7.getU(rating_tbl_BBB7.start + rating + 1);
+        int ratingAddr = ratingAddrH * 256 + ratingAddrL;
+
+        IO.println(String.format("rating address %04X",ratingAddr));
+
         update_screen_D56F(true);
         waitForKey();
     }
@@ -973,8 +1005,10 @@ public class Game implements Runnable {
         for(int i=0; i<scrn_visited_5BE8.size; i++) {
             screens += calcBits(scrn_visited_5BE8.getU(scrn_visited_5BE8.start+i));
         }
+        screens --; // don't count first room
         //IO.println("screens = " + screens);
-        int percent = screens / 128 * 100 + 192;
+        variables.set(0x5BC6, screens);
+        int percent = screens / 128 * 100;
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 0xE4E6;
         int percentBCD = byteToBCD(percent);
@@ -3709,11 +3743,11 @@ public class Game implements Runnable {
         int offsetByte = screenOrig / 8;
         int offsetBit = screenOrig % 8;
         scrn_visited_5BE8.setBit(offsetBit, scrn_visited_5BE8.start + offsetByte);
-        String txt = "";
+        /*String txt = "";
         for(int i=0; i<scrn_visited_5BE8.size; i++) {
             txt = txt.concat(String.format("%02X ",scrn_visited_5BE8.getU(scrn_visited_5BE8.start + i)));
         }
-        IO.println(String.format("Scr visited: %02X / %s", screenOrig, txt));
+        IO.println(String.format("Scr visited: %02X / %s", screenOrig, txt));*/
     }
 
     private void save_2d_info_CE49(int ix, DataBlock block) {
