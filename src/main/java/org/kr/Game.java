@@ -242,6 +242,12 @@ public class Game implements Runnable {
         //b$5BBB DEFS $01
         variables.set(0x5BBB, 0);
 
+        //; Data block at 5BC5
+        //@label=rising_blocks_z
+        //b$5BC5 DEFS $01
+        variables.set(0x5BC5, 0);
+
+
         int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
         // PUSH AF       ;
         // CALL $D53A    ;
@@ -921,6 +927,7 @@ public class Game implements Runnable {
 
     private void game_over_BA22() {
         debugPanel2.append("Game over BA22\n");
+        IO.println("Game over BA22\n");
         //TODO: implement
     }
 
@@ -1625,8 +1632,55 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
-        IO.println("end game sparkles");
-        // TODO: implement rest of routine
+
+        int z = block.getU(ix + 0x03);
+        if(z < 0xA4) {
+            block.set(ix + 0x0B, 3); // ; dZ=3
+            int x = block.getU(ix + 1);
+            int y = block.getU(ix + 2);
+            int xBit1 = (x & 0x80) >> 6;
+            int yBit0 = (y & 0x80) >> 7;
+            int xy = xBit1 | yBit0;
+            int dX = 0;
+            int dY = 0;
+            // @label=dX_dY_tbl
+            switch(xy) {
+                case 0: dY = 4; dX = -4; break;
+                case 1: dY = 4; dX = 4; break;
+                case 2: dY = -4; dX = -4; break;
+                case 3: dY = -4; dX = 4; break;
+            }
+            // @label=save_dX_dY
+            block.set(ix + 0x09, dX);
+            block.set(ix + 0x0A, dY);
+
+            int rnd = new Random().nextInt(0xFF + 1); //variables.get(0x5BA5);
+            int a = rnd & 0x03;
+            if(a==0) a++;
+            a+=0x82;
+            block.set(ix, a); // ; set graphic no.
+        } else {
+            // @label=loc_B5C4
+            int playerX = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 1);
+            int x = block.getU(ix + 1);
+            int deltaX = Math.abs(playerX - x);
+            if(deltaX < 0x06) {
+                int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
+                int y = block.getU(ix + 2);
+                int deltaY = Math.abs(playerY - y);
+                if(deltaY < 0x06) {
+                    game_over_BA22();
+                    return;
+                }
+            }
+            block.setBit(7, ix + 0x0D);
+            block.setBit(1, ix + 0x07); // ; ignore object in 3D calculations
+            block.set(ix + 0x0B, 1); // ; dZ=1
+            move_towards_plyr_B965(block, ix, 4, 4);
+        }
+        variables.set(0x5BC5, block.getU(ix + 3));
+        dec_dZ_and_update_XYZ_C700(block, ix);
+        //set_wipe_and_draw_flags_C692(block, ix);
     }
 
     private void upd_16_to_21_24_to_29_C823(DataBlock block, int ix) {
