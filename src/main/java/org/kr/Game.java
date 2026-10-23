@@ -17,13 +17,16 @@ public class Game implements Runnable {
     private int sunTick = 0;
     private long tickNo = 0;
     private final long REPAINT_MS = 50;
-    private final long DELAY_MS = 90;
+    private final long DELAY_MS = 1; // 90ms
     private final int SUN_TICK_PER_GAME_TICK = 8;
-    private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
+    private final int MAX_DAYS_BCD = 0x99; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
     private final int CAULDRON_REQUIRED_OBJECTS = 2; // 0x0E
+    private final int INITIAL_LIVES = 0x05; // NOTE: number in BCD
 
     private final boolean disableDeath = false;
+    private final boolean disableLoseLife = false;
+    private final boolean disableIncDays = false;
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
@@ -72,6 +75,10 @@ public class Game implements Runnable {
     private final DataBlock complete_colours_BAD2 = InitialData.block("complete_colours_BAD2");
     private final DataBlock complete_xy_BAD8 = InitialData.block("complete_xy_BAD8");
     private final DataBlock the_potion_casts_BAE4 = InitialData.block("the_potion_casts_BAE4");
+    private final DataBlock gameover_colours_BB4C = InitialData.block("gameover_colours_BB4C");
+    private final DataBlock gameover_xy_BB52 = InitialData.block("gameover_xy_BB52");
+    private final DataBlock a_GAME_OVER_BB5E = InitialData.block("a_GAME_OVER_BB5E");
+    private final DataBlock rating_tbl_BBB7 = InitialData.block("rating_tbl_BBB7");
     private final DataBlock[] backgroundObjects = new DataBlock[]{
             InitialData.block("arch_n_6D12"),
             InitialData.block("arch_e_6D23"),
@@ -309,7 +316,7 @@ public class Game implements Runnable {
         flags12_1_D16D.set(0xD16D, 0);
         // LD A,$05      ; 5 lives to start
         // LD ($5BBA),A  ;
-        variables.set(0x5BBA, 5);
+        variables.set(0x5BBA, INITIAL_LIVES);
         // LD HL,$5BA0   ;
         // LD A,($5BA2)  ;
         // ADD A,(HL)    ; seed_1 += seed_2
@@ -342,7 +349,7 @@ public class Game implements Runnable {
         boolean specialObjectsInitialized = false;
         //while(a < location_tbl_6251.endExcl())
         {
-            variables.set(0x5BBA, 5); // important only when looping over rooms
+            //variables.set(0x5BBA, 5); // important only when looping over rooms
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
@@ -895,7 +902,6 @@ public class Game implements Runnable {
     }
 
     private void player_dies_AFB7() {
-        IO.println("player_dies");
         lose_life_D12A();
     }
 
@@ -919,12 +925,14 @@ public class Game implements Runnable {
     private void lose_life_D12A() {
         initPlayerData();
         variables.set(0x5BB1, 0);
-        int livesLeft = variables.getU(0x5BBA) - 1;
-        variables.set(0x5BBA, livesLeft);
-        if(livesLeft < 0) {
+        int livesLeft = variables.getU(0x5BBA);
+        if(livesLeft < 1) {
+            variables.set(0x5BBA, -1);
             game_over_BA22();
             return;
         }
+        int newLivesLeft = disableLoseLife ? livesLeft : decBCD(livesLeft);
+        variables.set(0x5BBA, newLivesLeft);
         int scratch = sun_moon_scratchpad_C44D.getU(0xC44D);
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
         int playerGraphicsNo = graphic_objs_tbl_5C08.getU(0x5C08+0x10);
@@ -939,21 +947,29 @@ public class Game implements Runnable {
         debugPanel2.append("Game over BA22\n");
         IO.println("Game over BA22\n");
 
-        if(variables.getU(0x5BC3) != 0) { // all objects in cauldron
-            game_complete_msg_BAAB();
-        }
-        gameOver = true;
-    }
-
-    private void game_complete_msg_BAAB() {
         clear_scrn_buffer_D567();
         clear_scrn_D55F();
 
+        if(variables.getU(0x5BC3) != 0)  game_complete_msg_BAAB(); // all objects in cauldron
+        else gameOverScreen();
+        gameOver = true;
+    }
+
+    private void gameOverScreen() {
+        //variables.set(0x5BB8, 0);
+        display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
+        waitForKey();
+    }
+
+    private void game_complete_msg_BAAB() {
         variables.set(0x5BB8, 0);
         display_text_list_BEBF(complete_colours_BAD2, complete_xy_BAD8, the_potion_casts_BAE4);
         // $BAC4 LD DE,$B239   ;
         // $BAC7 CALL $B2CF    ; // ignore audio
+        waitForKey();
+    }
 
+    private void waitForKey() {
         while(keyQueue.isEmpty()) {
             delay();
         }
@@ -971,8 +987,8 @@ public class Game implements Runnable {
         if(a == 0) {
             variables.set(0x5BB8,1);
             print_border_D296();
-            update_screen_D56F(true);
         }
+        update_screen_D56F(true);
     }
 
     private void game_loop_AFBA() {
@@ -1369,7 +1385,8 @@ public class Game implements Runnable {
         variables.set(0x5BB1, 1); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
-            int incDays = incBCD(variables.getU(0x5BB9)) % 0xA0; // wrap days at 99
+            int currDays = variables.getU(0x5BB9);
+            int incDays = disableIncDays ? currDays : incBCD(currDays) % 0xA0; // wrap days at 99
             variables.set(0x5BB9, incDays);
             if(incDays == MAX_DAYS_BCD+1) {
                 game_over_BA22();
@@ -1385,6 +1402,11 @@ public class Game implements Runnable {
         return incNum;
     }
 
+    private int decBCD(int num) {
+        int decNum = num-1;
+        if((decNum & 0x0F) == 15) decNum = decNum - 6;
+        return decNum;
+    }
 
     private void update_sprite_loop_AFC7(DataBlock block) {
         // block contains sprite metadata (32 bytes each)
@@ -2498,7 +2520,6 @@ public class Game implements Runnable {
     }
 
     private void init_death_sparkles_BF21(DataBlock block, int ix) {
-        IO.println("death");
         block.set(ix, 0x70);
         block.setBit(1, ix + 0x07);
         // c$BF31 CALL $B403    ; // ignore audio
@@ -2932,7 +2953,7 @@ public class Game implements Runnable {
             int ptr = h * 256 + l;
             special_objs_tbl_6FF2.set(ptr, 0); // ; zap ptr object table entry
             int lives = variables.getU(0x5BBA);
-            variables.set(0x5BBA, lives + 1);
+            variables.set(0x5BBA, incBCD(lives));
             variables.set(0x5BC0, 0);
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
@@ -3210,7 +3231,6 @@ public class Game implements Runnable {
 
     private int ret_next_obj_required_C274() {
         int objsInCauldron = variables.getU(0x5BBB);
-        IO.println("objsInCauldron: " + objsInCauldron);
         return objects_required_C27D.start + objsInCauldron;
     }
 
