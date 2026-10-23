@@ -837,7 +837,7 @@ public class Game implements Runnable {
                 iy++;
             }
         }
-        debugTableConsole("Required: ", objects_required_C27D.start, objects_required_C27D.getCopy());
+        //debugTableConsole("Required: ", objects_required_C27D.start, objects_required_C27D.getCopy());
         //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
     }
 
@@ -958,7 +958,52 @@ public class Game implements Runnable {
     private void gameOverScreen() {
         //variables.set(0x5BB8, 0);
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
+        int days = variables.getU(0x5BB9);
+        int daysAddr = 0xE8E2;
+        if(days < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, days);
+        else print_BCD_number_BCAE(daysAddr, new int[] { days });
+        calc_and_display_percent_BC10();
+
+        update_screen_D56F(true);
         waitForKey();
+    }
+
+    private void calc_and_display_percent_BC10() {
+        int screens = 0;
+        for(int i=0; i<scrn_visited_5BE8.size; i++) {
+            screens += calcBits(scrn_visited_5BE8.getU(scrn_visited_5BE8.start+i));
+        }
+        //IO.println("screens = " + screens);
+        int percent = screens / 128 * 100 + 192;
+        //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
+        int percentAddr = 0xE4E6;
+        int percentBCD = byteToBCD(percent);
+        if(percentBCD < 0x10) {
+            print_BCD_lsd_BCC0(percentAddr + 1, percentBCD);
+        } else {
+            print_BCD_number_BCAE(percentAddr, new int[] {percentBCD});
+            if(percentBCD >= 0x100) {
+                print_BCD_lsd_BCC0(percentAddr - 1, (percentBCD >> 8) & 0x0F);
+            }
+        }
+    }
+
+    private int byteToBCD(int value) {
+        int bcd3 = (value / 100) % 10;
+        value -= bcd3 * 100;
+        int bcd2 = (value / 10) % 10;
+        value -= bcd2 * 10;
+        int bcd1 = value;
+        return bcd1 + bcd2 * 16 + bcd3 * 256;
+
+    }
+
+    private int calcBits(int toCalc) {
+        int res = 0;
+        for(int i=0; i<8; i++) {
+            if((toCalc & (1 << i))>0) res++;
+        }
+        return res;
     }
 
     private void game_complete_msg_BAAB() {
@@ -966,6 +1011,7 @@ public class Game implements Runnable {
         display_text_list_BEBF(complete_colours_BAD2, complete_xy_BAD8, the_potion_casts_BAE4);
         // $BAC4 LD DE,$B239   ;
         // $BAC7 CALL $B2CF    ; // ignore audio
+        update_screen_D56F(true);
         waitForKey();
     }
 
@@ -988,7 +1034,7 @@ public class Game implements Runnable {
             variables.set(0x5BB8,1);
             print_border_D296();
         }
-        update_screen_D56F(true);
+        // update_screen_D56F(true); // called after the routine
     }
 
     private void game_loop_AFBA() {
@@ -1190,8 +1236,14 @@ public class Game implements Runnable {
             print_8x8_BE7F(digitH, bc, font_6108);
             print_8x8_BE7F(digitL, bc+1, font_6108);
         }
-        mainMemory.setByteAt(0x5AEF, 0x47);
-        mainMemory.setByteAt(0x5AEF+1, 0x47);
+        //mainMemory.setByteAt(0x5AEF, 0x47);
+        //mainMemory.setByteAt(0x5AEF+1, 0x47);
+    }
+
+    private void print_BCD_lsd_BCC0(int bc, int value) {
+        int digitL = value & 0x0F;
+        print_8x8_BE7F(digitL, bc, font_6108);
+        //mainMemory.setByteAt(0x5AEF, 0x47);
     }
 
     private void print_lives_gfx_BC7A() {
@@ -3424,7 +3476,7 @@ public class Game implements Runnable {
         // and these traps are only in odd rooms
         variables.set(0x5BC0, graphic_objs_tbl_5C08.getU(0x5C10) & 1);
 
-        //flag_room_visited_D219();
+        flag_room_visited_D219();
     }
 
     private void update_special_objs_C591() {
@@ -3653,10 +3705,15 @@ public class Game implements Runnable {
     }
 
     private void flag_room_visited_D219() {
-        int screenOrig = graphic_objs_tbl_5C08.getU(0x5C10); // plyr_spr_1 screen
-        int screen = (screenOrig >> 3) & 0x1F;
-
-        //TODO: implement
+        int screenOrig = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x08); // plyr_spr_1 screen
+        int offsetByte = screenOrig / 8;
+        int offsetBit = screenOrig % 8;
+        scrn_visited_5BE8.setBit(offsetBit, scrn_visited_5BE8.start + offsetByte);
+        String txt = "";
+        for(int i=0; i<scrn_visited_5BE8.size; i++) {
+            txt = txt.concat(String.format("%02X ",scrn_visited_5BE8.getU(scrn_visited_5BE8.start + i)));
+        }
+        IO.println(String.format("Scr visited: %02X / %s", screenOrig, txt));
     }
 
     private void save_2d_info_CE49(int ix, DataBlock block) {
