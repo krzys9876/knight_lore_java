@@ -20,6 +20,8 @@ public class Game implements Runnable {
     private final long DELAY_MS = 90;
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x40; // NOTE: number in BCD
+    private final long CAULDRON_ATTR_DELAY_MS = 120;
+    private final int CAULDRON_REQUIRED_OBJECTS = 2; // 0x0E
 
     private final boolean disableDeath = false;
 
@@ -2479,10 +2481,8 @@ public class Game implements Runnable {
     }
 
     private void upd_player_top_CDE2(DataBlock block, int ix) {
-        if(variables.getU(0x5BC3)!=0) return;
-
         boolean flag = block.isSet(6,ix + 0x0D);
-        if(flag) {
+        if(flag && variables.getU(0x5BC3)==0) {
             init_death_sparkles_BF21(block, ix);
             return;
         }
@@ -2874,7 +2874,7 @@ public class Game implements Runnable {
         if(sameAsRequired) {
             variables.set(0x5BBB, variables.getU(0x5BBB) + 1);
             cycle_colours_with_sound_C2A5();
-            boolean gotAllObjects = variables.getU(0x5BBB) == 0x0E;
+            boolean gotAllObjects = variables.getU(0x5BBB) == CAULDRON_REQUIRED_OBJECTS;
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
         variables.set(0x5BC4, 0);
@@ -2887,7 +2887,23 @@ public class Game implements Runnable {
 
     private void prepare_final_animation_C2CC() {
         IO.println("prepare_final_animation_C2CC");
-        // TODO: implement
+
+        variables.set(0x5BC3, 1);
+        int ix = 0x5C68; // ; special_objs_here[1]
+        for(int i=0; i< 0x0B; i++) { // ; wipe 11 objects in the room (1 special, 7 bg, 3 fg)
+            graphic_objs_tbl_5C08.set(ix, 1); // ; set graphic no. = INVALID
+            //set_wipe_and_draw_flags_C692(graphic_objs_tbl_5C08, ix);
+            ix += 0x20; // ; entry size
+        }
+
+        int bc = 0x6108; // end of table
+        while(ix < bc) {
+            int grNo = graphic_objs_tbl_5C08.getU(ix);
+            if (grNo == 7) { // block
+                graphic_objs_tbl_5C08.set(ix, 0x83); // ; set to twinkly sprite
+            }
+            ix += 0x20;
+        }
     }
 
     private void cycle_colours_with_sound_C2A5() {
@@ -2903,7 +2919,7 @@ public class Game implements Runnable {
                 // $C2BD CALL $B403    ; // ignore audio
             }
             try {
-                Thread.sleep(20);
+                Thread.sleep(CAULDRON_ATTR_DELAY_MS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
