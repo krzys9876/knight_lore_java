@@ -335,9 +335,9 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x88 ;
-            int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = 0; // -S +N
+            int overrideRoomId = 0x1D ;
+            int overrideWE = 10; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = -55; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
@@ -1737,9 +1737,7 @@ public class Game implements Runnable {
             block.set(ix + 3, zOrig + 12); // ; Z+12
             boolean intersects = do_any_objs_intersect_B4FD(block, ix);
             block.set(ix + 3, zOrig); // ; restore original Z
-            if(intersects) { //; we can't drop anything
-                cant_drop_5BD3.set(0x5BD3, 1);
-            }
+            if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
             variables.set(0x5BB3, 1);
             variables.set(0x5BB4, 1);
@@ -1901,7 +1899,20 @@ public class Game implements Runnable {
     }
 
     private boolean do_any_objs_intersect_B4FD(DataBlock block, int ix) {
-        // TODO: implement rest of the routine
+        int iy = 0x5C08;
+        block.setBit(1, ix + 7); // ; ignore this object
+        for(int b = 0; b<0x28; b++) {
+            if(is_object_not_ignored_B538(block, iy)) {
+                if(do_objs_intersect_on_x_CC9D(block, ix, iy, 0) &&
+                        do_objs_intersect_on_y_CCB2(block, ix, iy, 0) &&
+                        do_objs_intersect_on_z_CCC7(block, ix, iy, 0)) {
+                    block.resetBit(1, ix + 7); // ; ignore this object
+                    return true;
+                }
+            }
+            iy += 0x20;
+        }
+        block.resetBit(1, ix + 7); // ; ignore this object
         return false;
     }
 
