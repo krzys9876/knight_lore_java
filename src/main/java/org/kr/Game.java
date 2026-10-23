@@ -34,6 +34,8 @@ public class Game implements Runnable {
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
     private final DataBlock variables = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
     private boolean exitingScreen = false;
+    private boolean gameOver = false;
+    private int gameCounter = 0;
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
     private final DataBlock cant_drop_5BD3 = new DataBlock(0x5BD3, 5);
@@ -67,6 +69,9 @@ public class Game implements Runnable {
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
     private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
     private final DataBlock cauldron_bubbles_B8C8 =  InitialData.block("cauldron_bubbles_B8C8");
+    private final DataBlock complete_colours_BAD2 = InitialData.block("complete_colours_BAD2");
+    private final DataBlock complete_xy_BAD8 = InitialData.block("complete_xy_BAD8");
+    private final DataBlock the_potion_casts_BAE4 = InitialData.block("the_potion_casts_BAE4");
     private final DataBlock[] backgroundObjects = new DataBlock[]{
             InitialData.block("arch_n_6D12"),
             InitialData.block("arch_e_6D23"),
@@ -172,125 +177,131 @@ public class Game implements Runnable {
     private void start_AF6C() {
         debugPanel1.append("start_AF6C");
 
-        // initialize variables (TODO: split variables to separate data blocks)
-        // @label=seed_1
-        // b$5BA0 DEFB $53,$00
-        variables.set(0x5BA0, 0x53);
-        //; Data block at 5BA2
-        // @label=seed_2
-        // b$5BA2 DEFS $02
-        variables.set(0x5BA2, 0);
-        variables.set(0x5BA3, 0);
-        //; Data block at 5BA5
-        //@label=seed_3
-        //b$5BA5 DEFS $01
-        variables.set(0x5BA5, 0);
-        //; Data block at 5BC7
-        // @label=gfxbase_8x8
-        // b$5BC7 DEFB $08,$61
-        //variables.set(0x5BC7, 0x08); // variables NOT USED (passing DataBlock with font data instead)
-        //variables.set(0x5BC8, 0x61);
-        // @label=user_input_method
-        // b$5BA4 DEFS $01
-        variables.set(0x5BA4, 0);
-        //; Data block at 5BB8
-        //@label=suppress_border
-        //b$5BB8 DEFB $01
-        variables.set(0x5BB8, 1);
-        //@label=old_input_method
-        //b$5BA6 DEFS $01
-        //$5BA7 DEFS $01
-        variables.set(0x5BA6, 0);
-        variables.set(0x5BA7, 0);
-        // @label=transform_flag_graphic
-        // b$5BB1 DEFS $01
-        variables.set(0x5BB1, 0);
-        //@label=all_objs_in_cauldron
-        //b$5BC3 DEFS $01
-        variables.set(0x5BC3, 0);
-        //@label=days
-        //b$5BB9 DEFS $01
-        variables.set(0x5BB9, 0);
-        //; #TABLE(default,centre,:w)
-        //; { =h Bit(n) | =h Description }
-        //; { b5 | ??? }
-        //; { b4 | pickup/drop }
-        //; { b3 | jump }
-        //; { b2 | forward }
-        //; { b1 | right }
-        //; { b0 | left }
-        //; TABLE#
-        //@label=user_input
-        //b$5BB5 DEFS $01
-        variables.set(0x5BB5, 0);
-        //@label=obj_dropping_into_cauldron
-        //b$5BC4 DEFS $01
-        variables.set(0x5BC4, 0);
+        gameCounter = 0;
+        while(true) {
+            variables.reset();
+            // initialize variables (TODO: split variables to separate data blocks)
+            // @label=seed_1
+            // b$5BA0 DEFB $53,$00
+            variables.set(0x5BA0, 0x53);
+            //; Data block at 5BA2
+            // @label=seed_2
+            // b$5BA2 DEFS $02
+            variables.set(0x5BA2, 0);
+            variables.set(0x5BA3, 0);
+            //; Data block at 5BA5
+            //@label=seed_3
+            //b$5BA5 DEFS $01
+            variables.set(0x5BA5, 0);
+            //; Data block at 5BC7
+            // @label=gfxbase_8x8
+            // b$5BC7 DEFB $08,$61
+            //variables.set(0x5BC7, 0x08); // variables NOT USED (passing DataBlock with font data instead)
+            //variables.set(0x5BC8, 0x61);
+            // @label=user_input_method
+            // b$5BA4 DEFS $01
+            variables.set(0x5BA4, 0);
+            //; Data block at 5BB8
+            //@label=suppress_border
+            //b$5BB8 DEFB $01
+            variables.set(0x5BB8, 1);
+            //@label=old_input_method
+            //b$5BA6 DEFS $01
+            //$5BA7 DEFS $01
+            variables.set(0x5BA6, 0);
+            variables.set(0x5BA7, 0);
+            // @label=transform_flag_graphic
+            // b$5BB1 DEFS $01
+            variables.set(0x5BB1, 0);
+            //@label=all_objs_in_cauldron
+            //b$5BC3 DEFS $01
+            variables.set(0x5BC3, 0);
+            //@label=days
+            //b$5BB9 DEFS $01
+            variables.set(0x5BB9, 0);
+            //; #TABLE(default,centre,:w)
+            //; { =h Bit(n) | =h Description }
+            //; { b5 | ??? }
+            //; { b4 | pickup/drop }
+            //; { b3 | jump }
+            //; { b2 | forward }
+            //; { b1 | right }
+            //; { b0 | left }
+            //; TABLE#
+            //@label=user_input
+            //b$5BB5 DEFS $01
+            variables.set(0x5BB5, 0);
+            //@label=obj_dropping_into_cauldron
+            //b$5BC4 DEFS $01
+            variables.set(0x5BC4, 0);
 
-        //; Data block at 5BC1
-        //@label=tmp_dZ
-        //b$5BC1 DEFS $01
-        variables.set(0x5BC1, 0);
+            //; Data block at 5BC1
+            //@label=tmp_dZ
+            //b$5BC1 DEFS $01
+            variables.set(0x5BC1, 0);
 
-        //; Data block at 5BC2
-        //@label=tmp_bouncing_ball_dZ
-        //b$5BC2 DEFS $01
-        variables.set(0x5BC2, 0);
+            //; Data block at 5BC2
+            //@label=tmp_bouncing_ball_dZ
+            //b$5BC2 DEFS $01
+            variables.set(0x5BC2, 0);
 
-        //; Data block at 5BBB
-        //@label=objects_put_in_cauldron
-        //b$5BBB DEFS $01
-        variables.set(0x5BBB, 0);
+            //; Data block at 5BBB
+            //@label=objects_put_in_cauldron
+            //b$5BBB DEFS $01
+            variables.set(0x5BBB, 0);
 
-        //; Data block at 5BC5
-        //@label=rising_blocks_z
-        //b$5BC5 DEFS $01
-        variables.set(0x5BC5, 0);
+            //; Data block at 5BC5
+            //@label=rising_blocks_z
+            //b$5BC5 DEFS $01
+            variables.set(0x5BC5, 0);
 
 
-        int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
-        // PUSH AF       ;
-        // CALL $D53A    ;
-        // POP AF        ;
-        variables.reset();
-        scrn_visited_5BE8.reset();
-        inventory_5BD8.reset();
-        cant_drop_5BD3.reset();
-        //objects_carried_5BDC.reset();
-        // For testing only
+            int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
+            // PUSH AF       ;
+            // CALL $D53A    ;
+            // POP AF        ;
+            scrn_visited_5BE8.reset();
+            inventory_5BD8.reset();
+            cant_drop_5BD3.reset();
+            //objects_carried_5BDC.reset();
+            // For testing only
 
-        // 65 14 F2 6F - bottle
-        // 66 14 FB 6F - bottle
-        inventory_5BD8.set(inventory_5BD8.start+12,   0x65);
-        inventory_5BD8.set(inventory_5BD8.start+12+1, 0x14);
-        inventory_5BD8.set(inventory_5BD8.start+12+2, 0xF2);
-        inventory_5BD8.set(inventory_5BD8.start+12+3, 0x6F);
-        inventory_5BD8.set(inventory_5BD8.start+8,   0x66);
-        inventory_5BD8.set(inventory_5BD8.start+8+1, 0x14);
-        inventory_5BD8.set(inventory_5BD8.start+8+2, 0xFB);
-        inventory_5BD8.set(inventory_5BD8.start+8+3, 0x6F);
+            // 65 14 F2 6F - bottle
+            // 66 14 FB 6F - bottle
+            inventory_5BD8.set(inventory_5BD8.start + 12, 0x65);
+            inventory_5BD8.set(inventory_5BD8.start + 12 + 1, 0x14);
+            inventory_5BD8.set(inventory_5BD8.start + 12 + 2, 0xF2);
+            inventory_5BD8.set(inventory_5BD8.start + 12 + 3, 0x6F);
+            inventory_5BD8.set(inventory_5BD8.start + 8, 0x66);
+            inventory_5BD8.set(inventory_5BD8.start + 8 + 1, 0x14);
+            inventory_5BD8.set(inventory_5BD8.start + 8 + 2, 0xFB);
+            inventory_5BD8.set(inventory_5BD8.start + 8 + 3, 0x6F);
 
-        //graphic_objs_tbl_5C08.reset();
-        //special_objs_here_5C48.reset();
-        //other_objs_here_5C88.reset();
+            //graphic_objs_tbl_5C08.reset();
+            //special_objs_here_5C48.reset();
+            //other_objs_here_5C88.reset();
 
-        //; Data block at 5BB3
-        //@label=pickup_drop_pressed
-        //b$5BB3 DEFS $01
-        variables.set(0x5BB3, 0);
+            //; Data block at 5BB3
+            //@label=pickup_drop_pressed
+            //b$5BB3 DEFS $01
+            variables.set(0x5BB3, 0);
 
-        //; Data block at 5BB4
-        //@label=objects_carried_changed
-        //b$5BB4 DEFS $01
-        variables.set(0x5BB4, 0);
+            //; Data block at 5BB4
+            //@label=objects_carried_changed
+            //b$5BB4 DEFS $01
+            variables.set(0x5BB4, 0);
 
-        variables.set(0x5BA0, v5C78);
-        main_AF88();
+            variables.set(0x5BA0, v5C78);
+            gameOver = false;
+            main_AF88();
+            gameCounter++;
+        }
     }
 
     private void main_AF88() {
         debugPanel1.append("main_AF88");
         build_lookup_tables_D69E();
+
         // XOR A
         // LD ($5BB2),A
         variables.set(0x5BB2, 0);
@@ -308,23 +319,23 @@ public class Game implements Runnable {
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-        menu_loop_BD23(true); // returns when game starts
+        menu_loop_BD23(false); // returns when game starts
 
-        try {
-            updateShadowMemory();
-            updateMainMemory();
-            mainPanel.saveImage("images/menu.png");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            /*try {
+                updateShadowMemory();
+                updateMainMemory();
+                mainPanel.saveImage("images/menu.png");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
 
         debugPanel2.append("START THE GAME");
-        debugPanel2.append("Input method: "+variables.getU(0x5BA4));
+        debugPanel2.append("Input method: " + variables.getU(0x5BA4));
 
         // LD DE,$B20E   ; }
         // CALL $B2CF    ; play tune // ignore audio
         // CALL $B544    ; randomise order of required objects
-        shuffle_objects_required_B544();
+        if(gameCounter==0) shuffle_objects_required_B544();
         // CALL $D1B1    ; {randomise player start location
 
         int a = location_tbl_6251.start;
@@ -335,16 +346,16 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             //int overrideRoomId=-1;
-            int overrideRoomId = 0x1D ;
-            int overrideWE = 10; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = -55; // -S +N
+            int overrideRoomId = 0x88;
+            int overrideWE = 50; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
             // CALL $C46D    ; }
             init_sun_C46D();
             // CALL $C47E    ; randomise special object locations
-            if(!specialObjectsInitialized) {
+            if (!specialObjectsInitialized) {
                 init_special_objects_C47E();
                 specialObjectsInitialized = true;
             }
@@ -358,8 +369,6 @@ public class Game implements Runnable {
             //int size = location_tbl_6251.getA(a+1);
             //a+=size+1;
         }
-
-        //printVariables();
     }
 
     private void saveImage(ScreenPanel panel, String fileName) {
@@ -490,10 +499,10 @@ public class Game implements Runnable {
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
             variables.set(0x5BB6, menu_colours_BDA2.getU(de1));
             //debugPanel2.append("menu attrib: %02x".formatted(variables.get(0x5BB6))) ;
-            int l = menu_xy_BDAA.getU(hl2); // x - menu position
-            int h = menu_xy_BDAA.getU(hl2+1); // y
+            int x = menu_xy_BDAA.getU(hl2); // x - menu position
+            int y = menu_xy_BDAA.getU(hl2+1); // y
             hl2 += 2;
-            de2 = print_text_single_colour_BE31(h, l, de1, de2);
+            de2 = print_text_single_colour_BE31(menu_text_BDBA, x, y, de2);
         }
         int a = variables.getU(0x5BB8); // suppress border
         if(a == 0) {
@@ -503,10 +512,10 @@ public class Game implements Runnable {
         }
     }
 
-    private int print_text_single_colour_BE31(int h, int l,int de1, int de2) {
-        // h: y, l: x, de1: attribute address, de2: text address (first)
-        debugPanel1.append(String.format("print_text_single_colour_BE31 ( y: %02x, x: %02x, attr_addr: %02x, text_addr: %04x)", h, l, de1, de2));
-        int bc = calc_vidbuf_addr_D811(h, l);
+    private int print_text_single_colour_BE31(DataBlock text, int x, int y, int de2) {
+        // h: y, l: x, de2: text address (first)
+        debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de2));
+        int bc = calc_vidbuf_addr_D811(y, x);
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
         // for testing only
@@ -514,17 +523,17 @@ public class Game implements Runnable {
         //for(int i=0; i < 32*192; i++) mainMemory.setByteAt(i + mainMemory.start, 0xFF);
         //for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
-        int hl = calc_attrib_addr_D848(h, l);
+        int hl = calc_attrib_addr_D848(y, x);
 
         // for testing only
         //mainMemory.setByteAt(hl, Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
 
         boolean textDone = false;
         while(!textDone) {
-            print_8x8_BE7F(menu_text_BDBA.getU(de2), bc, font_6108);
+            print_8x8_BE7F(text.getU(de2), bc, font_6108);
             mainMemory.setByteAt(hl, variables.getU(0x5BB6)); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
             shadowMemory.setByteAt(hl-mainMemory.start+shadowMemory.start, variables.getU(0x5BB6));
-            textDone = (menu_text_BDBA.getU(de2) & 0x80) > 0;
+            textDone = (text.getU(de2) & 0x80) > 0;
             hl ++;
             de2 ++;
             bc ++;
@@ -821,6 +830,7 @@ public class Game implements Runnable {
                 iy++;
             }
         }
+        debugTableConsole("Required: ", objects_required_C27D.start, objects_required_C27D.getCopy());
         //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
     }
 
@@ -928,7 +938,41 @@ public class Game implements Runnable {
     private void game_over_BA22() {
         debugPanel2.append("Game over BA22\n");
         IO.println("Game over BA22\n");
-        //TODO: implement
+
+        if(variables.getU(0x5BC3) != 0) { // all objects in cauldron
+            game_complete_msg_BAAB();
+        }
+        gameOver = true;
+    }
+
+    private void game_complete_msg_BAAB() {
+        clear_scrn_buffer_D567();
+        clear_scrn_D55F();
+
+        variables.set(0x5BB8, 0);
+        display_text_list_BEBF(complete_colours_BAD2, complete_xy_BAD8, the_potion_casts_BAE4);
+        // $BAC4 LD DE,$B239   ;
+        // $BAC7 CALL $B2CF    ; // ignore audio
+
+        while(keyQueue.isEmpty()) {
+            delay();
+        }
+    }
+
+    private void display_text_list_BEBF(DataBlock colors, DataBlock xy, DataBlock text) {
+        int de = text.start;
+        for(int i = 0; i < colors.size; i++) {
+            variables.set(0x5BB6, colors.getU(colors.start + i));
+            int x = xy.getU(xy.start + i*2);
+            int y = xy.getU(xy.start + i*2+1);
+            de = print_text_single_colour_BE31(text, x, y, de);
+        }
+        int a = variables.getU(0x5BB8); // suppress border
+        if(a == 0) {
+            variables.set(0x5BB8,1);
+            print_border_D296();
+            update_screen_D56F(true);
+        }
     }
 
     private void game_loop_AFBA() {
@@ -1015,6 +1059,7 @@ public class Game implements Runnable {
         print_days_BC66();
         print_lives_gfx_BC7A();
         print_lives_BCA3();
+        if(gameOver) return true;
         update_screen_D56F(false);
 
         // @label=loc_B074
@@ -1023,7 +1068,7 @@ public class Game implements Runnable {
         if(graphic_objs_tbl_5C08.getU(ix)==0 && graphic_objs_tbl_5C08.getU(ix + 0x20)==0) {
             player_dies_AFB7();
             exitingScreen = true;
-            return false;
+            return gameOver;
         }
 
         // @label=reset_objs_wipe_flag
@@ -1031,7 +1076,7 @@ public class Game implements Runnable {
             graphic_objs_tbl_5C08.resetBit(5, addr); // c$B090 RES 5,(HL)    ;
 
 
-        return false;
+        return gameOver;
     }
 
     private void init_cauldron_bubbles_B8A9() {
@@ -1326,7 +1371,10 @@ public class Game implements Runnable {
             // DAA - number must be in BCD
             int incDays = incBCD(variables.getU(0x5BB9)) % 0xA0; // wrap days at 99
             variables.set(0x5BB9, incDays);
-            if(incDays == MAX_DAYS_BCD+1) game_over_BA22();
+            if(incDays == MAX_DAYS_BCD+1) {
+                game_over_BA22();
+                return;
+            }
             print_days_BC66();
         }
     }
@@ -3162,6 +3210,7 @@ public class Game implements Runnable {
 
     private int ret_next_obj_required_C274() {
         int objsInCauldron = variables.getU(0x5BBB);
+        IO.println("objsInCauldron: " + objsInCauldron);
         return objects_required_C27D.start + objsInCauldron;
     }
 
@@ -3673,7 +3722,7 @@ public class Game implements Runnable {
             }
             t.append(" ").append(String.format("%02x", table[i]));
         }
-        debugPanel2.append(t.toString());
+        IO.println(t.toString());
     }
 }
 
