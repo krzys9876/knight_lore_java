@@ -17,13 +17,14 @@ public class Game implements Runnable {
     private int sunTick = 0;
     private long tickNo = 0;
     private final long REPAINT_MS = 50;
-    private final long DELAY_MS = 1; // 90ms
+    private final long DELAY_MS = 90; // 90ms
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x99; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
     private final int CAULDRON_REQUIRED_OBJECTS = 2; // 0x0E
     private final int INITIAL_LIVES = 0x05; // NOTE: number in BCD
 
+    private final boolean skipMenu = false;
     private final boolean disableDeath = false;
     private final boolean disableLoseLife = false;
     private final boolean disableIncDays = false;
@@ -330,7 +331,7 @@ public class Game implements Runnable {
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-        menu_loop_BD23(false); // returns when game starts
+        menu_loop_BD23(skipMenu); // returns when game starts
 
             /*try {
                 updateShadowMemory();
@@ -523,9 +524,9 @@ public class Game implements Runnable {
         }
     }
 
-    private int print_text_single_colour_BE31(DataBlock text, int x, int y, int de2) {
+    private int print_text_single_colour_BE31(DataBlock text, int x, int y, int de) {
         // h: y, l: x, de2: text address (first)
-        debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de2));
+        debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de));
         int bc = calc_vidbuf_addr_D811(y, x);
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
@@ -539,17 +540,36 @@ public class Game implements Runnable {
         // for testing only
         //mainMemory.setByteAt(hl, Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
 
+        de = printText(text, de, bc, hl, variables.getU(0x5BB6));
+        return de;
+    }
+
+    private int printText(DataBlock text, int de, int bc, int hl, int attr) {
         boolean textDone = false;
         while(!textDone) {
-            print_8x8_BE7F(text.getU(de2), bc, font_6108);
-            mainMemory.setByteAt(hl, variables.getU(0x5BB6)); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
-            shadowMemory.setByteAt(hl-mainMemory.start+shadowMemory.start, variables.getU(0x5BB6));
-            textDone = (text.getU(de2) & 0x80) > 0;
-            hl ++;
-            de2 ++;
-            bc ++;
+            print_8x8_BE7F(text.getU(de), bc, font_6108);
+            mainMemory.setByteAt(hl, attr); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
+            shadowMemory.setByteAt(hl -mainMemory.start+shadowMemory.start, attr);
+            textDone = (text.getU(de) & 0x80) > 0;
+            hl++;
+            de++;
+            bc++;
         }
-        return de2;
+        return de;
+    }
+
+    private int print_text_std_font_BE45(DataBlock text, int x, int y, int de) {
+        // h: y, l: x, de2: text address (first)
+        debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de));
+        int bc = calc_vidbuf_addr_D811(y, x);
+        debugPanel1.append(String.format("Video addr: %04x", bc));
+
+        int attr = text.getU(de); // first byte is the attribute
+        int hl = calc_attrib_addr_D848(y, x);
+
+        de = printText(text, de+1, bc, hl, attr);
+
+        return de;
     }
 
     private int calc_vidbuf_addr_D811(int y, int x) {
@@ -955,7 +975,7 @@ public class Game implements Runnable {
         clear_scrn_D55F();
 
         if(variables.getU(0x5BC3) != 0)  game_complete_msg_BAAB(); // all objects in cauldron
-        else gameOverScreen();
+        gameOverScreen();
         gameOver = true;
     }
 
@@ -968,8 +988,6 @@ public class Game implements Runnable {
         else print_BCD_number_BCAE(daysAddr, new int[] { days });
         calc_and_display_percent_BC10();
 
-        // TODO: calculate rating
-
         int objectsInCauldron = variables.getU(0x5BBB);
         int objBCD = byteToBCD(objectsInCauldron);
         int objAddr = 0xE2EA;
@@ -979,7 +997,7 @@ public class Game implements Runnable {
         int screens = variables.getU(0x5BC6);
         int allObjInCauldron = variables.getU(0x5BC3);
 
-        int a = screens + 105;
+        int a = screens;
         int c = ((a << 1) & 0xFF) | ((a >> 7) & 1);
         c = c & 0xC0;
         a = allObjInCauldron;
@@ -995,6 +1013,8 @@ public class Game implements Runnable {
         int ratingAddr = ratingAddrH * 256 + ratingAddrL;
 
         IO.println(String.format("rating address %04X",ratingAddr));
+
+        print_text_std_font_BE45(rating_tbl_BBB7, 0x58, 0x27, ratingAddr);
 
         update_screen_D56F(true);
         waitForKey();
@@ -1053,6 +1073,8 @@ public class Game implements Runnable {
         while(keyQueue.isEmpty()) {
             delay();
         }
+        keyQueue.clear();
+        delay();
     }
 
     private void display_text_list_BEBF(DataBlock colors, DataBlock xy, DataBlock text) {
@@ -1499,7 +1521,7 @@ public class Game implements Runnable {
         int ix = block.start;
         while(ix < block.endExcl()) {
             updateOneSprite(block, ix);
-            if(exitingScreen) return;
+            if(exitingScreen || gameOver) return;
             ix+=32;
 
             // update seed_3
