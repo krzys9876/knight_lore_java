@@ -21,7 +21,7 @@ public class Game implements Runnable {
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x98; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
-    private final int CAULDRON_REQUIRED_OBJECTS = 0x0E; // 0x0E
+    private final int CAULDRON_REQUIRED_OBJECTS = 0x02; // 0x0E
     private final int INITIAL_LIVES = 0x99; // NOTE: number in BCD
 
     private final boolean skipMenu = false;
@@ -1109,10 +1109,12 @@ public class Game implements Runnable {
                 exit = onscreen_loop_AFBD();
                 debugPanel1.setText("");
                 debugPanel2.setText("");
+                int cnt = 0;
                 for(int ix = graphic_objs_tbl_5C08.start; ix < graphic_objs_tbl_5C08.endExcl(); ix+=0x20) {
                     if(graphic_objs_tbl_5C08.getU(ix)!=0) {
-                        debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(ix));
+                        debugPanel2.append(graphic_objs_tbl_5C08.objectInfo(cnt, ix));
                     }
+                    cnt++;
                 }
                 debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
                 debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
@@ -1359,16 +1361,36 @@ public class Game implements Runnable {
                     while (objects_to_draw_CE8B.getU(de2) != 0xFF && !doneInnerLoop) {
                         boolean rendered2 = (objects_to_draw_CE8B.getU(de2) & 0x80) > 0;
                         if (!rendered2 && de1 != de2) {
-                            boolean is2behind1 = is2behind1(de1, de2);
-                            if (is2behind1) {
-                                if (renderList.contains(objects_to_draw_CE8B.getU(de2))) {
-                                    renderOne(de2, renderList);
-                                    rendered = true;
-                                } else {
-                                    renderList.add(objects_to_draw_CE8B.getU(de2));
-                                    savedToList = true;
+                            int relativePosition = analyzeRelativePosition(de1, de2);
+                            boolean objCoincide = overlaps(relativePosition);
+                            if(objCoincide) {
+                                // @label=objs_coincide
+                                int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphic_objs_tbl_5C08.start;
+                                int grNo1 = graphic_objs_tbl_5C08.getU(objectLoc1);
+                                boolean isSpecial1 = grNo1 >= 0x60 && grNo1 <= 0x66;
+                                int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 32 + graphic_objs_tbl_5C08.start;
+                                int grNo2 = graphic_objs_tbl_5C08.getU(objectLoc2);
+                                boolean isSpecial2 = grNo2 >= 0x60 && grNo2 <= 0x66;
+                                boolean isPlayer = de1 == objects_to_draw_CE8B.start || de2 == objects_to_draw_CE8B.start;
+                                /*if(isSpecial1 || isSpecial2)*/
+                                if(!isPlayer) IO.println("coincide "+objects_to_draw_CE8B.getU(de1)+" "+objects_to_draw_CE8B.getU(de2));
+
+                                if(isSpecial1) graphic_objs_tbl_5C08.set(objectLoc1, 0xBB); //; set to twinkle sprite
+                                else {
+                                    if(isSpecial2) graphic_objs_tbl_5C08.set(objectLoc2, 0xBB); //; set to twinkle sprite
                                 }
-                                doneInnerLoop = true;
+                            } else {
+                                boolean is2behind1 = is2behind1(relativePosition);
+                                if (is2behind1) {
+                                    if (renderList.contains(objects_to_draw_CE8B.getU(de2))) {
+                                        renderOne(de2, renderList);
+                                        rendered = true;
+                                    } else {
+                                        renderList.add(objects_to_draw_CE8B.getU(de2));
+                                        savedToList = true;
+                                    }
+                                    doneInnerLoop = true;
+                                }
                             }
                         }
                         if (!doneInnerLoop) de2++;
@@ -1399,8 +1421,9 @@ public class Game implements Runnable {
         renderList.reset();
     }
 
-    private boolean is2behind1(int de1, int de2) {
-        if(de1==de2) return false;
+    // Returns number of case from jump table at $CF69
+    private int analyzeRelativePosition(int de1, int de2) {
+        if(de1==de2) return 0;
 
         int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphic_objs_tbl_5C08.start;
         int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 32 + graphic_objs_tbl_5C08.start;
@@ -1437,8 +1460,16 @@ public class Game implements Runnable {
             if(!overlap6) c+=9;
             else c+=18;
 
+        return c;
+    }
+
+    private boolean is2behind1(int c) {
         boolean isBehind = c==3 || c==4 || c==6 || c==7 || c==12 || c==15 || c==16;
         return isBehind;
+    }
+
+    private boolean overlaps(int c) {
+        return c == 13;
     }
 
     private void display_panel_D255() {

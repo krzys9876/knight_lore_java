@@ -56,9 +56,9 @@ public class DataBlock {
 
     public static boolean isSetS(int bit, int value) { return (value & (1 << bit))>0; }
 
-    public String objectInfo(int address) {
+    public String objectInfo(int num, int address) {
         // Assuming the complete object info starts at address
-        String txt = String.format("%02x %s xyz:(%d,%d,%d) d:(%d,%d,%d)", getU(address), GRAPHIC_NAMES[getU(address)],
+        String txt = String.format("(%d) %02x %s xyz:(%d,%d,%d) d:(%d,%d,%d)", num, getU(address), GRAPHIC_NAMES[getU(address)],
                 getU(address+1), getU(address+2), getU(address+3),
                 getS(address+0x09), getS(address+0x0A), getS(address+0x0B));
         return txt;
