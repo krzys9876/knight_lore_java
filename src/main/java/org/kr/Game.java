@@ -17,16 +17,16 @@ public class Game implements Runnable {
     private int sunTick = 0;
     private long tickNo = 0;
     private final long REPAINT_MS = 50;
-    private final long DELAY_MS = 90; // 90ms
+    private final long DELAY_MS = 1; // 90ms
     private final int SUN_TICK_PER_GAME_TICK = 8;
-    private final int MAX_DAYS_BCD = 0x99; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
+    private final int MAX_DAYS_BCD = 0x10; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
     private final int CAULDRON_REQUIRED_OBJECTS = 2; // 0x0E
     private final int INITIAL_LIVES = 0x05; // NOTE: number in BCD
 
     private final boolean skipMenu = false;
     private final boolean disableDeath = false;
-    private final boolean disableLoseLife = false;
+    private final boolean disableLoseLife = true;
     private final boolean disableIncDays = false;
 
     // $4000-$57FF - spectrum video memory
@@ -975,14 +975,19 @@ public class Game implements Runnable {
         clear_scrn_D55F();
 
         if(variables.getU(0x5BC3) != 0)  game_complete_msg_BAAB(); // all objects in cauldron
+
+        clear_scrn_buffer_D567();
+        clear_scrn_D55F();
+
         gameOverScreen();
         gameOver = true;
     }
 
     private void gameOverScreen() {
-        //variables.set(0x5BB8, 0);
+        variables.set(0x5BB8, 0);
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
         int days = variables.getU(0x5BB9);
+        if(days > MAX_DAYS_BCD) days --; // game over due to timeout
         int daysAddr = 0xE8E2;
         if(days < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, days);
         else print_BCD_number_BCAE(daysAddr, new int[] { days });
@@ -1028,7 +1033,7 @@ public class Game implements Runnable {
         screens --; // don't count first room
         //IO.println("screens = " + screens);
         variables.set(0x5BC6, screens);
-        int percent = screens / 128 * 100;
+        int percent = 100 * screens / 128;
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 0xE4E6;
         int percentBCD = byteToBCD(percent);
