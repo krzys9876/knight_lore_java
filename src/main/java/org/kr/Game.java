@@ -17,16 +17,16 @@ public class Game implements Runnable {
     private int sunTick = 0;
     private long tickNo = 0;
     private final long REPAINT_MS = 50;
-    private final long DELAY_MS = 1; // 90ms
+    private final long DELAY_MS = 90; // 90ms
     private final int SUN_TICK_PER_GAME_TICK = 8;
-    private final int MAX_DAYS_BCD = 0x10; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
+    private final int MAX_DAYS_BCD = 0x98; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
-    private final int CAULDRON_REQUIRED_OBJECTS = 2; // 0x0E
-    private final int INITIAL_LIVES = 0x05; // NOTE: number in BCD
+    private final int CAULDRON_REQUIRED_OBJECTS = 0x0E; // 0x0E
+    private final int INITIAL_LIVES = 0x99; // NOTE: number in BCD
 
     private final boolean skipMenu = false;
     private final boolean disableDeath = false;
-    private final boolean disableLoseLife = true;
+    private final boolean disableLoseLife = false;
     private final boolean disableIncDays = false;
 
     // $4000-$57FF - spectrum video memory
@@ -1030,10 +1030,11 @@ public class Game implements Runnable {
         for(int i=0; i<scrn_visited_5BE8.size; i++) {
             screens += calcBits(scrn_visited_5BE8.getU(scrn_visited_5BE8.start+i));
         }
-        screens --; // don't count first room
         //IO.println("screens = " + screens);
+        int objInCauldron = variables.getU(0x5BBB);
+        int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
+        screens --; // don't count first room
         variables.set(0x5BC6, screens);
-        int percent = 100 * screens / 128;
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 0xE4E6;
         int percentBCD = byteToBCD(percent);
