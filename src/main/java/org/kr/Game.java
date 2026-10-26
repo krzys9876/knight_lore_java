@@ -1363,6 +1363,7 @@ public class Game implements Runnable {
                         if (!rendered2 && de1 != de2) {
                             int relativePosition = analyzeRelativePosition(de1, de2);
                             boolean objCoincide = overlaps(relativePosition);
+                            boolean is2behind1 = false;
                             if(objCoincide) {
                                 // @label=objs_coincide
                                 int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphic_objs_tbl_5C08.start;
@@ -1371,26 +1372,25 @@ public class Game implements Runnable {
                                 int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 32 + graphic_objs_tbl_5C08.start;
                                 int grNo2 = graphic_objs_tbl_5C08.getU(objectLoc2);
                                 boolean isSpecial2 = grNo2 >= 0x60 && grNo2 <= 0x66;
-                                boolean isPlayer = de1 == objects_to_draw_CE8B.start || de2 == objects_to_draw_CE8B.start;
-                                /*if(isSpecial1 || isSpecial2)*/
-                                if(!isPlayer) IO.println("coincide "+objects_to_draw_CE8B.getU(de1)+" "+objects_to_draw_CE8B.getU(de2));
-
                                 if(isSpecial1) graphic_objs_tbl_5C08.set(objectLoc1, 0xBB); //; set to twinkle sprite
                                 else {
                                     if(isSpecial2) graphic_objs_tbl_5C08.set(objectLoc2, 0xBB); //; set to twinkle sprite
+                                    // The first object on the list is behind the second
+                                    // (e.g. spell is behind cauldron, so it is invisible when inside).
+                                    // This makes rendering of coinciding object deterministic.
+                                    else is2behind1 = de2 < de1;
                                 }
-                            } else {
-                                boolean is2behind1 = is2behind1(relativePosition);
-                                if (is2behind1) {
-                                    if (renderList.contains(objects_to_draw_CE8B.getU(de2))) {
-                                        renderOne(de2, renderList);
-                                        rendered = true;
-                                    } else {
-                                        renderList.add(objects_to_draw_CE8B.getU(de2));
-                                        savedToList = true;
-                                    }
-                                    doneInnerLoop = true;
+                            }
+                            is2behind1 |= is2behind1(relativePosition);
+                            if (is2behind1) {
+                                if (renderList.contains(objects_to_draw_CE8B.getU(de2))) {
+                                    renderOne(de2, renderList);
+                                    rendered = true;
+                                } else {
+                                    renderList.add(objects_to_draw_CE8B.getU(de2));
+                                    savedToList = true;
                                 }
+                                doneInnerLoop = true;
                             }
                         }
                         if (!doneInnerLoop) de2++;
