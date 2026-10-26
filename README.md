@@ -28,7 +28,7 @@ The game is now in the first playable version. You may clone the repo and run it
 
 ```
     mvn package
-    java -jar kl-0.1.jar
+    java -jar target/kl-0.1.jar
 ```
 Note that you need Java 25.
 
