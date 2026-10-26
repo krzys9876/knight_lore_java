@@ -280,14 +280,14 @@ public class Game implements Runnable {
 
             // 65 14 F2 6F - bottle
             // 66 14 FB 6F - bottle
-            inventory_5BD8.set(inventory_5BD8.start + 12, 0x65);
+            /*inventory_5BD8.set(inventory_5BD8.start + 12, 0x65);
             inventory_5BD8.set(inventory_5BD8.start + 12 + 1, 0x14);
             inventory_5BD8.set(inventory_5BD8.start + 12 + 2, 0xF2);
             inventory_5BD8.set(inventory_5BD8.start + 12 + 3, 0x6F);
             inventory_5BD8.set(inventory_5BD8.start + 8, 0x66);
             inventory_5BD8.set(inventory_5BD8.start + 8 + 1, 0x14);
             inventory_5BD8.set(inventory_5BD8.start + 8 + 2, 0xFB);
-            inventory_5BD8.set(inventory_5BD8.start + 8 + 3, 0x6F);
+            inventory_5BD8.set(inventory_5BD8.start + 8 + 3, 0x6F);*/
 
             //graphic_objs_tbl_5C08.reset();
             //special_objs_here_5C48.reset();
@@ -357,9 +357,9 @@ public class Game implements Runnable {
             //variables.set(0x5BBA, 5); // important only when looping over rooms
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
-            //int overrideRoomId=-1;
-            int overrideRoomId = 0x88;
-            int overrideWE = 50; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId=-1;
+            //int overrideRoomId = 0x88;
+            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
