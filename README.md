@@ -37,6 +37,13 @@ or download _jar_ file and run it.
 
 Note that you need Java 25.
 
+## Next steps ##
+
+The rewrite was performed almost 1:1 with the assembler so you won't find any nicely encapsulated classes. 
+It is all based on directly manipulating the memory areas.
+
+The plan is to refactor the game so the code looks like proper Java.
+
 ## Version history ##
 
 ### 0.1 ###
