@@ -37,6 +37,23 @@ or download _jar_ file and run it.
 
 Note that you need Java 25.
 
+## How to play ##
+
+![Menu](images/locations/menu.png)
+
+In the original game you could select different control settings. So far only the keyboard is implemented 
+(I don't think you have a joystick anyway) without _directional control_. So just press 0.
+
+- To move forward press any key in the middle keyboard row, i.e. **A** to **L**.
+
+- To turn use key pairs in lower row, i.e. **Z/X**, **C/V** etc. to turn **left/right** respectively.
+
+- To jump press any key in upper keyboard row, i.e. **Q** to **P**.
+
+- To collect or drop an object press **1** to **0**.
+
+When the game ends press any key to return to the menu.
+
 ## Next steps ##
 
 The rewrite was performed almost 1:1 with the assembler so you won't find any nicely encapsulated classes. 
