@@ -1567,6 +1567,12 @@ public class Game implements Runnable {
         return decNum;
     }
 
+    private void updateSeed3() {
+        // update seed_3
+        int rnd = new Random().nextInt(0xFF+1);
+        variables.set(0x5BA5, (variables.getU(0x5BA5) + rnd) & 0xFF);
+    }
+
     private void update_sprite_loop_AFC7(DataBlock block) {
         // block contains sprite metadata (32 bytes each)
         int ix = block.start;
@@ -1575,8 +1581,7 @@ public class Game implements Runnable {
             if(exitingScreen || gameOver) return;
             ix+=32;
 
-            // update seed_3
-            variables.set(0x5BA5, (variables.getU(0x5BA5) + 1) & 0xFF);
+            updateSeed3();
         }
     }
 
@@ -1770,7 +1775,7 @@ public class Game implements Runnable {
         if(moving) return;
         int roomSizeZ = variables.getU(0x5BAE);
         int z = block.getU(ix + 0x03);
-        int seed3 = new Random().nextInt(0xFF + 1);
+        int seed3 = variables.getU(0x5BA5);
         if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
             // @label=init_portcullis_up
             //int seed3 = variables.getU(0x5BA5);
@@ -1883,7 +1888,7 @@ public class Game implements Runnable {
             block.set(ix + 0x09, dX);
             block.set(ix + 0x0A, dY);
 
-            int rnd = new Random().nextInt(0xFF + 1); //variables.get(0x5BA5);
+            int rnd = variables.getU(0x5BA5);
             int a = rnd & 0x03;
             if(a==0) a++;
             a+=0x82;
@@ -2576,8 +2581,7 @@ public class Game implements Runnable {
         block.set(ix + 0x20, 1); // update player top
         set_wipe_and_draw_flags_C692(block, ix + 0x20);
         //@label=rand_legs_sprite
-        int rnd = new Random().nextInt(0xFF + 1); //variables.get(0x5BA5);
-        //int rnd = variables.getU(0x5BA5) & 0x0F | ((variables.getU(0x5BA5) & 0xF0) >> 4);
+        int rnd = variables.getU(0x5BA5);
         int newSprite = (rnd & 0x03) | 0x5C;
         if(block.getU(ix) == newSprite) newSprite^=1; // change if same as current
         block.set(ix, newSprite);
@@ -2789,8 +2793,7 @@ public class Game implements Runnable {
         int flags = block.getU(ix + 0x0D);
         int lookAroundCounter = flags & 0x0F;
         if(lookAroundCounter == 0) { // look around again
-            int rnd = new Random().nextInt(0xFF+1); // variables.get(0x5BA5);
-            //int rnd = variables.getU(0x5BA5);
+            int rnd = variables.getU(0x5BA5);
             int sprite = block.getU(ix - 32); // bottom half
             if(rnd < 2) {
                 sprite =  (sprite & 0xF8) | 6; // ; look one way
@@ -2833,7 +2836,6 @@ public class Game implements Runnable {
         int c = ix & 0xFF; // $B6CD LD A,C        ;
         c = (c >> 1) & 0x10;
         int seed2 = variables.getU(0x5BA2);
-        //int seed2 = new Random().nextInt(0xFF + 1);
         c = (c + seed2) & 0xFF;
         if((c & 0b10000) > 0) c = c ^ 0xFF;
         c = c & 0x0F;
@@ -2883,7 +2885,6 @@ public class Game implements Runnable {
         } else {
             boolean isOtherDropping = variables.getU(0x5BBF) != 0;
             if(!isOtherDropping) {
-                //int rnd = new Random().nextInt(0xFF + 1); //variables.get(0x5BA5);
                 int rnd = variables.getU(0x5BA5);
                 // ; 1-in-16 chance
                 if((rnd & 0xF0) > 0) {
@@ -2912,13 +2913,11 @@ public class Game implements Runnable {
         boolean xyOob = (block.getU(ix + 0x0C) & 0x03) > 0; // ; OOB X/Y?
         if(!moving || xyOob) {
             // @label=loc_C5DD
-            //int seed3 = variables.getU(0x5BA5);
-            int seed3 = new Random().nextInt(0xFF + 1);
+            int seed3 = variables.getU(0x5BA5);
             int rnd3 = (seed3 & 0x03) + 4;
             int dx = get_delta_from_tbl_C645(rnd3);
             block.set(ix + 0x09, dx);
             int seed2 = variables.getU(0x5BA2);
-            //int seed2 = new Random().nextInt(0xFF + 1);
             int rnd2 = (seed2 & 0x03) + 4;
             int dy = get_delta_from_tbl_C645(rnd2);
             block.set(ix + 0x0A, dy);
@@ -3038,9 +3037,8 @@ public class Game implements Runnable {
                 return;
             }
         }
-        //int rnd = new Random().nextInt(0xFF + 1) & 3; //variables.get(0x5BA2);
-        //if(rnd != 0) return;
-        // No randomness
+        //if((variables.getU(0x5BA2) & 3) != 0) return;
+        // No randomness - transformation looks more dynamic
         if((tickNo % 3) != 0) return;
         int counter = block.getU(ix + 0x10) -1;
         block.set(ix + 0x10, counter);
@@ -3061,7 +3059,6 @@ public class Game implements Runnable {
         } else {
             // Continue transformation
             int random = variables.getU(0x5BA5);
-            //int random = new Random().nextInt(0xFF + 1);
             int nextSprite = (random & 3) | 0x5C;
             if(nextSprite != block.getU(ix)) nextSprite = nextSprite ^ 1;
             block.set(ix, nextSprite);
@@ -3519,14 +3516,15 @@ public class Game implements Runnable {
         boolean screenFlg = (screen & 0x01) == 0;
         int newDz = 4;
         if(!screenFlg) {
-            int seed3 = new Random().nextInt(0xFF+1);
-            newDz += seed3 & 0x03;
+            int rnd = variables.getU(0x5BA5);
+            newDz += rnd & 0x03;
         }
         boolean zOob = block.isSet(2, ix + 0x0C);
         if(zOob) {
             block.set(ix + 0x0B, newDz);
             // $B64C CALL $B42E     ; } // ignore audio
-            int rnd = new Random().nextInt(0xFF+1) & 0x01;
+            updateSeed3();
+            int rnd = variables.getU(0x5BA5) & 0x01;
             if(rnd == 1) {
                 int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
                 int newdY = block.getU(ix + 2) > playerY ? 2 : -2;
