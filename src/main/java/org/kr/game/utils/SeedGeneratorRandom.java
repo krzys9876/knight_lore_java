@@ -2,7 +2,7 @@ package org.kr.game.utils;
 
 import java.util.Random;
 
-public class RandomGen implements RandomGenBase {
+public class SeedGeneratorRandom implements SeedGenerator {
 
     private int seed1;
     private int seed2;
@@ -10,13 +10,12 @@ public class RandomGen implements RandomGenBase {
 
     private final Random rnd;
 
-    public RandomGen() {
+    public SeedGeneratorRandom() {
         seed1 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable)
         seed2 = 0;
         seed3 = 0;
         rnd = new Random();
 
-        updateSeed1();
         updateSeed3();
     }
 

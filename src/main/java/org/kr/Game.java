@@ -1,7 +1,6 @@
 package org.kr;
 
-import org.kr.game.utils.RandomGen;
-import org.kr.game.utils.RandomGenBase;
+import org.kr.game.utils.SeedGenerator;
 
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -16,7 +15,7 @@ public class Game implements Runnable {
     private final DebugPanel debugPanel2;
     private final ConcurrentSkipListSet<Integer> keyQueue;
 
-    private final RandomGenBase rnd = new RandomGen();
+    private final SeedGenerator rnd;
 
     private long lastTick = 0;
     private int sunTick = 0;
@@ -157,12 +156,13 @@ public class Game implements Runnable {
     };
 
     public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
-                ConcurrentSkipListSet<Integer> keyQueue) {
+                ConcurrentSkipListSet<Integer> keyQueue, SeedGenerator rnd) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
         this.debugPanel1 = debugPanel1;
         this.debugPanel2 = debugPanel2;
         this.keyQueue = keyQueue;
+        this.rnd = rnd;
 
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
@@ -365,7 +365,7 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             int overrideRoomId=-1;
-            //int overrideRoomId = 0x88;
+            //int overrideRoomId = 0x87;
             int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
@@ -851,6 +851,7 @@ public class Game implements Runnable {
                 if (key == KeyEvent.VK_0) startGame = true;
                 //Do not change seed to make game deterministic during development
                 //variables.set(0x5BA0, variables.get(0x5BA0)+1); // increase seed
+                rnd.updateSeed1();
                 delay();
             }
         }
@@ -1033,11 +1034,16 @@ public class Game implements Runnable {
         waitForKey();
     }
 
-    private void calc_and_display_percent_BC10() {
+    private int calcScreensVisited() {
         int screens = 0;
         for(int i=0; i<scrn_visited_5BE8.size; i++) {
             screens += calcBits(scrn_visited_5BE8.getU(scrn_visited_5BE8.start+i));
         }
+        return screens;
+    }
+
+    private void calc_and_display_percent_BC10() {
+        int screens = calcScreensVisited();
         //IO.println("screens = " + screens);
         int objInCauldron = variables.getU(0x5BBB);
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
@@ -1128,6 +1134,7 @@ public class Game implements Runnable {
                 //debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 8)));
                 debugPanel1.append(String.format("Objects collected: %d of %d", variables.getU(0x5BBB), CAULDRON_REQUIRED_OBJECTS));
+                debugPanel1.append(String.format("Rooms visited: %d", calcScreensVisited()));
                 debugPanel1.append(String.format("Max days: %02X", MAX_DAYS_BCD));
                 debugPanel1.append("Special objects (name / location):");
                 for(int ix = special_objs_tbl_6FF2.start; ix < special_objs_tbl_6FF2.endExcl(); ix+=9) {
@@ -1138,6 +1145,7 @@ public class Game implements Runnable {
                         debugPanel1.append(String.format("%s / %02X", name, location));
                     }
                 }
+                debugPanel1.append(String.format("Random seeds: %d %d %d", rnd.getSeed1(), rnd.getSeed2(), rnd.getSeed3()));
 
                 delay();
             }
@@ -1574,13 +1582,6 @@ public class Game implements Runnable {
         return decNum;
     }
 
-    private void updateSeed3() {
-        // update seed_3
-        rnd.updateSeed3();
-        //int rnd = new Random().nextInt(0xFF+1);
-        //variables.set(0x5BA5, (variables.getU(0x5BA5) + rnd) & 0xFF);
-    }
-
     private void update_sprite_loop_AFC7(DataBlock block) {
         // block contains sprite metadata (32 bytes each)
         int ix = block.start;
@@ -1589,7 +1590,7 @@ public class Game implements Runnable {
             if(exitingScreen || gameOver) return;
             ix+=32;
 
-            updateSeed3();
+            rnd.updateSeed3();
         }
     }
 
@@ -3519,7 +3520,7 @@ public class Game implements Runnable {
         if(zOob) {
             block.set(ix + 0x0B, newDz);
             // $B64C CALL $B42E     ; } // ignore audio
-            updateSeed3();
+            rnd.updateSeed3();
             if(rnd.getSeed3() == 1) {
                 int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
                 int newdY = block.getU(ix + 2) > playerY ? 2 : -2;

@@ -1,6 +1,6 @@
 package org.kr.game.utils;
 
-public interface RandomGenBase {
+public interface SeedGenerator {
     int getSeed1();
     int getSeed2();
     int getSeed3();
