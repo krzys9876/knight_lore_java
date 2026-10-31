@@ -195,19 +195,6 @@ public class Game implements Runnable {
             variables.reset();
             // initialize variables (TODO: split variables to separate data blocks)
 
-            // @label=seed_1
-            // b$5BA0 DEFB $53,$00
-            // variables.set(0x5BA0, 0x53);
-            //; Data block at 5BA2
-            // @label=seed_2
-            // b$5BA2 DEFS $02
-            //variables.set(0x5BA2, 0);
-            //variables.set(0x5BA3, 0);
-            //; Data block at 5BA5
-            //@label=seed_3
-            //b$5BA5 DEFS $01
-            //variables.set(0x5BA5, 0);
-
             //; Data block at 5BC7
             // @label=gfxbase_8x8
             // b$5BC7 DEFB $08,$61
