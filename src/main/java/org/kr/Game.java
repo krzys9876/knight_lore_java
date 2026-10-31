@@ -353,9 +353,9 @@ public class Game implements Runnable {
             //variables.set(0x5BBA, 5); // important only when looping over rooms
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
-            int overrideRoomId=-1;
-            //int overrideRoomId = 0x87;
-            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+            //int overrideRoomId=-1;
+            int overrideRoomId = 0x87;
+            int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -910,14 +910,10 @@ public class Game implements Runnable {
 
     private void init_special_objects_C47E() {
         int rnd1 = rnd.getSeed1() & 0x07; // random
-        int hl = specialObjects.start();
-        while(hl < specialObjects.endExcl()) {
+        for(int spi = 0; spi < specialObjects.size; spi++) {
             rnd1 = (rnd1 & 0x07) | 0x60; // set numbers between 0x60 and 0x67 starting from random number to special object indexes
-            specialObjects.set(hl, rnd1);
-            hl++;
-            // copy coords from "start" to "current"
-            for(int i=0; i<4; i++) specialObjects.set(hl+i+4, specialObjects.getU(hl+i));
-            hl+=8;
+            specialObjects.setGraphicNo(spi, rnd1);
+            specialObjects.copyStartToCurrent(spi);
             rnd1++;
         }
         debugTable2("Special objects:", specialObjects.start(), specialObjects.getCopy());
@@ -1126,11 +1122,11 @@ public class Game implements Runnable {
                 debugPanel1.append(String.format("Rooms visited: %d", calcScreensVisited()));
                 debugPanel1.append(String.format("Max days: %02X", MAX_DAYS_BCD));
                 debugPanel1.append("Special objects (name / location):");
-                for(int ix = specialObjects.start(); ix < specialObjects.endExcl(); ix+=9) {
-                    int grNo = specialObjects.getU(ix);
+                for(int ix = 0; ix < specialObjects.size; ix++) {
+                    int grNo = specialObjects.getGraphicNo(ix);
                     if(grNo!=0) {
                         String name = DataBlock.GRAPHIC_NAMES[grNo];
-                        int location = specialObjects.getU(ix + 8);
+                        int location = specialObjects.getScreen(ix);
                         debugPanel1.append(String.format("%s / %02X", name, location));
                     }
                 }
@@ -2056,7 +2052,8 @@ public class Game implements Runnable {
         int d = block.getU(iy + 0x11);
         int e = block.getU(iy + 0x10);
         int ptr =  d * 256 + e; // ; ptr graphic object
-        specialObjects.set(ptr, 0);
+        int spi = specialObjects.getIndex(ptr);
+        specialObjects.clearGraphicNo(spi);
         inventory_5BD8.set(hl, e);
         hl++;
         inventory_5BD8.set(hl, d);
@@ -3097,7 +3094,8 @@ public class Game implements Runnable {
             int l = block.getU(ix + 0x10);
             int h = block.getU(ix + 0x11);
             int ptr = h * 256 + l;
-            specialObjects.set(ptr, 0); // ; zap ptr object table entry
+            int spi = specialObjects.getIndex(ptr);
+            specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
             int lives = variables.getU(0x5BBA);
             variables.set(0x5BBA, incBCD(lives));
             variables.set(0x5BC0, 0);
@@ -3163,7 +3161,8 @@ public class Game implements Runnable {
         int l = block.getU(ix + 0x10);
         int h = block.getU(ix + 0x11);
         int ptr = h * 256 + l;
-        specialObjects.set(ptr , 0);
+        int spi = specialObjects.getIndex(ptr);
+        specialObjects.clearGraphicNo(spi);
         upd_111_B95E(block, ix);
     }
 
@@ -3532,7 +3531,10 @@ public class Game implements Runnable {
     private void upd_185_187_BF37(DataBlock block, int ix) {
         int l = block.getU(ix + 0x10);
         int h = block.getU(ix + 0x11);
-        if(l!=0 || h!=0) specialObjects.set(h*256+l, 0); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
+        if(l!=0 || h!=0) {
+            int spi = specialObjects.getIndex(h*256+l);
+            specialObjects.clearGraphicNo(spi); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
+        }
         upd_119_BF3F(block, ix);
     }
 
@@ -3578,12 +3580,13 @@ public class Game implements Runnable {
                 int d = graphic_objs_tbl_5C08.getU(iy + 0x11);
                 int ptr = d*256 + e; // ptr can be 0 for cauldron bubbles
                 if(ptr != 0) {
-                    specialObjects.set(ptr, grNo);
-                    specialObjects.set(ptr + 5, graphic_objs_tbl_5C08.getU(iy + 1));
-                    specialObjects.set(ptr + 6, graphic_objs_tbl_5C08.getU(iy + 2));
-                    specialObjects.set(ptr + 7, graphic_objs_tbl_5C08.getU(iy + 3));
+                    int spi = specialObjects.getIndex(ptr);
+                    specialObjects.setGraphicNo(spi, grNo);
+                    specialObjects.setCurrentX(spi, graphic_objs_tbl_5C08.getU(iy + 1));
+                    specialObjects.setCurrentY(spi, graphic_objs_tbl_5C08.getU(iy + 2));
+                    specialObjects.setCurrentZ(spi, graphic_objs_tbl_5C08.getU(iy + 3));
                     int screen = graphic_objs_tbl_5C08.getU(iy + 8);
-                    specialObjects.set(ptr + 8, screen);
+                    specialObjects.setScreen(spi, screen);
                 }
             }
             iy += 0x20;
@@ -3706,32 +3709,30 @@ public class Game implements Runnable {
     private void find_special_objs_here_C525() {
         int currLocId = graphic_objs_tbl_5C08.getU(0x5C08 + 8);
         for(int i=0x5C08 + 2*0x20; i<0x5C08 + 4*0x20; i++) graphic_objs_tbl_5C08.set(i, 0);
-        int iy = specialObjects.start();
-        while(iy<specialObjects.endExcl()) {
-            int specialObjGrNo = specialObjects.getU(iy);
+        for(int spi = 0; spi < specialObjects.size;  spi++) {
+            int specialObjGrNo = specialObjects.getGraphicNo(spi);
             int ix = 0x5C48;
             boolean saved = false;
             while(ix < 0x5C88 && !saved) {
                 int screenObjGrNo = graphic_objs_tbl_5C08.getU(ix);
-                if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == specialObjects.getU(iy + 8)) {
-                    graphic_objs_tbl_5C08.set(ix, specialObjects.getU(iy));
-                    graphic_objs_tbl_5C08.set(ix + 1, specialObjects.getU(iy + 5));
-                    graphic_objs_tbl_5C08.set(ix + 2, specialObjects.getU(iy + 6));
-                    graphic_objs_tbl_5C08.set(ix + 3, specialObjects.getU(iy + 7));
+                if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == specialObjects.getScreen(spi)) {
+                    graphic_objs_tbl_5C08.set(ix, specialObjGrNo);
+                    graphic_objs_tbl_5C08.set(ix + 1, specialObjects.getCurrentX(spi));
+                    graphic_objs_tbl_5C08.set(ix + 2, specialObjects.getCurrentY(spi));
+                    graphic_objs_tbl_5C08.set(ix + 3, specialObjects.getCurrentZ(spi));
                     graphic_objs_tbl_5C08.set(ix + 4, 5);
                     graphic_objs_tbl_5C08.set(ix + 5, 5);
                     graphic_objs_tbl_5C08.set(ix + 6, 0x0C);
                     graphic_objs_tbl_5C08.set(ix + 7, 0x14);
                     graphic_objs_tbl_5C08.set(ix + 8, currLocId);
                     for (int i = 9; i < 16; i++) graphic_objs_tbl_5C08.set(ix + i, 0);
-                    graphic_objs_tbl_5C08.set(ix + 0x10, iy & 0xFF);
-                    graphic_objs_tbl_5C08.set(ix + 0x11, (iy & 0xFF00) >> 8);
+                    graphic_objs_tbl_5C08.set(ix + 0x10, specialObjects.getAddress(spi) & 0xFF);
+                    graphic_objs_tbl_5C08.set(ix + 0x11, (specialObjects.getAddress(spi) & 0xFF00) >> 8);
                     for (int i = 18; i < 32; i++) graphic_objs_tbl_5C08.set(ix + i, 0);
                     saved = true;
                 }
                 ix += 32;
             }
-            iy+=9;
         }
     }
 
