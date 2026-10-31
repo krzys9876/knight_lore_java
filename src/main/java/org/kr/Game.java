@@ -3524,7 +3524,7 @@ public class Game implements Runnable {
             block.set(ix + 0x0B, newDz);
             // $B64C CALL $B42E     ; } // ignore audio
             rnd.updateSeed3();
-            if(rnd.getSeed3() == 1) {
+            if((rnd.getSeed3() & 0x01) == 1) {
                 int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
                 int newdY = block.getU(ix + 2) > playerY ? 2 : -2;
                 if(isWulf) newdY = -newdY; // ; towards player
