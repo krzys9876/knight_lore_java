@@ -1,5 +1,6 @@
 package org.kr;
 
+import org.kr.game.objects.SpecialObjects;
 import org.kr.game.utils.SeedGenerator;
 
 import java.awt.event.KeyEvent;
@@ -56,7 +57,8 @@ public class Game implements Runnable {
     private final DataBlock font_6108 = InitialData.block("font_6108");
     private final DataBlock sprite_scratchpad_BFDB = InitialData.block("sprite_scratchpad_BFDB");
     private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
-    private final DataBlock special_objs_tbl_6FF2 = InitialData.block("special_objs_tbl_6FF2");
+    //private final DataBlock special_objs_tbl_6FF2 = InitialData.block("special_objs_tbl_6FF2");
+    private final SpecialObjects specialObjects = new SpecialObjects();
     private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
     private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
@@ -908,17 +910,17 @@ public class Game implements Runnable {
 
     private void init_special_objects_C47E() {
         int rnd1 = rnd.getSeed1() & 0x07; // random
-        int hl = special_objs_tbl_6FF2.start;
-        while(hl < special_objs_tbl_6FF2.endExcl()) {
+        int hl = specialObjects.start();
+        while(hl < specialObjects.endExcl()) {
             rnd1 = (rnd1 & 0x07) | 0x60; // set numbers between 0x60 and 0x67 starting from random number to special object indexes
-            special_objs_tbl_6FF2.set(hl, rnd1);
+            specialObjects.set(hl, rnd1);
             hl++;
             // copy coords from "start" to "current"
-            for(int i=0; i<4; i++) special_objs_tbl_6FF2.set(hl+i+4, special_objs_tbl_6FF2.getU(hl+i));
+            for(int i=0; i<4; i++) specialObjects.set(hl+i+4, specialObjects.getU(hl+i));
             hl+=8;
             rnd1++;
         }
-        debugTable2("Special objects:", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy());
+        debugTable2("Special objects:", specialObjects.start(), specialObjects.getCopy());
     }
 
     private void player_dies_AFB7() {
@@ -1124,11 +1126,11 @@ public class Game implements Runnable {
                 debugPanel1.append(String.format("Rooms visited: %d", calcScreensVisited()));
                 debugPanel1.append(String.format("Max days: %02X", MAX_DAYS_BCD));
                 debugPanel1.append("Special objects (name / location):");
-                for(int ix = special_objs_tbl_6FF2.start; ix < special_objs_tbl_6FF2.endExcl(); ix+=9) {
-                    int grNo = special_objs_tbl_6FF2.getU(ix);
+                for(int ix = specialObjects.start(); ix < specialObjects.endExcl(); ix+=9) {
+                    int grNo = specialObjects.getU(ix);
                     if(grNo!=0) {
                         String name = DataBlock.GRAPHIC_NAMES[grNo];
-                        int location = special_objs_tbl_6FF2.getU(ix + 8);
+                        int location = specialObjects.getU(ix + 8);
                         debugPanel1.append(String.format("%s / %02X", name, location));
                     }
                 }
@@ -2054,7 +2056,7 @@ public class Game implements Runnable {
         int d = block.getU(iy + 0x11);
         int e = block.getU(iy + 0x10);
         int ptr =  d * 256 + e; // ; ptr graphic object
-        special_objs_tbl_6FF2.set(ptr, 0);
+        specialObjects.set(ptr, 0);
         inventory_5BD8.set(hl, e);
         hl++;
         inventory_5BD8.set(hl, d);
@@ -3095,7 +3097,7 @@ public class Game implements Runnable {
             int l = block.getU(ix + 0x10);
             int h = block.getU(ix + 0x11);
             int ptr = h * 256 + l;
-            special_objs_tbl_6FF2.set(ptr, 0); // ; zap ptr object table entry
+            specialObjects.set(ptr, 0); // ; zap ptr object table entry
             int lives = variables.getU(0x5BBA);
             variables.set(0x5BBA, incBCD(lives));
             variables.set(0x5BC0, 0);
@@ -3161,7 +3163,7 @@ public class Game implements Runnable {
         int l = block.getU(ix + 0x10);
         int h = block.getU(ix + 0x11);
         int ptr = h * 256 + l;
-        special_objs_tbl_6FF2.set(ptr , 0);
+        specialObjects.set(ptr , 0);
         upd_111_B95E(block, ix);
     }
 
@@ -3530,7 +3532,7 @@ public class Game implements Runnable {
     private void upd_185_187_BF37(DataBlock block, int ix) {
         int l = block.getU(ix + 0x10);
         int h = block.getU(ix + 0x11);
-        if(l!=0 || h!=0) special_objs_tbl_6FF2.set(h*256+l, 0); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
+        if(l!=0 || h!=0) specialObjects.set(h*256+l, 0); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
         upd_119_BF3F(block, ix);
     }
 
@@ -3576,12 +3578,12 @@ public class Game implements Runnable {
                 int d = graphic_objs_tbl_5C08.getU(iy + 0x11);
                 int ptr = d*256 + e; // ptr can be 0 for cauldron bubbles
                 if(ptr != 0) {
-                    special_objs_tbl_6FF2.set(ptr, grNo);
-                    special_objs_tbl_6FF2.set(ptr + 5, graphic_objs_tbl_5C08.getU(iy + 1));
-                    special_objs_tbl_6FF2.set(ptr + 6, graphic_objs_tbl_5C08.getU(iy + 2));
-                    special_objs_tbl_6FF2.set(ptr + 7, graphic_objs_tbl_5C08.getU(iy + 3));
+                    specialObjects.set(ptr, grNo);
+                    specialObjects.set(ptr + 5, graphic_objs_tbl_5C08.getU(iy + 1));
+                    specialObjects.set(ptr + 6, graphic_objs_tbl_5C08.getU(iy + 2));
+                    specialObjects.set(ptr + 7, graphic_objs_tbl_5C08.getU(iy + 3));
                     int screen = graphic_objs_tbl_5C08.getU(iy + 8);
-                    special_objs_tbl_6FF2.set(ptr + 8, screen);
+                    specialObjects.set(ptr + 8, screen);
                 }
             }
             iy += 0x20;
@@ -3704,18 +3706,18 @@ public class Game implements Runnable {
     private void find_special_objs_here_C525() {
         int currLocId = graphic_objs_tbl_5C08.getU(0x5C08 + 8);
         for(int i=0x5C08 + 2*0x20; i<0x5C08 + 4*0x20; i++) graphic_objs_tbl_5C08.set(i, 0);
-        int iy = special_objs_tbl_6FF2.start;
-        while(iy<special_objs_tbl_6FF2.endExcl()) {
-            int specialObjGrNo = special_objs_tbl_6FF2.getU(iy);
+        int iy = specialObjects.start();
+        while(iy<specialObjects.endExcl()) {
+            int specialObjGrNo = specialObjects.getU(iy);
             int ix = 0x5C48;
             boolean saved = false;
             while(ix < 0x5C88 && !saved) {
                 int screenObjGrNo = graphic_objs_tbl_5C08.getU(ix);
-                if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == special_objs_tbl_6FF2.getU(iy + 8)) {
-                    graphic_objs_tbl_5C08.set(ix, special_objs_tbl_6FF2.getU(iy));
-                    graphic_objs_tbl_5C08.set(ix + 1, special_objs_tbl_6FF2.getU(iy + 5));
-                    graphic_objs_tbl_5C08.set(ix + 2, special_objs_tbl_6FF2.getU(iy + 6));
-                    graphic_objs_tbl_5C08.set(ix + 3, special_objs_tbl_6FF2.getU(iy + 7));
+                if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == specialObjects.getU(iy + 8)) {
+                    graphic_objs_tbl_5C08.set(ix, specialObjects.getU(iy));
+                    graphic_objs_tbl_5C08.set(ix + 1, specialObjects.getU(iy + 5));
+                    graphic_objs_tbl_5C08.set(ix + 2, specialObjects.getU(iy + 6));
+                    graphic_objs_tbl_5C08.set(ix + 3, specialObjects.getU(iy + 7));
                     graphic_objs_tbl_5C08.set(ix + 4, 5);
                     graphic_objs_tbl_5C08.set(ix + 5, 5);
                     graphic_objs_tbl_5C08.set(ix + 6, 0x0C);
