@@ -1140,9 +1140,8 @@ public class Game implements Runnable {
     private boolean onscreen_loop_AFBD() {
         // @label=onscreen_loop
         //IO.println("Onscreen loop AFBD");
-        variables.set(0x5BBC, rnd.getSeed2());
         rnd.updateSeed2();
-        update_sprite_loop_AFC7(graphic_objs_tbl_5C08);
+        update_sprite_loop_AFC7();
 
         if(exitingScreen) return false;
         // loc_B000
@@ -1567,11 +1566,11 @@ public class Game implements Runnable {
         return decNum;
     }
 
-    private void update_sprite_loop_AFC7(DataBlock block) {
+    private void update_sprite_loop_AFC7() {
         // block contains sprite metadata (32 bytes each)
-        int ix = block.start;
-        while(ix < block.endExcl()) {
-            updateOneSprite(block, ix);
+        int ix = graphic_objs_tbl_5C08.start;
+        while(ix < graphic_objs_tbl_5C08.endExcl()) {
+            updateOneSprite(graphic_objs_tbl_5C08, ix);
             if(exitingScreen || gameOver) return;
             ix+=32;
 
