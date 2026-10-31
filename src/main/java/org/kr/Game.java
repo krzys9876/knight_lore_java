@@ -29,7 +29,7 @@ public class Game implements Runnable {
     private final int CAULDRON_REQUIRED_OBJECTS = 0x0E; // 0x0E
     private final int INITIAL_LIVES = 0x99; // NOTE: number in BCD
 
-    private final boolean skipMenu = false;
+    private final boolean skipMenu = true;
     private final boolean disableDeath = false;
     private final boolean disableLoseLife = false;
     private final boolean disableIncDays = false;
@@ -146,6 +146,8 @@ public class Game implements Runnable {
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
+
+    private final KeySequence keySequence = new KeySequence();
 
     // Repaint every fixed interval
     Timer timer = new Timer();
@@ -353,9 +355,9 @@ public class Game implements Runnable {
             //variables.set(0x5BBA, 5); // important only when looping over rooms
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
-            //int overrideRoomId=-1;
-            int overrideRoomId = 0x87;
-            int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
+            int overrideRoomId=-1;
+            //int overrideRoomId = 0x87;
+            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -1131,6 +1133,7 @@ public class Game implements Runnable {
                     }
                 }
                 debugPanel1.append(String.format("Random seeds: %d %d %d", rnd.getSeed1(), rnd.getSeed2(), rnd.getSeed3()));
+                debugPanel1.append(String.format("Tick: %d", tickNo));
 
                 delay();
             }
@@ -1251,6 +1254,19 @@ public class Game implements Runnable {
         }
         lastTick = currentTick;
         sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
+
+        if(keySequence.exists(tickNo)) {
+            KeySequenceEvent event = keySequence.get(tickNo);
+            if(event != null) {
+                if(event.type == KeySequenceEventType.PRESSED) {
+                    IO.println("PRESSED "+event.code);
+                    keyQueue.add(event.code);
+                } else {
+                    IO.println("RELEASED "+event.code);
+                    keyQueue.remove(event.code);
+                }
+            }
+        }
         tickNo ++;
     }
 
