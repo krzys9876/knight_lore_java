@@ -1118,7 +1118,20 @@ public class Game implements Runnable {
                     cnt++;
                 }
                 debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
-                debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
+                //debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
+                debugPanel1.append(String.format("Current room: %02X (hex)", graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 8)));
+                debugPanel1.append(String.format("Objects collected: %d of %d", variables.getU(0x5BBB), CAULDRON_REQUIRED_OBJECTS));
+                debugPanel1.append(String.format("Max days: %02X", MAX_DAYS_BCD));
+                debugPanel1.append("Special objects (name / location):");
+                for(int ix = special_objs_tbl_6FF2.start; ix < special_objs_tbl_6FF2.endExcl(); ix+=9) {
+                    int grNo = special_objs_tbl_6FF2.getU(ix);
+                    if(grNo!=0) {
+                        String name = DataBlock.GRAPHIC_NAMES[grNo];
+                        int location = special_objs_tbl_6FF2.getU(ix + 8);
+                        debugPanel1.append(String.format("%s / %02X", name, location));
+                    }
+                }
+
                 delay();
             }
         }

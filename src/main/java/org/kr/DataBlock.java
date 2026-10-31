@@ -64,7 +64,7 @@ public class DataBlock {
         return txt;
     }
 
-    private static final String[] GRAPHIC_NAMES = {
+    public static final String[] GRAPHIC_NAMES = {
             "none",                                             // 0x00 (0)
             "unused",                                           // 0x01 (1)
             "stone arch (near side)",                           // 0x02 (2)
