@@ -844,6 +844,7 @@ public class Game implements Runnable {
                 if (key == KeyEvent.VK_0) startGame = true;
                 //Do not change seed to make game deterministic during development
                 //variables.set(0x5BA0, variables.get(0x5BA0)+1); // increase seed
+                delay();
             }
         }
     }
