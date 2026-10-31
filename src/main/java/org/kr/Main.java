@@ -18,7 +18,7 @@ public class Main {
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1800, 900);
-        frame.setTitle("KL");
+        frame.setTitle("Knight Lore recreated");
         //frame.setLayout(new GridLayout(1, 3));
         frame.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
