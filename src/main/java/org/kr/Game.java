@@ -4,6 +4,7 @@ import org.kr.game.objects.SpecialObjects;
 import org.kr.game.utils.*;
 
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,9 +23,9 @@ public class Game implements Runnable {
     private long lastTick = 0;
     private int sunTick = 0;
     private long tickNo = 0;
-    private final long REPAINT_MS = 10;
+    private final long REPAINT_MS = 5;
     private final long DELAY_MS = 90; // 90ms
-    private final long DELAY_MS_REPLAY = 5; // 90ms
+    private final long DELAY_MS_REPLAY = 1; // 90ms
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x98; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
@@ -47,6 +48,7 @@ public class Game implements Runnable {
     private boolean exitingScreen = false;
     private boolean gameOver = false;
     private int gameCounter = 0;
+    private String gameId = "";
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
     private final DataBlock cant_drop_5BD3 = new DataBlock(0x5BD3, 5);
@@ -305,6 +307,8 @@ public class Game implements Runnable {
 
             //variables.set(0x5BA0, v5C78);
             gameOver = false;
+            gameId = nowAsString();
+            new File("saves/"+gameId).mkdir();
             main_AF88();
             gameCounter++;
         }
@@ -1265,7 +1269,11 @@ public class Game implements Runnable {
         lastTick = currentTick;
         sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
 
-        tickNo ++;
+        tickNo++;
+
+        if(keySequence.isSaving() || true) {
+            saveImage(mainPanel, String.format("saves/%s/tick_%d.png", gameId, tickNo));
+        }
 
         keySequence.switchMode(tickNo);
 
@@ -2608,6 +2616,10 @@ public class Game implements Runnable {
         return true;
     }
 
+    private String nowAsString() {
+        return DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+    }
+
     private void check_user_input_D022() {
         // NOTE: we ignore other methods than keyboard
         // NOTE2: we do not poll from the queue here, we simply read what's in the queue. The main class takes care of key press/release event
@@ -2624,8 +2636,7 @@ public class Game implements Runnable {
         if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_1 || k == KeyEvent.VK_2 || k == KeyEvent.VK_3 || k == KeyEvent.VK_4 || k == KeyEvent.VK_5 || k == KeyEvent.VK_6 || k == KeyEvent.VK_7 || k == KeyEvent.VK_8 || k == KeyEvent.VK_9 || k == KeyEvent.VK_0))
             c |= 0b10000;
         if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_ESCAPE)) {
-            String now = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-            keySequence.save(String.format("saves/key_sequence_%s.csv", now));
+            keySequence.save(String.format("saves/%s/key_sequence.csv", gameId));
             System.exit(0);
         }
         int prevC = variables.getU(0x5BB5);
@@ -3251,7 +3262,7 @@ public class Game implements Runnable {
                 // $C2BD CALL $B403    ; // ignore audio
             }
             try {
-                Thread.sleep(CAULDRON_ATTR_DELAY_MS);
+                if(keySequence.isSaving()) Thread.sleep(CAULDRON_ATTR_DELAY_MS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
