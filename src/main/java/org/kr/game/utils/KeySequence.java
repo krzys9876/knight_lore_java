@@ -1,7 +1,6 @@
 package org.kr.game.utils;
 
 import org.kr.InitialData;
-import org.kr.game.utils.KeySequenceMode;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
