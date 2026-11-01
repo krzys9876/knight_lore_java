@@ -1,11 +1,12 @@
 package org.kr;
 
 import org.kr.game.objects.SpecialObjects;
-import org.kr.game.utils.SeedGenerator;
+import org.kr.game.utils.*;
 
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -21,8 +22,9 @@ public class Game implements Runnable {
     private long lastTick = 0;
     private int sunTick = 0;
     private long tickNo = 0;
-    private final long REPAINT_MS = 50;
+    private final long REPAINT_MS = 10;
     private final long DELAY_MS = 90; // 90ms
+    private final long DELAY_MS_REPLAY = 5; // 90ms
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x98; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
@@ -1134,6 +1136,7 @@ public class Game implements Runnable {
                 }
                 debugPanel1.append(String.format("Random seeds: %d %d %d", rnd.getSeed1(), rnd.getSeed2(), rnd.getSeed3()));
                 debugPanel1.append(String.format("Tick: %d", tickNo));
+                debugPanel1.append(String.format("Mode: %s", keySequence.isReplaying() ? "Replaying" : "Saving"));
 
                 delay();
             }
@@ -1239,11 +1242,15 @@ public class Game implements Runnable {
         graphic_objs_tbl_5C08.set(de + 0x13, -4); //FC
     }
 
+    private long getDelayMs() {
+        return keySequence.isReplaying() ? DELAY_MS_REPLAY : DELAY_MS;
+    }
+
     private void delay() {
         long currentTick = System.currentTimeMillis();
         if(lastTick == 0) lastTick = currentTick;
 
-        long sleepMs = DELAY_MS - (currentTick - lastTick);
+        long sleepMs = getDelayMs() - (currentTick - lastTick);
         if(sleepMs > 0) {
             try {
                 Thread.sleep(sleepMs);
@@ -1257,16 +1264,14 @@ public class Game implements Runnable {
 
         tickNo ++;
 
-        if(keySequence.exists(tickNo)) {
+        keySequence.switchMode(tickNo);
+
+        if(keySequence.isReplaying() && keySequence.exists(tickNo)) {
             List<KeySequenceEvent> events = keySequence.get(tickNo);
             events.forEach(event -> {
-                if(event.type == KeySequenceEventType.PRESSED) {
-                    IO.println("PRESSED "+event.code);
-                    keyQueue.add(event.code);
-                } else {
-                    IO.println("RELEASED "+event.code);
-                    keyQueue.remove(event.code);
-                }
+                if(event.getType() == KeySequenceEventType.PRESSED)
+                    keyQueue.add(event.getCode());
+                else keyQueue.remove(event.getCode());
             });
         }
     }
@@ -2616,8 +2621,9 @@ public class Game implements Runnable {
         if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_1 || k == KeyEvent.VK_2 || k == KeyEvent.VK_3 || k == KeyEvent.VK_4 || k == KeyEvent.VK_5 || k == KeyEvent.VK_6 || k == KeyEvent.VK_7 || k == KeyEvent.VK_8 || k == KeyEvent.VK_9 || k == KeyEvent.VK_0))
             c |= 0b10000;
         if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_ESCAPE)) {
-            keySequence.save("images/key_sequence.csv");
-            System.exit(1);
+            String now = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+            keySequence.save(String.format("saves/key_sequence_%s.csv", now));
+            System.exit(0);
         }
         int prevC = variables.getU(0x5BB5);
         if(c != prevC) {
