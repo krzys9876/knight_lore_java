@@ -1090,6 +1090,23 @@ public class Game implements Runnable {
         delay();
     }
 
+    private void waitForSpace() {
+        while(!keyQueue.contains(KeyEvent.VK_SPACE)) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        while(keyQueue.contains(KeyEvent.VK_SPACE)) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     private void display_text_list_BEBF(DataBlock colors, DataBlock xy, DataBlock text) {
         int de = text.start;
         for(int i = 0; i < colors.size; i++) {
@@ -2635,6 +2652,10 @@ public class Game implements Runnable {
             c |= 0b01000;
         if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_1 || k == KeyEvent.VK_2 || k == KeyEvent.VK_3 || k == KeyEvent.VK_4 || k == KeyEvent.VK_5 || k == KeyEvent.VK_6 || k == KeyEvent.VK_7 || k == KeyEvent.VK_8 || k == KeyEvent.VK_9 || k == KeyEvent.VK_0))
             c |= 0b10000;
+        if(keyQueue.contains(KeyEvent.VK_SPACE)) {
+            keyQueue.remove(KeyEvent.VK_SPACE);
+            waitForSpace();
+        }
         if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_ESCAPE)) {
             keySequence.save(String.format("saves/%s/key_sequence.csv", gameId));
             System.exit(0);
