@@ -147,7 +147,7 @@ public class Game implements Runnable {
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
 
-    private final KeySequence keySequence = new KeySequence();
+    private final KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY);
 
     // Repaint every fixed interval
     Timer timer = new Timer();
@@ -1255,9 +1255,11 @@ public class Game implements Runnable {
         lastTick = currentTick;
         sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
 
+        tickNo ++;
+
         if(keySequence.exists(tickNo)) {
-            KeySequenceEvent event = keySequence.get(tickNo);
-            if(event != null) {
+            List<KeySequenceEvent> events = keySequence.get(tickNo);
+            events.forEach(event -> {
                 if(event.type == KeySequenceEventType.PRESSED) {
                     IO.println("PRESSED "+event.code);
                     keyQueue.add(event.code);
@@ -1265,9 +1267,8 @@ public class Game implements Runnable {
                     IO.println("RELEASED "+event.code);
                     keyQueue.remove(event.code);
                 }
-            }
+            });
         }
-        tickNo ++;
     }
 
     private void display_day_BCCA() {
@@ -2614,7 +2615,33 @@ public class Game implements Runnable {
             c |= 0b01000;
         if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_1 || k == KeyEvent.VK_2 || k == KeyEvent.VK_3 || k == KeyEvent.VK_4 || k == KeyEvent.VK_5 || k == KeyEvent.VK_6 || k == KeyEvent.VK_7 || k == KeyEvent.VK_8 || k == KeyEvent.VK_9 || k == KeyEvent.VK_0))
             c |= 0b10000;
-        if(c!=variables.getU(0x5BB5)) {
+        if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_ESCAPE)) {
+            keySequence.save("images/key_sequence.csv");
+            System.exit(1);
+        }
+        int prevC = variables.getU(0x5BB5);
+        if(c != prevC) {
+            boolean leftCurr = (c & 0b00001) > 0;
+            boolean leftPrev = (prevC & 0b00001) > 0;
+            boolean rightCurr = (c & 0b00010) > 0;
+            boolean rightPrev = (prevC & 0b00010) > 0;
+            boolean forwardCurr = (c & 0b00100) > 0;
+            boolean forwardPrev = (prevC & 0b00100) > 0;
+            boolean jumpCurr = (c & 0b01000) > 0;
+            boolean jumpPrev = (prevC & 0b01000) > 0;
+            boolean pickupDropCurr = (c & 0b10000) > 0;
+            boolean pickupDropPrev = (prevC & 0b10000) > 0;
+            if(leftCurr && !leftPrev) keySequence.putPressed(tickNo, KeyEvent.VK_Z);
+            if(!leftCurr && leftPrev) keySequence.putReleased(tickNo, KeyEvent.VK_Z);
+            if(rightCurr && !rightPrev) keySequence.putPressed(tickNo, KeyEvent.VK_X);
+            if(!rightCurr && rightPrev) keySequence.putReleased(tickNo, KeyEvent.VK_X);
+            if(forwardCurr && !forwardPrev) keySequence.putPressed(tickNo, KeyEvent.VK_A);
+            if(!forwardCurr && forwardPrev) keySequence.putReleased(tickNo, KeyEvent.VK_A);
+            if(jumpCurr && !jumpPrev) keySequence.putPressed(tickNo, KeyEvent.VK_Q);
+            if(!jumpCurr && jumpPrev) keySequence.putReleased(tickNo, KeyEvent.VK_Q);
+            if(pickupDropCurr && !pickupDropPrev) keySequence.putPressed(tickNo, KeyEvent.VK_1);
+            if(!pickupDropCurr && pickupDropPrev) keySequence.putReleased(tickNo, KeyEvent.VK_1);
+
             variables.set(0x5BB5, c);
             //IO.println("Pressed: "+Integer.toBinaryString(c));
         }
