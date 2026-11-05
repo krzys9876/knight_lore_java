@@ -14,7 +14,7 @@ public class KeySequence {
     public KeySequence(KeySequenceMode mode) {
         this.mode = mode;
         this.lastTick = -1;
-        if (mode == KeySequenceMode.REPLAY) loadFromResource();
+        if (isReplaying()) loadFromResource();
     }
 
     public void loadFromResource() {
@@ -49,27 +49,26 @@ public class KeySequence {
     }
 
     public void switchMode(long tick) {
-        if(mode == KeySequenceMode.REPLAY && tick > lastTick) mode = KeySequenceMode.SAVE;
+        if(isReplaying() && tick > lastTick) mode = KeySequenceMode.SAVE;
     }
 
     public boolean exists(long t) {
-        return mode == KeySequenceMode.REPLAY && keySequenceMap.containsKey(t);
+        return isReplaying() && keySequenceMap.containsKey(t);
     }
 
     public List<KeySequenceEvent> get(long tick) {
         return keySequenceMap.get(tick);
     }
 
+    public boolean isInactive() { return mode == KeySequenceMode.NONE; }
     public boolean isSaving() { return mode == KeySequenceMode.SAVE; }
     public boolean isReplaying() { return mode == KeySequenceMode.REPLAY; }
 
     public void putPressed(long tick, int code) {
-        if (mode == KeySequenceMode.SAVE) put(tick, KeySequenceEventType.PRESSED, code);
+        if (isSaving()) put(tick, KeySequenceEventType.PRESSED, code);
     }
 
-    public void putReleased(long tick, int code) {
-        if (mode == KeySequenceMode.SAVE) put(tick, KeySequenceEventType.RELEASED, code);
-    }
+    public void putReleased(long tick, int code) { if (isSaving()) put(tick, KeySequenceEventType.RELEASED, code); }
 
     private void put(long tick, KeySequenceEventType type, int code) {
         List<KeySequenceEvent> events = keySequenceMap.get(tick);

@@ -151,7 +151,7 @@ public class Game implements Runnable {
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
 
-    private final KeySequence keySequence = new KeySequence(KeySequenceMode.SAVE);
+    private final KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
 
     // Repaint every fixed interval
     Timer timer = new Timer();
@@ -308,7 +308,7 @@ public class Game implements Runnable {
             //variables.set(0x5BA0, v5C78);
             gameOver = false;
             gameId = nowAsString();
-            new File("saves/"+gameId).mkdir();
+            if(!keySequence.isInactive()) new File("saves/"+gameId).mkdir();
             main_AF88();
             gameCounter++;
         }
