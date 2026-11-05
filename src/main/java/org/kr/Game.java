@@ -25,7 +25,7 @@ public class Game implements Runnable {
     private long tickNo = 0;
     private final long REPAINT_MS = 5;
     private final long DELAY_MS = 90; // 90ms
-    private final long DELAY_MS_REPLAY = 1; // 90ms
+    private final long DELAY_MS_REPLAY = 0; // 90ms
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final int MAX_DAYS_BCD = 0x98; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
     private final long CAULDRON_ATTR_DELAY_MS = 120;
@@ -1145,8 +1145,10 @@ public class Game implements Runnable {
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 8)));
                 debugPanel1.append(String.format("Objects collected: %d of %d", variables.getU(0x5BBB), CAULDRON_REQUIRED_OBJECTS));
                 int hl = ret_next_obj_required_C274();
-                int required = objects_required_C27D.getU(hl) | 0x60;
-                debugPanel1.append(String.format("Next required object: %s", DataBlock.GRAPHIC_NAMES[required]));
+                if(hl < objects_required_C27D.endExcl()) {
+                    int required = objects_required_C27D.getU(hl) | 0x60;
+                    debugPanel1.append(String.format("Next required object: %s", DataBlock.GRAPHIC_NAMES[required]));
+                }
                 debugPanel1.append(String.format("Rooms visited: %d", calcScreensVisited()));
                 debugPanel1.append(String.format("Max days: %02X", MAX_DAYS_BCD));
                 debugPanel1.append("Special objects (name / location):");
