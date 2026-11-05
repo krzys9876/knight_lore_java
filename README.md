@@ -67,11 +67,15 @@ The plan is to refactor the game so the code looks like proper Java.
 
 ## Version history ##
 
-### 0.1 ###
-First playable version with hardcoded 99 lives and 99 days (counting from 0).
+### 0.3 ###
+Further improve debug information, enable optional game play (key sequence) save and replay
 
 ### 0.2 ###
 Improve debug information, game parameters and menu loop
+
+### 0.1 ###
+First playable version with hardcoded 99 lives and 99 days (counting from 0).
+
 
 
 [^1]: Note that the _[Ultimate Play the Game](https://en.wikipedia.org/wiki/Ultimate_Play_the_Game)_ company was acquired by 
