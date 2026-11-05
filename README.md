@@ -70,6 +70,9 @@ The plan is to refactor the game so the code looks like proper Java.
 ### 0.1 ###
 First playable version with hardcoded 99 lives and 99 days (counting from 0).
 
+### 0.2 ###
+Improve debug information, game parameters and menu loop
+
 
 [^1]: Note that the _[Ultimate Play the Game](https://en.wikipedia.org/wiki/Ultimate_Play_the_Game)_ company was acquired by 
 Microsoft so I don't want to publish the source code for obvious reasons.
