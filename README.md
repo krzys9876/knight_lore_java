@@ -6,7 +6,11 @@ with _isometric_ graphics, which most people describe as 3D-like.
 It was released back in 1984 for _[ZX Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum)_, an extremely popular
 and cheap home computer of the 80s.
 
-![Cauldron Room](images/locations/location_136_88.png)
+![Cauldron Room](images/cauldron_room.png)
+
+![Portcullis](images/portcullis.png)
+
+![Wulf and spell](images/wulf_and_spell.png)
 
 For anyone seeing the game for the first time in that times on that computer it seemed like magic. 
 It was also extremely hard to play and I as a kid never got anywhere near its completion.
@@ -39,7 +43,7 @@ Note that you need Java 25.
 
 ## How to play ##
 
-![Menu](images/locations/menu.png)
+![Menu](images/menu.png)
 
 In the original game you could select different control settings. So far only the keyboard is implemented 
 (I don't think you have a joystick anyway) without _directional control_. So just press 0.
