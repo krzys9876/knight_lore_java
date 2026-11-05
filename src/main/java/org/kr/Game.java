@@ -1290,7 +1290,7 @@ public class Game implements Runnable {
 
         tickNo++;
 
-        if(keySequence.isSaving() || true) {
+        if(keySequence.isSaving()) {
             saveImage(mainPanel, String.format("saves/%s/tick_%d.png", gameId, tickNo));
         }
 
