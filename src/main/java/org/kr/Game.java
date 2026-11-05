@@ -151,7 +151,7 @@ public class Game implements Runnable {
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
 
-    private final KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY);
+    private final KeySequence keySequence = new KeySequence(KeySequenceMode.SAVE);
 
     // Repaint every fixed interval
     Timer timer = new Timer();
