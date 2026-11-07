@@ -12,7 +12,7 @@ public class GameParams {
 
     private final int maxDays; // 98 is max (wraps at 99)
     private final int initialLives;
-    private int cauldronRequiredObjects; // 0x0E
+    private final int cauldronRequiredObjects; // 0x0E
 
     private final long delayMs; // 90ms
     private final long delayMsReplay;
