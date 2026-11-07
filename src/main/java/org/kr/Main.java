@@ -1,6 +1,7 @@
 package org.kr;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import org.kr.game.GameParams;
 import org.kr.game.utils.SeedGenerator;
 import org.kr.game.utils.SeedGeneratorSequential;
 
@@ -43,7 +44,8 @@ public class Main {
         panel1.requestFocus();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
         SeedGenerator rnd = new SeedGeneratorSequential();
-        Game game = new Game(panel1, panel2, panel3, panel4, keyQueue, rnd);
+        GameParams params = new GameParams(rnd, true, false, false, false, 99, 98, 14, 90, 0);
+        Game game = new Game(panel1, panel2, panel3, panel4, keyQueue, params);
         Thread gameThread = new Thread(game);
         gameThread.start();
 

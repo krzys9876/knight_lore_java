@@ -1,5 +1,6 @@
 package org.kr;
 
+import org.kr.game.GameParams;
 import org.kr.game.objects.SpecialObjects;
 import org.kr.game.utils.*;
 
@@ -18,24 +19,30 @@ public class Game implements Runnable {
     private final DebugPanel debugPanel2;
     private final ConcurrentSkipListSet<Integer> keyQueue;
 
-    private final SeedGenerator rnd;
+    private final GameParams params;
+
+    private final int SUN_TICK_PER_GAME_TICK = 8;
+    private final long CAULDRON_ATTR_DELAY_MS = 120;
+    private final long REPAINT_MS = 5;
 
     private long lastTick = 0;
     private int sunTick = 0;
     private long tickNo = 0;
-    private final long REPAINT_MS = 5;
-    private final long DELAY_MS = 90; // 90ms
-    private final long DELAY_MS_REPLAY = 0; // 90ms
-    private final int SUN_TICK_PER_GAME_TICK = 8;
-    private final int MAX_DAYS_BCD = 0x98; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
-    private final long CAULDRON_ATTR_DELAY_MS = 120;
-    private final int CAULDRON_REQUIRED_OBJECTS = 0x0E; // 0x0E
-    private final int INITIAL_LIVES = 0x99; // NOTE: number in BCD
 
-    private final boolean skipMenu = true;
-    private final boolean disableDeath = false;
-    private final boolean disableLoseLife = false;
-    private final boolean disableIncDays = false;
+    //private final long REPAINT_MS = 5;
+    //private final long CAULDRON_ATTR_DELAY_MS = 120;
+    //private final int SUN_TICK_PER_GAME_TICK = 8;
+
+    //private final long DELAY_MS; // 90ms
+    //private final long DELAY_MS_REPLAY; // 90ms
+    //private final int MAX_DAYS_BCD; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
+    //private final int CAULDRON_REQUIRED_OBJECTS; // 0x0E
+    //private final int INITIAL_LIVES; // NOTE: number in BCD
+
+    //private final boolean skipMenu;
+    //private final boolean disableDeath;
+    //private final boolean disableLoseLife;
+    //private final boolean disableIncDays;
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
@@ -164,13 +171,13 @@ public class Game implements Runnable {
     };
 
     public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
-                ConcurrentSkipListSet<Integer> keyQueue, SeedGenerator rnd) {
+                ConcurrentSkipListSet<Integer> keyQueue, GameParams params) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
         this.debugPanel1 = debugPanel1;
         this.debugPanel2 = debugPanel2;
         this.keyQueue = keyQueue;
-        this.rnd = rnd;
+        this.params = params;
 
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
@@ -325,17 +332,17 @@ public class Game implements Runnable {
         flags12_1_D16D.set(0xD16D, 0);
         // LD A,$05      ; 5 lives to start
         // LD ($5BBA),A  ;
-        variables.set(0x5BBA, INITIAL_LIVES);
+        variables.set(0x5BBA, byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
         // LD HL,$5BA0   ;
         // LD A,($5BA2)  ;
         // ADD A,(HL)    ; seed_1 += seed_2
         // LD (HL),A     ; update seed
-        rnd.updateSeed1();
+        params.getRnd().updateSeed1();
         // CALL $D55F    ; {colour is bright yellow on black
         clear_scrn_D55F();
         // CALL $BD0C    ;
         do_menu_selection_BD0C();
-        menu_loop_BD23(skipMenu); // returns when game starts
+        menu_loop_BD23(params.isSkipMenu()); // returns when game starts
 
             /*try {
                 updateShadowMemory();
@@ -848,7 +855,7 @@ public class Game implements Runnable {
                 if (key == KeyEvent.VK_0) startGame = true;
                 //Do not change seed to make game deterministic during development
                 //variables.set(0x5BA0, variables.get(0x5BA0)+1); // increase seed
-                rnd.updateSeed1();
+                params.getRnd().updateSeed1();
                 delay();
             }
         }
@@ -856,7 +863,7 @@ public class Game implements Runnable {
 
     private void shuffle_objects_required_B544() {
         //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
-        int a = rnd.getSeed1();
+        int a = params.getRnd().getSeed1();
         a = (a & 3) | 4; // random number (assuming seed is random)
         for(int c = a; c>0; c--) {
             int iy = objects_required_C27D.start;
@@ -901,7 +908,7 @@ public class Game implements Runnable {
         // LD A,$22      ; graphic_no (player bottom half)
         // LD ($D191),A  ; {plyr_spr_2_scratchpad (byte 16)
         byte_D191.set(0xD191, 0x22);
-        int a = rnd.getSeed1() & 0x3; // random
+        int a = params.getRnd().getSeed1() & 0x3; // random
         int randomLoc = start_locations_D1E2.getU(0xD1E2 + a);
         // For testing only
         if(override != -1) randomLoc = override;
@@ -917,7 +924,7 @@ public class Game implements Runnable {
     }
 
     private void init_special_objects_C47E() {
-        int rnd1 = rnd.getSeed1() & 0x07; // random
+        int rnd1 = params.getRnd().getSeed1() & 0x07; // random
         for(int spi = 0; spi < specialObjects.size; spi++) {
             rnd1 = (rnd1 & 0x07) | 0x60; // set numbers between 0x60 and 0x67 starting from random number to special object indexes
             specialObjects.setGraphicNo(spi, rnd1);
@@ -957,7 +964,7 @@ public class Game implements Runnable {
             game_over_BA22();
             return;
         }
-        int newLivesLeft = disableLoseLife ? livesLeft : decBCD(livesLeft);
+        int newLivesLeft = params.isDisableLoseLife() ? livesLeft : decBCD(livesLeft);
         variables.set(0x5BBA, newLivesLeft);
         int scratch = sun_moon_scratchpad_C44D.getU(0xC44D);
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
@@ -989,7 +996,7 @@ public class Game implements Runnable {
         variables.set(0x5BB8, 0);
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
         int days = variables.getU(0x5BB9);
-        if(days > MAX_DAYS_BCD) days --; // game over due to timeout
+        if(days > byteToBCD(params.getMaxDays())) days --; // game over due to timeout
         int daysAddr = 0xE8E2;
         if(days < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, days);
         else print_BCD_number_BCAE(daysAddr, new int[] { days });
@@ -1143,14 +1150,14 @@ public class Game implements Runnable {
                 debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
                 //debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 8)));
-                debugPanel1.append(String.format("Objects collected: %d of %d", variables.getU(0x5BBB), CAULDRON_REQUIRED_OBJECTS));
+                debugPanel1.append(String.format("Objects collected: %d of %d", variables.getU(0x5BBB), params.getCauldronRequiredObjects()));
                 int hl = ret_next_obj_required_C274();
                 if(hl < objects_required_C27D.endExcl()) {
                     int required = objects_required_C27D.getU(hl) | 0x60;
                     debugPanel1.append(String.format("Next required object: %s", DataBlock.GRAPHIC_NAMES[required]));
                 }
                 debugPanel1.append(String.format("Rooms visited: %d", calcScreensVisited()));
-                debugPanel1.append(String.format("Max days: %02X", MAX_DAYS_BCD));
+                debugPanel1.append(String.format("Max days: %d", params.getMaxDays()));
                 debugPanel1.append("Special objects (name / location):");
                 for(int ix = 0; ix < specialObjects.size; ix++) {
                     int grNo = specialObjects.getGraphicNo(ix);
@@ -1160,7 +1167,8 @@ public class Game implements Runnable {
                         debugPanel1.append(String.format("%s / %02X", name, location));
                     }
                 }
-                debugPanel1.append(String.format("Random seeds: %d %d %d", rnd.getSeed1(), rnd.getSeed2(), rnd.getSeed3()));
+                debugPanel1.append(String.format("Random seeds: %d %d %d",
+                        params.getRnd().getSeed1(), params.getRnd().getSeed2(), params.getRnd().getSeed3()));
                 debugPanel1.append(String.format("Tick: %d", tickNo));
                 debugPanel1.append(String.format("Mode: %s", keySequence.isReplaying() ? "Replaying" : "Saving"));
 
@@ -1172,7 +1180,7 @@ public class Game implements Runnable {
     private boolean onscreen_loop_AFBD() {
         // @label=onscreen_loop
         //IO.println("Onscreen loop AFBD");
-        rnd.updateSeed2();
+        params.getRnd().updateSeed2();
         update_sprite_loop_AFC7();
 
         if(exitingScreen) return false;
@@ -1269,7 +1277,7 @@ public class Game implements Runnable {
     }
 
     private long getDelayMs() {
-        return keySequence.isReplaying() ? DELAY_MS_REPLAY : DELAY_MS;
+        return keySequence.isReplaying() ? params.getDelayMsReplay() : params.getDelayMs();
     }
 
     private void delay() {
@@ -1596,9 +1604,9 @@ public class Game implements Runnable {
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
             int currDays = variables.getU(0x5BB9);
-            int incDays = disableIncDays ? currDays : incBCD(currDays) % 0xA0; // wrap days at 99
+            int incDays = params.isDisableIncDays() ? currDays : incBCD(currDays) % 0xA0; // wrap days at 99
             variables.set(0x5BB9, incDays);
-            if(incDays == MAX_DAYS_BCD+1) {
+            if(incDays == byteToBCD(params.getMaxDays())+1) {
                 game_over_BA22();
                 return;
             }
@@ -1626,7 +1634,7 @@ public class Game implements Runnable {
             if(exitingScreen || gameOver) return;
             ix+=32;
 
-            rnd.updateSeed3();
+            params.getRnd().updateSeed3();
         }
     }
 
@@ -1823,14 +1831,14 @@ public class Game implements Runnable {
         if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
             // @label=init_portcullis_up
             //int seed3 = variables.getU(0x5BA5);
-            if((rnd.getSeed3() & 0x1F) != 0) return; // ; 1in32 chance?
+            if((params.getRnd().getSeed3() & 0x1F) != 0) return; // ; 1in32 chance?
 
             block.setBit(0, ix); // ; graphic_no=9
             block.set(ix + 0x0B, 1); // ; dZ=1 (up)
         } else {
             int moveCnt = variables.getU(0x5BB0);
             if(moveCnt >= 4) {
-                if((rnd.getSeed3() & 0x1F) != 0) return;
+                if((params.getRnd().getSeed3() & 0x1F) != 0) return;
                 moveCnt = 0x80; // ; arbitrarily large count
             }
             // @label=init_portcullis_down
@@ -2435,7 +2443,7 @@ public class Game implements Runnable {
 
     private void setDestroyedFlags(DataBlock block, int ix, int iy) {
         // TODO: replace this with proper configuration
-        if(disableDeath) return;
+        if(params.isDisableDeath()) return;
 
         int flagsObj1 = block.getU(ix + 0x0D);
         int flagsObj2 = block.getU(iy + 0x0D);
@@ -2626,7 +2634,7 @@ public class Game implements Runnable {
         block.set(ix + 0x20, 1); // update player top
         set_wipe_and_draw_flags_C692(block, ix + 0x20);
         //@label=rand_legs_sprite
-        int newSprite = (rnd.getSeed3() & 0x03) | 0x5C;
+        int newSprite = (params.getRnd().getSeed3() & 0x03) | 0x5C;
         if(block.getU(ix) == newSprite) newSprite^=1; // change if same as current
         block.set(ix, newSprite);
         int flip = (block.getU(ix + 0x07)) ^ 0x40;
@@ -2872,10 +2880,10 @@ public class Game implements Runnable {
         int lookAroundCounter = flags & 0x0F;
         if(lookAroundCounter == 0) { // look around again
             int sprite = block.getU(ix - 32); // bottom half
-            if(rnd.getSeed3() < 2) {
+            if(params.getRnd().getSeed3() < 2) {
                 sprite =  (sprite & 0xF8) | 6; // ; look one way
                 block.set(ix + 0x0D, 8);
-            } else if(rnd.getSeed3() >= 0xFE) {
+            } else if(params.getRnd().getSeed3() >= 0xFE) {
                 sprite = (sprite & 0xF8) | 7; // ; look the other way
                 block.set(ix + 0x0D, 8);
             }
@@ -2912,7 +2920,7 @@ public class Game implements Runnable {
 
         int c = ix & 0xFF; // $B6CD LD A,C        ;
         c = (c >> 1) & 0x10;
-        c = (c + rnd.getSeed2()) & 0xFF;
+        c = (c + params.getRnd().getSeed2()) & 0xFF;
         if((c & 0b10000) > 0) c = c ^ 0xFF;
         c = c & 0x0F;
 
@@ -2962,7 +2970,7 @@ public class Game implements Runnable {
             boolean isOtherDropping = variables.getU(0x5BBF) != 0;
             if(!isOtherDropping) {
                 // ; 1-in-16 chance
-                if((rnd.getSeed3() & 0xF0) > 0) {
+                if((params.getRnd().getSeed3() & 0xF0) > 0) {
                     block.setBit(2, ix + 0x0D); // ; flag this one as dropping
                     variables.set(0x5BBF, 1); // ; flag a spike ball dropping
                 }
@@ -2988,10 +2996,10 @@ public class Game implements Runnable {
         boolean xyOob = (block.getU(ix + 0x0C) & 0x03) > 0; // ; OOB X/Y?
         if(!moving || xyOob) {
             // @label=loc_C5DD
-            int rnd3 = (rnd.getSeed3() & 0x03) + 4;
+            int rnd3 = (params.getRnd().getSeed3() & 0x03) + 4;
             int dx = get_delta_from_tbl_C645(rnd3);
             block.set(ix + 0x09, dx);
-            int rnd2 = (rnd.getSeed2() & 0x03) + 4;
+            int rnd2 = (params.getRnd().getSeed2() & 0x03) + 4;
             int dy = get_delta_from_tbl_C645(rnd2);
             block.set(ix + 0x0A, dy);
             calc_ghost_sprite_C603(block, ix);
@@ -3131,7 +3139,7 @@ public class Game implements Runnable {
             if (spriteFlag) block.set(ix + 0x13, block.getS(ix + 0x13) - 1);
         } else {
             // Continue transformation
-            int nextSprite = (rnd.getSeed3() & 3) | 0x5C;
+            int nextSprite = (params.getRnd().getSeed3() & 3) | 0x5C;
             if(nextSprite != block.getU(ix)) nextSprite = nextSprite ^ 1;
             block.set(ix, nextSprite);
             block.set(ix + 7, block.getU(ix + 0x07) ^ 0x40);
@@ -3239,7 +3247,7 @@ public class Game implements Runnable {
         if(sameAsRequired) {
             variables.set(0x5BBB, variables.getU(0x5BBB) + 1);
             cycle_colours_with_sound_C2A5();
-            boolean gotAllObjects = variables.getU(0x5BBB) == CAULDRON_REQUIRED_OBJECTS;
+            boolean gotAllObjects = variables.getU(0x5BBB) == params.getCauldronRequiredObjects();
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
         variables.set(0x5BC4, 0);
@@ -3320,7 +3328,7 @@ public class Game implements Runnable {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
-        if(((rnd.getSeed2() ^ 0xFF) & 0x01) == 0) block.set(ix, block.getU(ix)+1); // next sprite on odd frames
+        if(((params.getRnd().getSeed2() ^ 0xFF) & 0x01) == 0) block.set(ix, block.getU(ix)+1); // next sprite on odd frames
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3588,13 +3596,13 @@ public class Game implements Runnable {
         int screen = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 0x08);
         boolean screenFlg = (screen & 0x01) == 0;
         int newDz = 4;
-        if(!screenFlg) newDz += rnd.getSeed3() & 0x03;
+        if(!screenFlg) newDz += params.getRnd().getSeed3() & 0x03;
         boolean zOob = block.isSet(2, ix + 0x0C);
         if(zOob) {
             block.set(ix + 0x0B, newDz);
             // $B64C CALL $B42E     ; } // ignore audio
-            rnd.updateSeed3();
-            if((rnd.getSeed3() & 0x01) == 1) {
+            params.getRnd().updateSeed3();
+            if((params.getRnd().getSeed3() & 0x01) == 1) {
                 int playerY = graphic_objs_tbl_5C08.getU(graphic_objs_tbl_5C08.start + 2);
                 int newdY = block.getU(ix + 2) > playerY ? 2 : -2;
                 if(isWulf) newdY = -newdY; // ; towards player
