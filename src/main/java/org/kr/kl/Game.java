@@ -192,11 +192,11 @@ public class Game implements Runnable {
 
     public void updateMainMemory() {
         mainPanel.setPixelData(mainMemory.toPixels(LocalDateTime.now()));
-        mainPanel.repaint();
+        //mainPanel.repaint();
     }
     public void updateShadowMemory() {
         shadowPanel.setPixelData(shadowMemory.toPixels(LocalDateTime.now()));
-        shadowPanel.repaint();
+        //shadowPanel.repaint();
     }
 
     @Override

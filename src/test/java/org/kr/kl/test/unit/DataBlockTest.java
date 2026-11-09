@@ -1,4 +1,4 @@
-package org.kr.kl.test;
+package org.kr.kl.test.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

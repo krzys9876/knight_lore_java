@@ -1,9 +1,10 @@
-package org.kr.kl.test;
+package org.kr.kl.test.unit;
 
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kr.Color;
+import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.ScreenPanel;
 import org.kr.VideoMemoryScreen;
 import java.io.IOException;
@@ -85,7 +86,7 @@ public class VideoMemoryTest {
     }
 
     private void saveToFile(VideoMemoryScreen mem, String path, boolean flash) {
-        ScreenPanel panel = new ScreenPanel();
+        GamePanel panel = new GamePanel();
         panel.setPixelData(mem.toPixels(flash));
         try {
             panel.saveImage(path);

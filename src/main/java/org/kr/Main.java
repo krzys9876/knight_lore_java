@@ -3,6 +3,7 @@ package org.kr;
 import com.formdev.flatlaf.FlatLightLaf;
 import org.kr.kl.Game;
 import org.kr.kl.GameParams;
+import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.ScreenDebugPanel;
 import org.kr.kl.ui.ScreenPanel;
 import org.kr.kl.utils.SeedGenerator;
@@ -17,8 +18,10 @@ public class Main {
     static void main() {
         FlatLightLaf.setup();
 
-        ScreenPanel panel1 = new ScreenPanel();
-        ScreenPanel panel2 = new ScreenPanel();
+        GamePanel gamePanel1 = new GamePanel();
+        ScreenPanel panel1 = new ScreenPanel(gamePanel1);
+        GamePanel gamePanel2 = new GamePanel();
+        ScreenPanel panel2 = new ScreenPanel(gamePanel2);
         ScreenDebugPanel panel3 = new ScreenDebugPanel();
         ScreenDebugPanel panel4 = new ScreenDebugPanel();
         JFrame frame = new JFrame();
@@ -48,7 +51,7 @@ public class Main {
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
         SeedGenerator rnd = new SeedGeneratorSequential();
         GameParams params = new GameParams(rnd, true, false, false, false, 99, 98, 14, 90, 0);
-        Game game = new Game(panel1, panel2, panel3, panel4, keyQueue, params);
+        Game game = new Game(gamePanel1, gamePanel2, panel3, panel4, keyQueue, params);
         Thread gameThread = new Thread(game);
         gameThread.start();
 
