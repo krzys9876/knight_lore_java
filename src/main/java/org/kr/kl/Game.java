@@ -1,5 +1,6 @@
 package org.kr.kl;
 
+import org.kr.*;
 import org.kr.kl.objects.SpecialObjects;
 import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.DebugPanel;
