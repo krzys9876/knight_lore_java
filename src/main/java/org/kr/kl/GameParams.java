@@ -1,6 +1,6 @@
-package org.kr.game;
+package org.kr.kl;
 
-import org.kr.game.utils.SeedGenerator;
+import org.kr.kl.utils.SeedGenerator;
 
 public class GameParams {
     private final SeedGenerator rnd;

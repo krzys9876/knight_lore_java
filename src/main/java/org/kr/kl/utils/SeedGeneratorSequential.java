@@ -1,6 +1,4 @@
-package org.kr.game.utils;
-
-import java.util.Random;
+package org.kr.kl.utils;
 
 public class SeedGeneratorSequential implements SeedGenerator {
 

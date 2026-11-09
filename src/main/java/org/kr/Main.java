@@ -1,12 +1,12 @@
 package org.kr;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import org.kr.game.Game;
-import org.kr.game.GameParams;
-import org.kr.game.ui.ScreenDebugPanel;
-import org.kr.game.ui.ScreenPanel;
-import org.kr.game.utils.SeedGenerator;
-import org.kr.game.utils.SeedGeneratorSequential;
+import org.kr.kl.Game;
+import org.kr.kl.GameParams;
+import org.kr.kl.ui.ScreenDebugPanel;
+import org.kr.kl.ui.ScreenPanel;
+import org.kr.kl.utils.SeedGenerator;
+import org.kr.kl.utils.SeedGeneratorSequential;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,9 +1,9 @@
-package org.kr.game;
+package org.kr.kl;
 
-import org.kr.game.objects.SpecialObjects;
-import org.kr.game.ui.GamePanel;
-import org.kr.game.ui.DebugPanel;
-import org.kr.game.utils.*;
+import org.kr.kl.objects.SpecialObjects;
+import org.kr.kl.ui.GamePanel;
+import org.kr.kl.ui.DebugPanel;
+import org.kr.kl.utils.*;
 
 import java.awt.event.KeyEvent;
 import java.io.File;

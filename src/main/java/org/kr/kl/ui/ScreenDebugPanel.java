@@ -1,4 +1,4 @@
-package org.kr.game.ui;
+package org.kr.kl.ui;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package org.kr.game.utils;
+package org.kr.kl.utils;
 
 public interface SeedGenerator {
     int getSeed1();
