@@ -1,4 +1,4 @@
-package org.kr;
+package org.kr.game.ui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 
-public class ScreenPanel extends JPanel {
+public class ScreenPanel extends JPanel implements GamePanel {
     final int BASE_WIDTH = 256;
     final int BASE_HEIGHT = 192;
     private int[] pixelData = new int[BASE_WIDTH * BASE_HEIGHT];

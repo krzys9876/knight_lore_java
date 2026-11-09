@@ -1,12 +1,12 @@
-package org.kr;
+package org.kr.game.ui;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class DebugPanel extends JPanel {
+public class ScreenDebugPanel extends JPanel implements DebugPanel {
     private final JTextArea text = new JTextArea();
 
-    public DebugPanel() {
+    public ScreenDebugPanel() {
         setLayout(new BorderLayout());
         add(new JScrollPane(text), BorderLayout.CENTER);
         text.setEditable(false);

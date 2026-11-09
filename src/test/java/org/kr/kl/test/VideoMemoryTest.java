@@ -4,7 +4,7 @@ package org.kr.kl.test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kr.Color;
-import org.kr.ScreenPanel;
+import org.kr.game.ui.ScreenPanel;
 import org.kr.VideoMemoryScreen;
 import java.io.IOException;
 import java.nio.file.Path;

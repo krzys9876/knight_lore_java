@@ -1,7 +1,10 @@
 package org.kr;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import org.kr.game.Game;
 import org.kr.game.GameParams;
+import org.kr.game.ui.ScreenDebugPanel;
+import org.kr.game.ui.ScreenPanel;
 import org.kr.game.utils.SeedGenerator;
 import org.kr.game.utils.SeedGeneratorSequential;
 
@@ -16,8 +19,8 @@ public class Main {
 
         ScreenPanel panel1 = new ScreenPanel();
         ScreenPanel panel2 = new ScreenPanel();
-        DebugPanel panel3 = new DebugPanel();
-        DebugPanel panel4 = new DebugPanel();
+        ScreenDebugPanel panel3 = new ScreenDebugPanel();
+        ScreenDebugPanel panel4 = new ScreenDebugPanel();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1800, 900);

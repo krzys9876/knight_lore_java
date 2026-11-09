@@ -1,7 +1,8 @@
-package org.kr;
+package org.kr.game;
 
-import org.kr.game.GameParams;
 import org.kr.game.objects.SpecialObjects;
+import org.kr.game.ui.GamePanel;
+import org.kr.game.ui.DebugPanel;
 import org.kr.game.utils.*;
 
 import java.awt.event.KeyEvent;
@@ -13,8 +14,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Game implements Runnable {
-    private final ScreenPanel mainPanel;
-    private final ScreenPanel shadowPanel;
+    private final GamePanel mainPanel;
+    private final GamePanel shadowPanel;
     private final DebugPanel debugPanel1;
     private final DebugPanel debugPanel2;
     private final ConcurrentSkipListSet<Integer> keyQueue;
@@ -170,7 +171,7 @@ public class Game implements Runnable {
         }
     };
 
-    public Game(ScreenPanel mainPanel, ScreenPanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
+    public Game(GamePanel mainPanel, GamePanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
                 ConcurrentSkipListSet<Integer> keyQueue, GameParams params) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
@@ -394,7 +395,7 @@ public class Game implements Runnable {
         }
     }
 
-    private void saveImage(ScreenPanel panel, String fileName) {
+    private void saveImage(GamePanel panel, String fileName) {
         try {
             updateShadowMemory();
             updateMainMemory();
