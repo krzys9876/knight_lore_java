@@ -1677,7 +1677,7 @@ public class Game implements Runnable {
             case 0x67: upd_103_C1AB(ix); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(ix); break;
             case 0x6F: upd_111_B95E(ix); break;
-            case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(block, ix); break;
+            case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
             case 0x77: upd_119_BF3F(block, ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
             case 0x7F: upd_127_BF11(block, ix); break;
@@ -3269,12 +3269,11 @@ public class Game implements Runnable {
         // ignore audio
     }
 
-    private void upd_112_to_118_184_BF2B(DataBlock block, int ix) {
+    private void upd_112_to_118_184_BF2B(int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); //FC
+        graphicObjects.setXYAdj(ix, -12, -4);
 
-        block.set(ix, block.getU(ix)+1);
+        graphicObjects.setGrNo(ix, graphicObjects.getGrNo(ix)+1);
         // ignore audio
     }
 
@@ -3328,7 +3327,7 @@ public class Game implements Runnable {
         boolean triggered = block.isSet(3, ix + 0x0D);
         if(triggered) {
             block.set(ix, 0xB8); // ; graphic_no = sparkles
-            upd_112_to_118_184_BF2B(block, ix);
+            upd_112_to_118_184_BF2B(ix);
         }
     }
 
