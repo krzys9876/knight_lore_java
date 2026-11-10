@@ -1682,7 +1682,7 @@ public class Game implements Runnable {
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
             case 0x7F: upd_127_BF11(ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(ix); break;
-            case 0x83, 0x84, 0x85: upd_131_to_133_B566(block, ix); break;
+            case 0x83, 0x84, 0x85: upd_131_to_133_B566(ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
             case 0x8F: upd_143_B6A2(block, ix); break;
@@ -1906,16 +1906,15 @@ public class Game implements Runnable {
         graphicObjects.setXYAdj(ix, -8, -2);
     }
 
-    private void upd_131_to_133_B566(DataBlock block, int ix) {
+    private void upd_131_to_133_B566(int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); //FC
+        graphicObjects.setXYAdj(ix, -12, -4);
 
-        int z = block.getU(ix + 0x03);
+        int z = graphicObjects.getZ(ix);
         if(z < 0xA4) {
-            block.set(ix + 0x0B, 3); // ; dZ=3
-            int x = block.getU(ix + 1);
-            int y = block.getU(ix + 2);
+            graphicObjects.setDZ(ix, 3); // ; dZ=3
+            int x = graphicObjects.getX(ix);
+            int y = graphicObjects.getY(ix);
             int xBit1 = (x & 0x80) >> 6;
             int yBit0 = (y & 0x80) >> 7;
             int xy = xBit1 | yBit0;
@@ -1929,34 +1928,34 @@ public class Game implements Runnable {
                 case 3: dY = -4; dX = 4; break;
             }
             // @label=save_dX_dY
-            block.set(ix + 0x09, dX);
-            block.set(ix + 0x0A, dY);
+            graphicObjects.setDX(ix, dX);
+            graphicObjects.setDY(ix, dY);
 
             int rnd = variables.getU(0x5BA5);
             int a = rnd & 0x03;
             if(a==0) a++;
             a+=0x82;
-            block.set(ix, a); // ; set graphic no.
+            graphicObjects.setGrNo(ix, a); // ; set graphic no.
         } else {
             // @label=loc_B5C4
             int playerX = graphicObjects.getX(graphicObjects.start());
-            int x = block.getU(ix + 1);
+            int x = graphicObjects.getX(ix);
             int deltaX = Math.abs(playerX - x);
             if(deltaX < 0x06) {
                 int playerY = graphicObjects.getY(graphicObjects.start());
-                int y = block.getU(ix + 2);
+                int y = graphicObjects.getY(ix);
                 int deltaY = Math.abs(playerY - y);
                 if(deltaY < 0x06) {
                     game_over_BA22();
                     return;
                 }
             }
-            block.setBit(7, ix + 0x0D);
-            block.setBit(1, ix + 0x07); // ; ignore object in 3D calculations
-            block.set(ix + 0x0B, 1); // ; dZ=1
-            move_towards_plyr_B965(block, ix, 4, 4);
+            graphicObjects.setDeadlyIfObjectHitsPlayer(ix);
+            graphicObjects.setIgnore3D(ix); // ; ignore object in 3D calculations
+            graphicObjects.setDZ(ix, 1); // ; dZ=1
+            move_towards_plyr_B965(graphicObjects.graphic_objs_tbl_5C08, ix, 4, 4);
         }
-        variables.set(0x5BC5, block.getU(ix + 3));
+        variables.set(0x5BC5, graphicObjects.getZ(ix));
         dec_dZ_and_update_XYZ_C700(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
