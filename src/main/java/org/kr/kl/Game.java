@@ -1747,8 +1747,8 @@ public class Game implements Runnable {
                 if(autoAdjust) {
                     if(is_near_to_C7FE(graphicObjects.graphic_objs_tbl_5C08, ix, iy, 0x0F, 0x0F)) {
                         switch(get_sprite_dir_CA1E(graphicObjects.graphic_objs_tbl_5C08, ix)) {
-                            case 0, 1: adj_ew_C7B1(graphicObjects.graphic_objs_tbl_5C08, ix, iy); break;
-                            case 2, 3: adj_ns_C7C4(graphicObjects.graphic_objs_tbl_5C08, ix, iy); break;
+                            case 0, 1: adj_ew_C7B1(ix, iy); break;
+                            case 2, 3: adj_ns_C7C4(ix, iy); break;
                         }
                     }
                 }
@@ -1758,22 +1758,22 @@ public class Game implements Runnable {
         }
     }
 
-    private void adj_ew_C7B1(DataBlock block, int ix, int iy) {
+    private void adj_ew_C7B1(int ix, int iy) {
         // ix - arch, iy - player
-        int dyArch = block.getU(ix + 0x0A);
-        int yPlayer = block.getU(iy + 0x02);
+        int dyArch = graphicObjects.getDY(ix);
+        int yPlayer = graphicObjects.getY(iy);
         if(dyArch == yPlayer) return;
         int newDy = (dyArch > yPlayer) ? 1 : -1;
-        block.set(iy + 0x0F, newDy);
+        graphicObjects.setDYAdj(iy, newDy);
     }
 
-    private void adj_ns_C7C4(DataBlock block, int ix, int iy) {
+    private void adj_ns_C7C4(int ix, int iy) {
         // ix - arch, iy - player
-        int dxArch = block.getU(ix + 0x09);
-        int xPlayer = block.getU(iy + 0x01);
+        int dxArch = graphicObjects.getDX(ix);
+        int xPlayer = graphicObjects.getX(iy);
         if(dxArch == xPlayer) return;
         int newDx = (dxArch > xPlayer) ? 1 : -1;
-        block.set(iy + 0x0E, newDx);
+        graphicObjects.setDXAdj(iy, newDx);
     }
 
     // centre Y -> H, centre x -> L

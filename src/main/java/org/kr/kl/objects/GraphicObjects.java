@@ -55,7 +55,6 @@ package org.kr.kl.objects;
 */
 
 import org.kr.DataBlock;
-import org.kr.InitialData;
 
 public class GraphicObjects {
     public final DataBlock graphic_objs_tbl_5C08;
@@ -79,12 +78,18 @@ public class GraphicObjects {
     public int getX(int ix) { return graphic_objs_tbl_5C08.getU(ix + 1); }
     public int getY(int ix) { return graphic_objs_tbl_5C08.getU(ix + 2); }
     public int getZ(int ix) { return graphic_objs_tbl_5C08.getU(ix + 3); }
+    public int getDX(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x09); }
+    public int getDY(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0A); }
+    public int getDZ(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0B); }
     public boolean isHFlip(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
 
     public void setDX(int ix, int dx) { graphic_objs_tbl_5C08.set(ix + 0x09, dx); } // ix + 0x09
     public void setDY(int ix, int dy) { graphic_objs_tbl_5C08.set(ix + 0x0A, dy); } // ix + 0x09
     public void setDZ(int ix, int dz) { graphic_objs_tbl_5C08.set(ix + 0x0B, dz); } // ix + 0x09
+    public void setDXAdj(int ix, int dxAdj) { graphic_objs_tbl_5C08.set(ix + 0x0E, dxAdj); } // ix + 0x12
+    public void setDYAdj(int ix, int dyAdj) { graphic_objs_tbl_5C08.set(ix + 0x0F, dyAdj); } // ix + 0x13
     public void setXAdj(int ix, int xAdj) { graphic_objs_tbl_5C08.set(ix + 0x12, xAdj); } // ix + 0x12
     public void setYAdj(int ix, int yAdj) { graphic_objs_tbl_5C08.set(ix + 0x13, yAdj); } // ix + 0x13
+
 }
