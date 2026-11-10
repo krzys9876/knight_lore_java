@@ -2887,18 +2887,17 @@ public class Game implements Runnable {
 
     private void upd_54_B6B9(int ix) {
         // c$B6B9 CALL $B45D    ; // ignore audio
-        loc_B6BF(graphicObjects.graphic_objs_tbl_5C08, ix, 1, 0x09);
+        loc_B6BF(ix, true);
     }
 
     private void upd_55_B6B1(int ix) {
         // c$B6B1 CALL $B462    ; // ignore audio
-        loc_B6BF(graphicObjects.graphic_objs_tbl_5C08, ix, 2, 0x0A);
+        loc_B6BF(ix, false);
     }
 
-    private void loc_B6BF(DataBlock block, int ix, int offsetXY, int offsetDXY) {
+    private void loc_B6BF(int ix, boolean isX) {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
+        graphicObjects.setXYAdj(ix, -16, -8);
 
         int c = ix & 0xFF; // $B6CD LD A,C        ;
         c = (c >> 1) & 0x10;
@@ -2906,12 +2905,12 @@ public class Game implements Runnable {
         if((c & 0b10000) > 0) c = c ^ 0xFF;
         c = c & 0x0F;
 
-        int xy = block.getU(ix + offsetXY);
+        int xy = isX ? graphicObjects.getX(ix) : graphicObjects.getY(ix);
         xy = (xy + 0x08) & 0x0F;
         if(c != xy) {
             int a = xy < c ? 1 : -1;
-            block.set(ix + offsetDXY, a);
-            block.set(ix + 0x0B, 1);
+            if(isX) graphicObjects.setDX(ix, a); else graphicObjects.setDY(ix, a);
+            graphicObjects.setDZ(ix, 1);
             dec_dZ_and_update_XYZ_C700(ix);
         }
         //set_wipe_and_draw_flags_C692(block, ix);
