@@ -836,7 +836,7 @@ public class Game implements Runnable {
                 variables.set(0x5BA6, a);
                 Integer key = keyQueue.first();
                 keyQueue.remove(key);
-                IO.println("Key: " + key);
+                //IO.println("Key: " + key);
                 // 1,2,3,4,5
                 if (key == KeyEvent.VK_1) a &= 0xF9;
                 if (key == KeyEvent.VK_2) {
@@ -2341,7 +2341,7 @@ public class Game implements Runnable {
             // @label=exit_screen
             int grNo = block.getU(ix);
             if(grNo - 0x10 > 0x40) return;
-            IO.println(String.format("EXIT: %d (%02X) -> %d (%02X)",currentScreen,currentScreen,newScreen,newScreen));
+            //IO.println(String.format("EXIT: %d (%02X) -> %d (%02X)",currentScreen,currentScreen,newScreen,newScreen));
             exitingScreen = true; //TODO: rethink if this is the correct way to flag this
             block.set(ix + 0x08, newScreen);
             block.set(ix + 0x0C, block.getU(ix + 0x0C) | 0x30);
