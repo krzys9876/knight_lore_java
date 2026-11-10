@@ -1683,8 +1683,8 @@ public class Game implements Runnable {
             case 0x7F: upd_127_BF11(ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(ix); break;
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(ix); break;
-            case 0x8D: upd_141_B99C(block, ix); break;
-            case 0x8E: upd_142_B99F(block, ix); break;
+            case 0x8D: upd_141_B99C(ix); break;
+            case 0x8E: upd_142_B99F(ix); break;
             case 0x8F: upd_143_B6A2(block, ix); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(block, ix); break;
             case 0x96, 0x97: upd_150_151_B73C(block, ix); break;
@@ -3303,16 +3303,14 @@ public class Game implements Runnable {
         updateOneSprite(ix); // update after sparkes change to player
     }
 
-    private void upd_141_B99C(DataBlock block, int ix) {
+    private void upd_141_B99C(int ix) {
         //LD HL,$F4F0   ;
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -12); //F4
+        graphicObjects.setXYAdj(ix, -16, -12);
     }
 
-    private void upd_142_B99F(DataBlock block, int ix) {
+    private void upd_142_B99F(int ix) {
         //LD HL,$0CE8   ;
-        block.set(ix + 0x12, -24); //E8
-        block.set(ix + 0x13, 12); //0C
+        graphicObjects.setXYAdj(ix, -24, 12);
     }
 
     private void upd_143_B6A2(DataBlock block, int ix) {
