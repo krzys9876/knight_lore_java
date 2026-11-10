@@ -1687,8 +1687,8 @@ public class Game implements Runnable {
             case 0x8E: upd_142_B99F(ix); break;
             case 0x8F: upd_143_B6A2(block, ix); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(ix); break;
-            case 0x96, 0x97: upd_150_151_B73C(block, ix); break;
-            case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(block, ix); break;
+            case 0x96, 0x97: upd_150_151_B73C(ix); break;
+            case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(ix); break;
             case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(block, ix); break;
             case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(block, ix); break;
             case 0xB0, 0xB1: upd_176_177_B83F(ix); break;
@@ -3349,21 +3349,20 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_150_151_B73C(DataBlock block, int ix) {
+    private void upd_150_151_B73C(int ix) {
         //c$C50B LD HL,$07F4   ; +7, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, 7); //07
+        graphicObjects.setXYAdj(ix, -12, 7);
 
-        boolean directionE =  block.isSet(0, ix + 0x0D);
+        boolean directionE =  graphicObjects.isEast(ix);
         int a = directionE ? 2 : -2;
 
-        block.set(ix + 0x09, a);
-        block.set(ix + 0x29, a); // ; and for bottom half
-        set_guard_wizard_sprite_B76C(block, ix);
+        graphicObjects.setDX(ix, a);
+        graphicObjects.setDX(ix + 0x20, a); // ; and for bottom half
+        set_guard_wizard_sprite_B76C(graphicObjects.graphic_objs_tbl_5C08, ix);
         dec_dZ_and_update_XYZ_C700(ix);
-        boolean xOob =  block.isSet(0, ix + 0x0C);
-        if(xOob) block.set(ix + 0x0D, (block.getU(ix + 0x0D) ^ 0x01)); // ; toggle direction
-        block.set(ix + 0x21, block.getU(ix + 0x01)); // ; copy to bottom half
+        boolean xOob =  graphicObjects.isOobX(ix);
+        if(xOob) graphicObjects.toggleEastWest(ix); // ; toggle direction
+        graphicObjects.setX(ix + 0x20, graphicObjects.getX(ix)); // ; copy to bottom half
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);*/
     }
@@ -3385,36 +3384,35 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_160_to_163_B8DA(DataBlock block, int ix) {
+    private void upd_160_to_163_B8DA(int ix) {
         // c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); // FC
+        graphicObjects.setXYAdj(ix, -12, -4);
 
-        int firstSpObjGrNo =  block.getU(0x5C48);
+        int firstSpObjGrNo =  graphicObjects.graphic_objs_tbl_5C08.getU(0x5C48);
         if(firstSpObjGrNo != 0) {
             upd_111_B95E(ix);
             return;
         }
 
-        block.setBit(1, ix + 7); // ; ignore in 3D calcs
+        graphicObjects.setIgnore3D(ix); // ; ignore in 3D calcs
         dec_dZ_and_update_XYZ_C700(ix); // apply dXYZ now
-        next_graphic_no_mod_4_B98C(block, ix);
+        next_graphic_no_mod_4_B98C(graphicObjects.graphic_objs_tbl_5C08, ix);
 
-        int z = block.getU(ix + 3);
-        block.set(ix + 0x0B, 2); // ; dZ=2 - will be applied next frame as C700 has already been called
+        int z = graphicObjects.getZ(ix);
+        graphicObjects.setDZ(ix, 2); // ; dZ=2 - will be applied next frame as C700 has already been called
         if(z >= 0xA0) {
-            block.set(ix + 0x0B, 1); // dZ=1
+            graphicObjects.setDZ(ix, 1); // dZ=1
             int playerGrNo = graphicObjects.graphic_objs_tbl_5C08.getU(graphicObjects.graphic_objs_tbl_5C08.start);
             boolean isWulf = ((playerGrNo - 0x30) & 0xFF) < 0x10;
             if(!isWulf) {
-                int grNo = block.getU(ix);
+                int grNo = graphicObjects.getGrNo(ix);
                 if((grNo & 3) == 0) {
                     int hl = ret_next_obj_required_C274();
-                    block.set(ix, objects_required_C27D.getU(hl) | 0xA8);
+                    graphicObjects.setGrNo(ix, objects_required_C27D.getU(hl) | 0xA8);
                 }
             } else {
-                block.setBit(2, ix);
-                block.resetBit(1, ix + 7); // ; don't ignore in 3D calcs
+                graphicObjects.graphic_objs_tbl_5C08.setBit(2, ix);
+                graphicObjects.resetIgnore3D(ix); // ; don't ignore in 3D calcs
             }
         }
         //set_wipe_and_draw_flags_C692(block, ix);

@@ -104,6 +104,8 @@ public class GraphicObjects {
     public boolean isTriggered(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x0D); }
     public boolean ignore3D(int ix) { return graphic_objs_tbl_5C08.isSet(1, ix + 7); }
     public boolean justDropped(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0D); }
+    public boolean isEast(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0D); }
+    public boolean isNorth(int ix) { return graphic_objs_tbl_5C08.isSet(1, ix + 0x0D); }
 
     public void setGrNo(int ix, int grNo) { graphic_objs_tbl_5C08.set(ix, grNo); }
     public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }
@@ -142,4 +144,5 @@ public class GraphicObjects {
     public void resetTriggered(int ix) { graphic_objs_tbl_5C08.resetBit(3, ix + 0x0D); }
     public void clearOob(int ix) { graphic_objs_tbl_5C08.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
     public void resetJustDropped(int ix) { graphic_objs_tbl_5C08.resetBit(0, ix + 0x0D); }
+    public void toggleEastWest(int ix) { graphic_objs_tbl_5C08.set(ix + 0x0D, (graphic_objs_tbl_5C08.getU(ix + 0x0D) ^ 0x01)); }
 }
