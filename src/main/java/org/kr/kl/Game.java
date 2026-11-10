@@ -1678,7 +1678,7 @@ public class Game implements Runnable {
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(ix); break;
             case 0x6F: upd_111_B95E(ix); break;
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
-            case 0x77: upd_119_BF3F(block, ix); break;
+            case 0x77: upd_119_BF3F(ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
             case 0x7F: upd_127_BF11(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
@@ -3277,10 +3277,9 @@ public class Game implements Runnable {
         // ignore audio
     }
 
-    private void upd_119_BF3F(DataBlock block, int ix) {
+    private void upd_119_BF3F(int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); //FC
+        graphicObjects.setXYAdj(ix, -12, -4);
 
         upd_111_B95E(ix); // Fix bug/feature in the source (writing to ROM)
     }
@@ -3589,7 +3588,7 @@ public class Game implements Runnable {
             int spi = specialObjects.getIndex(h*256+l);
             specialObjects.clearGraphicNo(spi); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
         }
-        upd_119_BF3F(block, ix);
+        upd_119_BF3F(ix);
     }
 
     private void renderAllSprites(DataBlock block, int from, int cnt) {
