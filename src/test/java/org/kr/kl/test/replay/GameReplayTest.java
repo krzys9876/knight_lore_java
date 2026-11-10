@@ -10,18 +10,20 @@ import org.kr.kl.utils.KeySequence;
 import org.kr.kl.utils.KeySequenceMode;
 import org.kr.kl.utils.SeedGeneratorSequential;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameReplayTest {
     Thread gameThread = null;
-    String referencePath = "saves/20261105_092712";
+    String referencePath = "saves/20261110_094158";
 
     @Test
     @DisplayName("Replay complete gameplay")
@@ -37,7 +39,18 @@ public class GameReplayTest {
         DebugPanel debugPanel2 = new TestDebugPanel();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
         Game game = new Game(panel1, panel2, debugPanel1, debugPanel2, keyQueue, params, keySequence);
-        game.setTickCallback(() -> assertTick(game, panel1));
+
+        Map<String, Long> hashes = new HashMap<>();
+        try(var lines = Files.lines(Path.of(referencePath, "hashes.txt"))) {
+            lines.forEach(l  -> {
+                var tokens = l.split(" ");
+                hashes.put(tokens[0], Long.parseLong(tokens[1]));
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        game.setTickCallback(() -> assertTick(game, panel1, hashes));
 
         gameThread = new Thread(game);
         gameThread.start();
@@ -54,32 +67,24 @@ public class GameReplayTest {
         return p;
     }
 
-    private void assertTick(Game game, GamePanel panel) {
+    private void assertTick(Game game, GamePanel panel, Map<String, Long> hashes) {
         long tickNo = game.getTickNo();
+        String fileName = String.format("tick_%d.png", tickNo);
+        if (!hashes.containsKey(fileName)) fail("Invalid or no hash for: " + fileName);
+        long hashRef = hashes.get(fileName);
 
-        String fileName = referencePath + "/tick_" + tickNo + ".png";
-        try {
-            BufferedImage imgRef = ImageIO.read(new File(fileName));
-            if (imgRef == null) throw new IOException("Invalid or no image file: " + fileName);
-            int[] rgbRef = rgb(imgRef);
-            int[] rgbGame = panel.getPixelData();
-            if(!Arrays.equals(rgbRef, rgbGame)) {
-                IO.println(fileName);
-                for(int i=0; i<rgbGame.length; i++) {
-                    if (rgbGame[i] != rgbRef[i]) {
-                        IO.println(String.format("%d %d/%d %06X/%06X ERROR", i, i % 256, i / 256, rgbGame[i], rgbRef[i]));
-                    }
-                }
-                String dir = "saves/replay-test";
-                new File(dir).mkdir();
-                String testFile = dir + "/test_tick_" + tickNo + ".png";
-                panel.saveImage(testFile);
-                fail("Image for tick " + tickNo + " is incorrect");
-            }
-
-        } catch (IOException e) {
+        long gameHash = panel.screenHash();
+        if (hashRef != gameHash) {
             IO.println(fileName);
-            throw new RuntimeException(e);
+            String dir = "saves/replay-test";
+            new File(dir).mkdir();
+            String testFile = "test_tick_" + tickNo + ".png";
+            try {
+                panel.saveImage(dir, testFile);
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
+            fail("Image for tick " + tickNo + " is incorrect");
         }
     }
 }

@@ -29,7 +29,7 @@ public class VideoMemoryTest {
             assertEquals(Color.getScreenColor(Color.BLUE, true), pixels[i*2]);
             assertEquals(Color.getScreenColor(Color.RED, true), pixels[i*2+1]);
         }
-        saveToFile(mem, Path.of("test-files","test001.png").toString(), false);
+        saveToFile(mem, "test-files","test001.png", false);
     }
 
     @Test
@@ -63,8 +63,8 @@ public class VideoMemoryTest {
         verifyOneCell(mem, 17, 16, Color.BLUE, Color.GREEN, false, false);
         verifyOneCell(mem, 31, 23, Color.WHITE, Color.RED, false, false);
 
-        saveToFile(mem, Path.of("test-files","test002_noflash.png").toString(), false);
-        saveToFile(mem, Path.of("test-files","test002_flash.png").toString(), true);
+        saveToFile(mem, "test-files","test002_noflash.png", false);
+        saveToFile(mem, "test-files","test002_flash.png", true);
     }
 
     private void verifyOneCell(VideoMemoryScreen mem, int x, int y, int pen, int paper, boolean bright, boolean flash) {
@@ -85,11 +85,11 @@ public class VideoMemoryTest {
         }
     }
 
-    private void saveToFile(VideoMemoryScreen mem, String path, boolean flash) {
+    private void saveToFile(VideoMemoryScreen mem, String path, String name, boolean flash) {
         GamePanel panel = new GamePanel();
         panel.setPixelData(mem.toPixels(flash));
         try {
-            panel.saveImage(path);
+            panel.saveImage(path, name);
         } catch(IOException e) {
             e.printStackTrace();
         }

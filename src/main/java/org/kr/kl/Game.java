@@ -8,7 +8,9 @@ import org.kr.kl.utils.*;
 
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -191,11 +193,9 @@ public class Game implements Runnable {
 
     public void updateMainMemory() {
         mainPanel.setPixelData(mainMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo));
-        //mainPanel.repaint();
     }
     public void updateShadowMemory() {
         shadowPanel.setPixelData(shadowMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo));
-        //shadowPanel.repaint();
     }
 
     @Override
@@ -395,11 +395,11 @@ public class Game implements Runnable {
         }
     }
 
-    private void saveImage(GamePanel panel, String fileName) {
+    private void saveImage(GamePanel panel, String filePath, String fileName) {
         try {
             updateShadowMemory();
             updateMainMemory();
-            panel.saveImage(fileName);
+            panel.saveImage(filePath, fileName);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1088,6 +1088,7 @@ public class Game implements Runnable {
         // $BAC4 LD DE,$B239   ;
         // $BAC7 CALL $B2CF    ; // ignore audio
         update_screen_D56F(true);
+        if(keySequence.isSaving()) saveKeySequence();
         waitForKey();
     }
 
@@ -1301,7 +1302,7 @@ public class Game implements Runnable {
         nextTick();
 
         if(keySequence.isSaving()) {
-            saveImage(mainPanel, String.format("saves/%s/tick_%d.png", gameId, tickNo));
+            saveImage(mainPanel, "saves/" + gameId, String.format("tick_%d.png", tickNo));
         }
 
         if(params.getTickLimit() > 0 && tickNo >= params.getTickLimit()) {
@@ -2681,8 +2682,8 @@ public class Game implements Runnable {
             keyQueue.remove(KeyEvent.VK_SPACE);
             waitForSpace();
         }
-        if(keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_ESCAPE)) {
-            keySequence.save(String.format("saves/%s/key_sequence.csv", gameId));
+        if(keySequence.isSaving() && keyQueue.stream().anyMatch(k -> k == KeyEvent.VK_ESCAPE)) {
+            saveKeySequence();
             System.exit(0);
         }
         int prevC = variables.getU(0x5BB5);
@@ -2711,6 +2712,10 @@ public class Game implements Runnable {
             variables.set(0x5BB5, c);
             //IO.println("Pressed: "+Integer.toBinaryString(c));
         }
+    }
+
+    private void saveKeySequence() {
+        keySequence.save(String.format("saves/%s/key_sequence.csv", gameId));
     }
 
     private void handle_left_right_C89F(DataBlock block, int ix) {
