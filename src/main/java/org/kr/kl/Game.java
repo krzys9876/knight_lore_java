@@ -1663,8 +1663,8 @@ public class Game implements Runnable {
             case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(ix); break;
             case 0x36: upd_54_B6B9(ix); break;
             case 0x37: upd_55_B6B1(ix); break;
-            case 0x3E: upd_62_C4AA(block, ix); break;
-            case 0x3F: upd_63_B7A9(block, ix); break;
+            case 0x3E: upd_62_C4AA(ix); break;
+            case 0x3F: upd_63_B7A9(ix); break;
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(block, ix); break;
             case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(block, ix); break;
             case 0x54: upd_84_C4C3(block, ix); break;
@@ -2916,34 +2916,32 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_62_C4AA(DataBlock block, int ix) {
+    private void upd_62_C4AA(int ix) {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
-        block.set(ix + 0x09, 0);
-        block.set(ix + 0x0A, 0);
+        graphicObjects.setXYAdj(ix, -16, -8); //F8
+        graphicObjects.setDX(ix, 0);
+        graphicObjects.setDY(ix, 0);
         // $C4B0 CALL $B3E9    ; // ignore audio
 
         dec_dZ_and_update_XYZ_C700(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_63_B7A9(DataBlock block, int ix) {
+    private void upd_63_B7A9(int ix) {
         set_both_deadly_flags_B85C(ix);
         // c$C4E3 LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
+        graphicObjects.setXYAdj(ix, -16, -8);
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
         boolean disableSpikeBallDrop = variables.getU(0x5BC0) != 0;
         if(disableSpikeBallDrop) return;
-        boolean isDropping = block.isSet(2,ix + 0x0D);
+        boolean isDropping = graphicObjects.isDropping(ix);
         if(isDropping) {
             dec_dZ_and_update_XYZ_C700(ix);
-            boolean zOob = block.isSet(2,ix + 0x0C); // ; Z OOB? (hit the floor?)
+            boolean zOob = graphicObjects.isOob(ix); // ; Z OOB? (hit the floor?)
             if(zOob) {
-                block.resetBit(2, ix + 0x0D);
+                graphicObjects.setRising(ix);
                 variables.set(0x5BBF, 0); // ; flag no spiked balls dropping
             }
             // $B7D6 CALL $B451     ; } // ignore audio
@@ -2952,7 +2950,7 @@ public class Game implements Runnable {
             if(!isOtherDropping) {
                 // ; 1-in-16 chance
                 if((params.getRnd().getSeed3() & 0xF0) > 0) {
-                    block.setBit(2, ix + 0x0D); // ; flag this one as dropping
+                    graphicObjects.setDropping(ix); // ; flag this one as dropping
                     variables.set(0x5BBF, 1); // ; flag a spike ball dropping
                 }
             }

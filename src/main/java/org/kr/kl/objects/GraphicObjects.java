@@ -90,6 +90,7 @@ public class GraphicObjects {
     public boolean isOob(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0C); }
     public boolean isDead(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x0D); }
     public boolean isJumping(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x0C); }
+    public boolean isDropping(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0D); }
 
     public void setGrNo(int ix, int grNo) { graphic_objs_tbl_5C08.set(ix, grNo); }
     public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }
@@ -114,4 +115,6 @@ public class GraphicObjects {
     public void setIgnore3D(int ix) { graphic_objs_tbl_5C08.setBit(1, ix + 7); }
     public void setTemp10(int ix, int temp10) { graphic_objs_tbl_5C08.set(ix + 0x10, temp10); }
     public void flipMoveable(int ix) { graphic_objs_tbl_5C08.set(ix + 7, graphic_objs_tbl_5C08.getU(ix + 7) ^ 0x40); }
+    public void setRising(int ix) { graphic_objs_tbl_5C08.resetBit(2, ix + 0x0D); }
+    public void setDropping(int ix) { graphic_objs_tbl_5C08.setBit(2, ix + 0x0D); }
 }
