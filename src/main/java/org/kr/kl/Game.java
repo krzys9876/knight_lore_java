@@ -1651,7 +1651,7 @@ public class Game implements Runnable {
             case 0x03, 0x05: upd_3_5_C722(ix); break;
             case 0x06, 0x07: upd_6_7_C4E3(ix); break;
             case 0x08: upd_8_C65E(ix); break;
-            case 0x09: upd_9_C6BD(block, ix); break;
+            case 0x09: upd_9_C6BD(ix); break;
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(block, ix); break;
@@ -1757,7 +1757,7 @@ public class Game implements Runnable {
 
     private void adj_ew_C7B1(int ix, int iy) {
         // ix - arch, iy - player
-        int dyArch = graphicObjects.getDY(ix);
+        int dyArch = graphicObjects.getDYu(ix);
         int yPlayer = graphicObjects.getY(iy);
         if(dyArch == yPlayer) return;
         int newDy = (dyArch > yPlayer) ? 1 : -1;
@@ -1766,7 +1766,7 @@ public class Game implements Runnable {
 
     private void adj_ns_C7C4(int ix, int iy) {
         // ix - arch, iy - player
-        int dxArch = graphicObjects.getDX(ix);
+        int dxArch = graphicObjects.getDXu(ix);
         int xPlayer = graphicObjects.getX(iy);
         if(dxArch == xPlayer) return;
         int newDx = (dxArch > xPlayer) ? 1 : -1;
@@ -1853,30 +1853,29 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_9_C6BD(DataBlock block, int ix) {
+    private void upd_9_C6BD(int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
+        graphicObjects.setXYAdj(ix, -12, -6);
 
-        block.setBit(7, ix + 0x0D);
-        int playerFlags =  graphicObjects.graphic_objs_tbl_5C08.getU(graphicObjects.graphic_objs_tbl_5C08.start + 0x0C);
+        graphicObjects.setDeadlyIfObjectHitsPlayer(ix);
+        int playerFlags =  graphicObjects.getFlagsC(ix);
         boolean enteringRoom = (playerFlags & 0xF0)>0;
         if(enteringRoom) return;
-        int dZ =  block.getS(ix + 0x0B);
+        int dZ =  graphicObjects.getDZ(ix);
         if(dZ >= 0) {
             // @label=move_portcullis_up
-            block.set(ix + 0x0B, 2);
+            graphicObjects.setDZ(ix, 2);
             // $C6EE CALL $B467      ; // ignore audio
-            dec_dZ_and_update_XYZ_C700(block, ix);
+            dec_dZ_and_update_XYZ_C700(graphicObjects.graphic_objs_tbl_5C08, ix);
             int roomSizeZ = variables.getU(0x5BAE);
-            int z = block.getU(ix + 0x03);
-            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(block, ix);
+            int z = graphicObjects.getZ(ix);
+            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(graphicObjects.graphic_objs_tbl_5C08, ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         } else {
-            block.set(ix + 0x0B, dZ - 1); // ; accelerate speed?
-            dec_dZ_and_update_XYZ_C700(block, ix);
-            boolean oob = block.isSet(2, ix + 0x0C);
-            if(oob) stop_portcullis_C6E0(block, ix);
+            graphicObjects.setDZ(ix, dZ - 1); // ; accelerate speed?
+            dec_dZ_and_update_XYZ_C700(graphicObjects.graphic_objs_tbl_5C08, ix);
+            boolean oob = graphicObjects.isOob(ix);
+            if(oob) stop_portcullis_C6E0(graphicObjects.graphic_objs_tbl_5C08, ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         }
     }

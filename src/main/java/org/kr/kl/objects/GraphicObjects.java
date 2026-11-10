@@ -78,11 +78,16 @@ public class GraphicObjects {
     public int getX(int ix) { return graphic_objs_tbl_5C08.getU(ix + 1); }
     public int getY(int ix) { return graphic_objs_tbl_5C08.getU(ix + 2); }
     public int getZ(int ix) { return graphic_objs_tbl_5C08.getU(ix + 3); }
-    public int getDX(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x09); }
-    public int getDY(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0A); }
-    public int getDZ(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0B); }
+    public int getDX(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x09); }
+    public int getDXu(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x09); }
+    public int getDY(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0A); }
+    public int getDYu(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0A); }
+    public int getDZ(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0B); }
+    public int getFlagsC(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0C); }
     public boolean isHFlip(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
+    public boolean isOob(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0C); }
+
 
     public void setDX(int ix, int dx) { graphic_objs_tbl_5C08.set(ix + 0x09, dx); } // ix + 0x09
     public void setDY(int ix, int dy) { graphic_objs_tbl_5C08.set(ix + 0x0A, dy); } // ix + 0x09
@@ -95,5 +100,6 @@ public class GraphicObjects {
         graphic_objs_tbl_5C08.set(ix + 0x12, xAdj);
         graphic_objs_tbl_5C08.set(ix + 0x13, yAdj);
     }
+    public void setDeadlyIfObjectHitsPlayer(int ix) { graphic_objs_tbl_5C08.setBit(7, ix + 0x0D); }
 
 }
