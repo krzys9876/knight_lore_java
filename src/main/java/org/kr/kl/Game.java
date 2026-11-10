@@ -1659,10 +1659,10 @@ public class Game implements Runnable {
             case 0x16: upd_22_B7A3(ix); break;
             case 0x17: upd_23_B7E7(ix); break;
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(ix); break;
-            case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(block, ix); break;
+            case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(ix); break;
             case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(ix); break;
-            case 0x36: upd_54_B6B9(block, ix); break;
-            case 0x37: upd_55_B6B1(block, ix); break;
+            case 0x36: upd_54_B6B9(ix); break;
+            case 0x37: upd_55_B6B1(ix); break;
             case 0x3E: upd_62_C4AA(block, ix); break;
             case 0x3F: upd_63_B7A9(block, ix); break;
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(block, ix); break;
@@ -2841,11 +2841,10 @@ public class Game implements Runnable {
         return 0x00FE; // ; dY=0, dX=-2
     }
 
-    private void upd_32_to_47_CDDA(DataBlock block, int ix) {
+    private void upd_32_to_47_CDDA(int ix) {
         // c$C4F7 LD HL,$F8F4   ; -8, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -8); //F8
-        upd_player_top_CDE2(block, ix);
+        graphicObjects.setXYAdj(ix, -12, -8);
+        upd_player_top_CDE2(graphicObjects.graphic_objs_tbl_5C08, ix);
     }
 
     private void upd_player_top_CDE2(DataBlock block, int ix) {
@@ -2886,14 +2885,14 @@ public class Game implements Runnable {
         upd_player_bottom_C82B(ix);
     }
 
-    private void upd_54_B6B9(DataBlock block, int ix) {
+    private void upd_54_B6B9(int ix) {
         // c$B6B9 CALL $B45D    ; // ignore audio
-        loc_B6BF(block, ix, 1, 0x09);
+        loc_B6BF(graphicObjects.graphic_objs_tbl_5C08, ix, 1, 0x09);
     }
 
-    private void upd_55_B6B1(DataBlock block, int ix) {
+    private void upd_55_B6B1(int ix) {
         // c$B6B1 CALL $B462    ; // ignore audio
-        loc_B6BF(block, ix, 2, 0x0A);
+        loc_B6BF(graphicObjects.graphic_objs_tbl_5C08, ix, 2, 0x0A);
     }
 
     private void loc_B6BF(DataBlock block, int ix, int offsetXY, int offsetDXY) {
