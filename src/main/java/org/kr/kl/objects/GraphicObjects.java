@@ -89,6 +89,9 @@ public class GraphicObjects {
     public boolean isOob(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0C); }
 
 
+    public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }
+    public void setY(int ix, int y) { graphic_objs_tbl_5C08.set(ix + 2, y); }
+    public void setZ(int ix, int z) { graphic_objs_tbl_5C08.set(ix + 3, z); }
     public void setDX(int ix, int dx) { graphic_objs_tbl_5C08.set(ix + 0x09, dx); } // ix + 0x09
     public void setDY(int ix, int dy) { graphic_objs_tbl_5C08.set(ix + 0x0A, dy); } // ix + 0x09
     public void setDZ(int ix, int dz) { graphic_objs_tbl_5C08.set(ix + 0x0B, dz); } // ix + 0x09

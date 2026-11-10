@@ -2250,7 +2250,7 @@ public class Game implements Runnable {
         handle_exit_screen_CA70(block, ix);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
         if(!exitingScreen) {
-            add_dXYZ_C706(block, ix);
+            add_dXYZ_C706(ix);
             if (block.isSet(2, ix + 0x0C)) {
                 int tmpDz = variables.getS(0x5BC1);
                 if (tmpDz < 0) block.resetBit(3, ix + 0x0C);
@@ -2575,13 +2575,13 @@ public class Game implements Runnable {
         return a-1;
     }
 
-    private void add_dXYZ_C706(DataBlock block, int ix) {
+    private void add_dXYZ_C706(int ix) {
         // skip this when entering room
-        if(block.getU(ix + 0x01)==0xFF || block.getU(ix + 0x02)==0xFF) return;
+        if(graphicObjects.getX(ix)==0xFF || graphicObjects.getY(ix)==0xFF) return;
 
-        block.set(ix + 0x01, block.getU(ix + 0x01) + block.getS(ix + 0x09));
-        block.set(ix + 0x02, block.getU(ix + 0x02) + block.getS(ix + 0x0A));
-        block.set(ix + 0x03, block.getU(ix + 0x03) + block.getS(ix + 0x0B));
+        graphicObjects.setX(ix, graphicObjects.getX(ix) + graphicObjects.getDX(ix));
+        graphicObjects.setY(ix, graphicObjects.getY(ix) + graphicObjects.getDY(ix));
+        graphicObjects.setZ(ix, graphicObjects.getZ(ix) + graphicObjects.getDZ(ix));
     }
 
     private void calc_plyr_dXY_C9FB(DataBlock block, int ix) {
@@ -3093,7 +3093,7 @@ public class Game implements Runnable {
     private void dec_dZ_and_update_XYZ_C700(int ix) {
         graphicObjects.setDZ(ix, graphicObjects.getDZ(ix)-1); // ; dec dZ?
         adj_for_out_of_bounds_CB45(graphicObjects.graphic_objs_tbl_5C08, ix);
-        add_dXYZ_C706(graphicObjects.graphic_objs_tbl_5C08, ix);
+        add_dXYZ_C706(ix);
 
     }
 
