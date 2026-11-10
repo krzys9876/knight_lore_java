@@ -74,4 +74,17 @@ public class GraphicObjects {
         graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
         size = graphic_objs_tbl_5C08.size / 32;
     }
+
+    public int getGrNo(int ix) { return graphic_objs_tbl_5C08.getU(ix); }
+    public int getX(int ix) { return graphic_objs_tbl_5C08.getU(ix + 1); }
+    public int getY(int ix) { return graphic_objs_tbl_5C08.getU(ix + 2); }
+    public int getZ(int ix) { return graphic_objs_tbl_5C08.getU(ix + 3); }
+    public boolean isHFlip(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
+    public boolean isAutoAdjust(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
+
+    public void setDX(int ix, int dx) { graphic_objs_tbl_5C08.set(ix + 0x09, dx); } // ix + 0x09
+    public void setDY(int ix, int dy) { graphic_objs_tbl_5C08.set(ix + 0x0A, dy); } // ix + 0x09
+    public void setDZ(int ix, int dz) { graphic_objs_tbl_5C08.set(ix + 0x0B, dz); } // ix + 0x09
+    public void setXAdj(int ix, int xAdj) { graphic_objs_tbl_5C08.set(ix + 0x12, xAdj); } // ix + 0x12
+    public void setYAdj(int ix, int yAdj) { graphic_objs_tbl_5C08.set(ix + 0x13, yAdj); } // ix + 0x13
 }

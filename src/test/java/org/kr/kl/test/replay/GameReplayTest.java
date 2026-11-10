@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameReplayTest {
     Thread gameThread = null;
-    String referencePath = "saves/20261110_094158";
+    String referencePath = "saves/20261110_195359";
 
     @Test
     @DisplayName("Replay complete gameplay")

@@ -1633,7 +1633,7 @@ public class Game implements Runnable {
         // block contains sprite metadata (32 bytes each)
         int ix = graphicObjects.graphic_objs_tbl_5C08.start;
         while(ix < graphicObjects.graphic_objs_tbl_5C08.endExcl()) {
-            updateOneSprite(graphicObjects.graphic_objs_tbl_5C08, ix);
+            updateOneSprite(ix);
             if(exitingScreen || gameOver) return;
             ix+=32;
 
@@ -1641,12 +1641,13 @@ public class Game implements Runnable {
         }
     }
 
-    private void updateOneSprite(DataBlock block, int ix) {
-        save_2d_info_CE49(ix, block);
+    private void updateOneSprite(int ix) {
+        DataBlock block = graphicObjects.graphic_objs_tbl_5C08;
+        save_2d_info_CE49(ix);
         // @label=upd_sprite_jmp_tbl
         switch(block.getU(ix)) {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
-            case 0x02, 0x04: upd_2_4_C73C(block, ix); break;
+            case 0x02, 0x04: upd_2_4_C73C(ix); break;
             case 0x03, 0x05: upd_3_5_C722(block, ix); break;
             case 0x06, 0x07: upd_6_7_C4E3(block, ix); break;
             case 0x08: upd_8_C65E(block, ix); break;
@@ -1700,54 +1701,54 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_2_4_C73C(DataBlock block, int ix) {
-        boolean hFlip = block.isSet(6, ix + 0x07); // BIT 6,(IX+$07)
+    private void upd_2_4_C73C(int ix) {
+        boolean hFlip = graphicObjects.isHFlip(ix); // BIT 6,(IX+$07)
         int centreX, centreY;
         if(hFlip) {
             // LD HL,$FEEF
-            block.set(ix + 0x12, -17); // L=x - EF
-            block.set(ix + 0x13, -2); // H=y - FE
-            int x = block.getU(ix + 1) - 0x0D;
-            block.set(ix + 9, x); // dX
-            int y = block.getU(ix + 2);
-            block.set(ix + 0x0A, y); // dY=Y
+            graphicObjects.setXAdj(ix, -17); // L=x - EF
+            graphicObjects.setYAdj(ix, -2); // H=y - FE
+            int x = graphicObjects.getX(ix) - 0x0D;
+            graphicObjects.setDX(ix, x); // dX
+            int y = graphicObjects.getY(ix);
+            graphicObjects.setDY(ix, y); // dY=Y
             // LD HL,$0F06   ; +15, +6
             centreY = 15;
             centreX = 6;
         } else {
-            if(block.getU(ix) == 4) {
+            if(graphicObjects.getGrNo(ix) == 4) {
                 //@label=adj_m3_p1
                 //c$C737 LD HL,$FD01   ;
-                block.set(ix + 0x12, 1); // L=x - 01
-                block.set(ix + 0x12, -3); // H=y - FD
+                graphicObjects.setXAdj(ix, 1); // L=x - 01
+                graphicObjects.setYAdj(ix, -3); // H=y - FD
             } else {
                 // LD HL,$FDF9    ; -3, -7
-                block.set(ix + 0x12, -7); // F9
-                block.set(ix + 0x13, -3); // FD
+                graphicObjects.setXAdj(ix, -7); // F9
+                graphicObjects.setYAdj(ix, -3); // FD
             }
-            int y = block.getU(ix + 2) + 0x0D;
-            block.set(ix + 0x0A, y); // dY
-            int x = block.getU(ix + 1);
-            block.set(ix + 9, x); // dX
+            int y = graphicObjects.getY(ix) + 0x0D;
+            graphicObjects.setDY(ix, y); // dY
+            int x = graphicObjects.getX(ix);
+            graphicObjects.setDX(ix, x); // dX
             // LD HL,$060F   ; +6, +15
             centreY = 6;
             centreX = 15;
         }
-        int z = block.getU(ix + 3);
-        block.set(ix + 0x0B, z); // dZ=Z
-        chk_plyr_spec_near_arch_C7DB(block, ix, centreY, centreX);
+        int z = graphicObjects.getZ(ix);
+        graphicObjects.setDZ(ix, z); // dZ=Z
+        chk_plyr_spec_near_arch_C7DB(graphicObjects.graphic_objs_tbl_5C08, ix, centreY, centreX);
 
         // @label=loc_C785
-        int iy = graphicObjects.graphic_objs_tbl_5C08.start; // player
+        int iy = graphicObjects.start(); // player
         for(int objToCheck = 0; objToCheck<4; objToCheck++) {
-            int grNo = block.getU(ix);
+            int grNo = graphicObjects.getGrNo(ix);
             if(grNo!=0) {
-                boolean autoAdjust = graphicObjects.graphic_objs_tbl_5C08.isSet(3, iy + 7);
+                boolean autoAdjust = graphicObjects.isAutoAdjust(iy);
                 if(autoAdjust) {
-                    if(is_near_to_C7FE(block, ix, iy, 0x0F, 0x0F)) {
-                        switch(get_sprite_dir_CA1E(block, ix)) {
-                            case 0, 1: adj_ew_C7B1(block, ix, iy); break;
-                            case 2, 3: adj_ns_C7C4(block, ix, iy); break;
+                    if(is_near_to_C7FE(graphicObjects.graphic_objs_tbl_5C08, ix, iy, 0x0F, 0x0F)) {
+                        switch(get_sprite_dir_CA1E(graphicObjects.graphic_objs_tbl_5C08, ix)) {
+                            case 0, 1: adj_ew_C7B1(graphicObjects.graphic_objs_tbl_5C08, ix, iy); break;
+                            case 2, 3: adj_ns_C7C4(graphicObjects.graphic_objs_tbl_5C08, ix, iy); break;
                         }
                     }
                 }
@@ -3290,7 +3291,8 @@ public class Game implements Runnable {
                 // $C2BD CALL $B403    ; // ignore audio
             }
             try {
-                if(keySequence.isSaving()) Thread.sleep(CAULDRON_ATTR_DELAY_MS);
+                if(keySequence.isSaving() && !keySequence.isReplaying()) Thread.sleep(CAULDRON_ATTR_DELAY_MS);
+                updateMemory();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -3340,7 +3342,7 @@ public class Game implements Runnable {
         block.set(ix + 0x13, -4); //FC
         block.resetBit(6,ix + 0x0D);
         block.set(ix, block.getU(ix + 0x10));
-        updateOneSprite(block, ix); // update after sparkes change to player
+        updateOneSprite(ix); // update after sparkes change to player
     }
 
     private void upd_141_B99C(DataBlock block, int ix) {
@@ -3897,15 +3899,15 @@ public class Game implements Runnable {
         IO.println(String.format("Scr visited: %02X / %s", screenOrig, txt));*/
     }
 
-    private void save_2d_info_CE49(int ix, DataBlock block) {
-        int widthBytes = block.getU(ix + 0x18);
-        block.set(ix + 0x1c, widthBytes);
-        int heightLines = block.getU(ix + 0x19);
-        block.set(ix + 0x1d, heightLines);
-        int pixelX = block.getU(ix + 0x1a);
-        block.set(ix + 0x1e, pixelX);
-        int pixelY = block.getU(ix + 0x1b);
-        block.set(ix + 0x1f, pixelY);
+    private void save_2d_info_CE49(int ix) {
+        int widthBytes = graphicObjects.graphic_objs_tbl_5C08.getU(ix + 0x18);
+        graphicObjects.graphic_objs_tbl_5C08.set(ix + 0x1c, widthBytes);
+        int heightLines = graphicObjects.graphic_objs_tbl_5C08.getU(ix + 0x19);
+        graphicObjects.graphic_objs_tbl_5C08.set(ix + 0x1d, heightLines);
+        int pixelX = graphicObjects.graphic_objs_tbl_5C08.getU(ix + 0x1a);
+        graphicObjects.graphic_objs_tbl_5C08.set(ix + 0x1e, pixelX);
+        int pixelY = graphicObjects.graphic_objs_tbl_5C08.getU(ix + 0x1b);
+        graphicObjects.graphic_objs_tbl_5C08.set(ix + 0x1f, pixelY);
     }
 
     private boolean calc_pixel_XY_D6C9(DataBlock block, int ix) {

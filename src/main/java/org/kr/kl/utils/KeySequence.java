@@ -63,8 +63,8 @@ public class KeySequence {
     }
 
     public boolean isInactive() { return mode == KeySequenceMode.NONE; }
-    public boolean isSaving() { return mode == KeySequenceMode.SAVE; }
-    public boolean isReplaying() { return mode == KeySequenceMode.REPLAY; }
+    public boolean isSaving() { return mode == KeySequenceMode.SAVE || mode == KeySequenceMode.REPLAY_SAVE; }
+    public boolean isReplaying() { return mode == KeySequenceMode.REPLAY || mode == KeySequenceMode.REPLAY_SAVE; }
 
     public void putPressed(long tick, int code) {
         if (isSaving()) put(tick, KeySequenceEventType.PRESSED, code);
