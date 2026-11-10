@@ -1686,7 +1686,7 @@ public class Game implements Runnable {
             case 0x8D: upd_141_B99C(ix); break;
             case 0x8E: upd_142_B99F(ix); break;
             case 0x8F: upd_143_B6A2(block, ix); break;
-            case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(block, ix); break;
+            case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(ix); break;
             case 0x96, 0x97: upd_150_151_B73C(block, ix); break;
             case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(block, ix); break;
             case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(block, ix); break;
@@ -3325,28 +3325,27 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_144_to_149_152_to_157_B6F9(DataBlock block, int ix) {
+    private void upd_144_to_149_152_to_157_B6F9(int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
+        graphicObjects.setXYAdj(ix, -12, -6);
 
-        int dx = block.getS(ix + 0x09);
-        int dy = block.getS(ix + 0x0A);
+        int dx = graphicObjects.getDX(ix);
+        int dy = graphicObjects.getDY(ix);
         if(dx ==0 && dy == 0) return;
         // $B703 CALL $B4AD     ; // ignore audio
-        int dxU = block.getU(ix + 0x09);
-        int dyU = block.getU(ix + 0x0A);
+        int dxU = graphicObjects.getDXu(ix);
+        int dyU = graphicObjects.getDYu(ix);
         if(dxU > dyU) {
-            if(dx >= 0) block.setBit(3, ix); // ; graphic_no
-            else block.resetBit(3, ix);
-            block.resetBit(6, ix + 0x07); // ; clear hflip
+            if(dx >= 0) graphicObjects.graphic_objs_tbl_5C08.setBit(3, ix); // ; graphic_no
+            else graphicObjects.graphic_objs_tbl_5C08.resetBit(3, ix);
+            graphicObjects.resetHFlip(ix); // ; clear hflip
         } else {
-            if (dy >= 0) block.resetBit(3, ix);
-            else block.setBit(3, ix);
-            block.setBit(6, ix + 0x07);
+            if (dy >= 0) graphicObjects.graphic_objs_tbl_5C08.resetBit(3, ix);
+            else graphicObjects.graphic_objs_tbl_5C08.setBit(3, ix);
+            graphicObjects.setHFlip(ix);
         }
 
-        animate_human_legs_C97F(block, ix);
+        animate_human_legs_C97F(graphicObjects.graphic_objs_tbl_5C08, ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
