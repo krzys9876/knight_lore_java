@@ -89,7 +89,11 @@ public class GraphicObjects {
     public void setDZ(int ix, int dz) { graphic_objs_tbl_5C08.set(ix + 0x0B, dz); } // ix + 0x09
     public void setDXAdj(int ix, int dxAdj) { graphic_objs_tbl_5C08.set(ix + 0x0E, dxAdj); } // ix + 0x12
     public void setDYAdj(int ix, int dyAdj) { graphic_objs_tbl_5C08.set(ix + 0x0F, dyAdj); } // ix + 0x13
-    public void setXAdj(int ix, int xAdj) { graphic_objs_tbl_5C08.set(ix + 0x12, xAdj); } // ix + 0x12
-    public void setYAdj(int ix, int yAdj) { graphic_objs_tbl_5C08.set(ix + 0x13, yAdj); } // ix + 0x13
+    //public void setXAdj(int ix, int xAdj) { graphic_objs_tbl_5C08.set(ix + 0x12, xAdj); } // ix + 0x12
+    //public void setYAdj(int ix, int yAdj) { graphic_objs_tbl_5C08.set(ix + 0x13, yAdj); } // ix + 0x13
+    public void setXYAdj(int ix, int xAdj, int yAdj) {
+        graphic_objs_tbl_5C08.set(ix + 0x12, xAdj);
+        graphic_objs_tbl_5C08.set(ix + 0x13, yAdj);
+    }
 
 }

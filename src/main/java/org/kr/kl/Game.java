@@ -1650,7 +1650,7 @@ public class Game implements Runnable {
             case 0x02, 0x04: upd_2_4_C73C(ix); break;
             case 0x03, 0x05: upd_3_5_C722(ix); break;
             case 0x06, 0x07: upd_6_7_C4E3(ix); break;
-            case 0x08: upd_8_C65E(block, ix); break;
+            case 0x08: upd_8_C65E(ix); break;
             case 0x09: upd_9_C6BD(block, ix); break;
             case 0x0A: upd_10_C4E8(block, ix); break;
             case 0x0B: upd_11_C4ED(block, ix); break;
@@ -1706,8 +1706,7 @@ public class Game implements Runnable {
         int centreX, centreY;
         if(hFlip) {
             // LD HL,$FEEF
-            graphicObjects.setXAdj(ix, -17); // L=x - EF
-            graphicObjects.setYAdj(ix, -2); // H=y - FE
+            graphicObjects.setXYAdj(ix, -17, -2);
             int x = graphicObjects.getX(ix) - 0x0D;
             graphicObjects.setDX(ix, x); // dX
             int y = graphicObjects.getY(ix);
@@ -1719,12 +1718,10 @@ public class Game implements Runnable {
             if(graphicObjects.getGrNo(ix) == 4) {
                 //@label=adj_m3_p1
                 //c$C737 LD HL,$FD01   ;
-                graphicObjects.setXAdj(ix, 1); // L=x - 01
-                graphicObjects.setYAdj(ix, -3); // H=y - FD
+                graphicObjects.setXYAdj(ix, 1, -3);
             } else {
                 // LD HL,$FDF9    ; -3, -7
-                graphicObjects.setXAdj(ix, -7); // F9
-                graphicObjects.setYAdj(ix, -3); // FD
+                graphicObjects.setXYAdj(ix, -7, -3);
             }
             int y = graphicObjects.getY(ix) + 0x0D;
             graphicObjects.setDY(ix, y); // dY
@@ -1813,38 +1810,34 @@ public class Game implements Runnable {
         boolean hFlip = graphicObjects.isHFlip(ix); // BIT 6,(IX+$07)
         if(hFlip) {
             //LD HL,$FEF9
-            graphicObjects.setXAdj(ix, -7); // F9
-            graphicObjects.setYAdj(ix, -2); // FE
+            graphicObjects.setXYAdj(ix, -7, -2);
 
         } else {
             // LD HL,$FDF7    ; -3, -9
-            graphicObjects.setXAdj(ix, -9); // F7
-            graphicObjects.setYAdj(ix, -3); // FD
+            graphicObjects.setXYAdj(ix, -9, -3);
         }
     }
 
     private void upd_6_7_C4E3(int ix) {
         //LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXAdj(ix, -16); //F0
-        graphicObjects.setYAdj(ix, -8); //F8
+        graphicObjects.setXYAdj(ix, -16, -8);
     }
 
-    private void upd_8_C65E(DataBlock block, int ix) {
+    private void upd_8_C65E(int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
+        graphicObjects.setXYAdj(ix, -12, -6); //FA
 
         boolean moving = variables.getU(0x5BAF) > 0;
         if(moving) return;
         int roomSizeZ = variables.getU(0x5BAE);
-        int z = block.getU(ix + 0x03);
+        int z = graphicObjects.getZ(ix);
         if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
             // @label=init_portcullis_up
             //int seed3 = variables.getU(0x5BA5);
             if((params.getRnd().getSeed3() & 0x1F) != 0) return; // ; 1in32 chance?
 
-            block.setBit(0, ix); // ; graphic_no=9
-            block.set(ix + 0x0B, 1); // ; dZ=1 (up)
+            graphicObjects.graphic_objs_tbl_5C08.setBit(0, ix); // ; graphic_no=9
+            graphicObjects.setDZ(ix, 1); // ; dZ=1 (up)
         } else {
             int moveCnt = variables.getU(0x5BB0);
             if(moveCnt >= 4) {
@@ -1853,8 +1846,8 @@ public class Game implements Runnable {
             }
             // @label=init_portcullis_down
             variables.set(0x5BB0, moveCnt + 1);
-            block.setBit(0, ix); // ; graphic_no=9
-            block.set(ix + 0x0B, -1); // ; dZ=-1 (down)
+            graphicObjects.graphic_objs_tbl_5C08.setBit(0, ix); // ; graphic_no=9
+            graphicObjects.setDZ(ix, -1); // ; dZ=-1 (down)
         }
         variables.set(0x5BAF, variables.getU(0x5BAF) + 1);
         //set_wipe_and_draw_flags_C692(block, ix);
