@@ -2763,7 +2763,7 @@ public class Game implements Runnable {
     }
 
     private void upd_22_B7A3(DataBlock block, int ix) {
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         //c$C4FC LD HL,$F9F4   ; -7, -12
         // $C4FF JR $C4E0      ;
         block.set(ix + 0x12, -12); //F4
@@ -2771,7 +2771,7 @@ public class Game implements Runnable {
     }
 
     private void upd_23_B7E7(DataBlock block, int ix) {
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
@@ -2804,7 +2804,7 @@ public class Game implements Runnable {
         block.set(ix + 0x21, block.getU(ix + 1)); // ; copy to next obj X
         block.set(ix + 0x22, block.getU(ix + 2)); // ; copy to next obj Y
         set_guard_wizard_sprite_B76C(block, ix);
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -2934,7 +2934,7 @@ public class Game implements Runnable {
     }
 
     private void upd_63_B7A9(DataBlock block, int ix) {
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
@@ -2992,7 +2992,7 @@ public class Game implements Runnable {
             // $C5FA CALL $B467    ; // ignore audio
         }
         toggle_next_prev_sprite_B985(block, ix);
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3059,7 +3059,7 @@ public class Game implements Runnable {
             //  $B837 CALL $B42E    ; // ignore audio
         }
         toggle_next_prev_sprite_B985(block, ix);
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3397,7 +3397,7 @@ public class Game implements Runnable {
         boolean xOob =  block.isSet(0, ix + 0x0C);
         if(xOob) block.set(ix + 0x0D, (block.getU(ix + 0x0D) ^ 0x01)); // ; toggle direction
         block.set(ix + 0x21, block.getU(ix + 0x01)); // ; copy to bottom half
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);*/
     }
 
@@ -3545,7 +3545,7 @@ public class Game implements Runnable {
             if(zOob) block.setBit(2, ix + 0x0D);
             // $B88F CALL $B42E     ; // ignore audio
         }
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3604,7 +3604,7 @@ public class Game implements Runnable {
             }
         }
         toggle_next_prev_sprite_B985(block, ix);
-        set_both_deadly_flags_B85C(block, ix);
+        set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3923,8 +3923,8 @@ public class Game implements Runnable {
         return y < 0xC0; // 192
     }
 
-    private void set_both_deadly_flags_B85C(DataBlock block, int ix) {
-        block.set(ix + 0x0D, block.getU(ix + 0x0D) | 0xA0);
+    private void set_both_deadly_flags_B85C(int ix) {
+        graphicObjects.setBothDeadlyFlags(ix);
     }
 
     private void printVideoMemory() {

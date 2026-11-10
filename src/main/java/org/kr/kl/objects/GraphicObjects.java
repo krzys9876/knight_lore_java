@@ -107,6 +107,8 @@ public class GraphicObjects {
         graphic_objs_tbl_5C08.set(ix + 0x13, yAdj);
     }
     public void setDeadlyIfObjectHitsPlayer(int ix) { graphic_objs_tbl_5C08.setBit(7, ix + 0x0D); }
+    public void setDeadlyIfPlayerHitsObject(int ix) { graphic_objs_tbl_5C08.setBit(5, ix + 0x0D); }
+    public void setBothDeadlyFlags(int ix) { graphic_objs_tbl_5C08.set(ix + 0x0D, graphic_objs_tbl_5C08.getU(ix + 0x0D) | 0xA0);; }
     public void setDead(int ix) { graphic_objs_tbl_5C08.setBit(6, ix + 0x0D); }
     public void setDeadOtherHalf(int ix) { setDead(ix + 0x20); }
     public void setIgnore3D(int ix) { graphic_objs_tbl_5C08.setBit(1, ix + 7); }
