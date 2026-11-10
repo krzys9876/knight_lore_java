@@ -1681,7 +1681,7 @@ public class Game implements Runnable {
             case 0x77: upd_119_BF3F(ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
             case 0x7F: upd_127_BF11(ix); break;
-            case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
+            case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(ix); break;
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
             case 0x8E: upd_142_B99F(block, ix); break;
@@ -1901,10 +1901,9 @@ public class Game implements Runnable {
         graphicObjects.setXYAdj(ix, -8, -4);
     }
 
-    private void upd_128_to_130_C4D3(DataBlock block, int ix) {
+    private void upd_128_to_130_C4D3(int ix) {
         //LD HL,$FEF8   ; -2, -8
-        block.set(ix + 0x12, -8); //F8
-        block.set(ix + 0x13, -2); //FE
+        graphicObjects.setXYAdj(ix, -8, -2);
     }
 
     private void upd_131_to_133_B566(DataBlock block, int ix) {
