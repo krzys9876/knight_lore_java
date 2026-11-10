@@ -1665,8 +1665,8 @@ public class Game implements Runnable {
             case 0x37: upd_55_B6B1(ix); break;
             case 0x3E: upd_62_C4AA(ix); break;
             case 0x3F: upd_63_B7A9(ix); break;
-            case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(block, ix); break;
-            case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(block, ix); break;
+            case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(ix); break;
+            case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(ix); break;
             case 0x54: upd_84_C4C3(block, ix); break;
             case 0x55: upd_85_C4B6(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
@@ -1874,7 +1874,7 @@ public class Game implements Runnable {
         } else {
             graphicObjects.setDZ(ix, dZ - 1); // ; accelerate speed?
             dec_dZ_and_update_XYZ_C700(ix);
-            boolean oob = graphicObjects.isOob(ix);
+            boolean oob = graphicObjects.isOobZ(ix);
             if(oob) stop_portcullis_C6E0(ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         }
@@ -2939,7 +2939,7 @@ public class Game implements Runnable {
         boolean isDropping = graphicObjects.isDropping(ix);
         if(isDropping) {
             dec_dZ_and_update_XYZ_C700(ix);
-            boolean zOob = graphicObjects.isOob(ix); // ; Z OOB? (hit the floor?)
+            boolean zOob = graphicObjects.isOobZ(ix); // ; Z OOB? (hit the floor?)
             if(zOob) {
                 graphicObjects.setRising(ix);
                 variables.set(0x5BBF, 0); // ; flag no spiked balls dropping
@@ -2958,48 +2958,46 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_64_to_79_CDDF(DataBlock block, int ix) {
+    private void upd_64_to_79_CDDF(int ix) {
         // c$C501 LD HL,$F4F4   ; -12, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -12); //F4
-        upd_player_top_CDE2(block, ix);
+        graphicObjects.setXYAdj(ix, -12, -12); //F4
+        upd_player_top_CDE2(graphicObjects.graphic_objs_tbl_5C08, ix);
     }
 
-    private void upd_80_to_83_C5C8(DataBlock block, int ix) {
+    private void upd_80_to_83_C5C8(int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
+        graphicObjects.setXYAdj(ix, -12, -6);
 
         dec_dZ_and_update_XYZ_C700(ix);
-        boolean moving = block.getU(ix + 0x09) != 0 || block.getU(ix + 0x0A) != 0;
-        boolean xyOob = (block.getU(ix + 0x0C) & 0x03) > 0; // ; OOB X/Y?
+        boolean moving = graphicObjects.getDX(ix) != 0 || graphicObjects.getDY(ix) != 0;
+        boolean xyOob = graphicObjects.isOobXY(ix); // ; OOB X/Y?
         if(!moving || xyOob) {
             // @label=loc_C5DD
             int rnd3 = (params.getRnd().getSeed3() & 0x03) + 4;
             int dx = get_delta_from_tbl_C645(rnd3);
-            block.set(ix + 0x09, dx);
+            graphicObjects.setDX(ix, dx);
             int rnd2 = (params.getRnd().getSeed2() & 0x03) + 4;
             int dy = get_delta_from_tbl_C645(rnd2);
-            block.set(ix + 0x0A, dy);
-            calc_ghost_sprite_C603(block, ix);
+            graphicObjects.setDY(ix, dy);
+            calc_ghost_sprite_C603(ix);
             // $C5FA CALL $B467    ; // ignore audio
         }
-        toggle_next_prev_sprite_B985(block, ix);
+        toggle_next_prev_sprite_B985(graphicObjects.graphic_objs_tbl_5C08, ix);
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void calc_ghost_sprite_C603(DataBlock block, int ix) {
-        int dx = block.getS(ix + 0x09);
-        int dy = block.getS(ix + 0x0A);
+    private void calc_ghost_sprite_C603(int ix) {
+        int dx = graphicObjects.getDX(ix);
+        int dy = graphicObjects.getDY(ix);
         if(Math.abs(dy) < Math.abs(dx)) {
-            if(dx > 0) block.resetBit(1, ix); // ; sprite=80/81
-            else block.setBit(1, ix); // ; sprite=80/81
-            block.setBit(6, ix + 0x07); // set hflip
+            if(dx > 0) graphicObjects.graphic_objs_tbl_5C08.resetBit(1, ix); // ; sprite=80/81
+            else graphicObjects.graphic_objs_tbl_5C08.setBit(1, ix); // ; sprite=80/81
+            graphicObjects.setHFlip(ix); // set hflip
         } else {
-            if(dy > 0) block.setBit(1, ix);
-            else block.resetBit(1, ix);
-            block.resetBit(6, ix + 0x07); // reset hflip
+            if(dy > 0) graphicObjects.graphic_objs_tbl_5C08.setBit(1, ix);
+            else graphicObjects.graphic_objs_tbl_5C08.resetBit(1, ix);
+            graphicObjects.resetHFlip(ix); // reset hflip
         }
     }
 

@@ -87,7 +87,10 @@ public class GraphicObjects {
     public int getFlagsC(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0C); }
     public boolean isHFlip(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
-    public boolean isOob(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0C); }
+    public boolean isOobX(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0C); }
+    public boolean isOobY(int ix) { return graphic_objs_tbl_5C08.isSet(1, ix + 0x0C); }
+    public boolean isOobXY(int ix) { return isOobX(ix) || isOobY(ix); }
+    public boolean isOobZ(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0C); }
     public boolean isDead(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x0D); }
     public boolean isJumping(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x0C); }
     public boolean isDropping(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0D); }
@@ -101,8 +104,6 @@ public class GraphicObjects {
     public void setDZ(int ix, int dz) { graphic_objs_tbl_5C08.set(ix + 0x0B, dz); } // ix + 0x09
     public void setDXAdj(int ix, int dxAdj) { graphic_objs_tbl_5C08.set(ix + 0x0E, dxAdj); } // ix + 0x12
     public void setDYAdj(int ix, int dyAdj) { graphic_objs_tbl_5C08.set(ix + 0x0F, dyAdj); } // ix + 0x13
-    //public void setXAdj(int ix, int xAdj) { graphic_objs_tbl_5C08.set(ix + 0x12, xAdj); } // ix + 0x12
-    //public void setYAdj(int ix, int yAdj) { graphic_objs_tbl_5C08.set(ix + 0x13, yAdj); } // ix + 0x13
     public void setXYAdj(int ix, int xAdj, int yAdj) {
         graphic_objs_tbl_5C08.set(ix + 0x12, xAdj);
         graphic_objs_tbl_5C08.set(ix + 0x13, yAdj);
@@ -117,4 +118,6 @@ public class GraphicObjects {
     public void flipMoveable(int ix) { graphic_objs_tbl_5C08.set(ix + 7, graphic_objs_tbl_5C08.getU(ix + 7) ^ 0x40); }
     public void setRising(int ix) { graphic_objs_tbl_5C08.resetBit(2, ix + 0x0D); }
     public void setDropping(int ix) { graphic_objs_tbl_5C08.setBit(2, ix + 0x0D); }
+    public void setHFlip(int ix) { graphic_objs_tbl_5C08.setBit(6, ix + 0x07); }
+    public void resetHFlip(int ix) { graphic_objs_tbl_5C08.resetBit(6, ix + 0x07); }
 }
