@@ -1649,7 +1649,7 @@ public class Game implements Runnable {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
             case 0x02, 0x04: upd_2_4_C73C(ix); break;
             case 0x03, 0x05: upd_3_5_C722(ix); break;
-            case 0x06, 0x07: upd_6_7_C4E3(block, ix); break;
+            case 0x06, 0x07: upd_6_7_C4E3(ix); break;
             case 0x08: upd_8_C65E(block, ix); break;
             case 0x09: upd_9_C6BD(block, ix); break;
             case 0x0A: upd_10_C4E8(block, ix); break;
@@ -1823,6 +1823,12 @@ public class Game implements Runnable {
         }
     }
 
+    private void upd_6_7_C4E3(int ix) {
+        //LD HL,$F8F0   ; -8, -16
+        graphicObjects.setXAdj(ix, -16); //F0
+        graphicObjects.setYAdj(ix, -8); //F8
+    }
+
     private void upd_8_C65E(DataBlock block, int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         block.set(ix + 0x12, -12); //F4
@@ -1904,12 +1910,6 @@ public class Game implements Runnable {
         //LD HL,$FCF8   ; -4, -8
         block.set(ix + 0x12, -8); // F8
         block.set(ix + 0x13, -4); // FC
-    }
-
-    private void upd_6_7_C4E3(DataBlock block, int ix) {
-        //LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
     }
 
     private void upd_128_to_130_C4D3(DataBlock block, int ix) {
