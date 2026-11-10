@@ -1674,7 +1674,7 @@ public class Game implements Runnable {
             case 0x5B: upd_91_B683(ix); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(ix); break;
-            case 0x67: upd_103_C1AB(block, ix); break;
+            case 0x67: upd_103_C1AB(ix); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(block, ix); break;
             case 0x6F: upd_111_B95E(block, ix); break;
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(block, ix); break;
@@ -3128,28 +3128,26 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_103_C1AB(DataBlock block, int ix) {
+    private void upd_103_C1AB(int ix) {
         //c$C4D3 LD HL,$FEF8   ; -2, -8
-        block.set(ix + 0x12, -8); //F8
-        block.set(ix + 0x13, -2); //FE
+        graphicObjects.setXYAdj(ix, -8, -2);
 
         int iy = ix; // ; iy=extra life object
         ix = graphicObjects.graphic_objs_tbl_5C08.start; // ; ix = player
-        int width = block.getU(ix + 4);
-        int depth = block.getU(ix + 5);
-        block.set(ix + 4, width+1);
-        block.set(ix + 5, depth+1);
-        boolean isNear = is_on_or_near_obj_C17A(block, ix, iy);
-        block.set(ix + 4, width); //; restore width
-        block.set(ix + 5, depth); //; restore depth
+        int width = graphicObjects.getW(ix);
+        int depth = graphicObjects.getD(ix);
+        graphicObjects.setW(ix, width+1);
+        graphicObjects.setD(ix, depth+1);
+        boolean isNear = is_on_or_near_obj_C17A(graphicObjects.graphic_objs_tbl_5C08, ix, iy);
+        graphicObjects.setW(ix, width); //; restore width
+        graphicObjects.setD(ix, depth); //; restore depth
         ix = iy; // ; restore ix (extra life object)
         if(isNear) {
-            block.setBit(3, ix); // ; graphic_no: 103 + 8 = 111, see upd_111
+            graphicObjects.graphic_objs_tbl_5C08.setBit(3, ix); // ; graphic_no: 103 + 8 = 111, see upd_111
             //c$C4D8 LD HL,$FCF4   ; -4, -12
-            block.set(ix + 0x12, -12); //F4
-            block.set(ix + 0x13, -4); //FC
-            int l = block.getU(ix + 0x10);
-            int h = block.getU(ix + 0x11);
+            graphicObjects.setXYAdj(ix + 0x12, -12, -4);
+            int l = graphicObjects.getTemp10(ix);
+            int h = graphicObjects.getTemp11(ix);
             int ptr = h * 256 + l;
             int spi = specialObjects.getIndex(ptr);
             specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
