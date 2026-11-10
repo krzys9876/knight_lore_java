@@ -17,6 +17,8 @@ public class GameParams {
     private final long delayMs; // 90ms
     private final long delayMsReplay;
 
+    private long tickLimit = -1;
+
 
     public GameParams(SeedGenerator rnd, boolean skipMenu, boolean disableDeath, boolean disableLoseLife, boolean disableIncDays,
                       int maxDays, int initialLives, int cauldronRequiredObjects, long delayMs, int delayMsReplay) {
@@ -47,4 +49,7 @@ public class GameParams {
 
     public long getDelayMs() { return delayMs; }
     public long getDelayMsReplay() { return delayMsReplay; }
+
+    public long getTickLimit() { return tickLimit; }
+    public void setTickLimit(long tickLinit) { this.tickLimit = tickLinit; }
 }

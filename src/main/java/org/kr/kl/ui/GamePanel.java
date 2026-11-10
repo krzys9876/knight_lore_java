@@ -22,6 +22,10 @@ public class GamePanel {
         preparePixels();
     }
 
+    public BufferedImage getImage() {
+        return image;
+    }
+
     public void setPixelData(int[] pixelData) {
         this.pixelData = pixelData;
         preparePixels();

@@ -23,6 +23,8 @@ public class Game implements Runnable {
 
     private final GameParams params;
 
+    private boolean shouldQuit = false;
+
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final long CAULDRON_ATTR_DELAY_MS = 120;
     private final long REPAINT_MS = 5;
@@ -160,42 +162,39 @@ public class Game implements Runnable {
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
 
-    private final KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
+    private final KeySequence keySequence;
+    private Runnable tickCallback = () -> {};
 
-    // Repaint every fixed interval
-    Timer timer = new Timer();
-    TimerTask task = new TimerTask() {
-        @Override
-        public void run() {
-            updateMainMemory();
-            updateShadowMemory();
-        }
-    };
+    public void setTickCallback(Runnable r) { tickCallback = r; }
+
+    private void updateMemory() {
+        updateMainMemory();
+        updateShadowMemory();
+    }
 
     public Game(GamePanel mainPanel, GamePanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
-                ConcurrentSkipListSet<Integer> keyQueue, GameParams params) {
+                ConcurrentSkipListSet<Integer> keyQueue, GameParams params, KeySequence keySequence) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
         this.debugPanel1 = debugPanel1;
         this.debugPanel2 = debugPanel2;
         this.keyQueue = keyQueue;
         this.params = params;
+        this.keySequence = keySequence;
 
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
 
         mainMemory = new VideoMemoryScreen(0x4000);
         shadowMemory = new VideoMemoryLinear(0xD8F3);
-
-        timer.scheduleAtFixedRate(task, REPAINT_MS * 2, REPAINT_MS);
     }
 
     public void updateMainMemory() {
-        mainPanel.setPixelData(mainMemory.toPixels(LocalDateTime.now()));
+        mainPanel.setPixelData(mainMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo));
         //mainPanel.repaint();
     }
     public void updateShadowMemory() {
-        shadowPanel.setPixelData(shadowMemory.toPixels(LocalDateTime.now()));
+        shadowPanel.setPixelData(shadowMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo));
         //shadowPanel.repaint();
     }
 
@@ -208,7 +207,7 @@ public class Game implements Runnable {
         debugPanel1.append("start_AF6C");
 
         gameCounter = 0;
-        while(true) {
+        while(!shouldQuit) {
             variables.reset();
             // initialize variables (TODO: split variables to separate data blocks)
 
@@ -858,8 +857,9 @@ public class Game implements Runnable {
                 //Do not change seed to make game deterministic during development
                 //variables.set(0x5BA0, variables.get(0x5BA0)+1); // increase seed
                 params.getRnd().updateSeed1();
-                delay();
             }
+            delay();
+            if(shouldQuit) return;
         }
     }
 
@@ -1092,7 +1092,7 @@ public class Game implements Runnable {
     }
 
     private void waitForKey() {
-        while(keyQueue.isEmpty()) {
+        while(keyQueue.isEmpty() && !shouldQuit) {
             delay();
         }
         keyQueue.clear();
@@ -1135,10 +1135,10 @@ public class Game implements Runnable {
     private void game_loop_AFBA() {
         debugPanel2.append("Game loop AFBA\n");
         boolean exit = false;
-        while(!exit) {
+        while(!exit && !shouldQuit) {
             exitingScreen = false;
             build_screen_objects_D1E6();
-            while (!exit & !exitingScreen) {
+            while (!exit && !exitingScreen && !shouldQuit) {
                 exit = onscreen_loop_AFBD();
                 debugPanel1.setText("");
                 debugPanel2.setText("");
@@ -1298,10 +1298,15 @@ public class Game implements Runnable {
         lastTick = currentTick;
         sunTick = (sunTick+1) % SUN_TICK_PER_GAME_TICK;
 
-        tickNo++;
+        nextTick();
 
         if(keySequence.isSaving()) {
             saveImage(mainPanel, String.format("saves/%s/tick_%d.png", gameId, tickNo));
+        }
+
+        if(params.getTickLimit() > 0 && tickNo >= params.getTickLimit()) {
+            IO.println("tick: " + tickNo + ", should quit");
+            shouldQuit = true;
         }
 
         keySequence.switchMode(tickNo);
@@ -1315,6 +1320,14 @@ public class Game implements Runnable {
             });
         }
     }
+
+    private void nextTick() {
+        tickNo++;
+        updateMemory();
+        tickCallback.run();
+    }
+
+    public long getTickNo() { return tickNo; }
 
     private void display_day_BCCA() {
         int attr = variables.getU(0x5BAD); // room attribute

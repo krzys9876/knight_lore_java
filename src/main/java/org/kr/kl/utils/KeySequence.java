@@ -49,7 +49,9 @@ public class KeySequence {
     }
 
     public void switchMode(long tick) {
-        if(isReplaying() && tick > lastTick) mode = KeySequenceMode.SAVE;
+        if(isReplaying() && tick > lastTick) {
+            mode = KeySequenceMode.SAVE;
+        }
     }
 
     public boolean exists(long t) {

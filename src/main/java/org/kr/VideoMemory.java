@@ -20,8 +20,8 @@ public abstract class VideoMemory {
     public void setByteAt(int address, int value) { memory[address - start] = value ; }
     public int getByteAt(int address) { return memory[address - start]; }
 
-    public int[] toPixels(LocalDateTime time) {
-        return toPixels((time.getSecond() % 2) == 0);
+    public int[] toPixels(long tick) {
+        return toPixels(tick == -1 || ((tick / 5) % 2) == 0);
     }
 
     public int[] toPixels(boolean flash) {

@@ -6,6 +6,8 @@ import org.kr.kl.GameParams;
 import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.ScreenDebugPanel;
 import org.kr.kl.ui.ScreenPanel;
+import org.kr.kl.utils.KeySequence;
+import org.kr.kl.utils.KeySequenceMode;
 import org.kr.kl.utils.SeedGenerator;
 import org.kr.kl.utils.SeedGeneratorSequential;
 
@@ -49,9 +51,10 @@ public class Main {
 
         panel1.requestFocus();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
+        KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
         SeedGenerator rnd = new SeedGeneratorSequential();
-        GameParams params = new GameParams(rnd, true, false, false, false, 99, 98, 14, 90, 0);
-        Game game = new Game(gamePanel1, gamePanel2, panel3, panel4, keyQueue, params);
+        GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
+        Game game = new Game(gamePanel1, gamePanel2, panel3, panel4, keyQueue, params, keySequence);
         Thread gameThread = new Thread(game);
         gameThread.start();
 
