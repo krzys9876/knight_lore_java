@@ -1866,24 +1866,24 @@ public class Game implements Runnable {
             // @label=move_portcullis_up
             graphicObjects.setDZ(ix, 2);
             // $C6EE CALL $B467      ; // ignore audio
-            dec_dZ_and_update_XYZ_C700(graphicObjects.graphic_objs_tbl_5C08, ix);
+            dec_dZ_and_update_XYZ_C700(ix);
             int roomSizeZ = variables.getU(0x5BAE);
             int z = graphicObjects.getZ(ix);
-            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(graphicObjects.graphic_objs_tbl_5C08, ix);
+            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         } else {
             graphicObjects.setDZ(ix, dZ - 1); // ; accelerate speed?
-            dec_dZ_and_update_XYZ_C700(graphicObjects.graphic_objs_tbl_5C08, ix);
+            dec_dZ_and_update_XYZ_C700(ix);
             boolean oob = graphicObjects.isOob(ix);
-            if(oob) stop_portcullis_C6E0(graphicObjects.graphic_objs_tbl_5C08, ix);
+            if(oob) stop_portcullis_C6E0(ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         }
     }
 
-    private void stop_portcullis_C6E0(DataBlock block, int ix) {
+    private void stop_portcullis_C6E0(int ix) {
         // @label=stop_portcullis
         variables.set(0x5BAF, 0);
-        block.resetBit(0, ix); // graphic_no=8
+        graphicObjects.graphic_objs_tbl_5C08.resetBit(0, ix); // graphic_no=8
     }
 
     private void upd_10_C4E8(DataBlock block, int ix) {
@@ -1961,7 +1961,7 @@ public class Game implements Runnable {
             move_towards_plyr_B965(block, ix, 4, 4);
         }
         variables.set(0x5BC5, block.getU(ix + 3));
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -2785,7 +2785,7 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, 3); //03
 
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         move_guard_wizard_NSEW_B9CC(block, ix);
     }
 
@@ -2920,7 +2920,7 @@ public class Game implements Runnable {
             int a = xy < c ? 1 : -1;
             block.set(ix + offsetDXY, a);
             block.set(ix + 0x0B, 1);
-            dec_dZ_and_update_XYZ_C700(block, ix);
+            dec_dZ_and_update_XYZ_C700(ix);
         }
         //set_wipe_and_draw_flags_C692(block, ix);
     }
@@ -2933,7 +2933,7 @@ public class Game implements Runnable {
         block.set(ix + 0x0A, 0);
         // $C4B0 CALL $B3E9    ; // ignore audio
 
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -2949,7 +2949,7 @@ public class Game implements Runnable {
         if(disableSpikeBallDrop) return;
         boolean isDropping = block.isSet(2,ix + 0x0D);
         if(isDropping) {
-            dec_dZ_and_update_XYZ_C700(block, ix);
+            dec_dZ_and_update_XYZ_C700(ix);
             boolean zOob = block.isSet(2,ix + 0x0C); // ; Z OOB? (hit the floor?)
             if(zOob) {
                 block.resetBit(2, ix + 0x0D);
@@ -2981,7 +2981,7 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -6); //FA
 
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         boolean moving = block.getU(ix + 0x09) != 0 || block.getU(ix + 0x0A) != 0;
         boolean xyOob = (block.getU(ix + 0x0C) & 0x03) > 0; // ; OOB X/Y?
         if(!moving || xyOob) {
@@ -3023,7 +3023,7 @@ public class Game implements Runnable {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         if(is_obj_moving_C1A1(block, ix)) {
             block.set(ix + 0x09, 0);
             block.set(ix + 0x0A, 0);
@@ -3038,7 +3038,7 @@ public class Game implements Runnable {
         //LD HL,$F8F0   ; -8, -16
         block.set(ix + 0x12, -16); //F0
         block.set(ix + 0x13, -8); //F8
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         // $C4C0 JP $C232      ;// ignore audio
     }
 
@@ -3052,7 +3052,7 @@ public class Game implements Runnable {
         if(movingEast) block.set(ix + 0x09, 2);
         else block.set(ix + 0x09, -2);
         // $B801 CALL $B45D     ; // ignore audio
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         boolean xOob = block.isSet(0, ix + 0x0C);
         loc_B82F(block, ix, xOob, 1);
     }
@@ -3086,14 +3086,14 @@ public class Game implements Runnable {
         if(!triggered) return;
         block.resetBit(3, ix + 0x0D); // ; reset triggered
         block.set(ix + 0x0B, 0); // ; dZ=0
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         // $B69C CALL $B451      ; } // ignore audio
     }
 
-    private void dec_dZ_and_update_XYZ_C700(DataBlock block, int ix) {
-        block.set(ix + 0x0B, block.getS(ix + 0x0B)-1); // ; dec dZ?
-        adj_for_out_of_bounds_CB45(block, ix);
-        add_dXYZ_C706(block, ix);
+    private void dec_dZ_and_update_XYZ_C700(int ix) {
+        graphicObjects.setDZ(ix, graphicObjects.getDZ(ix)-1); // ; dec dZ?
+        adj_for_out_of_bounds_CB45(graphicObjects.graphic_objs_tbl_5C08, ix);
+        add_dXYZ_C706(graphicObjects.graphic_objs_tbl_5C08, ix);
 
     }
 
@@ -3141,7 +3141,7 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
 
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         boolean justDropped = block.isSet(0, ix + 0x0D);
         if(!justDropped) {
             boolean moving = block.getU(ix + 0x09) != 0 || block.getU(ix + 0x0A) != 0 || block.getU(ix + 0x0B) != 0;
@@ -3185,7 +3185,7 @@ public class Game implements Runnable {
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
         }
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         if(is_obj_moving_C1A1(block, ix)) {
             block.set(ix + 0x09, 0);
             block.set(ix + 0x0A, 0);
@@ -3224,7 +3224,7 @@ public class Game implements Runnable {
                 block.setBit(1, ix + 7); // ; ignore in 3D calcs
             }
         }
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         // c$C232 CALL $B467    ; // ignore audio
         // set_wipe_and_draw_flags_C692(block, ix);
     }
@@ -3397,7 +3397,7 @@ public class Game implements Runnable {
         block.set(ix + 0x09, a);
         block.set(ix + 0x29, a); // ; and for bottom half
         set_guard_wizard_sprite_B76C(block, ix);
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         boolean xOob =  block.isSet(0, ix + 0x0C);
         if(xOob) block.set(ix + 0x0D, (block.getU(ix + 0x0D) ^ 0x01)); // ; toggle direction
         block.set(ix + 0x21, block.getU(ix + 0x01)); // ; copy to bottom half
@@ -3434,7 +3434,7 @@ public class Game implements Runnable {
         }
 
         block.setBit(1, ix + 7); // ; ignore in 3D calcs
-        dec_dZ_and_update_XYZ_C700(block, ix); // apply dXYZ now
+        dec_dZ_and_update_XYZ_C700(ix); // apply dXYZ now
         next_graphic_no_mod_4_B98C(block, ix);
 
         int z = block.getU(ix + 3);
@@ -3478,7 +3478,7 @@ public class Game implements Runnable {
             }
         }
         move_towards_plyr_B965(block, ix, dx, dy);
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         next_graphic_no_mod_4_B98C(block, ix);
 
         if(cauldronRoom) {
@@ -3539,12 +3539,12 @@ public class Game implements Runnable {
         boolean dirUp = block.isSet(2, ix + 0x0D);
         if(dirUp) {
             block.set(ix + 0x0B, 3);
-            dec_dZ_and_update_XYZ_C700(block, ix);
+            dec_dZ_and_update_XYZ_C700(ix);
             int z = block.getU(ix + 3);
             if(z > variables.getU(0x5BBD))
                 block.resetBit(2, ix + 0x0D); // ; set dir=down
         } else {
-            dec_dZ_and_update_XYZ_C700(block, ix);
+            dec_dZ_and_update_XYZ_C700(ix);
             boolean zOob = block.isSet(2, ix + 0x0C);
             if(zOob) block.setBit(2, ix + 0x0D);
             // $B88F CALL $B42E     ; // ignore audio
@@ -3563,7 +3563,7 @@ public class Game implements Runnable {
         if(movingNorth) block.set(ix + 0x0A, 2);
         else block.set(ix + 0x0A, -2);
         // $B801 CALL $B45D     ; // ignore audio
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
         boolean yOob = block.isSet(1, ix + 0x0C);
         loc_B82F(block, ix, yOob, 2);
     }
@@ -3578,7 +3578,7 @@ public class Game implements Runnable {
         int dz = block.getU(ix + 0x0B);
 
         variables.set(0x5BC2, dz); // ; {tmp store
-        dec_dZ_and_update_XYZ_C700(block, ix);
+        dec_dZ_and_update_XYZ_C700(ix);
 
         block.set(ix + 0x09, dx); // ; preserve old dX
         block.set(ix + 0x0A, dy); // ; preserve old dY
