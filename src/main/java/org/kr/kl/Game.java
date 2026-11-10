@@ -1656,9 +1656,9 @@ public class Game implements Runnable {
             case 0x0B: upd_11_C4ED(ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(ix); break;
             case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(ix); break;
-            case 0x16: upd_22_B7A3(block, ix); break;
-            case 0x17: upd_23_B7E7(block, ix); break;
-            case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
+            case 0x16: upd_22_B7A3(ix); break;
+            case 0x17: upd_23_B7E7(ix); break;
+            case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(ix); break;
             case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(block, ix); break;
             case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(ix); break;
             case 0x36: upd_54_B6B9(block, ix); break;
@@ -2762,28 +2762,25 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_22_B7A3(DataBlock block, int ix) {
+    private void upd_22_B7A3(int ix) {
         set_both_deadly_flags_B85C(ix);
         //c$C4FC LD HL,$F9F4   ; -7, -12
         // $C4FF JR $C4E0      ;
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -7); //F9
+        graphicObjects.setXYAdj(ix, -12, -7);
     }
 
-    private void upd_23_B7E7(DataBlock block, int ix) {
+    private void upd_23_B7E7(int ix) {
         set_both_deadly_flags_B85C(ix);
         // c$C4E3 LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
+        graphicObjects.setXYAdj(ix, -16, -8);
     }
 
-    private void upd_30_31_158_159_B9A5(DataBlock block, int ix) {
+    private void upd_30_31_158_159_B9A5(int ix) {
         //c$C510 LD HL,$03F4   ; +3, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, 3); //03
+        graphicObjects.setXYAdj(ix, -12, 3);
 
         dec_dZ_and_update_XYZ_C700(ix);
-        move_guard_wizard_NSEW_B9CC(block, ix);
+        move_guard_wizard_NSEW_B9CC(graphicObjects.graphic_objs_tbl_5C08, ix);
     }
 
     private void move_guard_wizard_NSEW_B9CC(DataBlock block, int ix) {
