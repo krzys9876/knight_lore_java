@@ -1675,7 +1675,7 @@ public class Game implements Runnable {
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(ix); break;
             case 0x67: upd_103_C1AB(ix); break;
-            case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(block, ix); break;
+            case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(ix); break;
             case 0x6F: upd_111_B95E(block, ix); break;
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(block, ix); break;
             case 0x77: upd_119_BF3F(block, ix); break;
@@ -3165,35 +3165,34 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_104_to_110_C1F1(DataBlock block, int ix) {
+    private void upd_104_to_110_C1F1(int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); //FC
+        graphicObjects.setXYAdj(ix, -12, -4);
 
-        int x = block.getU(ix + 1);
+        int x = graphicObjects.getX(ix);
         int dX = x - 0x80;
         if(dX < 0) dX = 1;
         else if(dX > 0) dX = -1;
-        block.set(ix + 0x09, dX);
+        graphicObjects.setDX(ix, dX);
 
-        int y = block.getU(ix + 2);
+        int y = graphicObjects.getY(ix);
         int dY = y - 0x80;
         if(dY < 0) dY = 1;
         else if(dY > 0) dY = -1;
-        block.set(ix + 0x0A, dY);
+        graphicObjects.setDY(ix, dY);
 
         boolean center = x == 0x80 && y == 0x80;
-        int z = block.getU(ix + 3);
+        int z = graphicObjects.getZ(ix);
         if(!center) {
             int dZ = 1;
             if(z < 0x98) dZ++;
-            block.set(ix + 0x0B, dZ);
+            graphicObjects.setDZ(ix, dZ);
         } else {
             if(z <= 0x80) {
-                add_obj_to_cauldron_C245(block, ix);
+                add_obj_to_cauldron_C245(graphicObjects.graphic_objs_tbl_5C08, ix);
                 return;
             } else {
-                block.setBit(1, ix + 7); // ; ignore in 3D calcs
+                graphicObjects.setIgnore3D(ix); // ; ignore in 3D calcs
             }
         }
         dec_dZ_and_update_XYZ_C700(ix);
