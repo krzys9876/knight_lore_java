@@ -2241,7 +2241,7 @@ public class Game implements Runnable {
         //$C9D6 CALL M,$B451   ; ignore audio
 
         //$C9D9 CALL $CB45     ;
-        adj_for_out_of_bounds_CB45(block, ix);
+        adj_for_out_of_bounds_CB45(ix);
         //$C9DC CALL $CA70     ;
         handle_exit_screen_CA70(block, ix);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
@@ -2256,33 +2256,31 @@ public class Game implements Runnable {
         }
     }
 
-    private void adj_for_out_of_bounds_CB45(DataBlock block, int ix) {
-        if(block.isSet(1, ix + 0x07)) return;
-        block.setBit(1, ix + 0x07);
-        int flags2 = block.getU(ix + 0x0C);
-        flags2 &= 0xF8; // ; clear X,Y,Z OOB
-        block.set(ix + 0x0C, flags2);
-        int dzAdj = block.getS(ix + 0x0B); // H
+    private void adj_for_out_of_bounds_CB45(int ix) {
+        if(graphicObjects.ignore3D(ix)) return;
+        graphicObjects.setIgnore3D(ix);
+        graphicObjects.clearOob(ix);
+        int dzAdj = graphicObjects.getDZ(ix); // H
         if(dzAdj != 0) {
-            dzAdj = adj_dZ_for_out_of_bounds_CA5A(block, ix);
-            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(block, ix, 0, 0, dzAdj);
+            dzAdj = adj_dZ_for_out_of_bounds_CA5A(graphicObjects.graphic_objs_tbl_5C08, ix);
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(graphicObjects.graphic_objs_tbl_5C08, ix, 0, 0, dzAdj);
         }
-        int dxAdj = block.getS(ix + 0x09); // C
+        int dxAdj = graphicObjects.getDX(ix); // C
         if(dxAdj != 0) {
-            dxAdj = adj_dX_for_out_of_bounds_CCDD(block, ix);
-            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(block, ix, dxAdj, 0, dzAdj);
+            dxAdj = adj_dX_for_out_of_bounds_CCDD(graphicObjects.graphic_objs_tbl_5C08, ix);
+            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(graphicObjects.graphic_objs_tbl_5C08, ix, dxAdj, 0, dzAdj);
         }
-        int dyAdj = block.getS(ix + 0x0A); // L
+        int dyAdj = graphicObjects.getDY(ix); // L
         if(dyAdj != 0) {
-            dyAdj = adj_dY_for_out_of_bounds_CD08(block, ix);
-            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(block, ix, dxAdj, dyAdj, dzAdj);
+            dyAdj = adj_dY_for_out_of_bounds_CD08(graphicObjects.graphic_objs_tbl_5C08, ix);
+            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(graphicObjects.graphic_objs_tbl_5C08, ix, dxAdj, dyAdj, dzAdj);
         }
 
-        block.resetBit(1, ix + 0x07);
+        graphicObjects.resetIgnore3D(ix);
 
-        block.set(ix + 0x09, dxAdj);
-        block.set(ix + 0x0A, dyAdj);
-        block.set(ix + 0x0B, dzAdj);
+        graphicObjects.setDX(ix, dxAdj);
+        graphicObjects.setDY(ix, dyAdj);
+        graphicObjects.setDZ(ix, dzAdj);
     }
 
     private void handle_exit_screen_CA70(DataBlock block, int ix) {
@@ -3072,7 +3070,7 @@ public class Game implements Runnable {
 
     private void dec_dZ_and_update_XYZ_C700(int ix) {
         graphicObjects.setDZ(ix, graphicObjects.getDZ(ix)-1); // ; dec dZ?
-        adj_for_out_of_bounds_CB45(graphicObjects.graphic_objs_tbl_5C08, ix);
+        adj_for_out_of_bounds_CB45(ix);
         add_dXYZ_C706(ix);
 
     }
