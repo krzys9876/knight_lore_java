@@ -1672,7 +1672,7 @@ public class Game implements Runnable {
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(ix); break;
             case 0x5B: upd_91_B683(ix); break;
-            case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(block, ix); break;
+            case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
             case 0x67: upd_103_C1AB(block, ix); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(block, ix); break;
@@ -3075,12 +3075,10 @@ public class Game implements Runnable {
 
     }
 
-    private void upd_92_to_95_C337(DataBlock block, int ix) {
+    private void upd_92_to_95_C337(int ix) {
         //c$C4ED LD HL,$FEF4   ; -2, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -2); //FE
-        boolean flag = block.isSet(6, ix + 0x0D);
-        if(flag) {
+        graphicObjects.setXYAdj(ix, -12, -2);
+        if(graphicObjects.isDead(ix)) {
             if (variables.getU(0x5BC3) == 0) {
                 init_death_sparkles_BF21(ix);
                 return;
@@ -3089,28 +3087,27 @@ public class Game implements Runnable {
         //if((rnd.getSeed2() & 3) != 0) return;
         // No randomness - transformation looks more dynamic
         if((tickNo % 3) != 0) return;
-        int counter = block.getU(ix + 0x10) -1;
-        block.set(ix + 0x10, counter);
+        int counter = graphicObjects.getTemp10(ix) -1;
+        graphicObjects.setTemp10(ix, counter);
         //IO.println("upd_92_to_95_C337 sprite = "+block.get(ix));
         //debugTableConsole("Graphics while transforming:", graphic_objs_tbl_5C08.start, graphic_objs_tbl_5C08.getCopy());
 
         if(counter == 0) {
             // End transformation
             int a = variables.getU(0x5BB1) ^ 0x20;
-            block.set(ix, a);
+            graphicObjects.setGrNo(ix, a);
             a += 0x10;
-            block.set(ix + 0x20, a);
+            graphicObjects.setGrNo(ix + 0x20, a);
             variables.set(0x5BB1, 0);
-            block.set(ix + 0x12, -12); //F4
-            block.set(ix + 0x13, -6); //FA
-            boolean spriteFlag = block.isSet(5, ix);
-            if (spriteFlag) block.set(ix + 0x13, block.getS(ix + 0x13) - 1);
+            graphicObjects.setXYAdj(ix, -12, -6);
+            boolean spriteFlag = graphicObjects.graphic_objs_tbl_5C08.isSet(5, ix);
+            if (spriteFlag) graphicObjects.setYAdj(ix, graphicObjects.getYAdj(ix) - 1);
         } else {
             // Continue transformation
             int nextSprite = (params.getRnd().getSeed3() & 3) | 0x5C;
-            if(nextSprite != block.getU(ix)) nextSprite = nextSprite ^ 1;
-            block.set(ix, nextSprite);
-            block.set(ix + 7, block.getU(ix + 0x07) ^ 0x40);
+            if(nextSprite != graphicObjects.getGrNo(ix)) nextSprite = nextSprite ^ 1;
+            graphicObjects.setGrNo(ix, nextSprite);
+            graphicObjects.flipMoveable(ix);
         }
     }
 

@@ -85,6 +85,8 @@ public class GraphicObjects {
     public int getDZ(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0B); }
     public int getFlags7(int ix) { return graphic_objs_tbl_5C08.getS(ix + 7); }
     public int getFlagsC(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0C); }
+    public int getTemp10(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x10); }
+    public int getYAdj(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x13); }
     public boolean isHFlip(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isOobX(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0C); }
@@ -102,14 +104,16 @@ public class GraphicObjects {
     public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }
     public void setY(int ix, int y) { graphic_objs_tbl_5C08.set(ix + 2, y); }
     public void setZ(int ix, int z) { graphic_objs_tbl_5C08.set(ix + 3, z); }
-    public void setDX(int ix, int dx) { graphic_objs_tbl_5C08.set(ix + 0x09, dx); } // ix + 0x09
-    public void setDY(int ix, int dy) { graphic_objs_tbl_5C08.set(ix + 0x0A, dy); } // ix + 0x09
-    public void setDZ(int ix, int dz) { graphic_objs_tbl_5C08.set(ix + 0x0B, dz); } // ix + 0x09
-    public void setDXAdj(int ix, int dxAdj) { graphic_objs_tbl_5C08.set(ix + 0x0E, dxAdj); } // ix + 0x12
-    public void setDYAdj(int ix, int dyAdj) { graphic_objs_tbl_5C08.set(ix + 0x0F, dyAdj); } // ix + 0x13
+    public void setDX(int ix, int dx) { graphic_objs_tbl_5C08.set(ix + 0x09, dx); }
+    public void setDY(int ix, int dy) { graphic_objs_tbl_5C08.set(ix + 0x0A, dy); }
+    public void setDZ(int ix, int dz) { graphic_objs_tbl_5C08.set(ix + 0x0B, dz); }
+    public void setDXAdj(int ix, int dxAdj) { graphic_objs_tbl_5C08.set(ix + 0x0E, dxAdj); }
+    public void setDYAdj(int ix, int dyAdj) { graphic_objs_tbl_5C08.set(ix + 0x0F, dyAdj); }
+    public void setXAdj(int ix, int xAdj) { graphic_objs_tbl_5C08.set(ix + 0x12, xAdj); }
+    public void setYAdj(int ix, int yAdj) { graphic_objs_tbl_5C08.set(ix + 0x13, yAdj); }
     public void setXYAdj(int ix, int xAdj, int yAdj) {
-        graphic_objs_tbl_5C08.set(ix + 0x12, xAdj);
-        graphic_objs_tbl_5C08.set(ix + 0x13, yAdj);
+        setXAdj(ix, xAdj);
+        setYAdj(ix, yAdj);
     }
     public void setDeadlyIfObjectHitsPlayer(int ix) { graphic_objs_tbl_5C08.setBit(7, ix + 0x0D); }
     public void setDeadlyIfPlayerHitsObject(int ix) { graphic_objs_tbl_5C08.setBit(5, ix + 0x0D); }
