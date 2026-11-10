@@ -83,11 +83,13 @@ public class GraphicObjects {
     public int getDY(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0A); }
     public int getDYu(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0A); }
     public int getDZ(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0B); }
+    public int getFlags7(int ix) { return graphic_objs_tbl_5C08.getS(ix + 7); }
     public int getFlagsC(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0C); }
     public boolean isHFlip(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isOob(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0C); }
     public boolean isDead(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x0D); }
+    public boolean isJumping(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x0C); }
 
     public void setGrNo(int ix, int grNo) { graphic_objs_tbl_5C08.set(ix, grNo); }
     public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }
@@ -108,4 +110,6 @@ public class GraphicObjects {
     public void setDead(int ix) { graphic_objs_tbl_5C08.setBit(6, ix + 0x0D); }
     public void setDeadOtherHalf(int ix) { setDead(ix + 0x20); }
     public void setIgnore3D(int ix) { graphic_objs_tbl_5C08.setBit(1, ix + 7); }
+    public void setTemp10(int ix, int temp10) { graphic_objs_tbl_5C08.set(ix + 0x10, temp10); }
+    public void flipMoveable(int ix) { graphic_objs_tbl_5C08.set(ix + 7, graphic_objs_tbl_5C08.getU(ix + 7) ^ 0x40); }
 }

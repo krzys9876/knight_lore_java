@@ -1980,7 +1980,7 @@ public class Game implements Runnable {
         // @label=loc_C83E
             // c$C83E CALL $C306    ;
         // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317
-        boolean transformStarted = chk_and_init_transform_C306(graphicObjects.graphic_objs_tbl_5C08, ix);
+        boolean transformStarted = chk_and_init_transform_C306(ix);
         if(!transformStarted) {
         // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
@@ -2601,26 +2601,27 @@ public class Game implements Runnable {
         return grNo;
     }
 
-    private boolean chk_and_init_transform_C306(DataBlock block, int ix) {
+    private boolean chk_and_init_transform_C306(int ix) {
         boolean transforming = variables.getU(0x5BB1) > 0;
         if(!transforming) return false;
-        int a =  block.getU(ix + 0x0C) & 0xF0; // counter when entering the room
+        int a =  graphicObjects.getFlagsC(ix) & 0xF0; // counter when entering the room
         if (a > 0) return false;
-        boolean jumping = block.isSet(3, ix + 0x0C);
+        boolean jumping = graphicObjects.isJumping(ix);
         if (jumping) return false;
 
-        int sprite = block.getU(ix);
+        int sprite = graphicObjects.getGrNo(ix);
         variables.set(0x5BB1, sprite);
-        block.set(ix + 0x10, 8); // transform counter
+        graphicObjects.setTemp10(ix, 8); // transform counter
 
-        block.set(ix + 0x20, 1); // update player top
-        set_wipe_and_draw_flags_C692(block, ix + 0x20);
+        graphicObjects.setGrNo(ix + 0x20, 1); // update player top
+        set_wipe_and_draw_flags_C692(graphicObjects.graphic_objs_tbl_5C08, ix + 0x20);
         //@label=rand_legs_sprite
         int newSprite = (params.getRnd().getSeed3() & 0x03) | 0x5C;
-        if(block.getU(ix) == newSprite) newSprite^=1; // change if same as current
-        block.set(ix, newSprite);
-        int flip = (block.getU(ix + 0x07)) ^ 0x40;
-        block.set(ix + 0x07, flip);
+        if(graphicObjects.getGrNo(ix) == newSprite) newSprite^=1; // change if same as current
+        graphicObjects.setGrNo(ix, newSprite);
+        //int flip = (graphicObjects.getFlags7(ix)) ^ 0x40;
+        //block.set(ix + 0x07, flip);
+        graphicObjects.flipMoveable(ix);
 
         return true;
     }
