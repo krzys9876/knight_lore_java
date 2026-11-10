@@ -1940,11 +1940,11 @@ public class Game implements Runnable {
             block.set(ix, a); // ; set graphic no.
         } else {
             // @label=loc_B5C4
-            int playerX = graphicObjects.graphic_objs_tbl_5C08.getU(graphicObjects.graphic_objs_tbl_5C08.start + 1);
+            int playerX = graphicObjects.getX(graphicObjects.start());
             int x = block.getU(ix + 1);
             int deltaX = Math.abs(playerX - x);
             if(deltaX < 0x06) {
-                int playerY = graphicObjects.graphic_objs_tbl_5C08.getU(graphicObjects.graphic_objs_tbl_5C08.start + 2);
+                int playerY = graphicObjects.getY(graphicObjects.start());
                 int y = block.getU(ix + 2);
                 int deltaY = Math.abs(playerY - y);
                 if(deltaY < 0x06) {
