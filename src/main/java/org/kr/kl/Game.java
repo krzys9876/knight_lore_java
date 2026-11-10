@@ -78,13 +78,8 @@ public class Game implements Runnable {
     private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
     private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
-    private final DataBlock plyr_spr_1_scratchpad_D161 =  InitialData.block("plyr_spr_1_scratchpad_D161");
-    private final DataBlock start_loc_1_D169 =  InitialData.block("start_loc_1_D169");
-    private final DataBlock flags12_1_D16D =  InitialData.block("flags12_1_D16D");
-    private final DataBlock byte_D171 =  InitialData.block("byte_D171");
-    private final DataBlock plyr_spr_2_scratchpad_D181 =  InitialData.block("plyr_spr_2_scratchpad_D181");
-    private final DataBlock start_loc_2_D189 =  InitialData.block("start_loc_2_D189");
-    private final DataBlock byte_D191 =  InitialData.block("byte_D191");
+    private final DataBlock plyr_spr_1_scratchpad_D161 =  new DataBlock(0xD161, 32);
+    private final DataBlock plyr_spr_2_scratchpad_D181 =  new DataBlock(0xD181, 32);
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_yoff_C440 = InitialData.block("sun_moon_yoff_C440");
@@ -330,7 +325,7 @@ public class Game implements Runnable {
         // LD ($5BB2),A
         variables.set(0x5BB2, 0);
         // LD ($D16D),A  ; plyr_spr_1_scratchpad
-        flags12_1_D16D.set(0xD16D, 0);
+        plyr_spr_1_scratchpad_D161.set(0xD16D, 0);
         // LD A,$05      ; 5 lives to start
         // LD ($5BBA),A  ;
         variables.set(0x5BBA, byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
@@ -906,17 +901,19 @@ public class Game implements Runnable {
 
         // LD A,$12      ; graphic_no (player top half)
         // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
-        byte_D171.set(0xD171, 0x12);
+        plyr_spr_1_scratchpad_D161.set(0xD171, 0x12);
+        //byte_D171.set(0xD171, 0x12);
         // LD A,$22      ; graphic_no (player bottom half)
         // LD ($D191),A  ; {plyr_spr_2_scratchpad (byte 16)
-        byte_D191.set(0xD191, 0x22);
+        plyr_spr_2_scratchpad_D181.set(0xD191, 0x22);
         int a = params.getRnd().getSeed1() & 0x3; // random
         int randomLoc = start_locations_D1E2.getU(0xD1E2 + a);
         // For testing only
         if(override != -1) randomLoc = override;
 
-        start_loc_1_D169.set(0xD169, randomLoc);
-        start_loc_2_D189.set(0xD189, randomLoc);
+        //start_loc_1_D169.set(0xD169, randomLoc);
+        plyr_spr_1_scratchpad_D161.set(0xD169, randomLoc);
+        plyr_spr_2_scratchpad_D181.set(0xD189, randomLoc);
     }
 
     private void init_sun_C46D() {
@@ -944,17 +941,7 @@ public class Game implements Runnable {
         int de = 0x5C08;
         for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, plyr_spr_1_scratchpad_D161.getU(plyr_spr_1_scratchpad_D161.start+i));
         de+=plyr_spr_1_scratchpad_D161.size;
-        for(int i=0; i<start_loc_1_D169.size; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, start_loc_1_D169.getU(start_loc_1_D169.start+i));
-        de+=start_loc_1_D169.size;
-        for(int i=0; i<flags12_1_D16D.size; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, flags12_1_D16D.getU(flags12_1_D16D.start+i));
-        de+=flags12_1_D16D.size;
-        for(int i=0; i<byte_D171.size; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, byte_D171.getU(byte_D171.start+i));
-        de+=byte_D171.size;
         for(int i=0; i<plyr_spr_2_scratchpad_D181.size; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, plyr_spr_2_scratchpad_D181.getU(plyr_spr_2_scratchpad_D181.start+i));
-        de+=plyr_spr_2_scratchpad_D181.size;
-        for(int i=0; i<start_loc_2_D189.size; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, start_loc_2_D189.getU(start_loc_2_D189.start+i));
-        de+=start_loc_2_D189.size;
-        for(int i=0; i<byte_D191.size; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, byte_D191.getU(byte_D191.start+i));
     }
 
     private void lose_life_D12A() {
@@ -2346,8 +2333,8 @@ public class Game implements Runnable {
             block.set(ix + 0x08, newScreen);
             block.set(ix + 0x0C, block.getU(ix + 0x0C) | 0x30);
             copyPlayerData();
-            byte_D171.set(0xD171, plyr_spr_1_scratchpad_D161.getU(0xD161));
-            byte_D191.set(0xD191, plyr_spr_2_scratchpad_D181.getU(0xD181));
+            plyr_spr_1_scratchpad_D161.set(0xD171, plyr_spr_1_scratchpad_D161.getU(0xD161));
+            plyr_spr_2_scratchpad_D181.set(0xD191, plyr_spr_2_scratchpad_D181.getU(0xD181));
             plyr_spr_1_scratchpad_D161.set(0xD161, 0x78); // sparkly transform #1
             plyr_spr_2_scratchpad_D181.set(0xD181, 0x78);
         }
@@ -2358,17 +2345,7 @@ public class Game implements Runnable {
         int de = 0x5C08;
         for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i, graphicObjects.graphic_objs_tbl_5C08.getU(de+i));
         de+=plyr_spr_1_scratchpad_D161.size;
-        for(int i=0; i<start_loc_1_D169.size; i++) start_loc_1_D169.set(start_loc_1_D169.start+i, graphicObjects.graphic_objs_tbl_5C08.getU(de+i));
-        de+=start_loc_1_D169.size;
-        for(int i=0; i<flags12_1_D16D.size; i++) flags12_1_D16D.set(flags12_1_D16D.start+i, graphicObjects.graphic_objs_tbl_5C08.getU(de+i));
-        de+=flags12_1_D16D.size;
-        for(int i=0; i<byte_D171.size; i++) byte_D171.set(byte_D171.start+i, graphicObjects.graphic_objs_tbl_5C08.getU(de+i));
-        de+=byte_D171.size;
         for(int i=0; i<plyr_spr_2_scratchpad_D181.size; i++) plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start+i, graphicObjects.graphic_objs_tbl_5C08.getU(de+i));
-        de+=plyr_spr_2_scratchpad_D181.size;
-        for(int i=0; i<start_loc_2_D189.size; i++) start_loc_2_D189.set(start_loc_2_D189.start+i, graphicObjects.graphic_objs_tbl_5C08.getU(de+i));
-        de+=start_loc_2_D189.size;
-        for(int i=0; i<byte_D191.size; i++) byte_D191.set(byte_D191.start+i, graphicObjects.graphic_objs_tbl_5C08.getU(de+i));
     }
 
 
