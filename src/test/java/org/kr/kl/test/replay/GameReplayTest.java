@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameReplayTest {
@@ -47,30 +46,23 @@ public class GameReplayTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        //while(gameThread.isAlive()) {}
     }
 
     private int[] rgb(BufferedImage img) {
-        int w = img.getWidth(), h = img.getHeight();
-        int[] p = img.getRGB(0, 0, w, h, null, 0, w);   // always ARGB, whatever the image type
-        for (int i = 0; i < p.length; i++) p[i] &= 0x00FFFFFF; // 00 - alpha channel
+        int[] p = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());   // always ARGB, whatever the image type
+        for (int i = 0; i < p.length; i++) p[i] &= 0x00FFFFFF; // 00 - alpha channel, we need zeros here
         return p;
     }
 
     private void assertTick(Game game, GamePanel panel) {
         long tickNo = game.getTickNo();
-        if(tickNo>31934) {
-            IO.println("tickNo: " + tickNo);
-        }
-
 
         String fileName = referencePath + "/tick_" + tickNo + ".png";
         try {
             BufferedImage imgRef = ImageIO.read(new File(fileName));
             if (imgRef == null) throw new IOException("Invalid or no image file: " + fileName);
-            BufferedImage img = panel.getImage();
             int[] rgbRef = rgb(imgRef);
-            int[] rgbGame = rgb(img);
+            int[] rgbGame = panel.getPixelData();
             if(!Arrays.equals(rgbRef, rgbGame)) {
                 IO.println(fileName);
                 for(int i=0; i<rgbGame.length; i++) {
