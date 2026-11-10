@@ -1680,7 +1680,7 @@ public class Game implements Runnable {
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
             case 0x77: upd_119_BF3F(ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
-            case 0x7F: upd_127_BF11(block, ix); break;
+            case 0x7F: upd_127_BF11(ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(block, ix); break;
             case 0x8D: upd_141_B99C(block, ix); break;
@@ -3297,12 +3297,11 @@ public class Game implements Runnable {
         // Not used - all frame is redrawn
     }
 
-    private void upd_127_BF11(DataBlock block, int ix) {
+    private void upd_127_BF11(int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); //FC
-        block.resetBit(6,ix + 0x0D);
-        block.set(ix, block.getU(ix + 0x10));
+        graphicObjects.setXYAdj(ix, -12, -4); //FC
+        graphicObjects.resetDead(ix);
+        graphicObjects.setGrNo(ix, graphicObjects.getTemp10(ix));
         updateOneSprite(ix); // update after sparkes change to player
     }
 
