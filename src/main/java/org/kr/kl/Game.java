@@ -1679,7 +1679,7 @@ public class Game implements Runnable {
             case 0x6F: upd_111_B95E(ix); break;
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
             case 0x77: upd_119_BF3F(ix); break;
-            case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
+            case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
             case 0x7F: upd_127_BF11(block, ix); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(block, ix); break;
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(block, ix); break;
@@ -3284,11 +3284,11 @@ public class Game implements Runnable {
         upd_111_B95E(ix); // Fix bug/feature in the source (writing to ROM)
     }
 
-    private void upd_120_to_126_BEFE(DataBlock block, int ix) {
+    private void upd_120_to_126_BEFE(int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); //FC
-        if(((params.getRnd().getSeed2() ^ 0xFF) & 0x01) == 0) block.set(ix, block.getU(ix)+1); // next sprite on odd frames
+        graphicObjects.setXYAdj(ix, -12, -4);
+
+        if(((params.getRnd().getSeed2() ^ 0xFF) & 0x01) == 0) graphicObjects.setGrNo(ix, graphicObjects.getGrNo(ix) + 1); // next sprite on odd frames
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
