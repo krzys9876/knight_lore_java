@@ -120,4 +120,5 @@ public class GraphicObjects {
     public void setDropping(int ix) { graphic_objs_tbl_5C08.setBit(2, ix + 0x0D); }
     public void setHFlip(int ix) { graphic_objs_tbl_5C08.setBit(6, ix + 0x07); }
     public void resetHFlip(int ix) { graphic_objs_tbl_5C08.resetBit(6, ix + 0x07); }
+    public void toggleNextPrevSprite(int ix) { setGrNo(ix, getGrNo(ix) ^ 0x01); }
 }

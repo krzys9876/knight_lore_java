@@ -1670,7 +1670,7 @@ public class Game implements Runnable {
             case 0x54: upd_84_C4C3(block, ix); break;
             case 0x55: upd_85_C4B6(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
-            case 0x58, 0x59, 0x5A: upd_88_to_90_C506(block, ix); break;
+            case 0x58, 0x59, 0x5A: upd_88_to_90_C506(ix); break;
             case 0x5B: upd_91_B683(block, ix); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(block, ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
@@ -2982,7 +2982,7 @@ public class Game implements Runnable {
             calc_ghost_sprite_C603(ix);
             // $C5FA CALL $B467    ; // ignore audio
         }
-        toggle_next_prev_sprite_B985(graphicObjects.graphic_objs_tbl_5C08, ix);
+        toggle_next_prev_sprite_B985(ix);
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
@@ -3049,19 +3049,18 @@ public class Game implements Runnable {
             block.set(ix + 0x0D, block.getU(ix + 0x0D) ^ a); // ; toggle bit 1/2
             //  $B837 CALL $B42E    ; // ignore audio
         }
-        toggle_next_prev_sprite_B985(block, ix);
+        toggle_next_prev_sprite_B985(ix);
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void toggle_next_prev_sprite_B985(DataBlock block, int ix) {
-        block.set(ix, block.getU(ix) ^ 0x01);
+    private void toggle_next_prev_sprite_B985(int ix) {
+        graphicObjects.toggleNextPrevSprite(ix);
     }
 
-    private void upd_88_to_90_C506(DataBlock block, int ix) {
+    private void upd_88_to_90_C506(int ix) {
         // c$C506 LD HL,$F4F0   ;
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -16); //F0
+        graphicObjects.setXYAdj(ix, -12, -16);
     }
 
     private void upd_91_B683(DataBlock block, int ix) {
@@ -3521,7 +3520,7 @@ public class Game implements Runnable {
             int z = block.getU(ix + 3);
             variables.set(0x5BBD, z + 0x20); // ; calc bounce height
         }
-        toggle_next_prev_sprite_B985(block, ix);
+        toggle_next_prev_sprite_B985(ix);
         // $B879 CALL $B451     ; // ignore audio
         boolean dirUp = block.isSet(2, ix + 0x0D);
         if(dirUp) {
@@ -3594,7 +3593,7 @@ public class Game implements Runnable {
                 block.set(ix + 0x0A, 0); // ; new dY=0
             }
         }
-        toggle_next_prev_sprite_B985(block, ix);
+        toggle_next_prev_sprite_B985(ix);
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
