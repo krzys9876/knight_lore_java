@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameReplayTest {
     Thread gameThread = null;
@@ -52,7 +53,7 @@ public class GameReplayTest {
     private int[] rgb(BufferedImage img) {
         int w = img.getWidth(), h = img.getHeight();
         int[] p = img.getRGB(0, 0, w, h, null, 0, w);   // always ARGB, whatever the image type
-        for (int i = 0; i < p.length; i++) p[i] &= 0xFFFFFF;
+        for (int i = 0; i < p.length; i++) p[i] &= 0x00FFFFFF; // 00 - alpha channel
         return p;
     }
 
@@ -81,7 +82,7 @@ public class GameReplayTest {
                 new File(dir).mkdir();
                 String testFile = dir + "/test_tick_" + tickNo + ".png";
                 panel.saveImage(testFile);
-                assertTrue(false, "Image for tick "+tickNo+" is incorrect");
+                fail("Image for tick " + tickNo + " is incorrect");
             }
 
         } catch (IOException e) {
