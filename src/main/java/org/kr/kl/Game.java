@@ -1655,12 +1655,12 @@ public class Game implements Runnable {
             case 0x0A: upd_10_C4E8(ix); break;
             case 0x0B: upd_11_C4ED(ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(ix); break;
-            case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(block, ix); break;
+            case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(ix); break;
             case 0x16: upd_22_B7A3(block, ix); break;
             case 0x17: upd_23_B7E7(block, ix); break;
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(block, ix); break;
             case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(block, ix); break;
-            case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(block, ix); break;
+            case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(ix); break;
             case 0x36: upd_54_B6B9(block, ix); break;
             case 0x37: upd_55_B6B1(block, ix); break;
             case 0x3E: upd_62_C4AA(block, ix); break;
@@ -1962,43 +1962,42 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_16_to_21_24_to_29_C823(DataBlock block, int ix) {
+    private void upd_16_to_21_24_to_29_C823(int ix) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -6); //FA
-        upd_player_bottom_C82B(block, ix);
+        graphicObjects.setXYAdj(ix, -12, -6);
+        upd_player_bottom_C82B(ix);
     }
 
-    private void upd_player_bottom_C82B(DataBlock block, int ix) {
-        boolean flag = block.isSet(6, ix + 0x0D);
-        if(flag) {
+    private void upd_player_bottom_C82B(int ix) {
+        boolean isDead = graphicObjects.isDead(ix);
+        if(isDead) {
             if (variables.getU(0x5BC3) == 0) {
-                block.setBit(6, ix + 0x2D); // SET 6,(IX+$2D)
-                init_death_sparkles_BF21(block, ix);
+                graphicObjects.setDeadOtherHalf(ix); // SET 6,(IX+$2D)
+                init_death_sparkles_BF21(ix);
                 return;
             }
         }
         // @label=loc_C83E
             // c$C83E CALL $C306    ;
         // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317
-        boolean transformStarted = chk_and_init_transform_C306(block, ix);
+        boolean transformStarted = chk_and_init_transform_C306(graphicObjects.graphic_objs_tbl_5C08, ix);
         if(!transformStarted) {
         // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
             // $C844 CALL $C00E    ; handle_pickup_drop
-            handle_pickup_drop_C00E(block, ix);
+            handle_pickup_drop_C00E(graphicObjects.graphic_objs_tbl_5C08, ix);
             // $C847 CALL $C89F    ; handle_left_right
-            handle_left_right_C89F(block, ix);
+            handle_left_right_C89F(graphicObjects.graphic_objs_tbl_5C08, ix);
             // $C84A CALL $C948    ; handle_jump
-            handle_jump_C948(block, ix);
+            handle_jump_C948(graphicObjects.graphic_objs_tbl_5C08, ix);
             // $C84D CALL $C969    ; handle_forward
-            handle_forward_C969(block, ix);
+            handle_forward_C969(graphicObjects.graphic_objs_tbl_5C08, ix);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
-            boolean oob = chk_plyr_OOB_C87A(block, ix);
+            boolean oob = chk_plyr_OOB_C87A(graphicObjects.graphic_objs_tbl_5C08, ix);
             // $C853 JR NC,$C86D   ; plyr_OOB
             // @label=plyr_OOB
-            if(oob && block.getS(ix + 0x0B) > 0) block.set(ix + 0x0B, 0);
-            loc_C855(block, ix) ;
+            if(oob && graphicObjects.getDZ(ix) > 0) graphicObjects.setDZ(ix, 0);
+            loc_C855(graphicObjects.graphic_objs_tbl_5C08, ix) ;
         }
     }
 
@@ -2755,9 +2754,9 @@ public class Game implements Runnable {
         block.set(ix, (sprite & 0xF8) | nextSprite); //  ; update sprite - NOTE we update only bottom half
     }
 
-    private void init_death_sparkles_BF21(DataBlock block, int ix) {
-        block.set(ix, 0x70);
-        block.setBit(1, ix + 0x07);
+    private void init_death_sparkles_BF21(int ix) {
+        graphicObjects.setGrNo(ix, 0x70);
+        graphicObjects.setIgnore3D(ix);
         // c$BF31 CALL $B403    ; // ignore audio
         //set_wipe_and_draw_flags_C692(block, ix);
     }
@@ -2854,7 +2853,7 @@ public class Game implements Runnable {
     private void upd_player_top_CDE2(DataBlock block, int ix) {
         boolean flag = block.isSet(6,ix + 0x0D);
         if(flag && variables.getU(0x5BC3)==0) {
-            init_death_sparkles_BF21(block, ix);
+            init_death_sparkles_BF21(ix);
             return;
         }
 
@@ -2883,11 +2882,10 @@ public class Game implements Runnable {
         block.set(ix + 3, bottomY + 0x0C);
     }
 
-    private void upd_48_to_53_56_to_61_C828(DataBlock block, int ix) {
+    private void upd_48_to_53_56_to_61_C828(int ix) {
         // c$C4FC LD HL,$F9F4   ; -7, -12
-        block.set(ix + 0x12, -12); // F4
-        block.set(ix + 0x13, -7); // F9
-        upd_player_bottom_C82B(block, ix);
+        graphicObjects.setXYAdj(ix, -12, -7);
+        upd_player_bottom_C82B(ix);
     }
 
     private void upd_54_B6B9(DataBlock block, int ix) {
@@ -3101,7 +3099,7 @@ public class Game implements Runnable {
         boolean flag = block.isSet(6, ix + 0x0D);
         if(flag) {
             if (variables.getU(0x5BC3) == 0) {
-                init_death_sparkles_BF21(block, ix);
+                init_death_sparkles_BF21(ix);
                 return;
             }
         }
