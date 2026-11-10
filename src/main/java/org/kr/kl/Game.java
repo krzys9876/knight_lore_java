@@ -1671,7 +1671,7 @@ public class Game implements Runnable {
             case 0x55: upd_85_C4B6(block, ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(ix); break;
-            case 0x5B: upd_91_B683(block, ix); break;
+            case 0x5B: upd_91_B683(ix); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(block, ix); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(block, ix); break;
             case 0x67: upd_103_C1AB(block, ix); break;
@@ -3058,15 +3058,14 @@ public class Game implements Runnable {
         graphicObjects.setXYAdj(ix, -12, -16);
     }
 
-    private void upd_91_B683(DataBlock block, int ix) {
+    private void upd_91_B683(int ix) {
         //LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
+        graphicObjects.setXYAdj(ix, -16, -8);
 
-        boolean triggered = block.isSet(3, ix + 0x0D);
+        boolean triggered = graphicObjects.isTriggered(ix);
         if(!triggered) return;
-        block.resetBit(3, ix + 0x0D); // ; reset triggered
-        block.set(ix + 0x0B, 0); // ; dZ=0
+        graphicObjects.resetTriggered(ix); // ; reset triggered
+        graphicObjects.setDZ(ix, 0); // ; dZ=0
         dec_dZ_and_update_XYZ_C700(ix);
         // $B69C CALL $B451      ; } // ignore audio
     }

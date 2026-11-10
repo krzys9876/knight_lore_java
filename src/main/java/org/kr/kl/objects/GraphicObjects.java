@@ -95,6 +95,7 @@ public class GraphicObjects {
     public boolean isJumping(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x0C); }
     public boolean isDropping(int ix) { return graphic_objs_tbl_5C08.isSet(2, ix + 0x0D); }
     public boolean isMoving(int ix) { return getDX(ix)!=0 || getDY(ix)!=0 || getDZ(ix)!=0; }
+    public boolean isTriggered(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x0D); }
 
     public void setGrNo(int ix, int grNo) { graphic_objs_tbl_5C08.set(ix, grNo); }
     public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }
@@ -122,4 +123,5 @@ public class GraphicObjects {
     public void setHFlip(int ix) { graphic_objs_tbl_5C08.setBit(6, ix + 0x07); }
     public void resetHFlip(int ix) { graphic_objs_tbl_5C08.resetBit(6, ix + 0x07); }
     public void toggleNextPrevSprite(int ix) { setGrNo(ix, getGrNo(ix) ^ 0x01); }
+    public void resetTriggered(int ix) { graphic_objs_tbl_5C08.resetBit(3, ix + 0x0D); }
 }
