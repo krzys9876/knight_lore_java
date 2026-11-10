@@ -1676,7 +1676,7 @@ public class Game implements Runnable {
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(ix); break;
             case 0x67: upd_103_C1AB(ix); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(ix); break;
-            case 0x6F: upd_111_B95E(block, ix); break;
+            case 0x6F: upd_111_B95E(ix); break;
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(block, ix); break;
             case 0x77: upd_119_BF3F(block, ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(block, ix); break;
@@ -3217,7 +3217,7 @@ public class Game implements Runnable {
         int ptr = h * 256 + l;
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
-        upd_111_B95E(block, ix);
+        upd_111_B95E(ix);
     }
 
     private void prepare_final_animation_C2CC() {
@@ -3262,11 +3262,11 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_111_B95E(DataBlock block, int ix) {
+    private void upd_111_B95E(int ix) {
         // ; invalid
         // @label=upd_111
-        block.set(ix, 1);
-        // ignore audip
+        graphicObjects.setGrNo(ix, 1);
+        // ignore audio
     }
 
     private void upd_112_to_118_184_BF2B(DataBlock block, int ix) {
@@ -3283,7 +3283,7 @@ public class Game implements Runnable {
         block.set(ix + 0x12, -12); //F4
         block.set(ix + 0x13, -4); //FC
 
-        upd_111_B95E(block, ix); // Fix bug/feature in the source (writing to ROM)
+        upd_111_B95E(ix); // Fix bug/feature in the source (writing to ROM)
     }
 
     private void upd_120_to_126_BEFE(DataBlock block, int ix) {
@@ -3400,7 +3400,7 @@ public class Game implements Runnable {
 
         int firstSpObjGrNo =  block.getU(0x5C48);
         if(firstSpObjGrNo != 0) {
-            upd_111_B95E(block, ix);
+            upd_111_B95E(ix);
             return;
         }
 
@@ -3455,7 +3455,7 @@ public class Game implements Runnable {
         if(cauldronRoom) {
             int grNo = graphicObjects.graphic_objs_tbl_5C08.getU(graphicObjects.graphic_objs_tbl_5C08.start);
             if (((grNo - 0x10) & 0xFF) >= 0x40) { // is player dead (sparkles)
-                upd_111_B95E(block, ix); // ; final sparkles in cauldron
+                upd_111_B95E(ix); // ; final sparkles in cauldron
                 return;
             }
         }
