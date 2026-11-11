@@ -71,7 +71,7 @@ public class Game implements Runnable {
     private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
     private final DataBlock menu_text_BDBA = InitialData.block("menu_text_BDBA");
     private final DataBlock font_6108 = InitialData.block("font_6108");
-    private final DataBlock sprite_scratchpad_BFDB = InitialData.block("sprite_scratchpad_BFDB");
+    private final DataBlock sprite_scratchpad_BFDB = new DataBlock(0xBFDB, 0x20);
     private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
     //private final DataBlock special_objs_tbl_6FF2 = InitialData.block("special_objs_tbl_6FF2");
     private final SpecialObjects specialObjects = new SpecialObjects();
