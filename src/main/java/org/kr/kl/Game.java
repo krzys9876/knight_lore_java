@@ -1692,7 +1692,7 @@ public class Game implements Runnable {
             case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(ix); break;
             case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(ix); break;
             case 0xB0, 0xB1: upd_176_177_B83F(ix); break;
-            case 0xB2, 0xB3: upd_178_179_B865(block, ix); break;
+            case 0xB2, 0xB3: upd_178_179_B865(ix); break;
             case 0xB4, 0xB5: upd_180_181_B80F(block, ix); break;
             case 0xB6, 0xB7: upd_182_183_B5FF(block, ix); break;
             case 0xB9, 0xBB: upd_185_187_BF37(block, ix); break;
@@ -3483,29 +3483,28 @@ public class Game implements Runnable {
         // NOTE: rest of the routine is not implemented
     }
 
-    private void upd_178_179_B865(DataBlock block, int ix) {
+    private void upd_178_179_B865(int ix) {
         // c$C4F2 LD HL,$FCF8   ; -4, -8
-        block.set(ix + 0x12, -8); //F8
-        block.set(ix + 0x13, -4); //FC
+        graphicObjects.setXYAdj(ix, -8, -4);
 
         int bouncingHeight = variables.getU(0x5BBD);
         if(bouncingHeight == 0) {
-            int z = block.getU(ix + 3);
+            int z = graphicObjects.getZ(ix);
             variables.set(0x5BBD, z + 0x20); // ; calc bounce height
         }
         toggle_next_prev_sprite_B985(ix);
         // $B879 CALL $B451     ; // ignore audio
-        boolean dirUp = block.isSet(2, ix + 0x0D);
+        boolean dirUp = graphicObjects.isDirUp(ix);
         if(dirUp) {
-            block.set(ix + 0x0B, 3);
+            graphicObjects.setDZ(ix, 3);
             dec_dZ_and_update_XYZ_C700(ix);
-            int z = block.getU(ix + 3);
+            int z = graphicObjects.getZ(ix);
             if(z > variables.getU(0x5BBD))
-                block.resetBit(2, ix + 0x0D); // ; set dir=down
+                graphicObjects.setDirDown(ix); // ; set dir=down
         } else {
             dec_dZ_and_update_XYZ_C700(ix);
-            boolean zOob = block.isSet(2, ix + 0x0C);
-            if(zOob) block.setBit(2, ix + 0x0D);
+            boolean zOob = graphicObjects.isOobZ(ix);
+            if(zOob) graphicObjects.setDirUp(ix);
             // $B88F CALL $B42E     ; // ignore audio
         }
         set_both_deadly_flags_B85C(ix);
