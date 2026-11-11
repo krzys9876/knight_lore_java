@@ -107,8 +107,6 @@ public class GraphicObjects {
     public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
     public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
-    public boolean isVFlip(int ix) { return data.isSet(7, ix + 0x07); } // BIT 6,(IX+$07)
-    public boolean isAutoAdjust(int ix) { return data.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isOobX(int ix) { return data.isSet(0, ix + 0x0C); }
     public boolean isOobY(int ix) { return data.isSet(1, ix + 0x0C); }
     public boolean isOobXY(int ix) { return isOobX(ix) || isOobY(ix); }
@@ -122,7 +120,6 @@ public class GraphicObjects {
     public boolean justDropped(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
-    public boolean isWipe(int ix) { return data.isSet(5, ix + 7); }
     public boolean isBitSetGrNo(int ix, int bit) { return data.isSet(bit, ix); }
 
 
@@ -165,9 +162,6 @@ public class GraphicObjects {
     public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
     public void resetJustDropped(int ix) { data.resetBit(0, ix + 0x0D); }
     public void toggleEastWest(int ix) { data.set(ix + 0x0D, (data.getU(ix + 0x0D) ^ 0x01)); }
-    public void setDraw(int ix) { data.setBit(4, ix+7); }
-    public void setWipe(int ix) { data.setBit(5, ix+7); }
-    public void resetWipe(int ix) { data.resetBit(5, ix+7); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
     public void setOldSpriteWidthB(int ix, int w) { data.set(ix + 0x1C, w); }
@@ -190,9 +184,17 @@ public class GraphicObjects {
     public void setIgnore3D(int ix) { setFlags7(ix, Flags7.setIgnore3D(getFlags7(ix))); }
     public void resetIgnore3D(int ix) { setFlags7(ix, Flags7.resetIgnore3D(getFlags7(ix))); }
 
+    public boolean isAutoAdjust(int ix) { return Flags7.isAutoAdjust(getFlags7(ix)); }
+
+    public void setDraw(int ix) { setFlags7(ix, Flags7.setDraw(getFlags7(ix))); }
+
+    public void setWipe(int ix) { setFlags7(ix, Flags7.setWipe(getFlags7(ix))); }
+    public void resetWipe(int ix) { setFlags7(ix, Flags7.resetWipe(getFlags7(ix))); }
 
     public boolean isHFlip(int ix) { return Flags7.isHFlip(getFlags7(ix)); } // BIT 6,(IX+$07)
     public void setHFlip(int ix) { setFlags7(ix, Flags7.setHFlip(getFlags7(ix))); }
     public void resetHFlip(int ix) { setFlags7(ix, Flags7.resetHFlip(getFlags7(ix))); }
     public void flipHFlip(int ix) { setFlags7(ix, Flags7.flipHFlip(getFlags7(ix))); }
+
+    public boolean isVFlip(int ix) { return data.isSet(7, ix + 0x07); } // BIT 6,(IX+$07)
 }
