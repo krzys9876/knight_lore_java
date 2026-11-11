@@ -86,6 +86,7 @@ public class GraphicObjects {
     public int getDY(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0A); }
     public int getDYu(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0A); }
     public int getDZ(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0B); }
+    public int getDZu(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x0B); }
     public int getFlags7(int ix) { return graphic_objs_tbl_5C08.getS(ix + 7); }
     public int getFlagsC(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x0C); }
     public int getTemp10(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x10); }
