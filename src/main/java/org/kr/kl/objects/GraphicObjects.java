@@ -73,9 +73,11 @@ public class GraphicObjects {
 
     public final int size;
 
-    public GraphicObjects() {
-        data = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
-        size = data.size / 32;
+    public GraphicObjects(int start, int size) {
+        //data = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
+        this.size = size;
+        data = new DataBlock(start, size * 0x20);
+
     }
 
     public int getGrNo(int ix) { return data.getU(ix); }
@@ -98,8 +100,8 @@ public class GraphicObjects {
     public int getXAdj(int ix) { return data.getS(ix + 0x12); }
     public int getYAdj(int ix) { return data.getS(ix + 0x13); }
     public int getScreen(int ix) { return data.getU(ix + 0x08); }
-    public int getPixelX(int ix) { return data.getS(ix + 0x1A); }
-    public int getPixelY(int ix) { return data.getS(ix + 0x1B); }
+    public int getPixelX(int ix) { return data.getU(ix + 0x1A); }
+    public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
     public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
     public boolean isHFlip(int ix) { return data.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)

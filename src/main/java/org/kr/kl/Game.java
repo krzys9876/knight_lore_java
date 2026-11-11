@@ -83,9 +83,9 @@ public class Game implements Runnable {
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_yoff_C440 = InitialData.block("sun_moon_yoff_C440");
-    private final DataBlock sun_moon_scratchpad_C44D = new DataBlock(0xC44D, 0x20);
+    private final GraphicObjects sun_moon_scratchpad_C44D = new GraphicObjects(0xC44D, 1);
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
-    private final GraphicObjects graphicObjects = new GraphicObjects();
+    private final GraphicObjects graphicObjects = new GraphicObjects(0x5C08, 40);
     //private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
     private final DataBlock objects_to_draw_CE8B = new DataBlock(0xCE8B, 0x2E); // 46, but there should be not more than 40 objects to draw
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
@@ -917,9 +917,9 @@ public class Game implements Runnable {
     }
 
     private void init_sun_C46D() {
-        sun_moon_scratchpad_C44D.set(0xC44D, 0x58); // ; sprite index
-        sun_moon_scratchpad_C44D.set(0xC44D+0x1A, 0xB0); // ; pixel X
-        sun_moon_scratchpad_C44D.set(0xC44D+0x1B, 0x09); // ; pixel Y
+        sun_moon_scratchpad_C44D.setGrNo(sun_moon_scratchpad_C44D.start(), 0x58); // ; sprite index
+        sun_moon_scratchpad_C44D.setPixelX(sun_moon_scratchpad_C44D.start(), 0xB0); // ; pixel X
+        sun_moon_scratchpad_C44D.setPixelY(sun_moon_scratchpad_C44D.start(), 0x09); // ; pixel Y
     }
 
     private void init_special_objects_C47E() {
@@ -955,7 +955,7 @@ public class Game implements Runnable {
         }
         int newLivesLeft = params.isDisableLoseLife() ? livesLeft : decBCD(livesLeft);
         variables.set(0x5BBA, newLivesLeft);
-        int scratch = sun_moon_scratchpad_C44D.getU(0xC44D);
+        int scratch = sun_moon_scratchpad_C44D.getGrNo(sun_moon_scratchpad_C44D.start());
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
         int playerGraphicsNo = graphicObjects.getTemp10(graphicObjects.start());
         playerGraphicsNo = (playerGraphicsNo & 0x1F) + scratch;
@@ -1218,7 +1218,7 @@ public class Game implements Runnable {
         fill_window_C515(mainMemory, 0x5A97, 6, 4, 0x42);
         // $B055 CALL $D30D    ;
         // @label=colour_sun_moon
-        boolean isSun = ((sun_moon_scratchpad_C44D.getU(0xC44D)) & 1) == 0;
+        boolean isSun = ((sun_moon_scratchpad_C44D.getGrNo(sun_moon_scratchpad_C44D.start())) & 1) == 0;
         int attr = isSun ? 0x46 : 0x47;
         fill_window_C515(mainMemory, 0x5AB8, 4, 2, attr);
 
@@ -1561,19 +1561,19 @@ public class Game implements Runnable {
     private void display_sun_moon_frame_C3A4() {
         if(variables.getU(0x5BC3)!=0) return;
 
-        int ix = sun_moon_scratchpad_C44D.start;
+        int ix = sun_moon_scratchpad_C44D.start();
         // @label=display_frame
-        int x = sun_moon_scratchpad_C44D.getU(ix + 0x1A);
+        int x = sun_moon_scratchpad_C44D.getPixelX(ix);
         if (x == 0xE1 - 1) toggle_day_night_C3FF();
 
         int y = ((x + 0x10) >> 2) & 0x0F;
         int hl = 0xC440 + y;
-        sun_moon_scratchpad_C44D.set(ix + 0x1B, sun_moon_yoff_C440.getU(hl));
-        if (sunTick == 0) sun_moon_scratchpad_C44D.set(ix + 0x1A, x + 1);
+        sun_moon_scratchpad_C44D.setPixelY(ix, sun_moon_yoff_C440.getU(hl));
+        if (sunTick == 0) sun_moon_scratchpad_C44D.setPixelX(ix, x + 1);
 
         // @label=display_frame
         fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
-        print_sprite_D718(sun_moon_scratchpad_C44D, ix);
+        print_sprite_D718(sun_moon_scratchpad_C44D.data, ix);
 
         ix = sprite_scratchpad_BFDB.start;
         sprite_scratchpad_BFDB.set(ix + 7, 0);
@@ -1596,11 +1596,11 @@ public class Game implements Runnable {
     }
 
     private void toggle_day_night_C3FF() {
-        int ix = sun_moon_scratchpad_C44D.start;
-        int currentSprite =  sun_moon_scratchpad_C44D.getU(ix);
+        int ix = sun_moon_scratchpad_C44D.start();
+        int currentSprite =  sun_moon_scratchpad_C44D.getGrNo(ix);
         int nextSprite = currentSprite ^ 1; // flip last bit
-        sun_moon_scratchpad_C44D.set(ix, nextSprite);
-        sun_moon_scratchpad_C44D.set(ix+0x1A, 0xB0); // ; pixel X
+        sun_moon_scratchpad_C44D.setGrNo(ix, nextSprite);
+        sun_moon_scratchpad_C44D.setPixelX(ix, 0xB0); // ; pixel X
         variables.set(0x5BB1, 1); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
