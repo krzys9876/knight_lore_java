@@ -2389,12 +2389,11 @@ public class Game implements Runnable {
         return Math.abs(check) - d < 0;
     }
 
-    private void setDestroyedFlags(DataBlock block, int ix, int iy) {
+    private void setDestroyedFlags(int objectIx, int playerIx) {
         if(params.isDisableDeath()) return;
-        // bit 7->6
-        if(graphicObjects.getDeadlyIfObjectHitsPlayer(ix)) graphicObjects.setDead(iy);
-        // bit 5->6
-        if(graphicObjects.getDeadlyIfPlayerHitsObject(iy)) graphicObjects.setDead(ix);
+
+        if(graphicObjects.getDeadlyIfObjectHitsPlayer(objectIx)) graphicObjects.setDead(playerIx); // bit 7->6
+        if(graphicObjects.getDeadlyIfPlayerHitsObject(playerIx)) graphicObjects.setDead(objectIx); // bit 5->6
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
@@ -2407,7 +2406,7 @@ public class Game implements Runnable {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         block.setBit(2, ix + 0x0C); // set Z OOB
 
-                        setDestroyedFlags(block, ix, iy);
+                        setDestroyedFlags(ix, iy);
 
                         block.setBit(3, iy + 0x0D); //triggered (falling, collapsing blocks)
                         boolean movable = block.isSet(2, ix + 0x07);
@@ -2435,7 +2434,7 @@ public class Game implements Runnable {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         block.setBit(0, ix + 0x0C); // set X OOB
 
-                        setDestroyedFlags(block, ix, iy);
+                        setDestroyedFlags(ix, iy);
 
                         boolean moveable = block.isSet(2, iy + 0x07);
                         if(moveable) block.set(iy + 0x09, block.getS(ix + 0x09)); //copy dX
@@ -2460,7 +2459,7 @@ public class Game implements Runnable {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         block.setBit(1, ix + 0x0C); // set Y OOB
 
-                        setDestroyedFlags(block, ix, iy);
+                        setDestroyedFlags(ix, iy);
 
                         boolean moveable = block.isSet(2, iy + 0x07);
                         if(moveable) block.set(iy + 0x0A, block.getS(ix + 0x0A)); //copy dY
