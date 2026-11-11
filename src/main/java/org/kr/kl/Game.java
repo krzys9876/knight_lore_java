@@ -1960,15 +1960,15 @@ public class Game implements Runnable {
             // $C847 CALL $C89F    ; handle_left_right
             handle_left_right_C89F(ix);
             // $C84A CALL $C948    ; handle_jump
-            handle_jump_C948(graphicObjects.data, ix);
+            handle_jump_C948(ix);
             // $C84D CALL $C969    ; handle_forward
-            handle_forward_C969(graphicObjects.data, ix);
+            handle_forward_C969(ix);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
-            boolean oob = chk_plyr_OOB_C87A(graphicObjects.data, ix);
+            boolean oob = chk_plyr_OOB_C87A(ix);
             // $C853 JR NC,$C86D   ; plyr_OOB
             // @label=plyr_OOB
             if(oob && graphicObjects.getDZ(ix) > 0) graphicObjects.setDZ(ix, 0);
-            loc_C855(graphicObjects.data, ix) ;
+            loc_C855(ix) ;
         }
     }
 
@@ -1976,7 +1976,7 @@ public class Game implements Runnable {
         boolean pressed = variables.getU(0x5BB3) != 0;
         if(!pressed) {
             if(!chk_pickup_drop_BFFB()) return;
-            if(chk_plyr_OOB_C87A(graphicObjects.data, ix)) return;
+            if(chk_plyr_OOB_C87A(ix)) return;
             boolean jumping = graphicObjects.isJumping(ix);
             if(jumping) return;
             boolean zOob = graphicObjects.isOobZ(ix);
@@ -2171,20 +2171,20 @@ public class Game implements Runnable {
         return (keys & 0x10) > 0; // only standard keyboard input
     }
 
-    private boolean chk_plyr_OOB_C87A(DataBlock block, int ix) {
+    private boolean chk_plyr_OOB_C87A(int ix) {
         int roomSizeX = variables.getU(0x5BAB);
         int roomSizeY = variables.getU(0x5BAC);
-        int xMax = roomSizeX - block.getU(ix + 0x04);
-        int yMax = roomSizeY - block.getU(ix + 0x05);
+        int xMax = roomSizeX - graphicObjects.getW(ix);
+        int yMax = roomSizeY - graphicObjects.getD(ix);
 
-        int xCalc = Math.abs(block.getU(ix + 0x01) - 0x80);
-        int yCalc = Math.abs(block.getU(ix + 0x02) - 0x80);
+        int xCalc = Math.abs(graphicObjects.getX(ix) - 0x80);
+        int yCalc = Math.abs(graphicObjects.getY(ix) - 0x80);
 
         // True if player is outside the room (entering or exiting)
         return xCalc >= xMax || yCalc >= yMax;
     }
 
-    private void loc_C855(DataBlock block, int ix) {
+    private void loc_C855(int ix) {
         graphicObjects.setIgnore3D(ix + 0x20);
         move_player_C9A1(ix);
         graphicObjects.resetIgnore3D(ix + 0x20);
@@ -2676,39 +2676,37 @@ public class Game implements Runnable {
         graphicObjects.setGrNo(ix + 0x20, sprite); // ; set sprite for top half
     }
 
-    private void handle_jump_C948(DataBlock block, int ix) {
-        int flags = block.getU(ix + 0x0C);
-        boolean enteringScreen = (flags & 0xF0) > 0;
-        boolean jumping = DataBlock.isSetS(3, flags);
+    private void handle_jump_C948(int ix) {
+        boolean enteringScreen = graphicObjects.enteringScreen(ix);
+        boolean jumping = graphicObjects.isJumping(ix);
         boolean jump = DataBlock.isSetS(3, variables.getU(0x5BB5));
         if(!jump || enteringScreen || jumping) return;
-        int dz = block.getS(ix + 0x0B);
+        int dz = graphicObjects.getDZ(ix);
         dz++;
         if(dz < 0) return;
-        block.setBit(3, ix + 0x0C); // ; flag jumping
-        block.set(ix + 0x0B, 8);
+        graphicObjects.setJumping(ix); // ; flag jumping
+        graphicObjects.setDZ(ix, 8);
     }
 
-    private void handle_forward_C969(DataBlock block, int ix) {
-        int flags = block.getU(ix + 0x0C);
-        boolean enteringScreen = (flags & 0xF0) > 0;
-        boolean jumping = DataBlock.isSetS(3, flags);
+    private void handle_forward_C969(int ix) {
+        boolean enteringScreen = graphicObjects.enteringScreen(ix);
+        boolean jumping = graphicObjects.isJumping(ix);
         boolean forward = DataBlock.isSetS(2, variables.getU(0x5BB5));
         // ignore audio: @label=loc_C97A
         if(!enteringScreen && !jumping & !forward) {
             //@label=loc_C994
-            int sprite = block.getU(ix) & 0x07;
+            int sprite = graphicObjects.getGrNo(ix) & 0x07;
             if(sprite == 2 || sprite == 4) return;
         }
-        animate_human_legs_C97F(block, ix);
+        animate_human_legs_C97F(ix);
     }
 
-    private void animate_human_legs_C97F(DataBlock block, int ix) {
+    private void animate_human_legs_C97F(int ix) {
         // @label=animate_human_legs
-        int sprite = block.getU(ix);
+        int sprite = graphicObjects.getGrNo(ix);
         int nextSprite = ((sprite+1) & 7) % 6; // ; wrap?
         // @label=loc_C98B
-        block.set(ix, (sprite & 0xF8) | nextSprite); //  ; update sprite - NOTE we update only bottom half
+        graphicObjects.setGrNo(ix, (sprite & 0xF8) | nextSprite); //  ; update sprite - NOTE we update only bottom half
     }
 
     private void init_death_sparkles_BF21(int ix) {
@@ -3302,7 +3300,7 @@ public class Game implements Runnable {
             graphicObjects.setHFlip(ix);
         }
 
-        animate_human_legs_C97F(graphicObjects.data, ix);
+        animate_human_legs_C97F(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
