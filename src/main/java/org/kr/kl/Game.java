@@ -3530,9 +3530,9 @@ public class Game implements Runnable {
 
         graphicObjects.setDX(ix, dx); // ; preserve old dX
         graphicObjects.setDY(ix, dy); // ; preserve old dY
-        int playerGrNo = graphicObjects.data.getU(graphicObjects.data.start);
+        int playerGrNo = graphicObjects.getGrNo(graphicObjects.start());
         boolean isWulf = ((playerGrNo - 0x10) & 0xFF) >= 0x20;
-        int screen = graphicObjects.data.getU(graphicObjects.data.start + 0x08);
+        int screen = graphicObjects.getScreen(graphicObjects.start());
         boolean screenFlg = (screen & 0x01) == 0;
         int newDz = 4;
         if(!screenFlg) newDz += params.getRnd().getSeed3() & 0x03;
@@ -3542,13 +3542,13 @@ public class Game implements Runnable {
             // $B64C CALL $B42E     ; } // ignore audio
             params.getRnd().updateSeed3();
             if((params.getRnd().getSeed3() & 0x01) == 1) {
-                int playerY = graphicObjects.data.getU(graphicObjects.data.start + 2);
+                int playerY = graphicObjects.getY(graphicObjects.start());
                 int newdY = graphicObjects.getY(ix) > playerY ? 2 : -2;
                 if(isWulf) newdY = -newdY; // ; towards player
                 graphicObjects.setDY(ix, newdY);
                 graphicObjects.setDX(ix, 0); // ; new dX=0
             } else {
-                int playerX = graphicObjects.data.getU(graphicObjects.data.start + 1);
+                int playerX = graphicObjects.getX(graphicObjects.start());
                 int newdX = graphicObjects.getX(ix) > playerX ? 2 : -2;
                 if(isWulf) newdX = -newdX; // ; towards player
                 graphicObjects.setDX(ix, newdX);
@@ -3572,8 +3572,8 @@ public class Game implements Runnable {
 
     private void renderAllSprites(GraphicObjects block, int from, int cnt) {
         for(int i=from;i<from+cnt;i++) {
-            int ix = block.start() + i*32;
-            if(block.data.getU(ix)!=0) {
+            int ix = block.start() + i*0x20;
+            if(block.getGrNo(ix) != 0) {
                 if(calc_pixel_XY_D6C9(ix)) print_sprite_D718(block, ix);
             }
         }
@@ -3598,7 +3598,7 @@ public class Game implements Runnable {
         // NOTE: this means that in odd rooms spike balls do not drop until an object is picked up.
         // This is not straightforward but these are the traps - a player may be killed when picking up an object
         // and these traps are only in odd rooms
-        variables.set(0x5BC0, graphicObjects.data.getU(0x5C10) & 1);
+        variables.set(0x5BC0, graphicObjects.getScreen(graphicObjects.start()) & 1);
 
         flag_room_visited_D219();
     }
@@ -3606,17 +3606,17 @@ public class Game implements Runnable {
     private void update_special_objs_C591() {
         int iy = 0x5C48;
         for(int i=0; i<2; i++) {
-            int grNo = graphicObjects.data.getU(iy);
+            int grNo = graphicObjects.getGrNo(iy);
             if(grNo != 0) {
-                int e = graphicObjects.data.getU(iy + 0x10);
-                int d = graphicObjects.data.getU(iy + 0x11);
+                int e = graphicObjects.getTemp10(iy);
+                int d = graphicObjects.getTemp11(iy);
                 int ptr = d*256 + e; // ptr can be 0 for cauldron bubbles
                 if(ptr != 0) {
                     int spi = specialObjects.getIndex(ptr);
                     specialObjects.setGraphicNo(spi, grNo);
-                    specialObjects.setCurrentX(spi, graphicObjects.data.getU(iy + 1));
-                    specialObjects.setCurrentY(spi, graphicObjects.data.getU(iy + 2));
-                    specialObjects.setCurrentZ(spi, graphicObjects.data.getU(iy + 3));
+                    specialObjects.setCurrentX(spi, graphicObjects.getX(iy));
+                    specialObjects.setCurrentY(spi, graphicObjects.getY(iy));
+                    specialObjects.setCurrentZ(spi, graphicObjects.getZ(iy));
                     int screen = graphicObjects.data.getU(iy + 8);
                     specialObjects.setScreen(spi, screen);
                 }
