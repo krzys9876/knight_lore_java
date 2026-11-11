@@ -2185,12 +2185,11 @@ public class Game implements Runnable {
     }
 
     private void loc_C855(DataBlock block, int ix) {
-        block.setBit(1, ix + 0x27);
+        graphicObjects.setIgnore3D(ix + 0x20);
         move_player_C9A1(ix);
-        block.resetBit(1,ix + 0x27);
-        int flags = block.getU(ix + 0x0C);
-        if(flags>=0x10) block.set(ix + 0x0C, flags-0x10); // decrement entering screen counter (upper 4 bits)
-        set_wipe_and_draw_flags_C692(block, ix);
+        graphicObjects.resetIgnore3D(ix + 0x20);
+        graphicObjects.decEnterCounter(ix); // decrement entering screen counter (upper 4 bits)
+        set_wipe_and_draw_flags_C692(ix);
     }
 
     private void move_player_C9A1(int ix) {
@@ -2581,13 +2580,11 @@ public class Game implements Runnable {
         graphicObjects.setTemp10(ix, 8); // transform counter
 
         graphicObjects.setGrNo(ix + 0x20, 1); // update player top
-        set_wipe_and_draw_flags_C692(graphicObjects.data, ix + 0x20);
+        set_wipe_and_draw_flags_C692(ix + 0x20);
         //@label=rand_legs_sprite
         int newSprite = (params.getRnd().getSeed3() & 0x03) | 0x5C;
         if(graphicObjects.getGrNo(ix) == newSprite) newSprite^=1; // change if same as current
         graphicObjects.setGrNo(ix, newSprite);
-        //int flip = (graphicObjects.getFlags7(ix)) ^ 0x40;
-        //block.set(ix + 0x07, flip);
         graphicObjects.flipHFlip(ix);
 
         return true;
@@ -3258,8 +3255,9 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void set_wipe_and_draw_flags_C692(DataBlock block, int ix) {
-        // block.set(ix + 7, block.getU(ix + 0x07) | 0x30);
+    private void set_wipe_and_draw_flags_C692(int ix) {
+        graphicObjects.setWipe(ix);
+        graphicObjects.setDraw(ix);
         // Not used - all frame is redrawn
     }
 

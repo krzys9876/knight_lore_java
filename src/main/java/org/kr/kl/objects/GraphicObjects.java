@@ -211,4 +211,8 @@ public class GraphicObjects {
     public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
 
     public int getEnterCounter(int ix) { return getFlagsC(ix) & 0xF0; }
+    public void decEnterCounter(int ix) {
+        int counter = getEnterCounter(ix);
+        if(counter >= 0x10) setFlagsC(ix, (getFlagsC(ix) & 0x0F) + counter - 0x10);
+    }
 }
