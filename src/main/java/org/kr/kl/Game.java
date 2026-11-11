@@ -1547,7 +1547,7 @@ public class Game implements Runnable {
     }
 
     private void display_panel_D255() {
-        sprite_scratchpad_BFDB.data.reset();
+        sprite_scratchpad_BFDB.reset();
         int ix = sprite_scratchpad_BFDB.start();
         int hl = panel_data_D27E.start;
         hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 16, -8, 5, ix, hl, panel_data_D27E);
@@ -1576,13 +1576,13 @@ public class Game implements Runnable {
         print_sprite_D718(sun_moon_scratchpad_C44D, ix);
 
         ix = sprite_scratchpad_BFDB.start();
-        sprite_scratchpad_BFDB.data.set(ix + 7, 0);
-        sprite_scratchpad_BFDB.data.set(ix, 0x5A);
-        sprite_scratchpad_BFDB.data.set(ix + 0x1A, 0xB8);
-        sprite_scratchpad_BFDB.data.set(ix + 0x1B, 0);
+        sprite_scratchpad_BFDB.setGrNo(ix, 0x5A);
+        sprite_scratchpad_BFDB.setFlags7(ix, 0);
+        sprite_scratchpad_BFDB.setPixelX(ix, 0xB8);
+        sprite_scratchpad_BFDB.setPixelY(ix, 0);
         print_sprite_D718(sprite_scratchpad_BFDB, ix);
-        sprite_scratchpad_BFDB.data.set(ix + 0x1A, 0xD0);
-        sprite_scratchpad_BFDB.data.set(ix, 0xBA);
+        sprite_scratchpad_BFDB.setPixelX(ix, 0xD0);
+        sprite_scratchpad_BFDB.setGrNo(ix, 0xBA);
         print_sprite_D718(sprite_scratchpad_BFDB, ix);
     }
 
