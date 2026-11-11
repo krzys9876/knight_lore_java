@@ -1950,7 +1950,7 @@ public class Game implements Runnable {
             graphicObjects.setDeadlyIfObjectHitsPlayer(ix);
             graphicObjects.setIgnore3D(ix); // ; ignore object in 3D calculations
             graphicObjects.setDZ(ix, 1); // ; dZ=1
-            move_towards_plyr_B965(graphicObjects.data, ix, 4, 4);
+            move_towards_plyr_B965(graphicObjects, ix, 4, 4);
         }
         variables.set(0x5BC5, graphicObjects.getZ(ix));
         dec_dZ_and_update_XYZ_C700(ix);
@@ -3430,7 +3430,7 @@ public class Game implements Runnable {
                 dy = 1;
             }
         }
-        move_towards_plyr_B965(graphicObjects.data, ix, dx, dy);
+        move_towards_plyr_B965(graphicObjects, ix, dx, dy);
         dec_dZ_and_update_XYZ_C700(ix);
         next_graphic_no_mod_4_B98C(graphicObjects.data, ix);
 
@@ -3444,16 +3444,16 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692();
     }
 
-    private void move_towards_plyr_B965(DataBlock block, int ix, int dx, int dy) {
-        int playerX = graphicObjects.data.getU(graphicObjects.data.start + 1);
-        int x = block.getU(ix + 1);
+    private void move_towards_plyr_B965(GraphicObjects block, int ix, int dx, int dy) {
+        int playerX = graphicObjects.getX(graphicObjects.start());
+        int x = block.getX(ix);
         if(x >= playerX) dx = -dx; // player W
-        block.set(ix + 0x09, dx);
+        block.setDX(ix, dx);
 
-        int playerY = graphicObjects.data.getU(graphicObjects.data.start + 2);
-        int y = block.getU(ix + 2);
+        int playerY = graphicObjects.getY(graphicObjects.start());
+        int y = block.getY(ix);
         if(y >= playerY) dy = -dy; // player S
-        block.set(ix + 0x0A, dy);
+        block.setDY(ix, dy);
     }
 
     private void next_graphic_no_mod_4_B98C(DataBlock block, int ix) {
