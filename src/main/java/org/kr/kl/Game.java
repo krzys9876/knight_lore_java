@@ -1716,7 +1716,7 @@ public class Game implements Runnable {
                 boolean autoAdjust = graphicObjects.isAutoAdjust(iy);
                 if(autoAdjust) {
                     if(is_near_to_C7FE(graphicObjects, ix, iy, 0x0F, 0x0F)) {
-                        switch(get_sprite_dir_CA1E(graphicObjects.data, ix)) {
+                        switch(get_sprite_dir_CA1E(ix)) {
                             case 0, 1: adj_ew_C7B1(ix, iy); break;
                             case 2, 3: adj_ns_C7C4(ix, iy); break;
                         }
@@ -2274,7 +2274,7 @@ public class Game implements Runnable {
         //$CA96 DEFW $CB0E
         //$CA98 DEFW $CB29
         int currentScreen = block.getU(ix + 0x08);
-        int newScreen = switch(get_sprite_dir_CA1E(block, ix)) {
+        int newScreen = switch(get_sprite_dir_CA1E(ix)) {
             case 0 -> screen_west_CA9A(block, ix, oldRoomSizeX, oldRoomSizeY);
             case 1 -> screen_east_CAF3(block, ix, oldRoomSizeX, oldRoomSizeY);
             case 2 -> screen_north_CB0E(block, ix, oldRoomSizeX, oldRoomSizeY);
@@ -2552,7 +2552,7 @@ public class Game implements Runnable {
         block.set(ix + 0x0A, block.getS(ix + 0x0A) + block.getS(ix + 0x0F)); // dY
         block.set(ix + 0x0E, 0); // dX_adj
         block.set(ix + 0x0F, 0); // dY_adj
-        switch(get_sprite_dir_CA1E(block, ix)) {
+        switch(get_sprite_dir_CA1E(ix)) {
             case 0: block.set(ix + 0x09, (block.getS(ix + 0x09) - 3)); break;
             case 1: block.set(ix + 0x09, (block.getS(ix + 0x09) + 3)); break;
             case 2: block.set(ix + 0x0A, (block.getS(ix + 0x0A) + 3)); break;
@@ -2560,10 +2560,10 @@ public class Game implements Runnable {
         }
     }
 
-    private int get_sprite_dir_CA1E(DataBlock block, int ix) {
-        int flags = block.getU(ix + 0x07);
-        flags = (flags >> 2) & 0x10;
-        int grNo = (block.getU(ix) & 8) | flags;
+    private int get_sprite_dir_CA1E(int ix) {
+        boolean hFlip = graphicObjects.isHFlip(ix);
+        int flags = hFlip ? 0x10 : 0;
+        int grNo = (graphicObjects.getGrNo(ix) & 8) | flags;
         grNo = (grNo >> 3) & 3;
         return grNo;
     }
@@ -3707,7 +3707,7 @@ public class Game implements Runnable {
         // clear rest of graphics objects table
         for(int i = targetAddr; i<graphicObjects.endExcl(); i+=0x20) graphicObjects.resetObject(i);
 
-        debugTable2("Other objects data:", graphicObjects.start(), graphicObjects.data.getCopy());
+        debugTable2("Other objects data:", graphicObjects.start(), graphicObjects.getCopy());
     }
 
     private void find_special_objs_here_C525() {
@@ -3740,7 +3740,7 @@ public class Game implements Runnable {
     }
 
     private void adjust_plyr_xyz_for_room_size_D320() {
-        debugTable2("Graphic objects table:", 0x5C08, graphicObjects.data.getCopy());
+        debugTable2("Graphic objects table:", 0x5C08, graphicObjects.getCopy());
         int roomSizeX = variables.getU(0x5BAB) - 2;
         int roomSizeY = variables.getU(0x5BAC) - 2;
         int ix = 0x5C08;
