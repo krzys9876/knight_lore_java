@@ -2137,32 +2137,32 @@ public class Game implements Runnable {
     }
 
     private boolean is_on_or_near_obj_C17A(DataBlock block, int ix, int iy) {
-        boolean intersectsX = do_objs_intersect_on_x_CC9D(block, ix, iy, 0);
+        boolean intersectsX = do_objs_intersect_on_x_CC9D(ix, iy, 0);
         if(!intersectsX) return false;
-        boolean intersectsY = do_objs_intersect_on_y_CCB2(block, ix, iy, 0);
+        boolean intersectsY = do_objs_intersect_on_y_CCB2(ix, iy, 0);
         if(!intersectsY) return false;
         int z = block.getU(ix + 3);
         block.set(ix + 3, z - 4);
-        boolean intersectsZ = do_objs_intersect_on_z_CCC7(block, ix, iy, 0);
+        boolean intersectsZ = do_objs_intersect_on_z_CCC7(ix, iy, 0);
         block.set(ix + 3, z);
         return intersectsZ;
     }
 
     private boolean do_any_objs_intersect_B4FD(DataBlock block, int ix) {
-        int iy = 0x5C08;
-        block.setBit(1, ix + 7); // ; ignore this object
-        for(int b = 0; b<0x28; b++) {
-            if(is_object_not_ignored_B538(block, iy)) {
-                if(do_objs_intersect_on_x_CC9D(block, ix, iy, 0) &&
-                        do_objs_intersect_on_y_CCB2(block, ix, iy, 0) &&
-                        do_objs_intersect_on_z_CCC7(block, ix, iy, 0)) {
-                    block.resetBit(1, ix + 7); // ; ignore this object
+        int iy = graphicObjects.start();
+        graphicObjects.setIgnore3D(ix); // ; ignore this object
+        for(int b = 0; b<graphicObjects.size; b++) {
+            if(is_object_not_ignored_B538(iy)) {
+                if(do_objs_intersect_on_x_CC9D(ix, iy, 0) &&
+                        do_objs_intersect_on_y_CCB2(ix, iy, 0) &&
+                        do_objs_intersect_on_z_CCC7(ix, iy, 0)) {
+                    graphicObjects.resetIgnore3D(ix); // ; ignore this object
                     return true;
                 }
             }
             iy += 0x20;
         }
-        block.resetBit(1, ix + 7); // ; ignore this object
+        graphicObjects.resetIgnore3D(ix); // ; ignore this object
         return false;
     }
 
@@ -2350,40 +2350,40 @@ public class Game implements Runnable {
         return newScreen;
     }
 
-    private boolean is_object_not_ignored_B538(DataBlock block, int iy) {
-        return block.getU(iy) != 0 && !block.isSet(1, iy + 0x07);
+    private boolean is_object_not_ignored_B538(int iy) {
+        return graphicObjects.getGrNo(iy) != 0 && !graphicObjects.ignore3D(iy);
     }
 
     //; abs(objX+newdX-thisX)-(objW+thisW)
-    private boolean do_objs_intersect_on_x_CC9D(DataBlock block, int ix, int iy, int dxAdj) {
+    private boolean do_objs_intersect_on_x_CC9D(int ix, int iy, int dxAdj) {
         // dxAdj - C register
         // ix: obj, iy: this
-        int objW = block.getU(ix + 0x04);
-        int thisW = block.getU(iy + 0x04);
-        int objX = block.getU(ix + 0x01);
-        int thisX = block.getU(iy + 0x01);
+        int objW = graphicObjects.getW(ix);
+        int thisW = graphicObjects.getW(iy);
+        int objX = graphicObjects.getX(ix);
+        int thisX = graphicObjects.getX(iy);
         return Math.abs(objX + dxAdj - thisX) - (objW + thisW) < 0;
     }
 
     //; (objY+l-thisY)-(objD+thisD) - note: there is an error in comment in original source
-    private boolean do_objs_intersect_on_y_CCB2(DataBlock block, int ix, int iy, int dyAdj) {
+    private boolean do_objs_intersect_on_y_CCB2(int ix, int iy, int dyAdj) {
         // dyAdj - L register
         // ix: obj, iy: this
-        int objD = block.getU(ix + 0x05);
-        int thisD = block.getU(iy + 0x05);
-        int objY = block.getU(ix + 0x02);
-        int thisY = block.getU(iy + 0x02);
+        int objD = graphicObjects.getD(ix);
+        int thisD = graphicObjects.getD(iy);
+        int objY = graphicObjects.getY(ix);
+        int thisY = graphicObjects.getY(iy);
         return Math.abs(objY + dyAdj - thisY) - (objD + thisD) < 0;
     }
 
     //; (objZ+H-thisZ)-(objH or thisH)
-    private boolean do_objs_intersect_on_z_CCC7(DataBlock block, int ix, int iy, int dzAdj) {
+    private boolean do_objs_intersect_on_z_CCC7(int ix, int iy, int dzAdj) {
         // dzAdj - H register
         // ix: obj, iy: this
-        int objZ = block.getU(ix + 0x03);
-        int thisZ = block.getU(iy + 0x03);
-        int objH = block.getU(ix + 0x06);
-        int thisH = block.getU(iy + 0x06);
+        int objZ = graphicObjects.getZ(ix);
+        int thisZ = graphicObjects.getZ(iy);
+        int objH = graphicObjects.getH(ix);
+        int thisH = graphicObjects.getH(iy);
         int check = objZ + dzAdj - thisZ;
         int d = check >= 0 ? thisH : objH;
         return Math.abs(check) - d < 0;
@@ -2404,10 +2404,10 @@ public class Game implements Runnable {
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
         for(int i=0; i<0x28; i++) {
-            if(is_object_not_ignored_B538(block, iy)) {
+            if(is_object_not_ignored_B538(iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if (do_objs_intersect_on_x_CC9D(block, ix, iy, dxAdj) && do_objs_intersect_on_y_CCB2(block, ix, iy, dyAdj)) {
-                    while (do_objs_intersect_on_z_CCC7(block, ix, iy, dzAdj)) {
+                if (do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
+                    while (do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         block.setBit(2, ix + 0x0C); // set Z OOB
 
@@ -2432,10 +2432,10 @@ public class Game implements Runnable {
     private int adj_dX_for_obj_intersect_CB9A(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
         for(int i=0; i<0x28; i++) {
-            if(is_object_not_ignored_B538(block, iy)) {
+            if(is_object_not_ignored_B538(iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if(do_objs_intersect_on_y_CCB2(block, ix, iy, dyAdj) && do_objs_intersect_on_z_CCC7(block, ix, iy, dzAdj)) {
-                    while(do_objs_intersect_on_x_CC9D(block, ix, iy, dxAdj)) {
+                if(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
+                    while(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         block.setBit(0, ix + 0x0C); // set X OOB
 
@@ -2457,10 +2457,10 @@ public class Game implements Runnable {
     private int adj_dY_for_obj_intersect_CBE9(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
         for(int i=0; i<0x28; i++) {
-            if(is_object_not_ignored_B538(block, iy)) {
+            if(is_object_not_ignored_B538(iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if(do_objs_intersect_on_x_CC9D(block, ix, iy, dxAdj) && do_objs_intersect_on_z_CCC7(block, ix, iy, dzAdj)) {
-                    while(do_objs_intersect_on_y_CCB2(block, ix, iy, dyAdj)) {
+                if(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
+                    while(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         block.setBit(1, ix + 0x0C); // set Y OOB
 
