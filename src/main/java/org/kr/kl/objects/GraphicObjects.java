@@ -113,11 +113,6 @@ public class GraphicObjects {
     public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
     public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
-    public boolean isOobX(int ix) { return data.isSet(0, ix + 0x0C); }
-    public boolean isOobY(int ix) { return data.isSet(1, ix + 0x0C); }
-    public boolean isOobXY(int ix) { return isOobX(ix) || isOobY(ix); }
-    public boolean isOobZ(int ix) { return data.isSet(2, ix + 0x0C); }
-    public boolean isDead(int ix) { return data.isSet(6, ix + 0x0D); }
     public boolean isJumping(int ix) { return data.isSet(3, ix + 0x0C); }
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
@@ -164,6 +159,7 @@ public class GraphicObjects {
     public void setDirUp(int ix) { data.setBit(2, ix + 0x0D); }
     public void setDirDown(int ix) { data.resetBit(2, ix + 0x0D); }
     public void toggleNextPrevSprite(int ix) { setGrNo(ix, getGrNo(ix) ^ 0x01); }
+    public void setTriggered(int ix) { data.setBit(3, ix + 0x0D); }
     public void resetTriggered(int ix) { data.resetBit(3, ix + 0x0D); }
     public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
     public void resetJustDropped(int ix) { data.resetBit(0, ix + 0x0D); }
@@ -193,6 +189,8 @@ public class GraphicObjects {
     public void setIgnore3D(int ix) { setFlags7(ix, Flags7.setIgnore3D(getFlags7(ix))); }
     public void resetIgnore3D(int ix) { setFlags7(ix, Flags7.resetIgnore3D(getFlags7(ix))); }
 
+    public boolean isMoveable(int ix) { return Flags7.isMoveable(getFlags7(ix)); }
+
     public boolean isAutoAdjust(int ix) { return Flags7.isAutoAdjust(getFlags7(ix)); }
 
     public void setDraw(int ix) { setFlags7(ix, Flags7.setDraw(getFlags7(ix))); }
@@ -218,9 +216,21 @@ public class GraphicObjects {
         if(counter >= 0x10) setFlagsC(ix, (getFlagsC(ix) & 0x0F) + counter - 0x10);
     }
 
+    public boolean isOobX(int ix) { return data.isSet(0, ix + 0x0C); }
+    public boolean isOobY(int ix) { return data.isSet(1, ix + 0x0C); }
+    public boolean isOobXY(int ix) { return isOobX(ix) || isOobY(ix); }
+    public boolean isOobZ(int ix) { return data.isSet(2, ix + 0x0C); }
+
+    public void setOobX(int ix) { data.setBit(0, ix + 0x0C); }
+    public void setOobY(int ix) { data.setBit(1, ix + 0x0C); }
+    public void setOobZ(int ix) { data.setBit(2, ix + 0x0C); }
+
+
     // Flags D
     public int getFlagsD(int ix) { return data.getS(ix + 0x0D); }
     public void setFlagsD(int ix, int f) { data.set(ix + 0x0D, f); }
+
+    public boolean isDead(int ix) { return data.isSet(6, ix + 0x0D); }
 
     public int getTurnCounter(int ix) { return getFlagsD(ix) & 0x07; }
     public void initTurnCounter(int ix) { setFlagsD(ix, 2); }

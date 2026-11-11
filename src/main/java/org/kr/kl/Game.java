@@ -2233,7 +2233,7 @@ public class Game implements Runnable {
         int dzAdj = graphicObjects.getDZ(ix); // H
         if(dzAdj != 0) {
             dzAdj = adj_dZ_for_out_of_bounds_CA5A(graphicObjects.data, ix);
-            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(graphicObjects.data, ix, 0, 0, dzAdj);
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(ix, 0, 0, dzAdj);
         }
         int dxAdj = graphicObjects.getDX(ix); // C
         if(dxAdj != 0) {
@@ -2396,7 +2396,7 @@ public class Game implements Runnable {
         if(graphicObjects.getDeadlyIfPlayerHitsObject(playerIx)) graphicObjects.setDead(objectIx); // bit 5->6
     }
 
-    private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
+    private int adj_dZ_for_obj_intersect_CC38(int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
         for(int i=0; i<0x28; i++) {
             if(is_object_not_ignored_B538(iy)) {
@@ -2404,15 +2404,13 @@ public class Game implements Runnable {
                 if (do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
                     while (do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
-                        block.setBit(2, ix + 0x0C); // set Z OOB
-
+                        graphicObjects.setOobZ(ix); // set Z OOB
                         setDestroyedFlags(ix, iy);
-
-                        block.setBit(3, iy + 0x0D); //triggered (falling, collapsing blocks)
-                        boolean movable = block.isSet(2, ix + 0x07);
+                        graphicObjects.setTriggered(iy); //triggered (falling, collapsing blocks)
+                        boolean movable = graphicObjects.isMoveable(ix);
                         if (movable) {
-                            if (block.getS(ix + 0x09) == 0) block.set(ix + 0x09, block.getS(iy + 0x09)); //copy dX
-                            if (block.getS(ix + 0x0A) == 0) block.set(ix + 0x0A, block.getS(iy + 0x0A)); //copy dY
+                            if (graphicObjects.getDX(ix) == 0) graphicObjects.setDX(ix, graphicObjects.getDX(iy)); //copy dX
+                            if (graphicObjects.getDY(ix) == 0) graphicObjects.setDY(ix, graphicObjects.getDY(iy)); //copy dY
                         }
                         dzAdj = adj_d_for_out_of_bounds_CA89(dzAdj);
                         if (dzAdj == 0) return dzAdj;
