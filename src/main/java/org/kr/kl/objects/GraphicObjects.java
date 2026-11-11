@@ -137,6 +137,7 @@ public class GraphicObjects {
     public void setD(int ix, int d) { data.set(ix + 5, d); }
     public void setH(int ix, int h) { data.set(ix + 6, h); }
     public void setFlags7(int ix, int h) { data.set(ix + 7, h); }
+    public void setScreen(int ix, int h) { data.set(ix + 8, h); }
     public void setDX(int ix, int dx) { data.set(ix + 0x09, dx); }
     public void setDY(int ix, int dy) { data.set(ix + 0x0A, dy); }
     public void setDZ(int ix, int dz) { data.set(ix + 0x0B, dz); }

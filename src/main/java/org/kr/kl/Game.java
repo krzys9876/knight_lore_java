@@ -3617,7 +3617,7 @@ public class Game implements Runnable {
                     specialObjects.setCurrentX(spi, graphicObjects.getX(iy));
                     specialObjects.setCurrentY(spi, graphicObjects.getY(iy));
                     specialObjects.setCurrentZ(spi, graphicObjects.getZ(iy));
-                    int screen = graphicObjects.data.getU(iy + 8);
+                    int screen = graphicObjects.getScreen(iy);
                     specialObjects.setScreen(spi, screen);
                 }
             }
@@ -3626,16 +3626,15 @@ public class Game implements Runnable {
     }
 
     private void retrieve_screen_D3C6() {
-        int de = 0x5C88; // target
-        int bc = 0x6BD1; // location table end
-        int hl = 0x6251; // location table start
+        int bc = location_tbl_6251.endExcl()-1; // location table end
+        int hl = location_tbl_6251.start; // location table start
         // $D12D LD DE,$5C08   ;
         // $D130 PUSH DE       ;
         // $D131 POP IX        ;
-        int ix = 0x5C08; // set in lose_life_D12A
+        int ix = graphicObjects.start(); // set in lose_life_D12A
 
         boolean found = false;
-        int currLocId = graphicObjects.data.getU(ix + 8);
+        int currLocId = graphicObjects.getScreen(ix);
 
         while(hl < bc && !found) {
             int tableLocId = location_tbl_6251.getU(hl);
@@ -3650,7 +3649,7 @@ public class Game implements Runnable {
         if(!found) {
             // This should be unreachable
             debugPanel2.append("Location not found: ERROR");
-            graphicObjects.data.reset();
+            graphicObjects.reset();
             return;
         }
         // @label=found_screen
@@ -3709,18 +3708,18 @@ public class Game implements Runnable {
                     int x = (locByte & 0b00000111);
                     int y = (locByte & 0b00111000) >> 3;
                     int z = (locByte & 0b11000000) >> 6;
-                    graphicObjects.data.set(targetAddr, blockDef.getU(blockDef.start + templatePart * 6)); // object ID
-                    graphicObjects.data.set(targetAddr + 4, blockDef.getU(blockDef.start + templatePart * 6 + 1)); // width
-                    graphicObjects.data.set(targetAddr + 5, blockDef.getU(blockDef.start + templatePart * 6 + 2)); // depth
-                    graphicObjects.data.set(targetAddr + 6, blockDef.getU(blockDef.start + templatePart * 6 + 3)); // height
-                    graphicObjects.data.set(targetAddr + 7, blockDef.getU(blockDef.start + templatePart * 6 + 4)); // flags
-                    graphicObjects.data.set(targetAddr + 8, currLocId); // screen
+                    graphicObjects.setGrNo(targetAddr, blockDef.getU(blockDef.start + templatePart * 6)); // object ID
+                    graphicObjects.setW(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 1)); // width
+                    graphicObjects.setD(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 2)); // depth
+                    graphicObjects.setH(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 3)); // height
+                    graphicObjects.setFlags7(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 4)); // flags
+                    graphicObjects.setScreen(targetAddr, currLocId); // screen
                     int offsets = blockDef.getU(blockDef.start + templatePart * 6 + 5);
                     int x1 = ((offsets << 3) & 8);
                     int y1 = ((offsets << 2) & 8);
-                    graphicObjects.data.set(targetAddr + 1, x1 + x * 16 + 0x48); // X
-                    graphicObjects.data.set(targetAddr + 2, y1 + y * 16 + 0x48); // Y
-                    graphicObjects.data.set(targetAddr + 3, ((z * 12 + offsets) & 0xFC) + variables.getU(0x5BAE)); // Y, variable stores room size Z
+                    graphicObjects.setX(targetAddr, x1 + x * 16 + 0x48); // X
+                    graphicObjects.setY(targetAddr, y1 + y * 16 + 0x48); // Y
+                    graphicObjects.setZ(targetAddr, ((z * 12 + offsets) & 0xFC) + variables.getU(0x5BAE)); // Y, variable stores room size Z
                     for (int t = 9; t < 32; t++) graphicObjects.data.set(targetAddr + t, 0);  // reset remaining info
                     targetAddr += 32;
                     templateDone = blockDef.getU(blockDef.start + templatePart * 6 + 6) == 0; // some templates consists of two objects (guards)
