@@ -83,6 +83,8 @@ public class GraphicObjects {
         for(int i = 0; i < 0x20; i++) data.set(ix + i, 0);
     }
 
+    public String objectInfo(int num, int ix) { return data.objectInfo(num, ix); }
+
     public int getGrNo(int ix) { return data.getU(ix); }
     public int getX(int ix) { return data.getU(ix + 1); }
     public int getY(int ix) { return data.getU(ix + 2); }
@@ -173,7 +175,7 @@ public class GraphicObjects {
 
     // Flag 7
     public int getFlags7(int ix) { return data.getS(ix + 7); }
-    public void setFlags7(int ix, int h) { data.set(ix + 7, h); }
+    public void setFlags7(int ix, int f) { data.set(ix + 7, f); }
 
     public boolean isNearArch(int ix) { return Flags7.isNearArch(getFlags7(ix)); }
     public void setNearArch(int ix) { setFlags7(ix, Flags7.setNearArch(getFlags7(ix))); }
@@ -196,4 +198,7 @@ public class GraphicObjects {
     public void flipHFlip(int ix) { setFlags7(ix, Flags7.flipHFlip(getFlags7(ix))); }
 
     public boolean isVFlip(int ix) { return Flags7.isVFlip(getFlags7(ix)); }
+
+    // Flag C
+    public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
 }
