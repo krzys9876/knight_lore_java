@@ -146,8 +146,8 @@ public class GraphicObjects {
     public void setSpriteHeight(int ix, int h) { data.set(ix + 0x19, h); }
 
     public void setDeadlyIfObjectHitsPlayer(int ix) { data.setBit(7, ix + 0x0D); }
-    public void setDeadlyIfPlayerHitsObject(int ix) { data.setBit(5, ix + 0x0D); }
-    public void setBothDeadlyFlags(int ix) { data.set(ix + 0x0D, data.getU(ix + 0x0D) | 0xA0);; }
+    //public void setDeadlyIfPlayerHitsObject(int ix) { data.setBit(5, ix + 0x0D); }
+    public void setBothDeadlyFlags(int ix) { data.set(ix + 0x0D, data.getU(ix + 0x0D) | 0xA0); }
     public void setDead(int ix) { data.setBit(6, ix + 0x0D); }
     public void resetDead(int ix) { data.resetBit(6, ix + 0x0D); }
     public void setDeadOtherHalf(int ix) { setDead(ix + 0x20); }
