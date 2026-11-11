@@ -2056,7 +2056,7 @@ public class Game implements Runnable {
                 graphicObjects.setZ(ix, graphicObjects.getZ(ix) + 0x0C);
                 graphicObjects.setZ(ix + 0x20, graphicObjects.getZ(ix + 0x20) + 0x0C);
                 calc_pixel_XY_D6C9(iy);
-                drop_object_C106(graphicObjects.data, ix, iy);
+                drop_object_C106(ix, iy);
             }
         }
     }
@@ -2087,24 +2087,24 @@ public class Game implements Runnable {
             adjust_carried_C12B();
         } else {
             block.set(iy, a);
-            drop_object_C106(block, ix, iy);
+            drop_object_C106(ix, iy);
         }
 
     }
 
-    private void drop_object_C106(DataBlock block, int ix, int iy) {
+    private void drop_object_C106(int ix, int iy) {
         int hl = inventory_5BD8.start + 0x0C; // current slot
         int flags = inventory_5BD8.getU(hl + 1);
         int d = inventory_5BD8.getU(hl + 3); // 2-byte pointer to special objects table
         int e = inventory_5BD8.getU(hl + 2);
-        block.set(iy + 4, 5); // width=5
-        block.set(iy + 5, 5); // depth=5
-        block.set(iy + 6, 0x0C); // height=12
-        block.set(iy + 7, flags); //flags7
-        block.set(iy + 8, block.getU(ix + 8)); // ; scrn
-        block.set(iy + 0x11, d);
-        block.set(iy + 0x10, e); // set ptr to obj_tbl entry
-        block.setBit(0, iy + 0x0D); // flag just dropped
+        graphicObjects.setW(iy, 5); // width=5
+        graphicObjects.setD(iy, 5); // depth=5
+        graphicObjects.setH(iy, 0x0C); // height=12
+        graphicObjects.setFlags7(iy, flags); //flags7
+        graphicObjects.setScreen(iy, graphicObjects.getScreen(ix)); // ; scrn
+        graphicObjects.setTemp10(iy, e); // set ptr to obj_tbl entry
+        graphicObjects.setTemp11(iy, d);
+        graphicObjects.setJustDropped(iy); // flag just dropped
         adjust_carried_C12B();
     }
 

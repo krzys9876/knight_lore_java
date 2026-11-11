@@ -162,6 +162,7 @@ public class GraphicObjects {
     public void setTriggered(int ix) { data.setBit(3, ix + 0x0D); }
     public void resetTriggered(int ix) { data.resetBit(3, ix + 0x0D); }
     public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
+    public void setJustDropped(int ix) { data.setBit(0, ix + 0x0D); }
     public void resetJustDropped(int ix) { data.resetBit(0, ix + 0x0D); }
     public void toggleEastWest(int ix) { data.set(ix + 0x0D, (data.getU(ix + 0x0D) ^ 0x01)); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
