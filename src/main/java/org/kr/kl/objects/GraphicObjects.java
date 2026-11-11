@@ -92,6 +92,7 @@ public class GraphicObjects {
     public int getTemp10(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x10); }
     public int getTemp11(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x11); }
     public int getYAdj(int ix) { return graphic_objs_tbl_5C08.getS(ix + 0x13); }
+    public int getScreen(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x08); }
     public boolean isHFlip(int ix) { return graphic_objs_tbl_5C08.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return graphic_objs_tbl_5C08.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isOobX(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0C); }
@@ -108,7 +109,8 @@ public class GraphicObjects {
     public boolean justDropped(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0D); }
     public boolean isEast(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0D); }
     public boolean isNorth(int ix) { return graphic_objs_tbl_5C08.isSet(1, ix + 0x0D); }
-    public int getScreen(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x08); }
+    public boolean isWipe(int ix) { return graphic_objs_tbl_5C08.isSet(5, ix + 7); }
+
 
     public void setGrNo(int ix, int grNo) { graphic_objs_tbl_5C08.set(ix, grNo); }
     public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }

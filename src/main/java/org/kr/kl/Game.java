@@ -1401,11 +1401,11 @@ public class Game implements Runnable {
 
     private void list_objects_to_draw_CE62() {
         objects_to_draw_CE8B.reset();
-        int ix = 0x5C08;
+        int ix = graphicObjects.start();
         int hl = objects_to_draw_CE8B.start;
         final int cnt = 40;
         for(int i=0; i<cnt; i++) {
-            if(graphicObjects.graphic_objs_tbl_5C08.getU(ix + i*32) != 0 && (graphicObjects.graphic_objs_tbl_5C08.getU(ix + i*32 + 7) & 0x10) > 0) {
+            if(graphicObjects.getGrNo(ix + i*0x20) != 0/* && (!graphicObjects.isWipe(ix + i*0x20))*/) {
                 objects_to_draw_CE8B.set(hl, i);
                 hl++;
             }
