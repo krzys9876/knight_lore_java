@@ -957,12 +957,12 @@ public class Game implements Runnable {
         variables.set(0x5BBA, newLivesLeft);
         int scratch = sun_moon_scratchpad_C44D.getU(0xC44D);
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
-        int playerGraphicsNo = graphicObjects.graphic_objs_tbl_5C08.getU(0x5C08+0x10);
+        int playerGraphicsNo = graphicObjects.getTemp10(graphicObjects.start());
         playerGraphicsNo = (playerGraphicsNo & 0x1F) + scratch;
-        graphicObjects.graphic_objs_tbl_5C08.set(0x5C08+0x10, playerGraphicsNo);
-        int playerGraphicsNoTop = graphicObjects.graphic_objs_tbl_5C08.getU(0x5C08+0x30);
+        graphicObjects.setTemp10(graphicObjects.start(), playerGraphicsNo);
+        int playerGraphicsNoTop = graphicObjects.getTemp10(graphicObjects.start()+0x20);
         playerGraphicsNoTop = (playerGraphicsNoTop & 0x0F) + scratch + 0x20;
-        graphicObjects.graphic_objs_tbl_5C08.set(0x5C08+0x30, playerGraphicsNoTop);
+        graphicObjects.setTemp10(graphicObjects.start()+0x20, playerGraphicsNoTop);
     }
 
     private void game_over_BA22() {
@@ -1132,14 +1132,14 @@ public class Game implements Runnable {
                 debugPanel2.setText("");
                 int cnt = 0;
                 for(int ix = graphicObjects.graphic_objs_tbl_5C08.start; ix < graphicObjects.graphic_objs_tbl_5C08.endExcl(); ix+=0x20) {
-                    if(graphicObjects.graphic_objs_tbl_5C08.getU(ix)!=0) {
+                    if(graphicObjects.getGrNo(ix)!=0) {
                         debugPanel2.append(graphicObjects.graphic_objs_tbl_5C08.objectInfo(cnt, ix));
                     }
                     cnt++;
                 }
                 debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
                 //debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
-                debugPanel1.append(String.format("Current room: %02X (hex)", graphicObjects.graphic_objs_tbl_5C08.getU(graphicObjects.graphic_objs_tbl_5C08.start + 8)));
+                debugPanel1.append(String.format("Current room: %02X (hex)", graphicObjects.getScreen(graphicObjects.start())));
                 debugPanel1.append(String.format("Objects collected: %d of %d", variables.getU(0x5BBB), params.getCauldronRequiredObjects()));
                 int hl = ret_next_obj_required_C274();
                 if(hl < objects_required_C27D.endExcl()) {
@@ -1234,27 +1234,26 @@ public class Game implements Runnable {
         // @label=loc_B074
         variables.set(0x5BC5, 0);
         int ix = 0x5C08;
-        if(graphicObjects.graphic_objs_tbl_5C08.getU(ix)==0 && graphicObjects.graphic_objs_tbl_5C08.getU(ix + 0x20)==0) {
+        if(graphicObjects.getGrNo(ix)==0 && graphicObjects.getGrNo(ix + 0x20)==0) {
             player_dies_AFB7();
             exitingScreen = true;
             return gameOver;
         }
 
         // @label=reset_objs_wipe_flag
-        for(int addr = graphicObjects.graphic_objs_tbl_5C08.start+7; addr<graphicObjects.graphic_objs_tbl_5C08.endExcl(); addr+=32)
-            graphicObjects.graphic_objs_tbl_5C08.resetBit(5, addr); // c$B090 RES 5,(HL)    ;
-
+        for(int addr = graphicObjects.start(); addr<graphicObjects.graphic_objs_tbl_5C08.endExcl(); addr+=0x20)
+            graphicObjects.resetWipe(addr); // c$B090 RES 5,(HL)    ;
 
         return gameOver;
     }
 
     private void init_cauldron_bubbles_B8A9() {
-        int ix = graphicObjects.graphic_objs_tbl_5C08.start;
-        boolean cauldronRoom = graphicObjects.graphic_objs_tbl_5C08.getU(ix + 8) == 0x88;
+        int ix = graphicObjects.start();
+        boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
         if(!cauldronRoom) return;
 
         int de = 0x5C68;
-        int grNo = graphicObjects.graphic_objs_tbl_5C08.getU(de); // ; special_objs_here[1]
+        int grNo = graphicObjects.getGrNo(de); // ; special_objs_here[1]
         if(grNo != 0) return;
 
         if(variables.getU(0x5BC3) != 0) return;
@@ -1262,8 +1261,7 @@ public class Game implements Runnable {
         // 18 bytes to copy
         for(int i=0; i<0x12; i++) graphicObjects.graphic_objs_tbl_5C08.set(de+i, cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + i));
         // c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.graphic_objs_tbl_5C08.set(de + 0x12, -12); //F4
-        graphicObjects.graphic_objs_tbl_5C08.set(de + 0x13, -4); //FC
+        graphicObjects.setXYAdj(de, -12, -4);
     }
 
     private long getDelayMs() {

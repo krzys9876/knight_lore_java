@@ -150,4 +150,6 @@ public class GraphicObjects {
     public void clearOob(int ix) { graphic_objs_tbl_5C08.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
     public void resetJustDropped(int ix) { graphic_objs_tbl_5C08.resetBit(0, ix + 0x0D); }
     public void toggleEastWest(int ix) { graphic_objs_tbl_5C08.set(ix + 0x0D, (graphic_objs_tbl_5C08.getU(ix + 0x0D) ^ 0x01)); }
+    public void setWipe(int ix) { graphic_objs_tbl_5C08.setBit(5, ix+7); }
+    public void resetWipe(int ix) { graphic_objs_tbl_5C08.resetBit(5, ix+7); }
 }
