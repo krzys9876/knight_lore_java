@@ -2652,9 +2652,9 @@ public class Game implements Runnable {
     private void handle_left_right_C89F(DataBlock block, int ix) {
         //NOTE: we ignore input method and react to keyboard only
         // @label=left_right_rotational
-        int counter = block.getU(ix + 0x0D);
-        if((counter & 0x07) > 0) { // ; too soon to turn again?
-            block.set(ix + 0x0D, (counter & 0x07)-1);
+        int counter = graphicObjects.getTurnCounter(ix);
+        if(counter > 0) { // ; too soon to turn again?
+            graphicObjects.decTurnCounter(ix);
             return;
         }
         int keys = variables.getU(0x5BB5);

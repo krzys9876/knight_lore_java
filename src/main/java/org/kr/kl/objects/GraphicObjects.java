@@ -102,7 +102,6 @@ public class GraphicObjects {
     public int getDYu(int ix) { return data.getU(ix + 0x0A); }
     public int getDZ(int ix) { return data.getS(ix + 0x0B); }
     public int getDZu(int ix) { return data.getU(ix + 0x0B); }
-    public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
     public int getDXAdj(int ix) { return data.getS(ix + 0x0E); }
     public int getDYAdj(int ix) { return data.getS(ix + 0x0F); }
     public int getTemp10(int ix) { return data.getU(ix + 0x10); }
@@ -207,7 +206,8 @@ public class GraphicObjects {
 
     public boolean isVFlip(int ix) { return Flags7.isVFlip(getFlags7(ix)); }
 
-    // Flag C
+    // Flags C
+    public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
     public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
 
     public int getEnterCounter(int ix) { return getFlagsC(ix) & 0xF0; }
@@ -215,4 +215,15 @@ public class GraphicObjects {
         int counter = getEnterCounter(ix);
         if(counter >= 0x10) setFlagsC(ix, (getFlagsC(ix) & 0x0F) + counter - 0x10);
     }
+
+    // Flags D
+    public int getFlagsD(int ix) { return data.getS(ix + 0x0D); }
+    public void setFlagsD(int ix, int f) { data.set(ix + 0x0D, f); }
+
+    public int getTurnCounter(int ix) { return getFlagsD(ix) & 0x07; }
+    public void decTurnCounter(int ix) {
+        int counter = getTurnCounter(ix);
+        if(counter >= 1) setFlagsD(ix, (getFlagsD(ix) & 0xF8) + counter - 1);
+    }
+
 }
