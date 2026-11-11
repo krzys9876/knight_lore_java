@@ -2022,7 +2022,7 @@ public class Game implements Runnable {
                             iy+=0x20;
                         }
                     }
-                    if(foundPlace) room_to_drop_C0B2(graphicObjects.data, ix, iy);
+                    if(foundPlace) room_to_drop_C0B2(ix, iy);
                 };
             }
 
@@ -2034,31 +2034,30 @@ public class Game implements Runnable {
         }
     }
 
-    private void room_to_drop_C0B2(DataBlock block, int ix, int iy) {
+    private void room_to_drop_C0B2(int ix, int iy) {
         int hl = inventory_5BD8.start + 0x0C;
         if(inventory_5BD8.getU(hl) == 0) {
             adjust_carried_C12B();
         } else {
             if(cant_drop_5BD3.getU(cant_drop_5BD3.start) == 0) {
                 int grNo = inventory_5BD8.getU(hl);
-                block.set(iy, grNo);
-                boolean cauldronRoom = block.getU(ix + 8) == 0x88;
+                graphicObjects.setGrNo(iy, grNo);
+                boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
                 if(cauldronRoom) {
-                    int z = block.getU(ix + 3);
+                    int z = graphicObjects.getZ(ix);
                     if(z >= 0x98) {
-                        block.setBit(3, iy);
+                        graphicObjects.setBitGrNo(iy, 3);
                         variables.set(0x5BC4, 1);
                     }
                 }
-                block.set(iy + 1, block.getU(ix + 1));
-                block.set(iy + 2, block.getU(ix + 2));
-                block.set(iy + 3, block.getU(ix + 3));
-                block.set(ix + 3, block.getU(ix + 3) + 0x0C);
-                block.set(ix + 0x23, block.getU(ix + 0x23) + 0x0C);
+                graphicObjects.setX(iy, graphicObjects.getX(ix));
+                graphicObjects.setY(iy, graphicObjects.getY(ix));
+                graphicObjects.setZ(iy, graphicObjects.getZ(ix));
+                graphicObjects.setZ(ix, graphicObjects.getZ(ix) + 0x0C);
+                graphicObjects.setZ(ix + 0x20, graphicObjects.getZ(ix + 0x20) + 0x0C);
                 calc_pixel_XY_D6C9(iy);
-                drop_object_C106(block, ix, iy);
+                drop_object_C106(graphicObjects.data, ix, iy);
             }
-
         }
     }
 
