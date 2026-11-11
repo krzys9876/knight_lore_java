@@ -103,6 +103,8 @@ public class GraphicObjects {
     public int getDZ(int ix) { return data.getS(ix + 0x0B); }
     public int getDZu(int ix) { return data.getU(ix + 0x0B); }
     public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
+    public int getDXAdj(int ix) { return data.getS(ix + 0x0E); }
+    public int getDYAdj(int ix) { return data.getS(ix + 0x0F); }
     public int getTemp10(int ix) { return data.getU(ix + 0x10); }
     public int getTemp11(int ix) { return data.getU(ix + 0x11); }
     public int getXAdj(int ix) { return data.getS(ix + 0x12); }

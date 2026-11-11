@@ -2198,7 +2198,7 @@ public class Game implements Runnable {
         int flags = block.getU(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
         boolean jumping = DataBlock.isSetS(3, flags);
         boolean forward = variables.isSet(2, 0x5BB5);
-        if(jumping || ((flags & 0xF0) != 0) || forward) calc_plyr_dXY_C9FB(block, ix);
+        if(jumping || ((flags & 0xF0) != 0) || forward) calc_plyr_dXY_C9FB(ix);
 
         int dz = block.getS(ix + 0x0B);
         if(dz < 0) dz -= 2;
@@ -2547,16 +2547,16 @@ public class Game implements Runnable {
         graphicObjects.setZ(ix, graphicObjects.getZ(ix) + graphicObjects.getDZ(ix));
     }
 
-    private void calc_plyr_dXY_C9FB(DataBlock block, int ix) {
-        block.set(ix + 0x09, block.getS(ix + 0x09) + block.getS(ix + 0x0E)); // dX
-        block.set(ix + 0x0A, block.getS(ix + 0x0A) + block.getS(ix + 0x0F)); // dY
-        block.set(ix + 0x0E, 0); // dX_adj
-        block.set(ix + 0x0F, 0); // dY_adj
+    private void calc_plyr_dXY_C9FB(int ix) {
+        graphicObjects.setDX(ix, graphicObjects.getDX(ix) + graphicObjects.getDXAdj(ix)); // dX
+        graphicObjects.setDY(ix, graphicObjects.getDY(ix) + graphicObjects.getDYAdj(ix)); // dY
+        graphicObjects.setDXAdj(ix, 0); // dX_adj
+        graphicObjects.setDYAdj(ix, 0); // dY_adj
         switch(get_sprite_dir_CA1E(ix)) {
-            case 0: block.set(ix + 0x09, (block.getS(ix + 0x09) - 3)); break;
-            case 1: block.set(ix + 0x09, (block.getS(ix + 0x09) + 3)); break;
-            case 2: block.set(ix + 0x0A, (block.getS(ix + 0x0A) + 3)); break;
-            case 3: block.set(ix + 0x0A, (block.getS(ix + 0x0A) - 3)); break;
+            case 0: graphicObjects.setDX(ix, (graphicObjects.getDX(ix) - 3)); break;
+            case 1: graphicObjects.setDX(ix, (graphicObjects.getDX(ix) + 3)); break;
+            case 2: graphicObjects.setDY(ix, (graphicObjects.getDY(ix) + 3)); break;
+            case 3: graphicObjects.setDY(ix, (graphicObjects.getDY(ix) - 3)); break;
         }
     }
 
