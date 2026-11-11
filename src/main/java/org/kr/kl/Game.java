@@ -71,7 +71,7 @@ public class Game implements Runnable {
     private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
     private final DataBlock menu_text_BDBA = InitialData.block("menu_text_BDBA");
     private final DataBlock font_6108 = InitialData.block("font_6108");
-    private final DataBlock sprite_scratchpad_BFDB = new DataBlock(0xBFDB, 0x20);
+    private final GraphicObjects sprite_scratchpad_BFDB = new GraphicObjects(0xBFDB, 1);
     private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
     //private final DataBlock special_objs_tbl_6FF2 = InitialData.block("special_objs_tbl_6FF2");
     private final SpecialObjects specialObjects = new SpecialObjects();
@@ -623,14 +623,14 @@ public class Game implements Runnable {
         int ix = 0xBFDB;
         int hl = 0xD2CF;
         // CALL $D24C x4
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF); // corners
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, ix, hl, border_data_D2CF); // horizontal lines
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 0, 1, 0x80, ix, hl, border_data_D2CF); // vertical lines
-        transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 0, 1, 0x80, ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, border_data_D2CF); // corners
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.data, 8, 0, 0x18, ix, hl, border_data_D2CF); // horizontal lines
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.data, 8, 0, 0x18, ix, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.data, 0, 1, 0x80, ix, hl, border_data_D2CF); // vertical lines
+        transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.data, 0, 1, 0x80, ix, hl, border_data_D2CF);
     }
 
     private int transfer_sprite_and_print_D24C(DataBlock metadata, int ix, int hl, DataBlock source) {
@@ -1340,18 +1340,18 @@ public class Game implements Runnable {
     }
 
     private void display_objects_BF4E() {
-        int ix = sprite_scratchpad_BFDB.start;
+        int ix = sprite_scratchpad_BFDB.start();
         for(int b=0; b<3; b++) {
             if(inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4)!=0) {
                 int x = (2-b)*24+16;
                 int y = 0;
-                sprite_scratchpad_BFDB.set(ix + 0x1A, x);
-                sprite_scratchpad_BFDB.set(ix + 0x1B, y);
+                sprite_scratchpad_BFDB.data.set(ix + 0x1A, x);
+                sprite_scratchpad_BFDB.data.set(ix + 0x1B, y);
                 int hl = calc_vidbuf_addr_D811(y, x);
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
                 int spriteIndex = inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4);
-                sprite_scratchpad_BFDB.set(ix, spriteIndex);
-                print_sprite_D718(sprite_scratchpad_BFDB, ix);
+                sprite_scratchpad_BFDB.data.set(ix, spriteIndex);
+                print_sprite_D718(sprite_scratchpad_BFDB.data, ix);
                 // TODO: implement blit_to_screen
                 // $BFA2 CALL $D67C    ;
                 int attr = object_attributes_BFD3.getU(object_attributes_BFD3.start + (spriteIndex & 0x0F));
@@ -1385,12 +1385,12 @@ public class Game implements Runnable {
     }
 
     private void print_lives_gfx_BC7A() {
-        sprite_scratchpad_BFDB.reset();
-        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start, 0x8C);
-        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start + 7, 0);
-        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start + 0x1A, 0x10);
-        sprite_scratchpad_BFDB.set(sprite_scratchpad_BFDB.start + 0x1B, 0x20);
-        print_sprite_D718(sprite_scratchpad_BFDB, sprite_scratchpad_BFDB.start);
+        sprite_scratchpad_BFDB.data.reset();
+        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start(), 0x8C);
+        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start() + 7, 0);
+        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start() + 0x1A, 0x10);
+        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start() + 0x1B, 0x20);
+        print_sprite_D718(sprite_scratchpad_BFDB.data, sprite_scratchpad_BFDB.start());
         for(int i=0; i<2; i++) mainMemory.setByteAt(0x5A42+i, 0x47);
         for(int i=0; i<4; i++) mainMemory.setByteAt(0x5A62+i, 0x47);
     }
@@ -1547,15 +1547,15 @@ public class Game implements Runnable {
     }
 
     private void display_panel_D255() {
-        sprite_scratchpad_BFDB.reset();
-        int ix = sprite_scratchpad_BFDB.start;
+        sprite_scratchpad_BFDB.data.reset();
+        int ix = sprite_scratchpad_BFDB.start();
         int hl = panel_data_D27E.start;
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 16, -8, 5, ix, hl, panel_data_D27E);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 16, 8, 5, ix, hl, panel_data_D27E);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
-        transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.data, 16, -8, 5, ix, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, panel_data_D27E);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.data, 16, 8, 5, ix, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, panel_data_D27E);
+        transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.data, ix, hl, panel_data_D27E);
     }
 
     private void display_sun_moon_frame_C3A4() {
@@ -1575,15 +1575,15 @@ public class Game implements Runnable {
         fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
         print_sprite_D718(sun_moon_scratchpad_C44D.data, ix);
 
-        ix = sprite_scratchpad_BFDB.start;
-        sprite_scratchpad_BFDB.set(ix + 7, 0);
-        sprite_scratchpad_BFDB.set(ix, 0x5A);
-        sprite_scratchpad_BFDB.set(ix + 0x1A, 0xB8);
-        sprite_scratchpad_BFDB.set(ix + 0x1B, 0);
-        print_sprite_D718(sprite_scratchpad_BFDB, ix);
-        sprite_scratchpad_BFDB.set(ix + 0x1A, 0xD0);
-        sprite_scratchpad_BFDB.set(ix, 0xBA);
-        print_sprite_D718(sprite_scratchpad_BFDB, ix);
+        ix = sprite_scratchpad_BFDB.start();
+        sprite_scratchpad_BFDB.data.set(ix + 7, 0);
+        sprite_scratchpad_BFDB.data.set(ix, 0x5A);
+        sprite_scratchpad_BFDB.data.set(ix + 0x1A, 0xB8);
+        sprite_scratchpad_BFDB.data.set(ix + 0x1B, 0);
+        print_sprite_D718(sprite_scratchpad_BFDB.data, ix);
+        sprite_scratchpad_BFDB.data.set(ix + 0x1A, 0xD0);
+        sprite_scratchpad_BFDB.data.set(ix, 0xBA);
+        print_sprite_D718(sprite_scratchpad_BFDB.data, ix);
     }
 
     // ; Input:HL starting location B  width (bytes) C  height (lines), A - value
