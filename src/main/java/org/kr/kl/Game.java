@@ -28,26 +28,10 @@ public class Game implements Runnable {
 
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final long CAULDRON_ATTR_DELAY_MS = 120;
-    private final long REPAINT_MS = 5;
 
     private long lastTick = 0;
     private int sunTick = 0;
     private long tickNo = 0;
-
-    //private final long REPAINT_MS = 5;
-    //private final long CAULDRON_ATTR_DELAY_MS = 120;
-    //private final int SUN_TICK_PER_GAME_TICK = 8;
-
-    //private final long DELAY_MS; // 90ms
-    //private final long DELAY_MS_REPLAY; // 90ms
-    //private final int MAX_DAYS_BCD; // NOTE: number in BCD, 0x98 is max (wraps at 0x99)
-    //private final int CAULDRON_REQUIRED_OBJECTS; // 0x0E
-    //private final int INITIAL_LIVES; // NOTE: number in BCD
-
-    //private final boolean skipMenu;
-    //private final boolean disableDeath;
-    //private final boolean disableLoseLife;
-    //private final boolean disableIncDays;
 
     // $4000-$57FF - spectrum video memory
     // $5800-$5AFF - spectrum attribute memory
