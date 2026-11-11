@@ -2390,15 +2390,11 @@ public class Game implements Runnable {
     }
 
     private void setDestroyedFlags(DataBlock block, int ix, int iy) {
-        // TODO: replace this with proper configuration
         if(params.isDisableDeath()) return;
-
-        int flagsObj1 = block.getU(ix + 0x0D);
-        int flagsObj2 = block.getU(iy + 0x0D);
-        int obj2DestroyedFlags = ((flagsObj1 >> 1) & 0x40) | flagsObj2; // bit 7->6
-        block.set(iy + 0x0D, obj2DestroyedFlags);
-        int obj1DestroyedFlags = (obj2DestroyedFlags << 1) & 0x40 | flagsObj1; // bit 5->6
-        block.set(ix + 0x0D, obj1DestroyedFlags);
+        // bit 7->6
+        if(graphicObjects.getDeadlyIfObjectHitsPlayer(ix)) graphicObjects.setDead(iy);
+        // bit 5->6
+        if(graphicObjects.getDeadlyIfPlayerHitsObject(iy)) graphicObjects.setDead(ix);
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {

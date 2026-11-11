@@ -229,4 +229,7 @@ public class GraphicObjects {
         if(counter >= 1) setFlagsD(ix, (getFlagsD(ix) & 0xF8) + counter - 1);
     }
 
+    public boolean getDeadlyIfObjectHitsPlayer(int ix) { return data.isSet(7, ix + 0x0D); }
+    public boolean getDeadlyIfPlayerHitsObject(int ix) { return data.isSet(5, ix + 0x0D); }
+
 }
