@@ -79,6 +79,10 @@ public class GraphicObjects {
         for(int i = 0; i < 0x20; i++) data.set(ix + i, other.data.getU(otherIx + i));
     }
 
+    public void copyFrom(DataBlock other, int otherIx, int ix, int bytes) {
+        for(int i = 0; i < bytes; i++) data.set(ix + i, other.getU(otherIx + i));
+    }
+
     public void resetObject(int ix) {
         for(int i = 0; i < 0x20; i++) data.set(ix + i, 0);
     }

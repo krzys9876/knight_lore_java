@@ -874,13 +874,8 @@ public class Game implements Runnable {
             plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 3 + 8, 12 + (128+overrideZ) & 0xFF); // negative convention
         }
 
-        for(int i=0; i<8; i++)
-            plyr_spr_1_scratchpad_D161.data.set(plyr_spr_1_scratchpad_D161.start() + i,
-                    plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i));
-        for(int i=0; i<8; i++)
-            plyr_spr_2_scratchpad_D181.data.set(plyr_spr_2_scratchpad_D181.start()+i,
-                    plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i+8));
-
+        plyr_spr_1_scratchpad_D161.copyFrom(plyr_spr_init_data_D1A1, plyr_spr_init_data_D1A1.start, plyr_spr_1_scratchpad_D161.start(), 8);
+        plyr_spr_2_scratchpad_D181.copyFrom(plyr_spr_init_data_D1A1, plyr_spr_init_data_D1A1.start+8, plyr_spr_2_scratchpad_D181.start(), 8);
 
         // LD A,$12      ; graphic_no (player top half)
         // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
