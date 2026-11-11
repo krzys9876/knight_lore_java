@@ -3776,25 +3776,25 @@ public class Game implements Runnable {
         int y = graphicObjects.getY(ix);
         if(x == 0) {
             // @label=enter_arch_e
-            adjust_plyr_Z_for_arch_D38C(graphicObjects.data, ix,0x37);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0x37);
             int a = roomSizeX + 0x80 + graphicObjects.getW(ix);
             graphicObjects.setX(ix, a);
             copy_spr_1_xy_2_D34D(ix);
         } else if(x == 0xFF) {
             // @label=enter_arch_w
-            adjust_plyr_Z_for_arch_D38C(graphicObjects.data, ix,0xAE);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0xAE);
             int a = 0x80 - roomSizeX - graphicObjects.getW(ix);
             graphicObjects.setX(ix, a);
             copy_spr_1_xy_2_D34D(ix);
         } else if(y == 0) {
             // @label=enter_arch_n
-            adjust_plyr_Z_for_arch_D38C(graphicObjects.data, ix,0x51);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0x51);
             int a = roomSizeY + 0x80 + graphicObjects.getD(ix);
             graphicObjects.setY(ix, a);
             copy_spr_1_xy_2_D34D(ix);
         } else if(y == 0xFF) {
             // @label=enter_arch_s
-            adjust_plyr_Z_for_arch_D38C(graphicObjects.data, ix,0xC8);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0xC8);
             int a = 0x80 - roomSizeY - graphicObjects.getD(ix);
             graphicObjects.setY(ix, a);
             copy_spr_1_xy_2_D34D(ix);
@@ -3808,18 +3808,18 @@ public class Game implements Runnable {
         graphicObjects.setY(ix + 0x20, graphicObjects.getY(ix));
     }
 
-    private void adjust_plyr_Z_for_arch_D38C(DataBlock block, int ix, int c) {
-        int iy = 0x5C88;
+    private void adjust_plyr_Z_for_arch_D38C(GraphicObjects block, int ix, int c) {
+        int iy = graphicObjects.start() + 0x80; // arch location
         int de = 0x40;
         for(int b=0; b<4; b++) {
-            if(graphicObjects.data.getU(iy) < 0x06) { // is arch
+            if(graphicObjects.getGrNo(iy) < 0x06) { // is arch
                 // Arches are recognized by sum of their coordinates (8-bit unsigned, meaning & 0xFF or module 256)
-                int xy = (graphicObjects.data.getU(iy + 0x01)+graphicObjects.data.getU(iy + 0x02)) & 0xFF;
+                int xy = (graphicObjects.getX(iy)+graphicObjects.getY(iy)) & 0xFF;
                 if(xy == c) {
                     // @label=adj_plyr_Z
-                    int archZ = graphicObjects.data.getU(iy + 0x03);
-                    block.set(ix + 0x03, archZ);
-                    block.set(ix + 0x23, archZ + 0x0C);
+                    int archZ = graphicObjects.getZ(iy);
+                    block.setZ(ix, archZ);
+                    block.setZ(ix + 0x20, archZ + 0x0C);
                 }
             }
             iy+=de;
