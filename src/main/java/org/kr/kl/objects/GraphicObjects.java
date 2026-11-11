@@ -106,6 +106,7 @@ public class GraphicObjects {
     public boolean justDropped(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0D); }
     public boolean isEast(int ix) { return graphic_objs_tbl_5C08.isSet(0, ix + 0x0D); }
     public boolean isNorth(int ix) { return graphic_objs_tbl_5C08.isSet(1, ix + 0x0D); }
+    public int getScreen(int ix) { return graphic_objs_tbl_5C08.getU(ix + 0x08); }
 
     public void setGrNo(int ix, int grNo) { graphic_objs_tbl_5C08.set(ix, grNo); }
     public void setX(int ix, int x) { graphic_objs_tbl_5C08.set(ix + 1, x); }

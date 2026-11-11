@@ -1689,8 +1689,8 @@ public class Game implements Runnable {
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(ix); break;
             case 0x96, 0x97: upd_150_151_B73C(ix); break;
             case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(ix); break;
-            case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(block, ix); break;
-            case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(block, ix); break;
+            case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(ix); break;
+            case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(ix); break;
             case 0xB0, 0xB1: upd_176_177_B83F(ix); break;
             case 0xB2, 0xB3: upd_178_179_B865(block, ix); break;
             case 0xB4, 0xB5: upd_180_181_B80F(block, ix); break;
@@ -3423,12 +3423,11 @@ public class Game implements Runnable {
         return objects_required_C27D.start + objsInCauldron;
     }
 
-    private void upd_164_to_167_B92C(DataBlock block, int ix) {
+    private void upd_164_to_167_B92C(int ix) {
         // c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); // FC
+        graphicObjects.setXYAdj(ix, -12, -4);
 
-        boolean cauldronRoom = block.getU(ix + 0x08) == 0x88;
+        boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
         int dx = 4;
         int dy = 4;
         if(!cauldronRoom) {
@@ -3438,9 +3437,9 @@ public class Game implements Runnable {
                 dy = 1;
             }
         }
-        move_towards_plyr_B965(block, ix, dx, dy);
+        move_towards_plyr_B965(graphicObjects.graphic_objs_tbl_5C08, ix, dx, dy);
         dec_dZ_and_update_XYZ_C700(ix);
-        next_graphic_no_mod_4_B98C(block, ix);
+        next_graphic_no_mod_4_B98C(graphicObjects.graphic_objs_tbl_5C08, ix);
 
         if(cauldronRoom) {
             int grNo = graphicObjects.graphic_objs_tbl_5C08.getU(graphicObjects.graphic_objs_tbl_5C08.start);
@@ -3471,12 +3470,11 @@ public class Game implements Runnable {
         block.set(ix, newGrNo);
     }
 
-    private void upd_168_to_175_B923(DataBlock block, int ix) {
+    private void upd_168_to_175_B923(int ix) {
         // c$C4D8 LD HL,$FCF4   ; -4, -12
-        block.set(ix + 0x12, -12); //F4
-        block.set(ix + 0x13, -4); // FC
+        graphicObjects.setXYAdj(ix, -12, -4);
 
-        block.set(ix, 0xA0);
+        graphicObjects.setGrNo(ix, 0xA0);
     }
 
     // NOTE: commented as: not used
