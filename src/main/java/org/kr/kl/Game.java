@@ -2238,12 +2238,12 @@ public class Game implements Runnable {
         int dxAdj = graphicObjects.getDX(ix); // C
         if(dxAdj != 0) {
             dxAdj = adj_dX_for_out_of_bounds_CCDD(graphicObjects.data, ix);
-            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(graphicObjects.data, ix, dxAdj, 0, dzAdj);
+            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(ix, dxAdj, 0, dzAdj);
         }
         int dyAdj = graphicObjects.getDY(ix); // L
         if(dyAdj != 0) {
             dyAdj = adj_dY_for_out_of_bounds_CD08(graphicObjects.data, ix);
-            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(graphicObjects.data, ix, dxAdj, dyAdj, dzAdj);
+            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(ix, dxAdj, dyAdj, dzAdj);
         }
 
         graphicObjects.resetIgnore3D(ix);
@@ -2398,7 +2398,7 @@ public class Game implements Runnable {
 
     private int adj_dZ_for_obj_intersect_CC38(int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
-        for(int i=0; i<0x28; i++) {
+        for(int i=0; i<graphicObjects.size; i++) {
             if(is_object_not_ignored_B538(iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
                 if (do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
@@ -2407,8 +2407,7 @@ public class Game implements Runnable {
                         graphicObjects.setOobZ(ix); // set Z OOB
                         setDestroyedFlags(ix, iy);
                         graphicObjects.setTriggered(iy); //triggered (falling, collapsing blocks)
-                        boolean movable = graphicObjects.isMoveable(ix);
-                        if (movable) {
+                        if (graphicObjects.isMoveable(ix)) {
                             if (graphicObjects.getDX(ix) == 0) graphicObjects.setDX(ix, graphicObjects.getDX(iy)); //copy dX
                             if (graphicObjects.getDY(ix) == 0) graphicObjects.setDY(ix, graphicObjects.getDY(iy)); //copy dY
                         }
@@ -2422,20 +2421,17 @@ public class Game implements Runnable {
         return dzAdj;
     }
 
-    private int adj_dX_for_obj_intersect_CB9A(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
+    private int adj_dX_for_obj_intersect_CB9A(int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
-        for(int i=0; i<0x28; i++) {
+        for(int i=0; i<graphicObjects.size; i++) {
             if(is_object_not_ignored_B538(iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
                 if(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
                     while(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
-                        block.setBit(0, ix + 0x0C); // set X OOB
-
+                        graphicObjects.setOobX(ix); // set X OOB
                         setDestroyedFlags(ix, iy);
-
-                        boolean moveable = block.isSet(2, iy + 0x07);
-                        if(moveable) block.set(iy + 0x09, block.getS(ix + 0x09)); //copy dX
+                        if(graphicObjects.isMoveable(iy)) graphicObjects.setDX(iy, graphicObjects.getDX(ix)); //copy dX
                         dxAdj = adj_d_for_out_of_bounds_CA89(dxAdj);
                         if (dxAdj == 0) return dxAdj;
                     }
@@ -2447,20 +2443,17 @@ public class Game implements Runnable {
         return dxAdj;
     }
 
-    private int adj_dY_for_obj_intersect_CBE9(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
+    private int adj_dY_for_obj_intersect_CBE9(int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
-        for(int i=0; i<0x28; i++) {
+        for(int i=0; i<graphicObjects.size; i++) {
             if(is_object_not_ignored_B538(iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
                 if(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
                     while(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
-                        block.setBit(1, ix + 0x0C); // set Y OOB
-
+                        graphicObjects.setOobY(ix); // set Y OOB
                         setDestroyedFlags(ix, iy);
-
-                        boolean moveable = block.isSet(2, iy + 0x07);
-                        if(moveable) block.set(iy + 0x0A, block.getS(ix + 0x0A)); //copy dY
+                        if(graphicObjects.isMoveable(iy)) graphicObjects.setDY(iy, graphicObjects.getDY(ix)); //copy dY
                         dyAdj = adj_d_for_out_of_bounds_CA89(dyAdj);
                         if (dyAdj == 0) return dyAdj;
 
