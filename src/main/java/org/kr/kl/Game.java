@@ -1956,9 +1956,9 @@ public class Game implements Runnable {
         // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
             // $C844 CALL $C00E    ; handle_pickup_drop
-            handle_pickup_drop_C00E(graphicObjects.data, ix);
+            handle_pickup_drop_C00E(ix);
             // $C847 CALL $C89F    ; handle_left_right
-            handle_left_right_C89F(graphicObjects.data, ix);
+            handle_left_right_C89F(ix);
             // $C84A CALL $C948    ; handle_jump
             handle_jump_C948(graphicObjects.data, ix);
             // $C84D CALL $C969    ; handle_forward
@@ -1972,61 +1972,61 @@ public class Game implements Runnable {
         }
     }
 
-    private void handle_pickup_drop_C00E(DataBlock block, int ix) {
+    private void handle_pickup_drop_C00E(int ix) {
         boolean pressed = variables.getU(0x5BB3) != 0;
         if(!pressed) {
             if(!chk_pickup_drop_BFFB()) return;
-            if(chk_plyr_OOB_C87A(block, ix)) return;
-            boolean jumping = block.isSet(3,ix + 0x0C);
+            if(chk_plyr_OOB_C87A(graphicObjects.data, ix)) return;
+            boolean jumping = graphicObjects.isJumping(ix);
             if(jumping) return;
-            boolean zOob = block.isSet(2, ix + 0x0C);
+            boolean zOob = graphicObjects.isOobZ(ix);
             if(!zOob) return;
             cant_drop_5BD3.set(0x5BD3, 0);
-            int zOrig = block.getU(ix + 3);
-            block.set(ix + 3, zOrig + 12); // ; Z+12
-            boolean intersects = do_any_objs_intersect_B4FD(block, ix);
-            block.set(ix + 3, zOrig); // ; restore original Z
+            int zOrig = graphicObjects.getZ(ix);
+            graphicObjects.setZ(ix, zOrig + 12); // ; Z+12
+            boolean intersects = do_any_objs_intersect_B4FD(graphicObjects.data, ix);
+            graphicObjects.setZ(ix, zOrig); // ; restore original Z
             if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
             variables.set(0x5BB3, 1);
             variables.set(0x5BB4, 1);
-            int origW = block.getU(ix + 4);
-            int origD = block.getU(ix + 5);
-            int origH = block.getU(ix + 6);
-            block.set(ix + 4, origW + 4); // ; width+4
-            block.set(ix + 5, origD + 4); // ; depth+4
-            block.set(ix + 6, origH + 4); // ; height+4
-            int iy = 0x5C48;
+            int origW = graphicObjects.getW(ix);
+            int origD = graphicObjects.getD(ix);
+            int origH = graphicObjects.getH(ix);
+            graphicObjects.setW(ix, origW + 4); // ; width+4
+            graphicObjects.setD(ix, origD + 4); // ; depth+4
+            graphicObjects.setH(ix, origH + 4); // ; height+4
+            int iy = graphicObjects.start() + 0x40;
             boolean canPickup = false;
             int b=2;
             while(b>0 && !canPickup) {
-                canPickup = can_pickup_spec_obj_C172(block, ix, iy);
+                canPickup = can_pickup_spec_obj_C172(graphicObjects.data, ix, iy);
                 if(!canPickup) {
                     b--;
                     iy+=0x20;
                 }
             }
             if(canPickup) {
-                pickup_object_C141(block, ix, iy, origW, origD, origH);
+                pickup_object_C141(graphicObjects.data, ix, iy, origW, origD, origH);
             } else {
                 if(chk_pickup_drop_BFFB()) {
                     b=2;
-                    boolean cauldronRoom = block.getU(ix + 8) == 0x88;
+                    boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
                     if(cauldronRoom) b=1; // ; only check 1st special object
-                    iy = 0x5C48;
+                    iy = graphicObjects.start() + 0x40;
                     boolean foundPlace = false;
                     while(b>0 && !foundPlace) {
-                        foundPlace = block.getU(iy) == 0;
+                        foundPlace = graphicObjects.getGrNo(iy) == 0;
                         if(!foundPlace) {
                             b--;
                             iy+=0x20;
                         }
                     }
-                    if(foundPlace) room_to_drop_C0B2(block, ix, iy);
+                    if(foundPlace) room_to_drop_C0B2(graphicObjects.data, ix, iy);
                 };
             }
 
-            done_pickup_drop_C09D(block, ix, origW, origD, origH);
+            done_pickup_drop_C09D(graphicObjects.data, ix, origW, origD, origH);
         } else {
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
@@ -2649,7 +2649,7 @@ public class Game implements Runnable {
         keySequence.save(String.format("saves/%s/key_sequence.csv", gameId));
     }
 
-    private void handle_left_right_C89F(DataBlock block, int ix) {
+    private void handle_left_right_C89F(int ix) {
         //NOTE: we ignore input method and react to keyboard only
         // @label=left_right_rotational
         if(graphicObjects.getTurnCounter(ix) > 0) { // ; too soon to turn again?
