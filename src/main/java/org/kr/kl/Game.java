@@ -2232,17 +2232,17 @@ public class Game implements Runnable {
         graphicObjects.clearOob(ix);
         int dzAdj = graphicObjects.getDZ(ix); // H
         if(dzAdj != 0) {
-            dzAdj = adj_dZ_for_out_of_bounds_CA5A(graphicObjects.data, ix);
+            dzAdj = adj_dZ_for_out_of_bounds_CA5A(ix);
             if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(ix, 0, 0, dzAdj);
         }
         int dxAdj = graphicObjects.getDX(ix); // C
         if(dxAdj != 0) {
-            dxAdj = adj_dX_for_out_of_bounds_CCDD(graphicObjects.data, ix);
+            dxAdj = adj_dX_for_out_of_bounds_CCDD(ix);
             if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(ix, dxAdj, 0, dzAdj);
         }
         int dyAdj = graphicObjects.getDY(ix); // L
         if(dyAdj != 0) {
-            dyAdj = adj_dY_for_out_of_bounds_CD08(graphicObjects.data, ix);
+            dyAdj = adj_dY_for_out_of_bounds_CD08(ix);
             if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(ix, dxAdj, dyAdj, dzAdj);
         }
 
@@ -2465,53 +2465,47 @@ public class Game implements Runnable {
         return dyAdj;
     }
 
-    private int adj_dZ_for_out_of_bounds_CA5A(DataBlock block, int ix) {
+    private int adj_dZ_for_out_of_bounds_CA5A(int ix) {
         int roomSize = variables.getU(0x5BAE);
-        int dz = block.getS(ix + 0x0B);
-        int z = block.getU(ix + 0x03);
+        int dz = graphicObjects.getDZ(ix);
+        int z = graphicObjects.getZ(ix);
         while(true) {
             if (z + dz >= roomSize) return dz;
-            block.setBit(2, ix + 0x0C);
+            graphicObjects.setOobZ(ix);
             dz = adj_d_for_out_of_bounds_CA89(dz);
             if (dz == 0) return dz;
         }
     }
 
-    private int adj_dX_for_out_of_bounds_CCDD(DataBlock block, int ix) {
-        int dx = block.getS(ix + 0x09);
-        int flags = block.getU(ix + 0x0C);
-        boolean enteringRoom = (flags & 0xF0)>0;
-        if(enteringRoom) return dx;
-        boolean nearArch = block.isSet(0, ix + 0x07);
-        if(nearArch) return dx;
+    private int adj_dX_for_out_of_bounds_CCDD(int ix) {
+        int dx = graphicObjects.getDX(ix);
+        if(graphicObjects.enteringScreen(ix)) return dx;
+        if(graphicObjects.isNearArch(ix)) return dx;
 
         int roomSizeX = variables.getU(0x5BAB);
 
-        int x = block.getU(ix + 0x01);
+        int x = graphicObjects.getX(ix);
         while(true) {
-            int a = Math.abs(((x + dx) & 0xFF) - 0x80) + block.getU(ix + 0x04);
+            int a = Math.abs(((x + dx) & 0xFF) - 0x80) + graphicObjects.getW(ix);
             if(a < roomSizeX) return dx;
-            block.setBit(0, ix + 0x0C);
+            graphicObjects.setOobX(ix);
             dx = adj_d_for_out_of_bounds_CA89(dx);
             if(dx == 0) return dx;
         }
     }
 
-    private int adj_dY_for_out_of_bounds_CD08(DataBlock block, int ix) {
-        int dy = block.getS(ix + 0x0A);
-        int flags = block.getU(ix + 0x0C);
-        boolean enteringRoom = (flags & 0xF0)>0;
-        if(enteringRoom) return dy;
-        boolean nearArch = block.isSet(0, ix + 0x07);
-        if(nearArch) return dy;
+    private int adj_dY_for_out_of_bounds_CD08(int ix) {
+        int dy = graphicObjects.getDY(ix);
+        if(graphicObjects.enteringScreen(ix)) return dy;
+        if(graphicObjects.isNearArch(ix)) return dy;
 
         int roomSizeY = variables.getU(0x5BAC);
 
-        int y = block.getU(ix + 0x02);
+        int y = graphicObjects.getY(ix);
         while(true) {
-            int a = Math.abs(((y + dy) & 0xFF) - 0x80) + block.getU(ix + 0x05);
+            int a = Math.abs(((y + dy) & 0xFF) - 0x80) + graphicObjects.getD(ix);
             if(a < roomSizeY) return dy;
-            block.setBit(1, ix + 0x0C);
+            graphicObjects.setOobY(ix);
             dy = adj_d_for_out_of_bounds_CA89(dy);
             if(dy == 0) return dy;
         }
@@ -3011,7 +3005,6 @@ public class Game implements Runnable {
         graphicObjects.setDZ(ix, graphicObjects.getDZ(ix)-1); // ; dec dZ?
         adj_for_out_of_bounds_CB45(ix);
         add_dXYZ_C706(ix);
-
     }
 
     private void upd_92_to_95_C337(int ix) {
