@@ -191,10 +191,10 @@ public class GraphicObjects {
     public void setWipe(int ix) { setFlags7(ix, Flags7.setWipe(getFlags7(ix))); }
     public void resetWipe(int ix) { setFlags7(ix, Flags7.resetWipe(getFlags7(ix))); }
 
-    public boolean isHFlip(int ix) { return Flags7.isHFlip(getFlags7(ix)); } // BIT 6,(IX+$07)
+    public boolean isHFlip(int ix) { return Flags7.isHFlip(getFlags7(ix)); }
     public void setHFlip(int ix) { setFlags7(ix, Flags7.setHFlip(getFlags7(ix))); }
     public void resetHFlip(int ix) { setFlags7(ix, Flags7.resetHFlip(getFlags7(ix))); }
     public void flipHFlip(int ix) { setFlags7(ix, Flags7.flipHFlip(getFlags7(ix))); }
 
-    public boolean isVFlip(int ix) { return data.isSet(7, ix + 0x07); } // BIT 6,(IX+$07)
+    public boolean isVFlip(int ix) { return Flags7.isVFlip(getFlags7(ix)); }
 }
