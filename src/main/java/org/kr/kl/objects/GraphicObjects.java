@@ -71,6 +71,10 @@ public class GraphicObjects {
         return data.getCopy();
     }
 
+    public void reset() {
+        data.reset();
+    }
+
     public final int size;
 
     public GraphicObjects(int start, int size) {

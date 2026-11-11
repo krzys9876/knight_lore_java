@@ -1131,7 +1131,7 @@ public class Game implements Runnable {
                 debugPanel1.setText("");
                 debugPanel2.setText("");
                 int cnt = 0;
-                for(int ix = graphicObjects.data.start; ix < graphicObjects.data.endExcl(); ix+=0x20) {
+                for(int ix = graphicObjects.start(); ix < graphicObjects.endExcl(); ix+=0x20) {
                     if(graphicObjects.getGrNo(ix)!=0) {
                         debugPanel2.append(graphicObjects.data.objectInfo(cnt, ix));
                     }
@@ -1345,12 +1345,12 @@ public class Game implements Runnable {
             if(inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4)!=0) {
                 int x = (2-b)*24+16;
                 int y = 0;
-                sprite_scratchpad_BFDB.data.set(ix + 0x1A, x);
-                sprite_scratchpad_BFDB.data.set(ix + 0x1B, y);
+                sprite_scratchpad_BFDB.setPixelX(ix, x);
+                sprite_scratchpad_BFDB.setPixelY(ix, y);
                 int hl = calc_vidbuf_addr_D811(y, x);
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
                 int spriteIndex = inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4);
-                sprite_scratchpad_BFDB.data.set(ix, spriteIndex);
+                sprite_scratchpad_BFDB.setGrNo(ix, spriteIndex);
                 print_sprite_D718(sprite_scratchpad_BFDB, ix);
                 // TODO: implement blit_to_screen
                 // $BFA2 CALL $D67C    ;
@@ -1385,11 +1385,11 @@ public class Game implements Runnable {
     }
 
     private void print_lives_gfx_BC7A() {
-        sprite_scratchpad_BFDB.data.reset();
-        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start(), 0x8C);
-        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start() + 7, 0);
-        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start() + 0x1A, 0x10);
-        sprite_scratchpad_BFDB.data.set(sprite_scratchpad_BFDB.start() + 0x1B, 0x20);
+        sprite_scratchpad_BFDB.reset();
+        sprite_scratchpad_BFDB.setGrNo(sprite_scratchpad_BFDB.start(), 0x8C);
+        sprite_scratchpad_BFDB.setFlags7(sprite_scratchpad_BFDB.start(), 0);
+        sprite_scratchpad_BFDB.setPixelX(sprite_scratchpad_BFDB.start(), 0x10);
+        sprite_scratchpad_BFDB.setPixelY(sprite_scratchpad_BFDB.start(), 0x20);
         print_sprite_D718(sprite_scratchpad_BFDB, sprite_scratchpad_BFDB.start());
         for(int i=0; i<2; i++) mainMemory.setByteAt(0x5A42+i, 0x47);
         for(int i=0; i<4; i++) mainMemory.setByteAt(0x5A62+i, 0x47);
