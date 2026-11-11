@@ -646,10 +646,10 @@ public class Game implements Runnable {
     private void transfer_sprite_D237(GraphicObjects medatada, int ix, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         //debugPanel1.append("transfer_sprite_D237 (hl: %02x, ix: %04x)".formatted(hl, ix));
-        medatada.data.set(ix, source.getU(hl)); // sprite index
-        medatada.data.set(ix+0x07, source.getU(hl+1)); // flags
-        medatada.data.set(ix+0x1A, source.getU(hl+2)); // pixel X
-        medatada.data.set(ix+0x1B, source.getU(hl+3)); // pixel Y
+        medatada.setGrNo(ix, source.getU(hl)); // sprite index
+        medatada.setFlags7(ix, source.getU(hl+1)); // flags
+        medatada.setPixelX(ix, source.getU(hl+2)); // pixel X
+        medatada.setPixelY(ix, source.getU(hl+3)); // pixel Y
     }
 
     private void print_sprite_D718(GraphicObjects metadata, int ix) {
