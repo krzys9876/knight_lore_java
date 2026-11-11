@@ -1499,22 +1499,22 @@ public class Game implements Runnable {
     private int analyzeRelativePosition(int de1, int de2) {
         if(de1==de2) return 0;
 
-        int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphicObjects.data.start;
-        int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 32 + graphicObjects.data.start;
+        int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 0x20 + graphicObjects.start();
+        int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 0x20 + graphicObjects.start();
 
-        int x1 = graphicObjects.data.getU(objectLoc1 + 1);
-        int y1 = graphicObjects.data.getU(objectLoc1 + 2);
-        int z1 = graphicObjects.data.getU(objectLoc1 + 3);
-        int w1 = graphicObjects.data.getU(objectLoc1 + 4);
-        int d1 = graphicObjects.data.getU(objectLoc1 + 5);
-        int h1 = graphicObjects.data.getU(objectLoc1 + 6);
+        int x1 = graphicObjects.getX(objectLoc1);
+        int y1 = graphicObjects.getY(objectLoc1);
+        int z1 = graphicObjects.getZ(objectLoc1);
+        int w1 = graphicObjects.getW(objectLoc1);
+        int d1 = graphicObjects.getD(objectLoc1);
+        int h1 = graphicObjects.getH(objectLoc1);
 
-        int x2 = graphicObjects.data.getU(objectLoc2 + 1);
-        int y2 = graphicObjects.data.getU(objectLoc2 + 2);
-        int z2 = graphicObjects.data.getU(objectLoc2 + 3);
-        int w2 = graphicObjects.data.getU(objectLoc2 + 4);
-        int d2 = graphicObjects.data.getU(objectLoc2 + 5);
-        int h2 = graphicObjects.data.getU(objectLoc2 + 6);
+        int x2 = graphicObjects.getX(objectLoc2);
+        int y2 = graphicObjects.getY(objectLoc2);
+        int z2 = graphicObjects.getZ(objectLoc2);
+        int w2 = graphicObjects.getW(objectLoc2);
+        int d2 = graphicObjects.getD(objectLoc2);
+        int h2 = graphicObjects.getH(objectLoc2);
 
         boolean overlap1 = z1 >= (z2+h2); // $CF05 JR NC,$CF16    ; no overlap (C+=0)
         boolean overlap2 = z2 >= (z1+h1); // $CF12 JR C,$CF15     ; overlap (C+=1)
