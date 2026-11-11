@@ -108,6 +108,7 @@ public class GraphicObjects {
     public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
     public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
+    public boolean isVFlip(int ix) { return data.isSet(7, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isHFlip(int ix) { return data.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return data.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isNearArch(int ix) { return data.isSet(0, ix + 7); }
@@ -167,6 +168,8 @@ public class GraphicObjects {
     public void setDropping(int ix) { data.setBit(2, ix + 0x0D); }
     public void setDirUp(int ix) { data.setBit(2, ix + 0x0D); }
     public void setDirDown(int ix) { data.resetBit(2, ix + 0x0D); }
+    public void setVFlip(int ix) { data.setBit(7, ix + 0x07); }
+    public void resetVFlip(int ix) { data.resetBit(7, ix + 0x07); }
     public void setHFlip(int ix) { data.setBit(6, ix + 0x07); }
     public void resetHFlip(int ix) { data.resetBit(6, ix + 0x07); }
     public void toggleNextPrevSprite(int ix) { setGrNo(ix, getGrNo(ix) ^ 0x01); }

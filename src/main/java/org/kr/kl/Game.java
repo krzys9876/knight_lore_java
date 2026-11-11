@@ -653,7 +653,7 @@ public class Game implements Runnable {
     }
 
     private void print_sprite_D718(GraphicObjects metadata, int ix) {
-        int de = flip_sprite_D6EF(metadata.data, ix);
+        int de = flip_sprite_D6EF(metadata, ix);
         if(de == 0) return; // spr_null used as a flag to return from routine
 
         int x = metadata.getPixelX(ix);
@@ -725,17 +725,16 @@ public class Game implements Runnable {
     }
 
     // Returns address of sprite graphics data or 0 if null sprite
-    private int flip_sprite_D6EF(DataBlock metadata, int ix) {
+    private int flip_sprite_D6EF(GraphicObjects metadata, int ix) {
         //debugPanel1.append("flip_sprite_D6EF (ix: %04x)".formatted(ix));
-        int l = metadata.getU(ix);
+        int l = metadata.getGrNo(ix);
         int hl = l * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
         int de = sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256; // sprite actual address
         //debugPanel2.append("sprite address (DE): %04x".formatted(de));
         int width = sprite_graphics_data_728A.getU(de);
         // returns sprite address or 0 if sprite is spr_null
-        int flagsScratch = metadata.getU(ix + 0x07);
-        boolean flipVScratch = (flagsScratch & 0x80) > 0;
-        boolean flipHScratch = (flagsScratch & 0x40) > 0;
+        boolean flipVScratch = metadata.isVFlip(ix);
+        boolean flipHScratch = metadata.isHFlip(ix);
         int flagsSpriteData = sprite_graphics_data_728A.getU(de) & 0xC0;
         boolean flipVData = (flagsSpriteData & 0x80) > 0;
         boolean flipHData = (flagsSpriteData & 0x40) > 0;
