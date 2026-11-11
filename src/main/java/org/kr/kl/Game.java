@@ -656,8 +656,8 @@ public class Game implements Runnable {
         int de = flip_sprite_D6EF(metadata.data, ix);
         if(de == 0) return; // spr_null used as a flag to return from routine
 
-        int x = metadata.data.getU(ix + 0x1A);
-        int y = metadata.data.getU(ix + 0x1B);
+        int x = metadata.getPixelX(ix);
+        int y = metadata.getPixelY(ix);
         int xOffset = (x & 7);
         //debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned by %02x".formatted(xOffset));
         // JR Z,$D76F    ; {no, skip
@@ -667,9 +667,9 @@ public class Game implements Runnable {
         int a = sprite_graphics_data_728A.getU(de);
         a = (a & 0x7); // width_bytes, ignore rotation flags
         de ++;
-        metadata.data.set(ix + 0x19,   sprite_graphics_data_728A.getU(de)); // height_lines
+        metadata.setSpriteHeight(ix, sprite_graphics_data_728A.getU(de)); // height_lines
         // off bottom of screen?
-        if(y + metadata.data.getU(ix + 0x19)>0xC0) metadata.data.set(ix + 0x19, 0xC0 - y);
+        if(y + metadata.getSpriteHeight(ix)>0xC0) metadata.setSpriteHeight(ix, 0xC0 - y);
         de ++;
 
         if(y > 191 || x > 255) return; // do not attempt do draw out of screen
@@ -677,8 +677,8 @@ public class Game implements Runnable {
 
         if(xOffset == 0) {
             //@label=loc_D76F
-            metadata.data.set(ix + 0x18, a);
-            for(int lineNo = 0; lineNo<metadata.data.getU(ix + 0x19); lineNo++) {
+            metadata.setSpriteWidthB(ix, a);
+            for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 for (int i = 0; i < a; i++) {
                     int bufByte = shadowMemory.getByteAt(bc);
                     int e_mask = sprite_graphics_data_728A.getU(de);
@@ -693,9 +693,9 @@ public class Game implements Runnable {
                 bc+=(32-a);
             }
         } else {
-            metadata.data.set(ix + 0x18, a + 1);
+            metadata.setSpriteWidthB(ix, a + 1);
             int lookupBase = 0xF000 + (xOffset << 9);
-            for(int lineNo = 0; lineNo<metadata.data.getU(ix + 0x19); lineNo++) {
+            for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
                 for (int i = 0; i < a; i++) {
                     int bufByteLeft = shadowMemory.getByteAt(bc);
@@ -792,8 +792,8 @@ public class Game implements Runnable {
     private int multiple_print_sprite_BEE4(GraphicObjects metadata, int dx, int dy, int times, int ix, int hl) {
         for(int i=0; i<times; i++) {
             print_sprite_D718(metadata, ix);
-            metadata.data.set(ix + 0x1A, metadata.data.getU(ix + 0x1A) + dx);
-            metadata.data.set(ix + 0x1B, metadata.data.getU(ix + 0x1B) + dy);
+            metadata.setPixelX(ix, metadata.getPixelX(ix) + dx);
+            metadata.setPixelY(ix, metadata.getPixelY(ix) + dy);
         }
         return hl+4;
     }
