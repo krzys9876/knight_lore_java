@@ -3125,7 +3125,7 @@ public class Game implements Runnable {
         graphicObjects.setXYAdj(ix, -8, -2);
 
         int iy = ix; // ; iy=extra life object
-        ix = graphicObjects.data.start; // ; ix = player
+        ix = graphicObjects.start(); // ; ix = player
         int width = graphicObjects.getW(ix);
         int depth = graphicObjects.getD(ix);
         graphicObjects.setW(ix, width+1);
@@ -3135,7 +3135,7 @@ public class Game implements Runnable {
         graphicObjects.setD(ix, depth); //; restore depth
         ix = iy; // ; restore ix (extra life object)
         if(isNear) {
-            graphicObjects.data.setBit(3, ix); // ; graphic_no: 103 + 8 = 111, see upd_111
+            graphicObjects.setBitGrNo(ix, 3); // ; graphic_no: 103 + 8 = 111, see upd_111
             //c$C4D8 LD HL,$FCF4   ; -4, -12
             graphicObjects.setXYAdj(ix + 0x12, -12, -4);
             int l = graphicObjects.getTemp10(ix);
@@ -3218,16 +3218,16 @@ public class Game implements Runnable {
         variables.set(0x5BC3, 1);
         int ix = 0x5C68; // ; special_objs_here[1]
         for(int i=0; i< 0x0B; i++) { // ; wipe 11 objects in the room (1 special, 7 bg, 3 fg)
-            graphicObjects.data.set(ix, 1); // ; set graphic no. = INVALID
+            graphicObjects.setGrNo(ix, 1); // ; set graphic no. = INVALID
             //set_wipe_and_draw_flags_C692(graphic_objs_tbl_5C08, ix);
             ix += 0x20; // ; entry size
         }
 
         int bc = 0x6108; // end of table
         while(ix < bc) {
-            int grNo = graphicObjects.data.getU(ix);
+            int grNo = graphicObjects.getGrNo(ix);
             if (grNo == 7) { // block
-                graphicObjects.data.set(ix, 0x83); // ; set to twinkly sprite
+                graphicObjects.setGrNo(ix, 0x83); // ; set to twinkly sprite
             }
             ix += 0x20;
         }
