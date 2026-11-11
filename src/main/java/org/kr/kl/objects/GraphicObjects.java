@@ -175,6 +175,8 @@ public class GraphicObjects {
     public void setOldSpriteHeight(int ix, int h) { data.set(ix + 0x1D, h); }
     public void setOldPixelX(int ix, int x) { data.set(ix + 0x1E, x); }
     public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
+    public void setJumping(int ix) { data.setBit(3, ix + 0x0C); }
+    public void resetJumping(int ix) { data.resetBit(3, ix + 0x0C); }
 
     public void resetBitGrNo(int ix, int bit) { data.resetBit(bit, ix); }
     public void setBitGrNo(int ix, int bit) { data.setBit(bit, ix); }
@@ -207,4 +209,6 @@ public class GraphicObjects {
 
     // Flag C
     public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
+
+    public int getEnterCounter(int ix) { return getFlagsC(ix) & 0xF0; }
 }

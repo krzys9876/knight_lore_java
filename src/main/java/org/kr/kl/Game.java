@@ -2186,44 +2186,44 @@ public class Game implements Runnable {
 
     private void loc_C855(DataBlock block, int ix) {
         block.setBit(1, ix + 0x27);
-        move_player_C9A1(block, ix);
+        move_player_C9A1(ix);
         block.resetBit(1,ix + 0x27);
         int flags = block.getU(ix + 0x0C);
         if(flags>=0x10) block.set(ix + 0x0C, flags-0x10); // decrement entering screen counter (upper 4 bits)
         set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void move_player_C9A1(DataBlock block, int ix) {
-        if(variables.getU(0x5BC4)!=0) block.set(ix + 0x0B, 2); // D (IX+$0B),$02 ; dZ=2
-        int flags = block.getU(ix + 0x0C); // LD A,(IX+$0C)  ; flags12
-        boolean jumping = DataBlock.isSetS(3, flags);
+    private void move_player_C9A1(int ix) {
+        if(variables.getU(0x5BC4)!=0) graphicObjects.setDZ(ix, 2); // D (IX+$0B),$02 ; dZ=2
+        int enterCounter = graphicObjects.getEnterCounter(ix); // LD A,(IX+$0C)  ; flags12
+        boolean jumping = graphicObjects.isJumping(ix);
         boolean forward = variables.isSet(2, 0x5BB5);
-        if(jumping || ((flags & 0xF0) != 0) || forward) calc_plyr_dXY_C9FB(ix);
+        if(jumping || enterCounter != 0 || forward) calc_plyr_dXY_C9FB(ix);
 
-        int dz = block.getS(ix + 0x0B);
+        int dz = graphicObjects.getDZ(ix);
         if(dz < 0) dz -= 2;
         else {
             boolean jumpingKey = variables.isSet(3, 0x5BB5);
             if (jumpingKey) dz -= 1;
             else dz -= 2;
         }
-        block.set(ix + 0x0B, dz);
+        graphicObjects.setDZ(ix, dz);
         variables.set(0x5BC1, dz);
         //$C9D6 CALL M,$B451   ; ignore audio
 
         //$C9D9 CALL $CB45     ;
         adj_for_out_of_bounds_CB45(ix);
         //$C9DC CALL $CA70     ;
-        handle_exit_screen_CA70(block, ix);
+        handle_exit_screen_CA70(graphicObjects.data, ix);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
         if(!exitingScreen) {
             add_dXYZ_C706(ix);
-            if (block.isSet(2, ix + 0x0C)) {
+            if (graphicObjects.isOobZ(ix)) {
                 int tmpDz = variables.getS(0x5BC1);
-                if (tmpDz < 0) block.resetBit(3, ix + 0x0C);
+                if (tmpDz < 0) graphicObjects.resetJumping(ix);
             }
-            block.set(ix + 0x09, 0);
-            block.set(ix + 0x0A, 0);
+            graphicObjects.setDX(ix, 0);
+            graphicObjects.setDY(ix, 0);
         }
     }
 
