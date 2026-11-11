@@ -78,12 +78,12 @@ public class Game implements Runnable {
     private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
     private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
-    private final DataBlock plyr_spr_1_scratchpad_D161 =  new DataBlock(0xD161, 32);
-    private final DataBlock plyr_spr_2_scratchpad_D181 =  new DataBlock(0xD181, 32);
+    private final DataBlock plyr_spr_1_scratchpad_D161 =  new DataBlock(0xD161, 0x20);
+    private final DataBlock plyr_spr_2_scratchpad_D181 =  new DataBlock(0xD181, 0x20);
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_yoff_C440 = InitialData.block("sun_moon_yoff_C440");
-    private final DataBlock sun_moon_scratchpad_C44D =  InitialData.block("sun_moon_scratchpad_C44D");
+    private final DataBlock sun_moon_scratchpad_C44D = new DataBlock(0xC44D, 0x20);
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
     private final GraphicObjects graphicObjects = new GraphicObjects();
     //private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
@@ -1241,7 +1241,7 @@ public class Game implements Runnable {
         }
 
         // @label=reset_objs_wipe_flag
-        for(int addr = graphicObjects.start(); addr<graphicObjects.graphic_objs_tbl_5C08.endExcl(); addr+=0x20)
+        for(int addr = graphicObjects.start(); addr<graphicObjects.endExcl(); addr+=0x20)
             graphicObjects.resetWipe(addr); // c$B090 RES 5,(HL)    ;
 
         return gameOver;
@@ -1440,15 +1440,15 @@ public class Game implements Runnable {
                             boolean is2behind1 = false;
                             if(objCoincide) {
                                 // @label=objs_coincide
-                                int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphicObjects.graphic_objs_tbl_5C08.start;
-                                int grNo1 = graphicObjects.graphic_objs_tbl_5C08.getU(objectLoc1);
+                                int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphicObjects.start();
+                                int grNo1 = graphicObjects.getGrNo(objectLoc1);
                                 boolean isSpecial1 = grNo1 >= 0x60 && grNo1 <= 0x66;
-                                int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 32 + graphicObjects.graphic_objs_tbl_5C08.start;
-                                int grNo2 = graphicObjects.graphic_objs_tbl_5C08.getU(objectLoc2);
+                                int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 32 + graphicObjects.start();
+                                int grNo2 = graphicObjects.getGrNo(objectLoc2);
                                 boolean isSpecial2 = grNo2 >= 0x60 && grNo2 <= 0x66;
-                                if(isSpecial1) graphicObjects.graphic_objs_tbl_5C08.set(objectLoc1, 0xBB); //; set to twinkle sprite
+                                if(isSpecial1) graphicObjects.setGrNo(objectLoc1, 0xBB); //; set to twinkle sprite
                                 else {
-                                    if(isSpecial2) graphicObjects.graphic_objs_tbl_5C08.set(objectLoc2, 0xBB); //; set to twinkle sprite
+                                    if(isSpecial2) graphicObjects.setGrNo(objectLoc2, 0xBB); //; set to twinkle sprite
                                     // The first object on the list is behind the second
                                     // (e.g. spell is behind cauldron, so it is invisible when inside).
                                     // This makes rendering of coinciding object deterministic.
@@ -1488,8 +1488,8 @@ public class Game implements Runnable {
     }
 
     private void renderOne(int de, RenderStack renderList) {
-        int objectLoc = objects_to_draw_CE8B.getU(de) * 32 + graphicObjects.graphic_objs_tbl_5C08.start;
-        if(calc_pixel_XY_D6C9(graphicObjects.graphic_objs_tbl_5C08, objectLoc)) print_sprite_D718(graphicObjects.graphic_objs_tbl_5C08, objectLoc);
+        int objectLoc = objects_to_draw_CE8B.getU(de) * 32 + graphicObjects.start();
+        if(calc_pixel_XY_D6C9(objectLoc)) print_sprite_D718(graphicObjects.graphic_objs_tbl_5C08, objectLoc);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
         variables.set(0x5BBE, variables.getU(0x5BBE) + 1);
         renderList.reset();
@@ -2080,7 +2080,7 @@ public class Game implements Runnable {
                 block.set(iy + 3, block.getU(ix + 3));
                 block.set(ix + 3, block.getU(ix + 3) + 0x0C);
                 block.set(ix + 0x23, block.getU(ix + 0x23) + 0x0C);
-                calc_pixel_XY_D6C9(block, iy);
+                calc_pixel_XY_D6C9(iy);
                 drop_object_C106(block, ix, iy);
             }
 
@@ -3579,7 +3579,7 @@ public class Game implements Runnable {
         for(int i=from;i<from+cnt;i++) {
             int ix = block.start + i*32;
             if(block.getU(ix)!=0) {
-                if(calc_pixel_XY_D6C9(block, ix)) print_sprite_D718(block, ix);
+                if(calc_pixel_XY_D6C9(ix)) print_sprite_D718(block, ix);
             }
         }
     }
@@ -3855,27 +3855,27 @@ public class Game implements Runnable {
         graphicObjects.graphic_objs_tbl_5C08.set(ix + 0x1f, pixelY);
     }
 
-    private boolean calc_pixel_XY_D6C9(DataBlock block, int ix) {
+    private boolean calc_pixel_XY_D6C9(int ix) {
         // first check if object should disappear (including player)
         //@label=calc_pixel_XY_and_render
-        if(block.getU(ix) == 1) { //; flagged as ???
-            block.set(ix, 0);
+        if(graphicObjects.getGrNo(ix) == 1) { //; flagged as ???
+            graphicObjects.setGrNo(ix, 0);
             return false;
         }
 
-        int x = block.getU(ix + 0x01);
-        x = x + block.getU(ix + 0x02);
+        int x = graphicObjects.getX(ix);
+        x = x + graphicObjects.getY(ix);
         x = x - 0x80;
-        x = (x + block.getS(ix + 0x12)) & 0xFF;
-        block.set(ix + 0x1a, x);
-        int y = block.getU(ix + 0x02);
-        y = y - block.getU(ix + 0x01);
+        x = (x + graphicObjects.getXAdj(ix)) & 0xFF;
+        graphicObjects.setPixelX(ix, x);
+        int y = graphicObjects.getY(ix);
+        y = y - graphicObjects.getX(ix);
         y = y + 0x80;
         y = y >> 1;
-        y = y + block.getU(ix + 0x03);
+        y = y + graphicObjects.getZ(ix);
         y = y - 0x68;
-        y = y + block.getS(ix + 0x13);
-        block.set(ix + 0x1b, y);
+        y = y + graphicObjects.getYAdj(ix);
+        graphicObjects.setPixelY(ix, y);
         // $D6EC CP $C0         ; bottom line of screen?
         return y < 0xC0; // 192
     }
