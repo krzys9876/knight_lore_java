@@ -1228,14 +1228,14 @@ public class Game implements Runnable {
         boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
         if(!cauldronRoom) return;
 
-        int de = 0x5C68;
+        int de = graphicObjects.start() + 0x60;
         int grNo = graphicObjects.getGrNo(de); // ; special_objs_here[1]
         if(grNo != 0) return;
 
         if(variables.getU(0x5BC3) != 0) return;
 
         // 18 bytes to copy
-        for(int i=0; i<0x12; i++) graphicObjects.data.set(de+i, cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + i));
+        graphicObjects.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, de, 0x12);
         // c$C4D8 LD HL,$FCF4   ; -4, -12
         graphicObjects.setXYAdj(de, -12, -4);
     }
@@ -3656,7 +3656,7 @@ public class Game implements Runnable {
                 graphicObjects.resetObject(targetAddr);
                 // 8 - byte sprite info
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.getU(bkgAddr)));
-                for(int i=0; i<8; i++) graphicObjects.data.set(targetAddr+i, bkgObj.getU(bkgAddr+i));
+                graphicObjects.copyFrom(bkgObj, bkgAddr, targetAddr, 8);
                 bkgAddr+=8;
                 // 9th byte
                 graphicObjects.setScreen(targetAddr, currLocId);
