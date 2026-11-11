@@ -174,6 +174,7 @@ public class GraphicObjects {
     public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
     public void resetJustDropped(int ix) { data.resetBit(0, ix + 0x0D); }
     public void toggleEastWest(int ix) { data.set(ix + 0x0D, (data.getU(ix + 0x0D) ^ 0x01)); }
+    public void setDraw(int ix) { data.setBit(4, ix+7); }
     public void setWipe(int ix) { data.setBit(5, ix+7); }
     public void resetWipe(int ix) { data.resetBit(5, ix+7); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
