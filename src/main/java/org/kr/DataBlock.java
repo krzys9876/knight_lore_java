@@ -56,6 +56,7 @@ public class DataBlock {
 
     public static int getWithBitSetS(int bit, int value) { return value | (1 << bit); }
     public static int getWithBitResetS(int bit, int value) { return value & ((1 << bit) ^ 0b11111111); }
+    public static int getWithBitFlippedS(int bit, int value) { return value ^ (1 << bit); }
     public static boolean isSetS(int bit, int value) { return (value & (1 << bit))>0; }
 
     public String objectInfo(int num, int address) {

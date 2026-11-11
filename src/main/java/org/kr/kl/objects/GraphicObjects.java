@@ -97,7 +97,6 @@ public class GraphicObjects {
     public int getDYu(int ix) { return data.getU(ix + 0x0A); }
     public int getDZ(int ix) { return data.getS(ix + 0x0B); }
     public int getDZu(int ix) { return data.getU(ix + 0x0B); }
-    public int getFlags7(int ix) { return data.getS(ix + 7); }
     public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
     public int getTemp10(int ix) { return data.getU(ix + 0x10); }
     public int getTemp11(int ix) { return data.getU(ix + 0x11); }
@@ -109,9 +108,7 @@ public class GraphicObjects {
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
     public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
     public boolean isVFlip(int ix) { return data.isSet(7, ix + 0x07); } // BIT 6,(IX+$07)
-    public boolean isHFlip(int ix) { return data.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return data.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
-    public boolean isNearArch(int ix) { return data.isSet(0, ix + 7); }
     public boolean isOobX(int ix) { return data.isSet(0, ix + 0x0C); }
     public boolean isOobY(int ix) { return data.isSet(1, ix + 0x0C); }
     public boolean isOobXY(int ix) { return isOobX(ix) || isOobY(ix); }
@@ -122,7 +119,6 @@ public class GraphicObjects {
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isMoving(int ix) { return getDX(ix)!=0 || getDY(ix)!=0 || getDZ(ix)!=0; }
     public boolean isTriggered(int ix) { return data.isSet(3, ix + 0x0D); }
-    public boolean ignore3D(int ix) { return data.isSet(1, ix + 7); }
     public boolean justDropped(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
@@ -137,7 +133,6 @@ public class GraphicObjects {
     public void setW(int ix, int w) { data.set(ix + 4, w); }
     public void setD(int ix, int d) { data.set(ix + 5, d); }
     public void setH(int ix, int h) { data.set(ix + 6, h); }
-    public void setFlags7(int ix, int h) { data.set(ix + 7, h); }
     public void setScreen(int ix, int h) { data.set(ix + 8, h); }
     public void setDX(int ix, int dx) { data.set(ix + 0x09, dx); }
     public void setDY(int ix, int dy) { data.set(ix + 0x0A, dy); }
@@ -159,19 +154,12 @@ public class GraphicObjects {
     public void setDead(int ix) { data.setBit(6, ix + 0x0D); }
     public void resetDead(int ix) { data.resetBit(6, ix + 0x0D); }
     public void setDeadOtherHalf(int ix) { setDead(ix + 0x20); }
-    public void setIgnore3D(int ix) { data.setBit(1, ix + 7); }
-    public void resetIgnore3D(int ix) { data.resetBit(1, ix + 7); }
     public void setTemp10(int ix, int temp10) { data.set(ix + 0x10, temp10); }
     public void setTemp11(int ix, int temp11) { data.set(ix + 0x11, temp11); }
-    public void flipMoveable(int ix) { data.set(ix + 7, data.getU(ix + 7) ^ 0x40); }
     public void setRising(int ix) { data.resetBit(2, ix + 0x0D); }
     public void setDropping(int ix) { data.setBit(2, ix + 0x0D); }
     public void setDirUp(int ix) { data.setBit(2, ix + 0x0D); }
     public void setDirDown(int ix) { data.resetBit(2, ix + 0x0D); }
-    public void setVFlip(int ix) { data.setBit(7, ix + 0x07); }
-    public void resetVFlip(int ix) { data.resetBit(7, ix + 0x07); }
-    public void setHFlip(int ix) { data.setBit(6, ix + 0x07); }
-    public void resetHFlip(int ix) { data.resetBit(6, ix + 0x07); }
     public void toggleNextPrevSprite(int ix) { setGrNo(ix, getGrNo(ix) ^ 0x01); }
     public void resetTriggered(int ix) { data.resetBit(3, ix + 0x0D); }
     public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
@@ -186,9 +174,25 @@ public class GraphicObjects {
     public void setOldSpriteHeight(int ix, int h) { data.set(ix + 0x1D, h); }
     public void setOldPixelX(int ix, int x) { data.set(ix + 0x1E, x); }
     public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
-    public void setNearArch(int ix) { data.setBit(0, ix + 7); }
-    public void resetNearArch(int ix) { data.resetBit(0, ix + 7); }
 
     public void resetBitGrNo(int ix, int bit) { data.resetBit(bit, ix); }
     public void setBitGrNo(int ix, int bit) { data.setBit(bit, ix); }
+
+    // Flag 7
+    public int getFlags7(int ix) { return data.getS(ix + 7); }
+    public void setFlags7(int ix, int h) { data.set(ix + 7, h); }
+
+    public boolean isNearArch(int ix) { return Flags7.isNearArch(getFlags7(ix)); }
+    public void setNearArch(int ix) { setFlags7(ix, Flags7.setNearArch(getFlags7(ix))); }
+    //public void resetNearArch(int ix) { setFlags7(ix, Flags7.resetNearArch(getFlags7(ix))); }
+
+    public boolean ignore3D(int ix) { return Flags7.ignore3D(getFlags7(ix)); }
+    public void setIgnore3D(int ix) { setFlags7(ix, Flags7.setIgnore3D(getFlags7(ix))); }
+    public void resetIgnore3D(int ix) { setFlags7(ix, Flags7.resetIgnore3D(getFlags7(ix))); }
+
+
+    public boolean isHFlip(int ix) { return Flags7.isHFlip(getFlags7(ix)); } // BIT 6,(IX+$07)
+    public void setHFlip(int ix) { setFlags7(ix, Flags7.setHFlip(getFlags7(ix))); }
+    public void resetHFlip(int ix) { setFlags7(ix, Flags7.resetHFlip(getFlags7(ix))); }
+    public void flipHFlip(int ix) { setFlags7(ix, Flags7.flipHFlip(getFlags7(ix))); }
 }

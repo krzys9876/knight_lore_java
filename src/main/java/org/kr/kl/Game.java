@@ -2613,7 +2613,7 @@ public class Game implements Runnable {
         graphicObjects.setGrNo(ix, newSprite);
         //int flip = (graphicObjects.getFlags7(ix)) ^ 0x40;
         //block.set(ix + 0x07, flip);
-        graphicObjects.flipMoveable(ix);
+        graphicObjects.flipHFlip(ix);
 
         return true;
     }
@@ -3098,7 +3098,7 @@ public class Game implements Runnable {
             int nextSprite = (params.getRnd().getSeed3() & 3) | 0x5C;
             if(nextSprite != graphicObjects.getGrNo(ix)) nextSprite = nextSprite ^ 1;
             graphicObjects.setGrNo(ix, nextSprite);
-            graphicObjects.flipMoveable(ix);
+            graphicObjects.flipHFlip(ix);
         }
     }
 
