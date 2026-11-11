@@ -51,7 +51,7 @@ public class Flags7 {
     public static boolean isHFlip(int b) { return DataBlock.isSetS(hFlipBit, b); }
     public static int setHFlip(int b) { return DataBlock.getWithBitSetS(hFlipBit, b); }
     public static int resetHFlip(int b) { return DataBlock.getWithBitResetS(hFlipBit, b); }
-    public static int flipHFlip(int b) { return DataBlock.getWithBitFlippedS(hFlipBit, b); }
+    public static int toggleHFlip(int b) { return DataBlock.getWithBitToggledS(hFlipBit, b); }
 
     public static boolean isVFlip(int b) { return DataBlock.isSetS(vFlipBit, b); }
     public static int setVFlip(int b) { return DataBlock.getWithBitSetS(vFlipBit, b); }

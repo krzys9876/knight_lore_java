@@ -51,12 +51,14 @@ public class DataBlock {
     public boolean isSet(int bit, int address) { return isSetS(bit, getU(address)); }
     public void setBit(int bit, int address) { set(address, getWithBitSet(bit, address)); }
     public void resetBit(int bit, int address) { set(address, getWithBitReset(bit, address)); }
+    public void toggleBit(int bit, int address) { set(address, getWithBitToggled(bit, address)); }
     public int getWithBitSet(int bit, int address) { return getWithBitSetS(bit, getU(address)); }
     public int getWithBitReset(int bit, int address) { return getWithBitResetS(bit, getU(address)); }
+    public int getWithBitToggled(int bit, int address) { return getWithBitToggledS(bit, getU(address)); }
 
     public static int getWithBitSetS(int bit, int value) { return value | (1 << bit); }
     public static int getWithBitResetS(int bit, int value) { return value & ((1 << bit) ^ 0b11111111); }
-    public static int getWithBitFlippedS(int bit, int value) { return value ^ (1 << bit); }
+    public static int getWithBitToggledS(int bit, int value) { return value ^ (1 << bit); }
     public static boolean isSetS(int bit, int value) { return (value & (1 << bit))>0; }
 
     public String objectInfo(int num, int address) {

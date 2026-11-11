@@ -2585,7 +2585,7 @@ public class Game implements Runnable {
         int newSprite = (params.getRnd().getSeed3() & 0x03) | 0x5C;
         if(graphicObjects.getGrNo(ix) == newSprite) newSprite^=1; // change if same as current
         graphicObjects.setGrNo(ix, newSprite);
-        graphicObjects.flipHFlip(ix);
+        graphicObjects.toggleHFlip(ix);
 
         return true;
     }
@@ -2652,36 +2652,28 @@ public class Game implements Runnable {
     private void handle_left_right_C89F(DataBlock block, int ix) {
         //NOTE: we ignore input method and react to keyboard only
         // @label=left_right_rotational
-        int counter = graphicObjects.getTurnCounter(ix);
-        if(counter > 0) { // ; too soon to turn again?
+        if(graphicObjects.getTurnCounter(ix) > 0) { // ; too soon to turn again?
             graphicObjects.decTurnCounter(ix);
             return;
         }
         int keys = variables.getU(0x5BB5);
         if((keys & 3) == 0) return; // ; left or right?
 
-        int flags = block.getU(ix + 0x0C);
-        if((flags & 0xF0) >0) return; // ; entering screen?
-        if(DataBlock.isSetS(3, flags)) return; // ; already jumping?
+        if(graphicObjects.getEnterCounter(ix) > 0) return; // ; entering screen?
+        if(graphicObjects.isJumping(ix)) return; // ; already jumping?
         // $C911 CALL $B4C1     ;
         // ignore audio
         // @label=loc_C915
-        counter |= 2; // ; init turning delay counter
-        block.set(ix + 0x0D, counter);
+        //int turnCounter = 2; // ; init turning delay counter
+        graphicObjects.initTurnCounter(ix);
         boolean right = (keys & 1)>0;
         boolean left = (keys & 2)>0;
-        int flip = block.getU(ix + 0x07);
-        boolean hflip = !DataBlock.isSetS(6, flip);
-        if((right & hflip) || (left & !hflip)) {
-            int sprite = block.getU(ix);
-            sprite ^= 8;
-            block.set(ix, sprite);
-        }
-        flip^= 0x40; // ; toggle hflip
-        block.set(ix + 0x07, flip);
-        int sprite = block.getU(ix);
+        boolean hflip = !graphicObjects.isHFlip(ix);
+        if((right & hflip) || (left & !hflip)) graphicObjects.toggleBitGrNo(ix, 3);
+        graphicObjects.toggleHFlip(ix);
+        int sprite = graphicObjects.getGrNo(ix);
         sprite += 0x10; // ; top half
-        block.set(ix + 0x20, sprite); // ; set sprite for top half
+        graphicObjects.setGrNo(ix + 0x20, sprite); // ; set sprite for top half
     }
 
     private void handle_jump_C948(DataBlock block, int ix) {
@@ -3070,7 +3062,7 @@ public class Game implements Runnable {
             int nextSprite = (params.getRnd().getSeed3() & 3) | 0x5C;
             if(nextSprite != graphicObjects.getGrNo(ix)) nextSprite = nextSprite ^ 1;
             graphicObjects.setGrNo(ix, nextSprite);
-            graphicObjects.flipHFlip(ix);
+            graphicObjects.toggleHFlip(ix);
         }
     }
 

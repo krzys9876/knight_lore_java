@@ -177,8 +177,9 @@ public class GraphicObjects {
     public void setJumping(int ix) { data.setBit(3, ix + 0x0C); }
     public void resetJumping(int ix) { data.resetBit(3, ix + 0x0C); }
 
-    public void resetBitGrNo(int ix, int bit) { data.resetBit(bit, ix); }
     public void setBitGrNo(int ix, int bit) { data.setBit(bit, ix); }
+    public void resetBitGrNo(int ix, int bit) { data.resetBit(bit, ix); }
+    public void toggleBitGrNo(int ix, int bit) { data.toggleBit(bit, ix); }
 
     // Flag 7
     public int getFlags7(int ix) { return data.getS(ix + 7); }
@@ -202,7 +203,7 @@ public class GraphicObjects {
     public boolean isHFlip(int ix) { return Flags7.isHFlip(getFlags7(ix)); }
     public void setHFlip(int ix) { setFlags7(ix, Flags7.setHFlip(getFlags7(ix))); }
     public void resetHFlip(int ix) { setFlags7(ix, Flags7.resetHFlip(getFlags7(ix))); }
-    public void flipHFlip(int ix) { setFlags7(ix, Flags7.flipHFlip(getFlags7(ix))); }
+    public void toggleHFlip(int ix) { setFlags7(ix, Flags7.toggleHFlip(getFlags7(ix))); }
 
     public boolean isVFlip(int ix) { return Flags7.isVFlip(getFlags7(ix)); }
 
@@ -221,6 +222,7 @@ public class GraphicObjects {
     public void setFlagsD(int ix, int f) { data.set(ix + 0x0D, f); }
 
     public int getTurnCounter(int ix) { return getFlagsD(ix) & 0x07; }
+    public void initTurnCounter(int ix) { setFlagsD(ix, 2); }
     public void decTurnCounter(int ix) {
         int counter = getTurnCounter(ix);
         if(counter >= 1) setFlagsD(ix, (getFlagsD(ix) & 0xF8) + counter - 1);
