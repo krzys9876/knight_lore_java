@@ -3827,26 +3827,17 @@ public class Game implements Runnable {
     }
 
     private void flag_room_visited_D219() {
-        int screenOrig = graphicObjects.data.getU(graphicObjects.data.start + 0x08); // plyr_spr_1 screen
+        int screenOrig = graphicObjects.getScreen(graphicObjects.start()); // plyr_spr_1 screen
         int offsetByte = screenOrig / 8;
         int offsetBit = screenOrig % 8;
         scrn_visited_5BE8.setBit(offsetBit, scrn_visited_5BE8.start + offsetByte);
-        /*String txt = "";
-        for(int i=0; i<scrn_visited_5BE8.size; i++) {
-            txt = txt.concat(String.format("%02X ",scrn_visited_5BE8.getU(scrn_visited_5BE8.start + i)));
-        }
-        IO.println(String.format("Scr visited: %02X / %s", screenOrig, txt));*/
     }
 
     private void save_2d_info_CE49(int ix) {
-        int widthBytes = graphicObjects.data.getU(ix + 0x18);
-        graphicObjects.data.set(ix + 0x1c, widthBytes);
-        int heightLines = graphicObjects.data.getU(ix + 0x19);
-        graphicObjects.data.set(ix + 0x1d, heightLines);
-        int pixelX = graphicObjects.data.getU(ix + 0x1a);
-        graphicObjects.data.set(ix + 0x1e, pixelX);
-        int pixelY = graphicObjects.data.getU(ix + 0x1b);
-        graphicObjects.data.set(ix + 0x1f, pixelY);
+        graphicObjects.setOldSpriteWidthB(ix, graphicObjects.getSpriteWidthB(ix));
+        graphicObjects.setOldSpriteHeight(ix, graphicObjects.getSpriteHeight(ix));
+        graphicObjects.setOldPixelX(ix, graphicObjects.getPixelX(ix));
+        graphicObjects.setOldPixelY(ix, graphicObjects.getPixelY(ix));
     }
 
     private boolean calc_pixel_XY_D6C9(int ix) {

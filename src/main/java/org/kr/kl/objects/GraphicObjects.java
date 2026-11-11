@@ -179,6 +179,10 @@ public class GraphicObjects {
     public void resetWipe(int ix) { data.resetBit(5, ix+7); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
+    public void setOldSpriteWidthB(int ix, int w) { data.set(ix + 0x1C, w); }
+    public void setOldSpriteHeight(int ix, int h) { data.set(ix + 0x1D, h); }
+    public void setOldPixelX(int ix, int x) { data.set(ix + 0x1E, x); }
+    public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
     public void setNearArch(int ix) { data.setBit(0, ix + 7); }
     public void resetNearArch(int ix) { data.resetBit(0, ix + 7); }
 
