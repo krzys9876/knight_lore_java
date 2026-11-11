@@ -59,21 +59,12 @@ import org.kr.DataBlock;
 public class GraphicObjects {
     public final DataBlock data;
 
-    public int start() {
-        return data.start;
-    }
+    public int start() { return data.start; }
+    public int endExcl() { return data.endExcl(); }
 
-    public int endExcl() {
-        return data.endExcl();
-    }
+    public int[] getCopy() { return data.getCopy(); }
 
-    public int[] getCopy() {
-        return data.getCopy();
-    }
-
-    public void reset() {
-        data.reset();
-    }
+    public void reset() { data.reset(); }
 
     public final int size;
 
@@ -82,6 +73,14 @@ public class GraphicObjects {
         this.size = size;
         data = new DataBlock(start, size * 0x20);
 
+    }
+
+    public void copyFrom(GraphicObjects other, int otherIx, int ix) {
+        for(int i = 0; i < 0x20; i++) data.set(ix + i, other.data.getU(otherIx + i));
+    }
+
+    public void resetObject(int ix) {
+        for(int i = 0; i < 0x20; i++) data.set(ix + i, 0);
     }
 
     public int getGrNo(int ix) { return data.getU(ix); }

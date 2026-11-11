@@ -78,7 +78,7 @@ public class Game implements Runnable {
     private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
     private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
-    private final DataBlock plyr_spr_1_scratchpad_D161 =  new DataBlock(0xD161, 0x20);
+    private final GraphicObjects plyr_spr_1_scratchpad_D161 =  new GraphicObjects(0xD161, 1);
     private final DataBlock plyr_spr_2_scratchpad_D181 =  new DataBlock(0xD181, 0x20);
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
@@ -325,7 +325,7 @@ public class Game implements Runnable {
         // LD ($5BB2),A
         variables.set(0x5BB2, 0);
         // LD ($D16D),A  ; plyr_spr_1_scratchpad
-        plyr_spr_1_scratchpad_D161.set(0xD16D, 0);
+        plyr_spr_1_scratchpad_D161.data.set(0xD16D, 0);
         // LD A,$05      ; 5 lives to start
         // LD ($5BBA),A  ;
         variables.set(0x5BBA, byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
@@ -891,7 +891,7 @@ public class Game implements Runnable {
         }
 
         for(int i=0; i<8; i++)
-            plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i,
+            plyr_spr_1_scratchpad_D161.data.set(plyr_spr_1_scratchpad_D161.start() + i,
                     plyr_spr_init_data_D1A1.getU(plyr_spr_init_data_D1A1.start+i));
         for(int i=0; i<8; i++)
             plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start+i,
@@ -900,7 +900,7 @@ public class Game implements Runnable {
 
         // LD A,$12      ; graphic_no (player top half)
         // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
-        plyr_spr_1_scratchpad_D161.set(0xD171, 0x12);
+        plyr_spr_1_scratchpad_D161.data.set(0xD171, 0x12);
         //byte_D171.set(0xD171, 0x12);
         // LD A,$22      ; graphic_no (player bottom half)
         // LD ($D191),A  ; {plyr_spr_2_scratchpad (byte 16)
@@ -911,7 +911,7 @@ public class Game implements Runnable {
         if(override != -1) randomLoc = override;
 
         //start_loc_1_D169.set(0xD169, randomLoc);
-        plyr_spr_1_scratchpad_D161.set(0xD169, randomLoc);
+        plyr_spr_1_scratchpad_D161.data.set(0xD169, randomLoc);
         plyr_spr_2_scratchpad_D181.set(0xD189, randomLoc);
     }
 
@@ -937,9 +937,9 @@ public class Game implements Runnable {
     }
 
     private void initPlayerData() {
-        int de = 0x5C08;
-        for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) graphicObjects.data.set(de+i, plyr_spr_1_scratchpad_D161.getU(plyr_spr_1_scratchpad_D161.start+i));
-        de+=plyr_spr_1_scratchpad_D161.size;
+        int de = graphicObjects.start();
+        for(int i=0; i<plyr_spr_1_scratchpad_D161.data.size; i++) graphicObjects.data.set(de+i, plyr_spr_1_scratchpad_D161.data.getU(plyr_spr_1_scratchpad_D161.start()+i));
+        de+=plyr_spr_1_scratchpad_D161.data.size;
         for(int i=0; i<plyr_spr_2_scratchpad_D181.size; i++) graphicObjects.data.set(de+i, plyr_spr_2_scratchpad_D181.getU(plyr_spr_2_scratchpad_D181.start+i));
     }
 
@@ -2314,9 +2314,9 @@ public class Game implements Runnable {
             block.set(ix + 0x08, newScreen);
             block.set(ix + 0x0C, block.getU(ix + 0x0C) | 0x30);
             copyPlayerData();
-            plyr_spr_1_scratchpad_D161.set(0xD171, plyr_spr_1_scratchpad_D161.getU(0xD161));
+            plyr_spr_1_scratchpad_D161.data.set(0xD171, plyr_spr_1_scratchpad_D161.data.getU(0xD161));
             plyr_spr_2_scratchpad_D181.set(0xD191, plyr_spr_2_scratchpad_D181.getU(0xD181));
-            plyr_spr_1_scratchpad_D161.set(0xD161, 0x78); // sparkly transform #1
+            plyr_spr_1_scratchpad_D161.data.set(0xD161, 0x78); // sparkly transform #1
             plyr_spr_2_scratchpad_D181.set(0xD181, 0x78);
         }
     }
@@ -2324,8 +2324,9 @@ public class Game implements Runnable {
     private void copyPlayerData() {
         // This is the opposite of the initPlayerData
         int de = 0x5C08;
-        for(int i=0; i<plyr_spr_1_scratchpad_D161.size; i++) plyr_spr_1_scratchpad_D161.set(plyr_spr_1_scratchpad_D161.start+i, graphicObjects.data.getU(de+i));
-        de+=plyr_spr_1_scratchpad_D161.size;
+        //for(int i=0; i<plyr_spr_1_scratchpad_D161.data.size; i++) plyr_spr_1_scratchpad_D161.data.set(plyr_spr_1_scratchpad_D161.start() + i, graphicObjects.data.getU(de+i));
+        plyr_spr_1_scratchpad_D161.copyFrom(graphicObjects, graphicObjects.start(), plyr_spr_1_scratchpad_D161.start());
+        de+=plyr_spr_1_scratchpad_D161.data.size;
         for(int i=0; i<plyr_spr_2_scratchpad_D181.size; i++) plyr_spr_2_scratchpad_D181.set(plyr_spr_2_scratchpad_D181.start+i, graphicObjects.data.getU(de+i));
     }
 
@@ -3678,14 +3679,14 @@ public class Game implements Runnable {
             debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.getU(hl)));
             int bkgAddr =  bkgObj.start;
             while(bkgObj.getU(bkgAddr) != 0) { // each object consists of 8-byte sprite info terminated by 0
+                graphicObjects.resetObject(targetAddr);
                 // 8 - byte sprite info
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.getU(bkgAddr)));
                 for(int i=0; i<8; i++) graphicObjects.data.set(targetAddr+i, bkgObj.getU(bkgAddr+i));
                 bkgAddr+=8;
                 // 9th byte
-                graphicObjects.data.set(targetAddr+8, currLocId);
-                for(int t=9; t<32; t++) graphicObjects.data.set(targetAddr+t, 0); // reset remaining info
-                targetAddr+=32;
+                graphicObjects.setScreen(targetAddr, currLocId);
+                targetAddr+=0x20;
             }
             hl++;
         }
@@ -3702,11 +3703,11 @@ public class Game implements Runnable {
                 int templatePart = 0;
                 boolean templateDone = false;
                 while(!templateDone) {
-
                     int locByte = location_tbl_6251.getU(hl + i);
                     int x = (locByte & 0b00000111);
                     int y = (locByte & 0b00111000) >> 3;
                     int z = (locByte & 0b11000000) >> 6;
+                    graphicObjects.resetObject(targetAddr);
                     graphicObjects.setGrNo(targetAddr, blockDef.getU(blockDef.start + templatePart * 6)); // object ID
                     graphicObjects.setW(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 1)); // width
                     graphicObjects.setD(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 2)); // depth
@@ -3719,8 +3720,7 @@ public class Game implements Runnable {
                     graphicObjects.setX(targetAddr, x1 + x * 16 + 0x48); // X
                     graphicObjects.setY(targetAddr, y1 + y * 16 + 0x48); // Y
                     graphicObjects.setZ(targetAddr, ((z * 12 + offsets) & 0xFC) + variables.getU(0x5BAE)); // Y, variable stores room size Z
-                    for (int t = 9; t < 32; t++) graphicObjects.data.set(targetAddr + t, 0);  // reset remaining info
-                    targetAddr += 32;
+                    targetAddr += 0x20;
                     templateDone = blockDef.getU(blockDef.start + templatePart * 6 + 6) == 0; // some templates consists of two objects (guards)
                     templatePart++;
                 }
@@ -3731,7 +3731,7 @@ public class Game implements Runnable {
 
         // @label=zero_end_of_graphic_objs_tbl
         // clear rest of graphics objects table
-        for(int i = targetAddr; i<graphicObjects.endExcl(); i++) graphicObjects.data.set(i, 0);
+        for(int i = targetAddr; i<graphicObjects.endExcl(); i+=0x20) graphicObjects.resetObject(i);
 
         debugTable2("Other objects data:", graphicObjects.start(), graphicObjects.data.getCopy());
     }
