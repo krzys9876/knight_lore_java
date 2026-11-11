@@ -125,6 +125,7 @@ public class GraphicObjects {
     public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
     public boolean isWipe(int ix) { return data.isSet(5, ix + 7); }
+    public boolean isBitSetGrNo(int ix, int bit) { return data.isSet(bit, ix); }
 
 
     public void setGrNo(int ix, int grNo) { data.set(ix, grNo); }
@@ -175,4 +176,7 @@ public class GraphicObjects {
     public void resetWipe(int ix) { data.resetBit(5, ix+7); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
+
+    public void resetBitGrNo(int ix, int bit) { data.resetBit(bit, ix); }
+    public void setBitGrNo(int ix, int bit) { data.setBit(bit, ix); }
 }

@@ -1880,7 +1880,7 @@ public class Game implements Runnable {
     private void stop_portcullis_C6E0(int ix) {
         // @label=stop_portcullis
         variables.set(0x5BAF, 0);
-        graphicObjects.data.resetBit(0, ix); // graphic_no=8
+        graphicObjects.resetBitGrNo(ix, 0); // graphic_no=8
     }
 
     private void upd_10_C4E8(int ix) {
@@ -2429,7 +2429,7 @@ public class Game implements Runnable {
     }
 
     private int adj_dZ_for_obj_intersect_CC38(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
-        int iy = graphicObjects.data.start;
+        int iy = graphicObjects.start();
         for(int i=0; i<0x28; i++) {
             if(is_object_not_ignored_B538(block, iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
@@ -2457,7 +2457,7 @@ public class Game implements Runnable {
     }
 
     private int adj_dX_for_obj_intersect_CB9A(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
-        int iy = graphicObjects.data.start;
+        int iy = graphicObjects.start();
         for(int i=0; i<0x28; i++) {
             if(is_object_not_ignored_B538(block, iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
@@ -2482,7 +2482,7 @@ public class Game implements Runnable {
     }
 
     private int adj_dY_for_obj_intersect_CBE9(DataBlock block, int ix, int dxAdj, int dyAdj, int dzAdj) {
-        int iy = graphicObjects.data.start;
+        int iy = graphicObjects.start();
         for(int i=0; i<0x28; i++) {
             if(is_object_not_ignored_B538(block, iy)) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
@@ -2984,12 +2984,12 @@ public class Game implements Runnable {
         int dx = graphicObjects.getDX(ix);
         int dy = graphicObjects.getDY(ix);
         if(Math.abs(dy) < Math.abs(dx)) {
-            if(dx > 0) graphicObjects.data.resetBit(1, ix); // ; sprite=80/81
-            else graphicObjects.data.setBit(1, ix); // ; sprite=80/81
+            if(dx > 0) graphicObjects.resetBitGrNo(ix, 1); // ; sprite=80/81
+            else graphicObjects.setBitGrNo(ix, 1); // ; sprite=80/81
             graphicObjects.setHFlip(ix); // set hflip
         } else {
-            if(dy > 0) graphicObjects.data.setBit(1, ix);
-            else graphicObjects.data.resetBit(1, ix);
+            if(dy > 0) graphicObjects.setBitGrNo(ix, 1);
+            else graphicObjects.resetBitGrNo(ix, 1);
             graphicObjects.resetHFlip(ix); // reset hflip
         }
     }
@@ -3092,7 +3092,7 @@ public class Game implements Runnable {
             graphicObjects.setGrNo(ix + 0x20, a);
             variables.set(0x5BB1, 0);
             graphicObjects.setXYAdj(ix, -12, -6);
-            boolean spriteFlag = graphicObjects.data.isSet(5, ix);
+            boolean spriteFlag = graphicObjects.isBitSetGrNo(ix, 5);
             if (spriteFlag) graphicObjects.setYAdj(ix, graphicObjects.getYAdj(ix) - 1);
         } else {
             // Continue transformation
