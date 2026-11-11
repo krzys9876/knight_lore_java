@@ -1629,8 +1629,8 @@ public class Game implements Runnable {
 
     private void update_sprite_loop_AFC7() {
         // block contains sprite metadata (32 bytes each)
-        int ix = graphicObjects.data.start;
-        while(ix < graphicObjects.data.endExcl()) {
+        int ix = graphicObjects.start();
+        while(ix < graphicObjects.endExcl()) {
             updateOneSprite(ix);
             if(exitingScreen || gameOver) return;
             ix+=32;
@@ -1640,10 +1640,9 @@ public class Game implements Runnable {
     }
 
     private void updateOneSprite(int ix) {
-        DataBlock block = graphicObjects.data;
         save_2d_info_CE49(ix);
         // @label=upd_sprite_jmp_tbl
-        switch(block.getU(ix)) {
+        switch(graphicObjects.getGrNo(ix)) {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
             case 0x02, 0x04: upd_2_4_C73C(ix); break;
             case 0x03, 0x05: upd_3_5_C722(ix); break;
@@ -1666,8 +1665,8 @@ public class Game implements Runnable {
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(ix); break;
             case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(ix); break;
             case 0x54: upd_84_C4C3(ix); break;
-            case 0x55: upd_85_C4B6(block, ix); break;
-            case 0x56, 0x57: upd_86_87_B7ED(block, ix); break;
+            case 0x55: upd_85_C4B6(ix); break;
+            case 0x56, 0x57: upd_86_87_B7ED(ix); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(ix); break;
             case 0x5B: upd_91_B683(ix); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(ix); break;
@@ -1683,7 +1682,7 @@ public class Game implements Runnable {
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(ix); break;
             case 0x8D: upd_141_B99C(ix); break;
             case 0x8E: upd_142_B99F(ix); break;
-            case 0x8F: upd_143_B6A2(block, ix); break;
+            case 0x8F: upd_143_B6A2(ix); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(ix); break;
             case 0x96, 0x97: upd_150_151_B73C(ix); break;
             case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(ix); break;
@@ -1695,7 +1694,7 @@ public class Game implements Runnable {
             case 0xB6, 0xB7: upd_182_183_B5FF(ix); break;
             case 0xB9, 0xBB: upd_185_187_BF37(ix); break;
 
-            default: IO.println("Not updated: %02x (%d)".formatted(block.getU(ix),block.getU(ix))); break;
+            default: IO.println("Not updated: %02x (%d)".formatted(graphicObjects.getGrNo(ix),graphicObjects.getGrNo(ix))); break;
         }
     }
 
@@ -3010,27 +3009,24 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_85_C4B6(DataBlock block, int ix) {
+    private void upd_85_C4B6(int ix) {
         //LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
+        graphicObjects.setXYAdj(ix, -16, -8);
         dec_dZ_and_update_XYZ_C700(ix);
         // $C4C0 JP $C232      ;// ignore audio
     }
 
-    private void upd_86_87_B7ED(DataBlock block, int ix) {
+    private void upd_86_87_B7ED(int ix) {
         // c$C4F2 LD HL,$FCF8   ; -4, -8
-        block.set(ix + 0x12, -8); //F8
-        block.set(ix + 0x13, -4); //FC
+        graphicObjects.setXYAdj(ix, -8, -4);
 
-        block.set(ix + 0x0B, 1); // ; pre-load dZ=1
-        boolean movingEast = block.isSet(0, ix + 0x0D);
-        if(movingEast) block.set(ix + 0x09, 2);
-        else block.set(ix + 0x09, -2);
+        graphicObjects.setDZ(ix, 1); // ; pre-load dZ=1
+        boolean movingEast = graphicObjects.isEast(ix);
+        if(movingEast) graphicObjects.setDX(ix, 2); else graphicObjects.setDX(ix, -2);
         // $B801 CALL $B45D     ; // ignore audio
         dec_dZ_and_update_XYZ_C700(ix);
-        boolean xOob = block.isSet(0, ix + 0x0C);
-        loc_B82F(block, ix, xOob, 1);
+        boolean xOob = graphicObjects.isOobX(ix);
+        loc_B82F(graphicObjects.data, ix, xOob, 1);
     }
 
     private void loc_B82F(DataBlock block, int ix, boolean oob, int a) {
@@ -3311,14 +3307,13 @@ public class Game implements Runnable {
         graphicObjects.setXYAdj(ix, -24, 12);
     }
 
-    private void upd_143_B6A2(DataBlock block, int ix) {
+    private void upd_143_B6A2(int ix) {
         // c$C4E3 LD HL,$F8F0   ; -8, -16
-        block.set(ix + 0x12, -16); //F0
-        block.set(ix + 0x13, -8); //F8
+        graphicObjects.setXYAdj(ix, -16, -8);
 
-        boolean triggered = block.isSet(3, ix + 0x0D);
+        boolean triggered = graphicObjects.isTriggered(ix);
         if(triggered) {
-            block.set(ix, 0xB8); // ; graphic_no = sparkles
+            graphicObjects.setGrNo(ix, 0xB8); // ; graphic_no = sparkles
             upd_112_to_118_184_BF2B(ix);
         }
     }
