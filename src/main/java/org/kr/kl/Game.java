@@ -1730,7 +1730,7 @@ public class Game implements Runnable {
         }
         int z = graphicObjects.getZ(ix);
         graphicObjects.setDZ(ix, z); // dZ=Z
-        chk_plyr_spec_near_arch_C7DB(graphicObjects.data, ix, centreY, centreX);
+        chk_plyr_spec_near_arch_C7DB(graphicObjects, ix, centreY, centreX);
 
         // @label=loc_C785
         int iy = graphicObjects.start(); // player
@@ -1739,7 +1739,7 @@ public class Game implements Runnable {
             if(grNo!=0) {
                 boolean autoAdjust = graphicObjects.isAutoAdjust(iy);
                 if(autoAdjust) {
-                    if(is_near_to_C7FE(graphicObjects.data, ix, iy, 0x0F, 0x0F)) {
+                    if(is_near_to_C7FE(graphicObjects, ix, iy, 0x0F, 0x0F)) {
                         switch(get_sprite_dir_CA1E(graphicObjects.data, ix)) {
                             case 0, 1: adj_ew_C7B1(ix, iy); break;
                             case 2, 3: adj_ns_C7C4(ix, iy); break;
@@ -1771,16 +1771,16 @@ public class Game implements Runnable {
     }
 
     // centre Y -> H, centre x -> L
-    private void chk_plyr_spec_near_arch_C7DB(DataBlock block, int ix, int centreY, int centreX) {
+    private void chk_plyr_spec_near_arch_C7DB(GraphicObjects block, int ix, int centreY, int centreX) {
         int iy = 0x5C08; // start of graphics table, first two objects are player top and bottom
         for(int objToCheck = 0; objToCheck < 4; objToCheck++) {
-            int grNo = graphicObjects.data.getU(iy);
+            int grNo = graphicObjects.getGrNo(iy);
             if(grNo!=0) {
-                boolean autoAdjust = graphicObjects.data.isSet(3, iy + 7);
+                boolean autoAdjust = graphicObjects.isAutoAdjust(iy);
                 if(autoAdjust) {
                     if(is_near_to_C7FE(block, ix, iy, centreY, centreX)) {
                         // C7F5 SET 0,(IY+$07)
-                        graphicObjects.data.setBit(0, iy + 0x07);
+                        graphicObjects.setNearArch(iy);
                     }
                 }
             }
@@ -1788,16 +1788,16 @@ public class Game implements Runnable {
         }
     }
 
-    private boolean is_near_to_C7FE(DataBlock block, int ix, int iy, int centreY, int centreX) {
+    private boolean is_near_to_C7FE(GraphicObjects block, int ix, int iy, int centreY, int centreX) {
         //@label=is_near_to
         // ix - arch, iy - object (player), centreY - H, centreX - L
         // NOTE: we compare unsigned values - the dX, dY and dZ values are set as temporary variables and contain x, y and z
-        int archCentreX = block.getU(ix + 0x09);
-        int archCentreY = block.getU(ix + 0x0A);
-        int archCentreZ = block.getU(ix + 0x0B);
-        int objX = graphicObjects.data.getU(iy + 0x01);
-        int objY = graphicObjects.data.getU(iy + 0x02);
-        int objZ = graphicObjects.data.getU(iy + 0x03);
+        int archCentreX = block.getDXu(ix);
+        int archCentreY = block.getDYu(ix);
+        int archCentreZ = block.getDZu(ix);
+        int objX = graphicObjects.getX(iy);
+        int objY = graphicObjects.getY(iy);
+        int objZ = graphicObjects.getZ(iy);
 
         return (Math.abs(archCentreX - objX) < centreX) && (Math.abs(archCentreY - objY) < centreY) &&
                 (Math.abs(archCentreZ - objZ) < 4);
@@ -1833,7 +1833,7 @@ public class Game implements Runnable {
             //int seed3 = variables.getU(0x5BA5);
             if((params.getRnd().getSeed3() & 0x1F) != 0) return; // ; 1in32 chance?
 
-            graphicObjects.data.setBit(0, ix); // ; graphic_no=9
+            graphicObjects.setBitGrNo(ix, 0); // ; graphic_no=9
             graphicObjects.setDZ(ix, 1); // ; dZ=1 (up)
         } else {
             int moveCnt = variables.getU(0x5BB0);
@@ -1843,7 +1843,7 @@ public class Game implements Runnable {
             }
             // @label=init_portcullis_down
             variables.set(0x5BB0, moveCnt + 1);
-            graphicObjects.data.setBit(0, ix); // ; graphic_no=9
+            graphicObjects.setBitGrNo(ix, 0); // ; graphic_no=9
             graphicObjects.setDZ(ix, -1); // ; dZ=-1 (down)
         }
         variables.set(0x5BAF, variables.getU(0x5BAF) + 1);
@@ -3329,12 +3329,12 @@ public class Game implements Runnable {
         int dxU = graphicObjects.getDXu(ix);
         int dyU = graphicObjects.getDYu(ix);
         if(dxU > dyU) {
-            if(dx >= 0) graphicObjects.data.setBit(3, ix); // ; graphic_no
-            else graphicObjects.data.resetBit(3, ix);
+            if(dx >= 0) graphicObjects.setBitGrNo(ix, 3); // ; graphic_no
+            else graphicObjects.resetBitGrNo(ix, 3);
             graphicObjects.resetHFlip(ix); // ; clear hflip
         } else {
-            if (dy >= 0) graphicObjects.data.resetBit(3, ix);
-            else graphicObjects.data.setBit(3, ix);
+            if (dy >= 0) graphicObjects.resetBitGrNo(ix, 3);
+            else graphicObjects.setBitGrNo(ix, 3);
             graphicObjects.setHFlip(ix);
         }
 
@@ -3381,7 +3381,7 @@ public class Game implements Runnable {
         // c$C4D8 LD HL,$FCF4   ; -4, -12
         graphicObjects.setXYAdj(ix, -12, -4);
 
-        int firstSpObjGrNo =  graphicObjects.data.getU(0x5C48);
+        int firstSpObjGrNo =  graphicObjects.getGrNo(0x5C48);
         if(firstSpObjGrNo != 0) {
             upd_111_B95E(ix);
             return;
@@ -3395,7 +3395,7 @@ public class Game implements Runnable {
         graphicObjects.setDZ(ix, 2); // ; dZ=2 - will be applied next frame as C700 has already been called
         if(z >= 0xA0) {
             graphicObjects.setDZ(ix, 1); // dZ=1
-            int playerGrNo = graphicObjects.data.getU(graphicObjects.data.start);
+            int playerGrNo = graphicObjects.getGrNo(graphicObjects.start());
             boolean isWulf = ((playerGrNo - 0x30) & 0xFF) < 0x10;
             if(!isWulf) {
                 int grNo = graphicObjects.getGrNo(ix);
@@ -3404,7 +3404,7 @@ public class Game implements Runnable {
                     graphicObjects.setGrNo(ix, objects_required_C27D.getU(hl) | 0xA8);
                 }
             } else {
-                graphicObjects.data.setBit(2, ix);
+                graphicObjects.setBitGrNo(ix, 3);
                 graphicObjects.resetIgnore3D(ix); // ; don't ignore in 3D calcs
             }
         }
@@ -3424,7 +3424,7 @@ public class Game implements Runnable {
         int dx = 4;
         int dy = 4;
         if(!cauldronRoom) {
-            boolean nearArch = graphicObjects.data.isSet(0,graphicObjects.data.start + 0x07);
+            boolean nearArch = graphicObjects.isNearArch(graphicObjects.start());
             if(nearArch) {
                 dx = 1;
                 dy = 1;
@@ -3435,7 +3435,7 @@ public class Game implements Runnable {
         next_graphic_no_mod_4_B98C(graphicObjects.data, ix);
 
         if(cauldronRoom) {
-            int grNo = graphicObjects.data.getU(graphicObjects.data.start);
+            int grNo = graphicObjects.getGrNo(graphicObjects.start());
             if (((grNo - 0x10) & 0xFF) >= 0x40) { // is player dead (sparkles)
                 upd_111_B95E(ix); // ; final sparkles in cauldron
                 return;

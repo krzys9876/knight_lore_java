@@ -110,6 +110,7 @@ public class GraphicObjects {
     public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
     public boolean isHFlip(int ix) { return data.isSet(6, ix + 0x07); } // BIT 6,(IX+$07)
     public boolean isAutoAdjust(int ix) { return data.isSet(3, ix + 0x07); } // BIT 6,(IX+$07)
+    public boolean isNearArch(int ix) { return data.isSet(0, ix + 7); }
     public boolean isOobX(int ix) { return data.isSet(0, ix + 0x0C); }
     public boolean isOobY(int ix) { return data.isSet(1, ix + 0x0C); }
     public boolean isOobXY(int ix) { return isOobX(ix) || isOobY(ix); }
@@ -176,6 +177,8 @@ public class GraphicObjects {
     public void resetWipe(int ix) { data.resetBit(5, ix+7); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
+    public void setNearArch(int ix) { data.setBit(0, ix + 7); }
+    public void resetNearArch(int ix) { data.resetBit(0, ix + 7); }
 
     public void resetBitGrNo(int ix, int bit) { data.resetBit(bit, ix); }
     public void setBitGrNo(int ix, int bit) { data.setBit(bit, ix); }
