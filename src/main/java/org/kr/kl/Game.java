@@ -2007,7 +2007,7 @@ public class Game implements Runnable {
                 }
             }
             if(canPickup) {
-                pickup_object_C141(graphicObjects.data, ix, iy, origW, origD, origH);
+                pickup_object_C141(ix, iy, origW, origD, origH);
             } else {
                 if(chk_pickup_drop_BFFB()) {
                     b=2;
@@ -2061,17 +2061,17 @@ public class Game implements Runnable {
         }
     }
 
-    private void pickup_object_C141(DataBlock block, int ix, int iy, int origW, int origD, int origH) {
+    private void pickup_object_C141(int ix, int iy, int origW, int origD, int origH) {
         variables.set(0x5BC0, 0);
-        int grNo = block.getU(iy);
+        int grNo = graphicObjects.getGrNo(iy);
         int hl = inventory_5BD8.start;
         inventory_5BD8.set(hl, grNo);
         hl++;
-        int flags = block.getU(iy + 7);
+        int flags = graphicObjects.getFlags7(iy);
         inventory_5BD8.set(hl, flags);
         hl++;
-        int d = block.getU(iy + 0x11);
-        int e = block.getU(iy + 0x10);
+        int e = graphicObjects.getTemp10(iy);
+        int d = graphicObjects.getTemp11(iy);
         int ptr =  d * 256 + e; // ; ptr graphic object
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
@@ -2079,14 +2079,14 @@ public class Game implements Runnable {
         hl++;
         inventory_5BD8.set(hl, d);
         //set_wipe_and_draw_flags_C692(block, ix);
-        block.set(iy, 1);
+        graphicObjects.setGrNo(iy, 1);
 
         hl = inventory_5BD8.start + 0x0C;
         int a = inventory_5BD8.getU(hl);
         if(a == 0) {
             adjust_carried_C12B();
         } else {
-            block.set(iy, a);
+            graphicObjects.setGrNo(iy, a);
             drop_object_C106(ix, iy);
         }
 
