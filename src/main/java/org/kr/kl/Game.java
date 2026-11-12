@@ -2931,15 +2931,14 @@ public class Game implements Runnable {
         if(movingEast) graphicObjects.setDX(ix, 2); else graphicObjects.setDX(ix, -2);
         // $B801 CALL $B45D     ; // ignore audio
         dec_dZ_and_update_XYZ_C700(ix);
-        boolean xOob = graphicObjects.isOobX(ix);
-        loc_B82F(graphicObjects.data, ix, xOob, 1);
+        loc_B82F(ix, true);
     }
 
-    private void loc_B82F(DataBlock block, int ix, boolean oob, int a) {
-        if(oob) {
-            block.set(ix + 0x0D, block.getU(ix + 0x0D) ^ a); // ; toggle bit 1/2
-            //  $B837 CALL $B42E    ; // ignore audio
-        }
+    // Toggle direction if OOB
+    private void loc_B82F(int ix, boolean isX) {
+        if(isX && graphicObjects.isOobX(ix)) graphicObjects.toggleEastWest(ix);
+        else if(!isX && graphicObjects.isOobY(ix)) graphicObjects.toggleNorthSouth(ix);
+
         toggle_next_prev_sprite_B985(ix);
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
@@ -3419,8 +3418,7 @@ public class Game implements Runnable {
         if(movingNorth) graphicObjects.setDY(ix, 2); else graphicObjects.setDY(ix, -2);
         // $B801 CALL $B45D     ; // ignore audio
         dec_dZ_and_update_XYZ_C700(ix);
-        boolean yOob = graphicObjects.isOobY(ix);
-        loc_B82F(graphicObjects.data, ix, yOob, 2);
+        loc_B82F(ix, false);
     }
 
     private void upd_182_183_B5FF(int ix) {

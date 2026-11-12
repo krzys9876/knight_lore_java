@@ -162,7 +162,6 @@ public class GraphicObjects {
     public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
     public void setJustDropped(int ix) { data.setBit(0, ix + 0x0D); }
     public void resetJustDropped(int ix) { data.resetBit(0, ix + 0x0D); }
-    public void toggleEastWest(int ix) { data.set(ix + 0x0D, (data.getU(ix + 0x0D) ^ 0x01)); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
     public void setOldSpriteWidthB(int ix, int w) { data.set(ix + 0x1C, w); }
@@ -249,6 +248,8 @@ public class GraphicObjects {
     public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
     public int getDirection(int ix) { return getFlagsD(ix) & 0x03; }
     public void incDirection(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xFC) | ((getDirection(ix) + 1) & 0x03)); }
+    public void toggleEastWest(int ix) { setFlagsD(ix, getFlagsD(ix) ^ 1); }
+    public void toggleNorthSouth(int ix) { setFlagsD(ix, getFlagsD(ix) ^ 2); }
 
     public int getLookAroundCounter(int ix) { return getFlagsD(ix) & 0x0F; } // NOTE: multi-purpose bits
     public void decLookAroundCounter(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xF0) | ((getLookAroundCounter(ix) - 1) & 0x0F)); }
