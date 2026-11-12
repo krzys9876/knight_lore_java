@@ -54,7 +54,7 @@ public class LookupTable {
     private int reverseBits(int v) {
         int e = 0;
         for(int b=0; b<8; b++) {
-            int bit = (v & (1 << b)) >> b; // given bit at position 0
+            int bit = (v & (1 << b)) >> b; // given bit shifted to position 0
             e |= bit << (7-b); // shift bit to desired position
         }
         return e;
