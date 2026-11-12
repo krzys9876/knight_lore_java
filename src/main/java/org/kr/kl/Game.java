@@ -1480,9 +1480,9 @@ public class Game implements Runnable {
             case 0x06, 0x07: upd_6_7_C4E3(o); break;
             case 0x08: upd_8_C65E(o); break;
             case 0x09: upd_9_C6BD(o); break;
-            case 0x0A: upd_10_C4E8(ix); break;
-            case 0x0B: upd_11_C4ED(ix); break;
-            case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(ix); break;
+            case 0x0A: upd_10_C4E8(o); break;
+            case 0x0B: upd_11_C4ED(o); break;
+            case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(o); break;
             case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(ix); break;
             case 0x16: upd_22_B7A3(ix); break;
             case 0x17: upd_23_B7E7(ix); break;
@@ -1509,7 +1509,7 @@ public class Game implements Runnable {
             case 0x77: upd_119_BF3F(ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
             case 0x7F: upd_127_BF11(o); break;
-            case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(ix); break;
+            case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(o); break;
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(ix); break;
             case 0x8D: upd_141_B99C(ix); break;
             case 0x8E: upd_142_B99F(ix); break;
@@ -1519,7 +1519,7 @@ public class Game implements Runnable {
             case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(ix); break;
             case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(ix); break;
             case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(ix); break;
-            case 0xB0, 0xB1: upd_176_177_B83F(ix); break;
+            case 0xB0, 0xB1: upd_176_177_B83F(o); break;
             case 0xB2, 0xB3: upd_178_179_B865(ix); break;
             case 0xB4, 0xB5: upd_180_181_B80F(ix); break;
             case 0xB6, 0xB7: upd_182_183_B5FF(ix); break;
@@ -1704,25 +1704,13 @@ public class Game implements Runnable {
         graphicObjects.resetBitGrNo(ix, 0); // graphic_no=8
     }
 
-    private void upd_10_C4E8(int ix) {
-        //LD HL,$FFEC   ;
-        graphicObjects.setXYAdj(ix, -20, -1);
-    }
+    private void upd_10_C4E8(GraphicObject o) { o.setXYAdj(-20, -1); }
 
-    private void upd_11_C4ED(int ix) {
-        //LD HL,$FEF4   ; -2, -12
-        graphicObjects.setXYAdj(ix, -12, -2); // FE
-    }
+    private void upd_11_C4ED(GraphicObject o) { o.setXYAdj(-12, -2); }
 
-    private void upd_12_to_15_C4F2(int ix) {
-        //LD HL,$FCF8   ; -4, -8
-        graphicObjects.setXYAdj(ix, -8, -4);
-    }
+    private void upd_12_to_15_C4F2(GraphicObject o) { o.setXYAdj(-8, -4); }
 
-    private void upd_128_to_130_C4D3(int ix) {
-        //LD HL,$FEF8   ; -2, -8
-        graphicObjects.setXYAdj(ix, -8, -2);
-    }
+    private void upd_128_to_130_C4D3(GraphicObject o) { o.setXYAdj(-8, -2); }
 
     private void upd_131_to_133_B566(int ix) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
@@ -3222,8 +3210,8 @@ public class Game implements Runnable {
     }
 
     // NOTE: commented as: not used
-    private void upd_176_177_B83F(int ix) {
-        upd_12_to_15_C4F2(ix);
+    private void upd_176_177_B83F(GraphicObject o) {
+        upd_12_to_15_C4F2(o);
         // NOTE: rest of the routine is not implemented
     }
 
