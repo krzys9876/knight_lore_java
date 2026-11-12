@@ -27,6 +27,14 @@ public class Sprite {
         setByteRaw(pos2, buffer);
     }
 
+    public void replaceAndRevertBytes(int pos1, int pos2) {
+        int buffer = getByteRaw(pos1);
+        setByteRaw(pos1, lookupTable.getReverse(getByteRaw(pos2)));
+        setByteRaw(pos2, lookupTable.getReverse(buffer));
+    }
+
+    public void reverseByte(int pos) { setByteRaw(pos, lookupTable.getReverse(getByteRaw(pos)));}
+
     public void toggleHFlip() { data[0] = data[0] ^ 0x40; }
     public void toggleVFlip() { data[0] = data[0] ^ 0x80; }
 
@@ -50,23 +58,24 @@ public class Sprite {
         // Flip horizontally (in-place) and set flag in data
         if(refHFlip != isHFlip()) {
             for(int line = 0; line<lines; line++) {
-                int firstByteAddress = de + 2 + line * bytesInLine;
+                int firstByteAddress = de + line * bytesInLine;
                 int lastByteAddress = firstByteAddress + bytesInLine - 1;
-                int bytePairs = bytesInLine >> 1;
-                for(int b = 0; b < bytePairs; b++) {
-                    boolean isMask = (b & 1) == 0;
-                    // Middle pair means that we have off number of data bytes so we must only flip bits and leave bytes in place
-                    boolean isMiddlePair = ((bytePairs & 1) == 1) && (b == bytePairs - 1);
-                    int shift = isMiddlePair ? 0 : (isMask ? -1 : 1);
+                int bytePairs = bytesInLine >> 1; // byte pair is a mask byte followed by data byte
+                if((bytePairs & 1) == 1) {
+                    // Middle pair means that we have off number of data bytes (don't first the mast) so we must only flip bits and leave bytes in place
+                    // m1 b1 m2 b2 m3 b3 -> m2 b2 are the middle pair
+                    bytePairs --;
+                    int byteAddress = firstByteAddress + bytePairs;
+                    reverseByte(byteAddress);
+                    reverseByte(byteAddress + 1);
+                }
+                for(int b = 0; b < bytePairs / 2; b++) {
                     // NOTE: the data bytes and mask bytes must not be mixed
-                    int leftByteAddress = firstByteAddress + b;
-                    int rightByteAddress = lastByteAddress - b + shift;
-                    int leftBuffer = getByteRaw(leftByteAddress - 2);
-                    leftBuffer = lookupTable.getReverse(leftBuffer); // F1xx - byte flip table
-                    int rightBuffer = getByteRaw(rightByteAddress - 2);
-                    rightBuffer = lookupTable.getReverse(rightBuffer);
-                    setByteRaw(leftByteAddress - 2, isMiddlePair ? leftBuffer : rightBuffer);
-                    setByteRaw(rightByteAddress - 2, isMiddlePair ? rightBuffer : leftBuffer);
+                    // m1 b1 m2 b2 m3 b3 m4 b4 -> m4 b4 m3 b3 m2 b2 m1 b1
+                    int leftByteAddress = firstByteAddress + b * 2;
+                    int rightByteAddress = lastByteAddress - b * 2 - 1;
+                    replaceAndRevertBytes(leftByteAddress, rightByteAddress); // mask
+                    replaceAndRevertBytes(leftByteAddress + 1, rightByteAddress + 1); // data
                 }
             }
             toggleHFlip();
