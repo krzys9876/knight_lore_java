@@ -72,4 +72,13 @@ public class Sprite {
             toggleHFlip();
         }
     }
+
+    public int applyToByte(int bufByte, int pos) {
+        int outBufByte = bufByte;
+        int e_mask = getMask(pos);
+        int d_spriteByte = getByte(pos);
+        outBufByte = (outBufByte & (e_mask ^ 0xFF));
+        outBufByte = (outBufByte | d_spriteByte) & 0xFF;
+        return outBufByte;
+    }
 }

@@ -602,13 +602,8 @@ public class Game implements Runnable {
             metadata.setSpriteWidthB(ix, sprite.width);
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 for (int i = 0; i < sprite.width; i++) {
-                    int bufByte = shadowMemory.getByteAt(bc);
-                    int e_mask = sprite.getMask(de);
-                    int d_spriteByte = sprite.getByte(de);
+                    shadowMemory.setByteAt(bc, sprite.applyToByte(shadowMemory.getByteAt(bc), de));
                     de++;
-                    bufByte = (bufByte & (e_mask ^ 0xFF));
-                    bufByte = (bufByte | d_spriteByte) & 0xFF;
-                    shadowMemory.setByteAt(bc, bufByte);
                     bc++;
                 }
                 bc+=(32-sprite.width);
