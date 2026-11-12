@@ -2,6 +2,7 @@ package org.kr.kl;
 
 import org.kr.*;
 import org.kr.kl.objects.GraphicObjects;
+import org.kr.kl.objects.LookupTable;
 import org.kr.kl.objects.SpecialObjects;
 import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.DebugPanel;
@@ -50,7 +51,7 @@ public class Game implements Runnable {
     private final DataBlock cant_drop_5BD3 = new DataBlock(0x5BD3, 5);
     //private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12); // contains unk and objects_carried_2
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
-    private final DataBlock lookupTable = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
+    private final LookupTable lookupTable = new LookupTable();
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
     private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
     private final DataBlock menu_text_BDBA = InitialData.block("menu_text_BDBA");
@@ -302,7 +303,7 @@ public class Game implements Runnable {
 
     private void main_AF88() {
         debugPanel1.append("main_AF88");
-        build_lookup_tables_D69E();
+        //build_lookup_tables_D69E();
 
         // XOR A
         // LD ($5BB2),A
@@ -381,63 +382,6 @@ public class Game implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void build_lookup_tables_D69E() {
-        debugPanel1.append("build_lookup_tables_D69E");
-        // NOTE: registers are treated as ints, not bytes due to lack of unsigned byte type in java
-
-        // E is not reinitialized between the two loops
-        int e=0;
-        // F200 - FFFF
-        for(int l = 0; l<=0xFF; l++) {
-            int d=0;
-            e=l;
-            int h = 0xFF;
-            for (int b = 7; b > 0; b--) {
-                // SLA E
-                boolean cy = (e & 0x80) > 0;
-                e = (e << 1) & 0xFF;
-                // RL D
-                d = (d << 1) & 0xFF;
-                if(cy) d++;
-                // LD A, E
-                int a = e;
-                // CPL
-                a = a ^ 0xFF;
-                // LD (HL), A
-                lookupTable.set(h * 256 + l, a);
-                // DEC H
-                h--;
-                // LD A, D
-                a = d;
-                // CPL
-                a = a ^ 0xFF;
-                lookupTable.set(h * 256 + l, a);
-                // DEC H
-                h--;
-                // DJNZ $D6A7
-            }
-        }
-        // F100 - F1FF
-        for(int l = 0; l<=0xFF; l++) {
-            int d=l;
-            for(int b=8; b > 0; b--) {
-                // SRL D
-                boolean cy = (d & 1) > 0;
-                d = (d >> 1);
-                // RL E
-                e = (e << 1) & 0xFF;
-                if(cy) e++;
-                // DJNZ $D6BE
-            }
-            // LD (HL), e
-            lookupTable.set(0xF100+l, e);
-        }
-
-        // Lookup table values verified with KL memory dump
-        //printLookupTable();
-        //printShadowMemory();
     }
 
     private void clear_scrn_D55F() {
@@ -687,10 +631,10 @@ public class Game implements Runnable {
                     de++;
                     int d_spriteByte = sprite_graphics_data_728A.getU(de);
                     de++;
-                    int e_maskLeft = (lookupTable.getU(lookupBase + e_mask)) ^ 0xFF;
-                    int e_maskRight = (lookupTable.getU(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
-                    int d_spriteByteLeft = (lookupTable.getU(lookupBase + d_spriteByte)) ^ 0xFF;
-                    int d_spriteByteRight = (lookupTable.getU(lookupBase + 0x0100 + d_spriteByte)) ^ 0xFF;
+                    int e_maskLeft = (lookupTable.get(lookupBase + e_mask)) ^ 0xFF;
+                    int e_maskRight = (lookupTable.get(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
+                    int d_spriteByteLeft = (lookupTable.get(lookupBase + d_spriteByte)) ^ 0xFF;
+                    int d_spriteByteRight = (lookupTable.get(lookupBase + 0x0100 + d_spriteByte)) ^ 0xFF;
                     bufByteLeft = (bufByteLeft & (e_maskLeft ^ 0xFF));
                     bufByteLeft = (bufByteLeft | d_spriteByteLeft) & 0xFF;
                     shadowMemory.setByteAt(bc, bufByteLeft);
@@ -754,9 +698,9 @@ public class Game implements Runnable {
                     int leftByteAddress = firstByteAddress + b;
                     int rightByteAddress = lastByteAddress - b + shift;
                     int leftBuffer = sprite_graphics_data_728A.getU(leftByteAddress);
-                    leftBuffer = lookupTable.getU(0xF100 + leftBuffer); // F1xx - byte flip table
+                    leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
                     int rightBuffer = sprite_graphics_data_728A.getU(rightByteAddress);
-                    rightBuffer = lookupTable.getU(0xF100 + rightBuffer);
+                    rightBuffer = lookupTable.get(0xF100 + rightBuffer);
                     sprite_graphics_data_728A.set(leftByteAddress, isMiddlePair ? leftBuffer : rightBuffer);
                     sprite_graphics_data_728A.set(rightByteAddress, isMiddlePair ? rightBuffer : leftBuffer);
                 }
