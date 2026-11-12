@@ -25,15 +25,11 @@ public class SpriteData {
         }
         for(int grNo=0; grNo<size; grNo++) {
             int startAddress = pointers[grNo];
-            int endAddressExcl = grNo==size-1 ? sprite_graphics_data_728A.endExcl() : pointers[grNo]+1;
+            int lines = sprite_graphics_data_728A.getU(startAddress+1);
+            int bytesInLine = (sprite_graphics_data_728A.getU(startAddress) & 0x07) * 2;
+            int endAddressExcl = startAddress + 2 + lines * bytesInLine;
             sprites[grNo] = new Sprite(Arrays.copyOfRange(sprite_graphics_data_728A.getCopy(), startAddress - sprite_graphics_data_728A.start, endAddressExcl - sprite_graphics_data_728A.start));
         }
-    }
-
-    public int getPointer(int grNo) {
-        //int hl = grNo * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
-        //return sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256; // sprite actual address
-        return pointers[grNo];
     }
 
     // Returns address of sprite graphics data or 0 if null sprite
@@ -41,33 +37,35 @@ public class SpriteData {
         int grNo = metadata.getGrNo(ix);
         if(grNo == 0) return Optional.empty();
 
-        int de = getPointer(grNo);
+        //int de = getPointer(grNo);
+        Sprite sprite = sprites[grNo];
+        int de = 0;
 
         boolean flipVScratch = metadata.isVFlip(ix);
         boolean flipHScratch = metadata.isHFlip(ix);
-        int flagsSpriteData = sprite_graphics_data_728A.getU(de) & 0xC0;
+        int flagsSpriteData = sprite.data[de] & 0xC0;
         boolean flipVData = (flagsSpriteData & 0x80) > 0;
         boolean flipHData = (flagsSpriteData & 0x40) > 0;
 
         // Flip vertically (in-place) and set flag in data
         if(flipVScratch != flipVData) {
-            int lines = sprite_graphics_data_728A.getU(de+1);
-            int bytesInLine = (sprite_graphics_data_728A.getU(de) & 0x07) * 2;
+            int lines = sprite.data[de+1];
+            int bytesInLine = (sprite.data[de] & 0x07) * 2;
             for(int line = 0; line<(lines >> 1); line++) {
                 for(int b = 0; b < bytesInLine; b++) {
                     int topByteAddress = de + 2 + line * bytesInLine + b;
                     int bottomByteAddress = de + 2 + (lines - line - 1) * bytesInLine + b;
-                    int buffer = sprite_graphics_data_728A.getU(topByteAddress);
-                    sprite_graphics_data_728A.set(topByteAddress, sprite_graphics_data_728A.getU(bottomByteAddress));
-                    sprite_graphics_data_728A.set(bottomByteAddress, buffer);
+                    int buffer = sprite.data[topByteAddress];
+                    sprite.data[topByteAddress] = sprite.data[bottomByteAddress];
+                    sprite.data[bottomByteAddress] = buffer;
                 }
             }
-            sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.getU(de) ^ 0x80);
+            sprite.data[de] = sprite.data[de] ^ 0x80;
         }
         // Flip horizontally (in-place) and set flag in data
         if(flipHScratch != flipHData) {
-            int lines = sprite_graphics_data_728A.getU(de+1);
-            int bytesInLine = (sprite_graphics_data_728A.getU(de) & 0x07) * 2;
+            int lines = sprite.data[de+1];
+            int bytesInLine = (sprite.data[de] & 0x07) * 2;
             for(int line = 0; line<lines; line++) {
                 int firstByteAddress = de + 2 + line * bytesInLine;
                 int lastByteAddress = firstByteAddress + bytesInLine - 1;
@@ -80,21 +78,16 @@ public class SpriteData {
                     // NOTE: the data bytes and mask bytes must not be mixed
                     int leftByteAddress = firstByteAddress + b;
                     int rightByteAddress = lastByteAddress - b + shift;
-                    int leftBuffer = sprite_graphics_data_728A.getU(leftByteAddress);
+                    int leftBuffer = sprite.data[leftByteAddress];
                     leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
-                    int rightBuffer = sprite_graphics_data_728A.getU(rightByteAddress);
+                    int rightBuffer = sprite.data[rightByteAddress];
                     rightBuffer = lookupTable.get(0xF100 + rightBuffer);
-                    sprite_graphics_data_728A.set(leftByteAddress, isMiddlePair ? leftBuffer : rightBuffer);
-                    sprite_graphics_data_728A.set(rightByteAddress, isMiddlePair ? rightBuffer : leftBuffer);
+                    sprite.data[leftByteAddress] = isMiddlePair ? leftBuffer : rightBuffer;
+                    sprite.data[rightByteAddress] = isMiddlePair ? rightBuffer : leftBuffer;
                 }
             }
-            sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.getU(de) ^ 0x40);
+            sprite.data[de] = sprite.data[de] ^ 0x40;
         }
-        int startAddress = de;
-        int lines = sprite_graphics_data_728A.getU(de+1);
-        int bytesInLine = (sprite_graphics_data_728A.getU(de) & 0x07) * 2;
-        int endAddress = de + 2 + lines * bytesInLine;
-        assert(endAddress > startAddress);
-        return Optional.of(new Sprite(Arrays.copyOfRange(sprite_graphics_data_728A.getCopy(), startAddress - sprite_graphics_data_728A.start, endAddress - sprite_graphics_data_728A.start)));
+        return Optional.of(sprite);
     }
 }
