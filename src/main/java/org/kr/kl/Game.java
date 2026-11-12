@@ -602,8 +602,8 @@ public class Game implements Runnable {
             metadata.setSpriteWidthB(ix, sprite.width);
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 for (int i = 0; i < sprite.width; i++) shadowMemory.setByteAt(bc+i, sprite.applyToByte(shadowMemory.getByteAt(bc+i), de+i));
-                bc+=0x20;
-                de+=sprite.width;
+                bc += 0x20;
+                de += sprite.width;
             }
         } else {
             metadata.setSpriteWidthB(ix, sprite.width + 1);
@@ -611,27 +611,26 @@ public class Game implements Runnable {
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
                 for (int i = 0; i < sprite.width; i++) {
-                    int bufByteLeft = shadowMemory.getByteAt(bc);
-                    int bufByteRight = shadowMemory.getByteAt(bc+1);
-                    int e_mask = sprite.getMask(de);
-                    int d_spriteByte = sprite.getByte(de);
-                    de++;
+                    int bufByteLeft = shadowMemory.getByteAt(bc+i);
+                    int bufByteRight = shadowMemory.getByteAt(bc+i+1);
+                    int e_mask = sprite.getMask(de+i);
+                    int d_spriteByte = sprite.getByte(de+i);
                     int e_maskLeft = (lookupTable.get(lookupBase + e_mask)) ^ 0xFF;
                     int e_maskRight = (lookupTable.get(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
                     int d_spriteByteLeft = (lookupTable.get(lookupBase + d_spriteByte)) ^ 0xFF;
                     int d_spriteByteRight = (lookupTable.get(lookupBase + 0x0100 + d_spriteByte)) ^ 0xFF;
                     bufByteLeft = (bufByteLeft & (e_maskLeft ^ 0xFF));
                     bufByteLeft = (bufByteLeft | d_spriteByteLeft) & 0xFF;
-                    shadowMemory.setByteAt(bc, bufByteLeft);
+                    shadowMemory.setByteAt(bc+i, bufByteLeft);
                     // Do not modify next line
                     if(((bc - shadowMemory.start) & 0x001F)!=0x001F) {
                         bufByteRight = (bufByteRight & (e_maskRight ^ 0xFF));
                         bufByteRight = (bufByteRight | d_spriteByteRight) & 0xFF;
-                        shadowMemory.setByteAt(bc+1, bufByteRight);
+                        shadowMemory.setByteAt(bc+i+1, bufByteRight);
                     }
-                    bc++;
                 }
-                bc+=(32-sprite.width);
+                bc += 0x20;
+                de += sprite.width;
             }
         }
     }
