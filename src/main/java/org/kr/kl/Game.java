@@ -1983,7 +1983,7 @@ public class Game implements Runnable {
             cant_drop_5BD3.set(0x5BD3, 0);
             int zOrig = graphicObjects.getZ(ix);
             graphicObjects.setZ(ix, zOrig + 12); // ; Z+12
-            boolean intersects = do_any_objs_intersect_B4FD(graphicObjects.data, ix);
+            boolean intersects = do_any_objs_intersect_B4FD(ix);
             graphicObjects.setZ(ix, zOrig); // ; restore original Z
             if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
@@ -2146,7 +2146,7 @@ public class Game implements Runnable {
         return intersectsZ;
     }
 
-    private boolean do_any_objs_intersect_B4FD(DataBlock block, int ix) {
+    private boolean do_any_objs_intersect_B4FD(int ix) {
         int iy = graphicObjects.start();
         graphicObjects.setIgnore3D(ix); // ; ignore this object
         for(int b = 0; b<graphicObjects.size; b++) {
