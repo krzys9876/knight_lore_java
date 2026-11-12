@@ -1925,7 +1925,7 @@ public class Game implements Runnable {
             graphicObjects.setDeadlyIfObjectHitsPlayer(ix);
             graphicObjects.setIgnore3D(ix); // ; ignore object in 3D calculations
             graphicObjects.setDZ(ix, 1); // ; dZ=1
-            move_towards_plyr_B965(graphicObjects, ix, 4, 4);
+            move_towards_plyr_B965(ix, 4, 4);
         }
         variables.set(0x5BC5, graphicObjects.getZ(ix));
         dec_dZ_and_update_XYZ_C700(ix);
@@ -3328,7 +3328,7 @@ public class Game implements Runnable {
 
         graphicObjects.setIgnore3D(ix); // ; ignore in 3D calcs
         dec_dZ_and_update_XYZ_C700(ix); // apply dXYZ now
-        next_graphic_no_mod_4_B98C(graphicObjects.data, ix);
+        next_graphic_no_mod_4_B98C(ix);
 
         int z = graphicObjects.getZ(ix);
         graphicObjects.setDZ(ix, 2); // ; dZ=2 - will be applied next frame as C700 has already been called
@@ -3369,9 +3369,9 @@ public class Game implements Runnable {
                 dy = 1;
             }
         }
-        move_towards_plyr_B965(graphicObjects, ix, dx, dy);
+        move_towards_plyr_B965(ix, dx, dy);
         dec_dZ_and_update_XYZ_C700(ix);
-        next_graphic_no_mod_4_B98C(graphicObjects.data, ix);
+        next_graphic_no_mod_4_B98C(ix);
 
         if(cauldronRoom) {
             int grNo = graphicObjects.getGrNo(graphicObjects.start());
@@ -3383,23 +3383,23 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692();
     }
 
-    private void move_towards_plyr_B965(GraphicObjects block, int ix, int dx, int dy) {
+    private void move_towards_plyr_B965(int ix, int dx, int dy) {
         int playerX = graphicObjects.getX(graphicObjects.start());
-        int x = block.getX(ix);
+        int x = graphicObjects.getX(ix);
         if(x >= playerX) dx = -dx; // player W
-        block.setDX(ix, dx);
+        graphicObjects.setDX(ix, dx);
 
         int playerY = graphicObjects.getY(graphicObjects.start());
-        int y = block.getY(ix);
+        int y = graphicObjects.getY(ix);
         if(y >= playerY) dy = -dy; // player S
-        block.setDY(ix, dy);
+        graphicObjects.setDY(ix, dy);
     }
 
-    private void next_graphic_no_mod_4_B98C(DataBlock block, int ix) {
-        int grNo = block.getU(ix);
+    private void next_graphic_no_mod_4_B98C(int ix) {
+        int grNo = graphicObjects.getGrNo(ix);
         int grNo2Bits = grNo & 0x03;
         int newGrNo = grNo & 0xFC | ((grNo2Bits + 1) & 0x03); // ; inc low 2 bits
-        block.set(ix, newGrNo);
+        graphicObjects.setGrNo(ix, newGrNo);
     }
 
     private void upd_168_to_175_B923(int ix) {
