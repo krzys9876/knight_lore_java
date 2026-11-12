@@ -1170,18 +1170,18 @@ public class Game implements Runnable {
     }
 
     private void display_objects_BF4E() {
-        int ix = sprite_scratchpad_BFDB.start();
+        GraphicObject scratch = sprite_scratchpad_BFDB.o(0);
         for(int b=0; b<3; b++) {
             if(inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4)!=0) {
                 int x = (2-b)*24+16;
                 int y = 0;
-                sprite_scratchpad_BFDB.setPixelX(ix, x);
-                sprite_scratchpad_BFDB.setPixelY(ix, y);
+                scratch.setPixelX(x);
+                scratch.setPixelY(y);
                 int hl = calc_vidbuf_addr_D811(y, x);
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
                 int spriteIndex = inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4);
-                sprite_scratchpad_BFDB.setGrNo(ix, spriteIndex);
-                print_sprite_D718(sprite_scratchpad_BFDB, ix);
+                scratch.setGrNo(spriteIndex);
+                print_sprite_D718(sprite_scratchpad_BFDB, scratch.ix);
                 // TODO: implement blit_to_screen
                 // $BFA2 CALL $D67C    ;
                 int attr = object_attributes_BFD3.getU(object_attributes_BFD3.start + (spriteIndex & 0x0F));

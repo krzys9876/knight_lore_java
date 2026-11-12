@@ -10,6 +10,10 @@ public class GraphicObject {
     }
 
     public int getGrNo() { return parent.getGrNo(ix); }
+    public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }
+
+    public void setPixelX(int x) { parent.setPixelX(ix, x); }
+    public void setPixelY(int y) { parent.setPixelY(ix, y); }
 
     public int getTemp10() { return parent.getTemp10(ix); }
     public int getTemp11() { return parent.getTemp11(ix); }
