@@ -580,7 +580,7 @@ public class Game implements Runnable {
     }
 
     private void print_sprite_D718(GraphicObjects metadata, int ix) {
-        int de = flip_sprite_D6EF(metadata, ix);
+        int de = spriteData.flip_sprite_D6EF(metadata, ix);
         if(de == 0) return; // spr_null used as a flag to return from routine
 
         int x = metadata.getPixelX(ix);
@@ -649,61 +649,6 @@ public class Game implements Runnable {
                 bc+=(32-a);
             }
         }
-    }
-
-    // Returns address of sprite graphics data or 0 if null sprite
-    private int flip_sprite_D6EF(GraphicObjects metadata, int ix) {
-        int de = spriteData.getPointer(metadata.getGrNo(ix));
-        int width = spriteData.sprite_graphics_data_728A.getU(de);
-        // returns sprite address or 0 if sprite is spr_null
-        boolean flipVScratch = metadata.isVFlip(ix);
-        boolean flipHScratch = metadata.isHFlip(ix);
-        int flagsSpriteData = spriteData.sprite_graphics_data_728A.getU(de) & 0xC0;
-        boolean flipVData = (flagsSpriteData & 0x80) > 0;
-        boolean flipHData = (flagsSpriteData & 0x40) > 0;
-
-        // Flip vertically (in-place) and set flag in data
-        if(flipVScratch != flipVData) {
-            int lines = spriteData.sprite_graphics_data_728A.getU(de+1);
-            int bytesInLine = (spriteData.sprite_graphics_data_728A.getU(de) & 0x07) * 2;
-            for(int line = 0; line<(lines >> 1); line++) {
-                for(int b = 0; b < bytesInLine; b++) {
-                    int topByteAddress = de + 2 + line * bytesInLine + b;
-                    int bottomByteAddress = de + 2 + (lines - line - 1) * bytesInLine + b;
-                    int buffer = spriteData.sprite_graphics_data_728A.getU(topByteAddress);
-                    spriteData.sprite_graphics_data_728A.set(topByteAddress, spriteData.sprite_graphics_data_728A.getU(bottomByteAddress));
-                    spriteData.sprite_graphics_data_728A.set(bottomByteAddress, buffer);
-                }
-            }
-            spriteData.sprite_graphics_data_728A.set(de, spriteData.sprite_graphics_data_728A.getU(de) ^ 0x80);
-        }
-        // Flip horizontally (in-place) and set flag in data
-        if(flipHScratch != flipHData) {
-            int lines = spriteData.sprite_graphics_data_728A.getU(de+1);
-            int bytesInLine = (spriteData.sprite_graphics_data_728A.getU(de) & 0x07) * 2;
-            for(int line = 0; line<lines; line++) {
-                int firstByteAddress = de + 2 + line * bytesInLine;
-                int lastByteAddress = firstByteAddress + bytesInLine - 1;
-                int bytePairs = bytesInLine >> 1;
-                for(int b = 0; b < bytePairs; b++) {
-                    boolean isMask = (b & 1) == 0;
-                    // Middle pair means that we have off number of data bytes so we must only flip bits and leave bytes in place
-                    boolean isMiddlePair = ((bytePairs & 1) == 1) && (b == bytePairs - 1);
-                    int shift = isMiddlePair ? 0 : (isMask ? -1 : 1);
-                    // NOTE: the data bytes and mask bytes must not be mixed
-                    int leftByteAddress = firstByteAddress + b;
-                    int rightByteAddress = lastByteAddress - b + shift;
-                    int leftBuffer = spriteData.sprite_graphics_data_728A.getU(leftByteAddress);
-                    leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
-                    int rightBuffer = spriteData.sprite_graphics_data_728A.getU(rightByteAddress);
-                    rightBuffer = lookupTable.get(0xF100 + rightBuffer);
-                    spriteData.sprite_graphics_data_728A.set(leftByteAddress, isMiddlePair ? leftBuffer : rightBuffer);
-                    spriteData.sprite_graphics_data_728A.set(rightByteAddress, isMiddlePair ? rightBuffer : leftBuffer);
-                }
-            }
-            spriteData.sprite_graphics_data_728A.set(de, spriteData.sprite_graphics_data_728A.getU(de) ^ 0x40);
-        }
-        return width == 0 ? 0 : de;
     }
 
     private int transfer_and_multiple_print_sprite(GraphicObjects metadata, int dx, int dy, int times, int ix, int hl, DataBlock dataBlock) {
