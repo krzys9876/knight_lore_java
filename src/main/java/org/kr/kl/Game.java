@@ -3119,7 +3119,7 @@ public class Game implements Runnable {
             graphicObjects.setDZ(ix, dZ);
         } else {
             if(z <= 0x80) {
-                add_obj_to_cauldron_C245(graphicObjects.data, ix);
+                add_obj_to_cauldron_C245(ix);
                 return;
             } else {
                 graphicObjects.setIgnore3D(ix); // ; ignore in 3D calcs
@@ -3130,10 +3130,10 @@ public class Game implements Runnable {
         // set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void add_obj_to_cauldron_C245(DataBlock block, int ix) {
-        block.set(ix + 3, 0x80);
+    private void add_obj_to_cauldron_C245(int ix) {
+        graphicObjects.setZ(ix, 0x80);
         int hl = ret_next_obj_required_C274();
-        int grNo = block.getU(ix);
+        int grNo = graphicObjects.getGrNo(ix);
         boolean sameAsRequired = objects_required_C27D.getU(hl) == (grNo & 0x07);
         if(sameAsRequired) {
             variables.set(0x5BBB, variables.getU(0x5BBB) + 1);
@@ -3142,8 +3142,8 @@ public class Game implements Runnable {
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
         variables.set(0x5BC4, 0);
-        int l = block.getU(ix + 0x10);
-        int h = block.getU(ix + 0x11);
+        int l = graphicObjects.getTemp10(ix);
+        int h = graphicObjects.getTemp11(ix);
         int ptr = h * 256 + l;
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
