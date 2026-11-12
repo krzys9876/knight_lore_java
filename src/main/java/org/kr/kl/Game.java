@@ -1476,8 +1476,8 @@ public class Game implements Runnable {
         switch(o.getGrNo()) {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
             case 0x02, 0x04: upd_2_4_C73C(o); break;
-            case 0x03, 0x05: upd_3_5_C722(ix); break;
-            case 0x06, 0x07: upd_6_7_C4E3(ix); break;
+            case 0x03, 0x05: upd_3_5_C722(o); break;
+            case 0x06, 0x07: upd_6_7_C4E3(o); break;
             case 0x08: upd_8_C65E(ix); break;
             case 0x09: upd_9_C6BD(ix); break;
             case 0x0A: upd_10_C4E8(ix); break;
@@ -1633,21 +1633,13 @@ public class Game implements Runnable {
                 (Math.abs(archCentreZ - objZ) < 4);
     }
 
-    private void upd_3_5_C722(int ix) {
-        boolean hFlip = graphicObjects.isHFlip(ix); // BIT 6,(IX+$07)
-        if(hFlip) {
-            //LD HL,$FEF9
-            graphicObjects.setXYAdj(ix, -7, -2);
-
-        } else {
-            // LD HL,$FDF7    ; -3, -9
-            graphicObjects.setXYAdj(ix, -9, -3);
-        }
+    private void upd_3_5_C722(GraphicObject o) {
+        if(o.isHFlip()) o.setXYAdj(-7, -2);
+        else o.setXYAdj(-9, -3);
     }
 
-    private void upd_6_7_C4E3(int ix) {
-        //LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXYAdj(ix, -16, -8);
+    private void upd_6_7_C4E3(GraphicObject o) {
+        o.setXYAdj(-16, -8);
     }
 
     private void upd_8_C65E(int ix) {
