@@ -121,6 +121,7 @@ public class GraphicObjects {
     public boolean justDropped(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
+    public int getDirection(int ix) { return getFlagsD(ix) & 0x03; }
     public boolean isBitSetGrNo(int ix, int bit) { return data.isSet(bit, ix); }
 
 

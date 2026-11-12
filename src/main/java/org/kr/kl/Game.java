@@ -2691,26 +2691,25 @@ public class Game implements Runnable {
         graphicObjects.setXYAdj(ix, -12, 3);
 
         dec_dZ_and_update_XYZ_C700(ix);
-        move_guard_wizard_NSEW_B9CC(graphicObjects.data, ix);
+        move_guard_wizard_NSEW_B9CC(ix);
     }
 
-    private void move_guard_wizard_NSEW_B9CC(DataBlock block, int ix) {
-        int direction = block.getU(ix + 0x0D) & 0x03;
-        int dydx = switch(direction) {
-            case 0 -> guard_W_B9E0(block, ix);
-            case 1 -> guard_N_B9FB(block, ix);
-            case 2 -> guard_E_BA08(block, ix);
-            case 3 -> guard_S_BA15(block, ix);
+    private void move_guard_wizard_NSEW_B9CC(int ix) {
+        int dydx = switch(graphicObjects.getDirection(ix)) {
+            case 0 -> guard_W_B9E0(graphicObjects.data, ix);
+            case 1 -> guard_N_B9FB(graphicObjects.data, ix);
+            case 2 -> guard_E_BA08(graphicObjects.data, ix);
+            case 3 -> guard_S_BA15(graphicObjects.data, ix);
             default -> 0;
         };
         int dx = dydx & 0xFF;
-        block.set(ix + 0x09, dx);
-        block.set(ix + 0x29, dx); // ; next obj dX
+        graphicObjects.setDX(ix, dx);
+        graphicObjects.setDX(ix + 0x20, dx); // ; next obj dX
         int dy = (dydx & 0xFF00) >> 8;
-        block.set(ix + 0x0A, dy);
-        block.set(ix + 0x2A, dy); // ; next obj dY
-        block.set(ix + 0x21, block.getU(ix + 1)); // ; copy to next obj X
-        block.set(ix + 0x22, block.getU(ix + 2)); // ; copy to next obj Y
+        graphicObjects.setDY(ix, dy);
+        graphicObjects.setDY(ix + 0x20, dy); // ; next obj dY
+        graphicObjects.setX(ix + 0x20, graphicObjects.getX(ix)); // ; copy to next obj X
+        graphicObjects.setY(ix + 0x20, graphicObjects.getY(ix)); // ; copy to next obj Y
         set_guard_wizard_sprite_B76C(ix);
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
