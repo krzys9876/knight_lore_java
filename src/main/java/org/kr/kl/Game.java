@@ -2026,7 +2026,7 @@ public class Game implements Runnable {
                 };
             }
 
-            done_pickup_drop_C09D(graphicObjects.data, ix, origW, origD, origH);
+            done_pickup_drop_C09D(ix, origW, origD, origH);
         } else {
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
@@ -2108,10 +2108,10 @@ public class Game implements Runnable {
         adjust_carried_C12B();
     }
 
-    private void done_pickup_drop_C09D(DataBlock block, int ix, int origW, int origD, int origH) {
-        block.set(ix + 4, origW);
-        block.set(ix + 5, origD);
-        block.set(ix + 6, origH);
+    private void done_pickup_drop_C09D(int ix, int origW, int origD, int origH) {
+        graphicObjects.setW(ix, origW);
+        graphicObjects.setD(ix, origD);
+        graphicObjects.setH(ix, origH);
     }
 
     private void adjust_carried_C12B() {
