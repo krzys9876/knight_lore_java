@@ -601,12 +601,9 @@ public class Game implements Runnable {
             //@label=loc_D76F
             metadata.setSpriteWidthB(ix, sprite.width);
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
-                for (int i = 0; i < sprite.width; i++) {
-                    shadowMemory.setByteAt(bc, sprite.applyToByte(shadowMemory.getByteAt(bc), de));
-                    de++;
-                    bc++;
-                }
-                bc+=(32-sprite.width);
+                for (int i = 0; i < sprite.width; i++) shadowMemory.setByteAt(bc+i, sprite.applyToByte(shadowMemory.getByteAt(bc+i), de+i));
+                bc+=0x20;
+                de+=sprite.width;
             }
         } else {
             metadata.setSpriteWidthB(ix, sprite.width + 1);
