@@ -2211,7 +2211,7 @@ public class Game implements Runnable {
         //$C9D9 CALL $CB45     ;
         adj_for_out_of_bounds_CB45(ix);
         //$C9DC CALL $CA70     ;
-        handle_exit_screen_CA70(graphicObjects.data, ix);
+        handle_exit_screen_CA70(ix);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
         if(!exitingScreen) {
             add_dXYZ_C706(ix);
@@ -2251,14 +2251,11 @@ public class Game implements Runnable {
         graphicObjects.setDZ(ix, dzAdj);
     }
 
-    private void handle_exit_screen_CA70(DataBlock block, int ix) {
-        int flags = block.getU(ix + 0x0C);
-        boolean enteringRoom = (flags & 0xF0)>0;
-        if(enteringRoom) return;
-        boolean nearArch = block.isSet(0, ix + 0x07);
-        if(!nearArch) return;
+    private void handle_exit_screen_CA70(int ix) {
+        if(graphicObjects.enteringScreen(ix)) return;
+        if(!graphicObjects.isNearArch(ix)) return;
 
-        block.resetBit(0, ix + 0x07);
+        graphicObjects.resetNearArch(ix);
 
         // $CA82 LD HL,($5BAB)  ;
         // $CA85 PUSH HL        ;
@@ -2270,23 +2267,23 @@ public class Game implements Runnable {
         //$CA94 DEFW $CAF3
         //$CA96 DEFW $CB0E
         //$CA98 DEFW $CB29
-        int currentScreen = block.getU(ix + 0x08);
+        int currentScreen = graphicObjects.getScreen(ix);
         int newScreen = switch(get_sprite_dir_CA1E(ix)) {
-            case 0 -> screen_west_CA9A(block, ix, oldRoomSizeX, oldRoomSizeY);
-            case 1 -> screen_east_CAF3(block, ix, oldRoomSizeX, oldRoomSizeY);
-            case 2 -> screen_north_CB0E(block, ix, oldRoomSizeX, oldRoomSizeY);
-            case 3 -> screen_south_CB29(block, ix, oldRoomSizeX, oldRoomSizeY);
+            case 0 -> screen_west_CA9A(graphicObjects.data, ix, oldRoomSizeX, oldRoomSizeY);
+            case 1 -> screen_east_CAF3(graphicObjects.data, ix, oldRoomSizeX, oldRoomSizeY);
+            case 2 -> screen_north_CB0E(graphicObjects.data, ix, oldRoomSizeX, oldRoomSizeY);
+            case 3 -> screen_south_CB29(graphicObjects.data, ix, oldRoomSizeX, oldRoomSizeY);
             default -> currentScreen;
         };
 
         if(currentScreen!=newScreen) {
             // @label=exit_screen
-            int grNo = block.getU(ix);
+            int grNo = graphicObjects.getGrNo(ix);
             if(grNo - 0x10 > 0x40) return;
             //IO.println(String.format("EXIT: %d (%02X) -> %d (%02X)",currentScreen,currentScreen,newScreen,newScreen));
             exitingScreen = true; //TODO: rethink if this is the correct way to flag this
-            block.set(ix + 0x08, newScreen);
-            block.set(ix + 0x0C, block.getU(ix + 0x0C) | 0x30);
+            graphicObjects.setScreen(ix, newScreen);
+            graphicObjects.initEnterCounter(ix);
             copyPlayerData();
             plyr_spr_1_scratchpad_D161.setTemp10(plyr_spr_1_scratchpad_D161.start(), plyr_spr_1_scratchpad_D161.getGrNo(plyr_spr_1_scratchpad_D161.start()));
             plyr_spr_2_scratchpad_D181.setTemp10(plyr_spr_2_scratchpad_D181.start(), plyr_spr_2_scratchpad_D181.getGrNo(plyr_spr_2_scratchpad_D181.start()));

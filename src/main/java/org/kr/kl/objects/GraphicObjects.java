@@ -184,7 +184,7 @@ public class GraphicObjects {
 
     public boolean isNearArch(int ix) { return Flags7.isNearArch(getFlags7(ix)); }
     public void setNearArch(int ix) { setFlags7(ix, Flags7.setNearArch(getFlags7(ix))); }
-    //public void resetNearArch(int ix) { setFlags7(ix, Flags7.resetNearArch(getFlags7(ix))); }
+    public void resetNearArch(int ix) { setFlags7(ix, Flags7.resetNearArch(getFlags7(ix))); }
 
     public boolean ignore3D(int ix) { return Flags7.ignore3D(getFlags7(ix)); }
     public void setIgnore3D(int ix) { setFlags7(ix, Flags7.setIgnore3D(getFlags7(ix))); }
@@ -212,6 +212,7 @@ public class GraphicObjects {
 
     public int getEnterCounter(int ix) { return getFlagsC(ix) & 0xF0; }
     public boolean enteringScreen(int ix) { return getEnterCounter(ix) > 0; }
+    public void initEnterCounter(int ix) { setFlagsC(ix, getFlagsC(ix) | 0x30); }
     public void decEnterCounter(int ix) {
         int counter = getEnterCounter(ix);
         if(counter >= 0x10) setFlagsC(ix, (getFlagsC(ix) & 0x0F) + counter - 0x10);
