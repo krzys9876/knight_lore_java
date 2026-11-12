@@ -47,20 +47,16 @@ public class LookupTable {
             }
         }
         // F100 - F1FF
-        for(int l = 0; l<=0xFF; l++) {
-            int d=l;
-            for(int b=8; b > 0; b--) {
-                // SRL D
-                boolean cy = (d & 1) > 0;
-                d = (d >> 1);
-                // RL E
-                e = (e << 1) & 0xFF;
-                if(cy) e++;
-                // DJNZ $D6BE
-            }
-            // LD (HL), e
-            data.set(0xF100+l, e);
-        }
+        for(int l = 0; l<=0xFF; l++) data.set(0xF100+l, reverseBits(l));
         // Lookup table values verified with KL memory dump
+    }
+
+    private int reverseBits(int v) {
+        int e = 0;
+        for(int b=0; b<8; b++) {
+            int bit = (v & (1 << b)) >> b; // given bit at position 0
+            e |= bit << (7-b); // shift bit to desired position
+        }
+        return e;
     }
 }

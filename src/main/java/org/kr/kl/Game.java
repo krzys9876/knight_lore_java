@@ -584,7 +584,6 @@ public class Game implements Runnable {
         int x = metadata.getPixelX(ix);
         int y = metadata.getPixelY(ix);
         int xOffset = (x & 7);
-        //debugPanel2.append(xOffset == 0 ? "aligned" : "NOT aligned by %02x".formatted(xOffset));
         // JR Z,$D76F    ; {no, skip
 
         // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
