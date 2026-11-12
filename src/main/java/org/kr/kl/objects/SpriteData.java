@@ -11,20 +11,17 @@ public class SpriteData {
     private final Sprite[] sprites;
 
     public SpriteData() {
-        DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
+        DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112"); // pointers to sprites in sprite graphic data table
         int size = sprite_tbl_7112.size / 2; // 2 bytes per object
-        int[] pointers = new int[size];
         sprites = new Sprite[size];
+        int[] spriteDataRaw = sprite_graphics_data_728A.getCopy();
         for(int grNo = 0; grNo< size; grNo++) {
-            int hl = grNo * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
-            pointers[grNo] = sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256; // sprite actual address
-        }
-        for(int grNo = 0; grNo< size; grNo++) {
-            int startAddress = pointers[grNo];
-            int lines = sprite_graphics_data_728A.getU(startAddress+1);
-            int bytesInLine = (sprite_graphics_data_728A.getU(startAddress) & 0x07) * 2;
+            int hl = grNo * 2 + sprite_tbl_7112.start; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
+            int startAddress = sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256 - sprite_graphics_data_728A.start; // sprite actual address
+            int lines = spriteDataRaw[startAddress+1];
+            int bytesInLine = (spriteDataRaw[startAddress] & 0x07) * 2;
             int endAddressExcl = startAddress + 2 + lines * bytesInLine;
-            sprites[grNo] = new Sprite(Arrays.copyOfRange(sprite_graphics_data_728A.getCopy(), startAddress - sprite_graphics_data_728A.start, endAddressExcl - sprite_graphics_data_728A.start));
+            sprites[grNo] = new Sprite(Arrays.copyOfRange(spriteDataRaw, startAddress, endAddressExcl));
         }
     }
 
