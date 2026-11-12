@@ -1475,7 +1475,7 @@ public class Game implements Runnable {
         int ix = o.ix;
         switch(o.getGrNo()) {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
-            case 0x02, 0x04: upd_2_4_C73C(ix); break;
+            case 0x02, 0x04: upd_2_4_C73C(o); break;
             case 0x03, 0x05: upd_3_5_C722(ix); break;
             case 0x06, 0x07: upd_6_7_C4E3(ix); break;
             case 0x08: upd_8_C65E(ix); break;
@@ -1529,57 +1529,56 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_2_4_C73C(int ix) {
-        boolean hFlip = graphicObjects.isHFlip(ix); // BIT 6,(IX+$07)
+    private void upd_2_4_C73C(GraphicObject o) {
+        int ix=o.ix;
+        boolean hFlip = o.isHFlip(); // BIT 6,(IX+$07)
         int centreX, centreY;
         if(hFlip) {
             // LD HL,$FEEF
-            graphicObjects.setXYAdj(ix, -17, -2);
-            int x = graphicObjects.getX(ix) - 0x0D;
-            graphicObjects.setDX(ix, x); // dX
-            int y = graphicObjects.getY(ix);
-            graphicObjects.setDY(ix, y); // dY=Y
+            o.setXYAdj(-17, -2);
+            int x = o.getX() - 0x0D;
+            o.setDX(x); // dX
+            int y = o.getY();
+            o.setDY(y); // dY=Y
             // LD HL,$0F06   ; +15, +6
             centreY = 15;
             centreX = 6;
         } else {
-            if(graphicObjects.getGrNo(ix) == 4) {
+            if(o.getGrNo() == 4) {
                 //@label=adj_m3_p1
                 //c$C737 LD HL,$FD01   ;
-                graphicObjects.setXYAdj(ix, 1, -3);
+                o.setXYAdj(1, -3);
             } else {
                 // LD HL,$FDF9    ; -3, -7
-                graphicObjects.setXYAdj(ix, -7, -3);
+                o.setXYAdj(-7, -3);
             }
-            int y = graphicObjects.getY(ix) + 0x0D;
-            graphicObjects.setDY(ix, y); // dY
-            int x = graphicObjects.getX(ix);
-            graphicObjects.setDX(ix, x); // dX
+            int y = o.getY() + 0x0D;
+            o.setDY(y); // dY
+            int x = o.getX();
+            o.setDX(x); // dX
             // LD HL,$060F   ; +6, +15
             centreY = 6;
             centreX = 15;
         }
-        int z = graphicObjects.getZ(ix);
-        graphicObjects.setDZ(ix, z); // dZ=Z
+        int z = o.getZ();
+        o.setDZ(z); // dZ=Z
         chk_plyr_spec_near_arch_C7DB(graphicObjects, ix, centreY, centreX);
 
         // @label=loc_C785
-        int iy = graphicObjects.start(); // player
-        for(int objToCheck = 0; objToCheck<4; objToCheck++) {
-            int grNo = graphicObjects.getGrNo(ix);
-            if(grNo!=0) {
-                boolean autoAdjust = graphicObjects.isAutoAdjust(iy);
-                if(autoAdjust) {
-                    if(is_near_to_C7FE(graphicObjects, ix, iy, 0x0F, 0x0F)) {
-                        switch(get_sprite_dir_CA1E(ix)) {
-                            case 0, 1: adj_ew_C7B1(ix, iy); break;
-                            case 2, 3: adj_ns_C7C4(ix, iy); break;
+        int grNo = o.getGrNo();
+        if(grNo != 0) {
+            for (int objToCheck = 0; objToCheck < 2; objToCheck++) {
+                GraphicObject checkO = graphicObjects.o(objToCheck);
+                boolean autoAdjust = checkO.isAutoAdjust();
+                if (autoAdjust) {
+                    if (is_near_to_C7FE(graphicObjects, ix, checkO.ix, 0x0F, 0x0F)) {
+                        switch (get_sprite_dir_CA1E(ix)) {
+                            case 0, 1: adj_ew_C7B1(ix, checkO.ix); break;
+                            case 2, 3: adj_ns_C7C4(ix, checkO.ix); break;
                         }
                     }
                 }
-
             }
-            iy+=0x20;
         }
     }
 
