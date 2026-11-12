@@ -1,7 +1,5 @@
 package org.kr.kl.objects;
 
-import java.util.Optional;
-
 public class Sprite {
     private final int[] data;
     private static final LookupTable lookupTable = new LookupTable();
