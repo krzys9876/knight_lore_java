@@ -4,6 +4,7 @@ import org.kr.*;
 import org.kr.kl.objects.GraphicObjects;
 import org.kr.kl.objects.LookupTable;
 import org.kr.kl.objects.SpecialObjects;
+import org.kr.kl.objects.SpriteData;
 import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.DebugPanel;
 import org.kr.kl.utils.*;
@@ -60,8 +61,7 @@ public class Game implements Runnable {
     private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
     //private final DataBlock special_objs_tbl_6FF2 = InitialData.block("special_objs_tbl_6FF2");
     private final SpecialObjects specialObjects = new SpecialObjects();
-    private final DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
-    private final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
+    private final SpriteData spriteData = new SpriteData();
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
     private final GraphicObjects plyr_spr_1_scratchpad_D161 =  new GraphicObjects(0xD161, 1);
     private final GraphicObjects plyr_spr_2_scratchpad_D181 =  new GraphicObjects(0xD181, 1);
@@ -591,10 +591,10 @@ public class Game implements Runnable {
 
         // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
         // we skip this part entirely, using inner for loop instead
-        int a = sprite_graphics_data_728A.getU(de);
+        int a = spriteData.sprite_graphics_data_728A.getU(de);
         a = (a & 0x7); // width_bytes, ignore rotation flags
         de ++;
-        metadata.setSpriteHeight(ix, sprite_graphics_data_728A.getU(de)); // height_lines
+        metadata.setSpriteHeight(ix, spriteData.sprite_graphics_data_728A.getU(de)); // height_lines
         // off bottom of screen?
         if(y + metadata.getSpriteHeight(ix)>0xC0) metadata.setSpriteHeight(ix, 0xC0 - y);
         de ++;
@@ -608,9 +608,9 @@ public class Game implements Runnable {
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 for (int i = 0; i < a; i++) {
                     int bufByte = shadowMemory.getByteAt(bc);
-                    int e_mask = sprite_graphics_data_728A.getU(de);
+                    int e_mask = spriteData.sprite_graphics_data_728A.getU(de);
                     de++;
-                    int d_spriteByte = sprite_graphics_data_728A.getU(de);
+                    int d_spriteByte = spriteData.sprite_graphics_data_728A.getU(de);
                     de++;
                     bufByte = (bufByte & (e_mask ^ 0xFF));
                     bufByte = (bufByte | d_spriteByte) & 0xFF;
@@ -627,9 +627,9 @@ public class Game implements Runnable {
                 for (int i = 0; i < a; i++) {
                     int bufByteLeft = shadowMemory.getByteAt(bc);
                     int bufByteRight = shadowMemory.getByteAt(bc+1);
-                    int e_mask = sprite_graphics_data_728A.getU(de);
+                    int e_mask = spriteData.sprite_graphics_data_728A.getU(de);
                     de++;
-                    int d_spriteByte = sprite_graphics_data_728A.getU(de);
+                    int d_spriteByte = spriteData.sprite_graphics_data_728A.getU(de);
                     de++;
                     int e_maskLeft = (lookupTable.get(lookupBase + e_mask)) ^ 0xFF;
                     int e_maskRight = (lookupTable.get(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
@@ -653,38 +653,34 @@ public class Game implements Runnable {
 
     // Returns address of sprite graphics data or 0 if null sprite
     private int flip_sprite_D6EF(GraphicObjects metadata, int ix) {
-        //debugPanel1.append("flip_sprite_D6EF (ix: %04x)".formatted(ix));
-        int l = metadata.getGrNo(ix);
-        int hl = l * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
-        int de = sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256; // sprite actual address
-        //debugPanel2.append("sprite address (DE): %04x".formatted(de));
-        int width = sprite_graphics_data_728A.getU(de);
+        int de = spriteData.getPointer(metadata.getGrNo(ix));
+        int width = spriteData.sprite_graphics_data_728A.getU(de);
         // returns sprite address or 0 if sprite is spr_null
         boolean flipVScratch = metadata.isVFlip(ix);
         boolean flipHScratch = metadata.isHFlip(ix);
-        int flagsSpriteData = sprite_graphics_data_728A.getU(de) & 0xC0;
+        int flagsSpriteData = spriteData.sprite_graphics_data_728A.getU(de) & 0xC0;
         boolean flipVData = (flagsSpriteData & 0x80) > 0;
         boolean flipHData = (flagsSpriteData & 0x40) > 0;
 
         // Flip vertically (in-place) and set flag in data
         if(flipVScratch != flipVData) {
-            int lines = sprite_graphics_data_728A.getU(de+1);
-            int bytesInLine = (sprite_graphics_data_728A.getU(de) & 0x07) * 2;
+            int lines = spriteData.sprite_graphics_data_728A.getU(de+1);
+            int bytesInLine = (spriteData.sprite_graphics_data_728A.getU(de) & 0x07) * 2;
             for(int line = 0; line<(lines >> 1); line++) {
                 for(int b = 0; b < bytesInLine; b++) {
                     int topByteAddress = de + 2 + line * bytesInLine + b;
                     int bottomByteAddress = de + 2 + (lines - line - 1) * bytesInLine + b;
-                    int buffer = sprite_graphics_data_728A.getU(topByteAddress);
-                    sprite_graphics_data_728A.set(topByteAddress, sprite_graphics_data_728A.getU(bottomByteAddress));
-                    sprite_graphics_data_728A.set(bottomByteAddress, buffer);
+                    int buffer = spriteData.sprite_graphics_data_728A.getU(topByteAddress);
+                    spriteData.sprite_graphics_data_728A.set(topByteAddress, spriteData.sprite_graphics_data_728A.getU(bottomByteAddress));
+                    spriteData.sprite_graphics_data_728A.set(bottomByteAddress, buffer);
                 }
             }
-            sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.getU(de) ^ 0x80);
+            spriteData.sprite_graphics_data_728A.set(de, spriteData.sprite_graphics_data_728A.getU(de) ^ 0x80);
         }
         // Flip horizontally (in-place) and set flag in data
         if(flipHScratch != flipHData) {
-            int lines = sprite_graphics_data_728A.getU(de+1);
-            int bytesInLine = (sprite_graphics_data_728A.getU(de) & 0x07) * 2;
+            int lines = spriteData.sprite_graphics_data_728A.getU(de+1);
+            int bytesInLine = (spriteData.sprite_graphics_data_728A.getU(de) & 0x07) * 2;
             for(int line = 0; line<lines; line++) {
                 int firstByteAddress = de + 2 + line * bytesInLine;
                 int lastByteAddress = firstByteAddress + bytesInLine - 1;
@@ -697,15 +693,15 @@ public class Game implements Runnable {
                     // NOTE: the data bytes and mask bytes must not be mixed
                     int leftByteAddress = firstByteAddress + b;
                     int rightByteAddress = lastByteAddress - b + shift;
-                    int leftBuffer = sprite_graphics_data_728A.getU(leftByteAddress);
+                    int leftBuffer = spriteData.sprite_graphics_data_728A.getU(leftByteAddress);
                     leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
-                    int rightBuffer = sprite_graphics_data_728A.getU(rightByteAddress);
+                    int rightBuffer = spriteData.sprite_graphics_data_728A.getU(rightByteAddress);
                     rightBuffer = lookupTable.get(0xF100 + rightBuffer);
-                    sprite_graphics_data_728A.set(leftByteAddress, isMiddlePair ? leftBuffer : rightBuffer);
-                    sprite_graphics_data_728A.set(rightByteAddress, isMiddlePair ? rightBuffer : leftBuffer);
+                    spriteData.sprite_graphics_data_728A.set(leftByteAddress, isMiddlePair ? leftBuffer : rightBuffer);
+                    spriteData.sprite_graphics_data_728A.set(rightByteAddress, isMiddlePair ? rightBuffer : leftBuffer);
                 }
             }
-            sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.getU(de) ^ 0x40);
+            spriteData.sprite_graphics_data_728A.set(de, spriteData.sprite_graphics_data_728A.getU(de) ^ 0x40);
         }
         return width == 0 ? 0 : de;
     }
