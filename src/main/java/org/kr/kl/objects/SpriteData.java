@@ -49,12 +49,10 @@ public class SpriteData {
 
         // Flip vertically (in-place) and set flag in data
         if(flipVScratch != flipVData) {
-            int lines = sprite.data[de+1];
-            int bytesInLine = (sprite.data[de] & 0x07) * 2;
-            for(int line = 0; line<(lines >> 1); line++) {
-                for(int b = 0; b < bytesInLine; b++) {
-                    int topByteAddress = de + 2 + line * bytesInLine + b;
-                    int bottomByteAddress = de + 2 + (lines - line - 1) * bytesInLine + b;
+            for(int line = 0; line<(sprite.lines >> 1); line++) {
+                for(int b = 0; b < sprite.bytesInLine; b++) {
+                    int topByteAddress = de + 2 + line * sprite.bytesInLine + b;
+                    int bottomByteAddress = de + 2 + (sprite.lines - line - 1) * sprite.bytesInLine + b;
                     int buffer = sprite.data[topByteAddress];
                     sprite.data[topByteAddress] = sprite.data[bottomByteAddress];
                     sprite.data[bottomByteAddress] = buffer;
@@ -64,12 +62,10 @@ public class SpriteData {
         }
         // Flip horizontally (in-place) and set flag in data
         if(flipHScratch != flipHData) {
-            int lines = sprite.data[de+1];
-            int bytesInLine = (sprite.data[de] & 0x07) * 2;
-            for(int line = 0; line<lines; line++) {
-                int firstByteAddress = de + 2 + line * bytesInLine;
-                int lastByteAddress = firstByteAddress + bytesInLine - 1;
-                int bytePairs = bytesInLine >> 1;
+            for(int line = 0; line<sprite.lines; line++) {
+                int firstByteAddress = de + 2 + line * sprite.bytesInLine;
+                int lastByteAddress = firstByteAddress + sprite.bytesInLine - 1;
+                int bytePairs = sprite.bytesInLine >> 1;
                 for(int b = 0; b < bytePairs; b++) {
                     boolean isMask = (b & 1) == 0;
                     // Middle pair means that we have off number of data bytes so we must only flip bits and leave bytes in place

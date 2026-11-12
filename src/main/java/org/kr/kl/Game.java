@@ -581,8 +581,6 @@ public class Game implements Runnable {
         if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
         Sprite sprite = spriteO.get();
 
-        int de = 0;
-
         int x = metadata.getPixelX(ix);
         int y = metadata.getPixelY(ix);
         int xOffset = (x & 7);
@@ -591,45 +589,41 @@ public class Game implements Runnable {
 
         // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
         // we skip this part entirely, using inner for loop instead
-        int a = sprite.data[de];
-        a = (a & 0x7); // width_bytes, ignore rotation flags
-        de ++;
-        metadata.setSpriteHeight(ix, sprite.data[de]); // height_lines
+        metadata.setSpriteHeight(ix, sprite.lines); // height_lines
         // off bottom of screen?
         if(y + metadata.getSpriteHeight(ix)>0xC0) metadata.setSpriteHeight(ix, 0xC0 - y);
-        de ++;
+
+        int de = 0;
 
         if(y > 191 || x > 255) return; // do not attempt do draw out of screen
         int bc = calc_vidbuf_addr_D811(y, x);
 
         if(xOffset == 0) {
             //@label=loc_D76F
-            metadata.setSpriteWidthB(ix, a);
+            metadata.setSpriteWidthB(ix, sprite.width);
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
-                for (int i = 0; i < a; i++) {
+                for (int i = 0; i < sprite.width; i++) {
                     int bufByte = shadowMemory.getByteAt(bc);
-                    int e_mask = sprite.data[de];
-                    de++;
-                    int d_spriteByte = sprite.data[de];
+                    int e_mask = sprite.getMask(de);
+                    int d_spriteByte = sprite.getByte(de);
                     de++;
                     bufByte = (bufByte & (e_mask ^ 0xFF));
                     bufByte = (bufByte | d_spriteByte) & 0xFF;
                     shadowMemory.setByteAt(bc, bufByte);
                     bc++;
                 }
-                bc+=(32-a);
+                bc+=(32-sprite.width);
             }
         } else {
-            metadata.setSpriteWidthB(ix, a + 1);
+            metadata.setSpriteWidthB(ix, sprite.width + 1);
             int lookupBase = 0xF000 + (xOffset << 9);
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
-                for (int i = 0; i < a; i++) {
+                for (int i = 0; i < sprite.width; i++) {
                     int bufByteLeft = shadowMemory.getByteAt(bc);
                     int bufByteRight = shadowMemory.getByteAt(bc+1);
-                    int e_mask = sprite.data[de];
-                    de++;
-                    int d_spriteByte = sprite.data[de];
+                    int e_mask = sprite.getMask(de);
+                    int d_spriteByte = sprite.getByte(de);
                     de++;
                     int e_maskLeft = (lookupTable.get(lookupBase + e_mask)) ^ 0xFF;
                     int e_maskRight = (lookupTable.get(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
@@ -646,7 +640,7 @@ public class Game implements Runnable {
                     }
                     bc++;
                 }
-                bc+=(32-a);
+                bc+=(32-sprite.width);
             }
         }
     }
