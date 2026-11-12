@@ -4,15 +4,14 @@ import java.util.Optional;
 
 public class Sprite {
     private final int[] data;
-    private final LookupTable lookupTable;
+    private static final LookupTable lookupTable = new LookupTable();
 
     public final int lines;
     public final int width;
     public final int bytesInLine;
 
-    public Sprite(int[] data, LookupTable lookupTable) {
+    public Sprite(int[] data) {
         this.data = data;
-        this.lookupTable = lookupTable;
         lines = data[1];
         width = data[0] & 7;
         bytesInLine = width * 2;

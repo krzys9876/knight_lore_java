@@ -22,13 +22,12 @@ public class SpriteData {
             int hl = grNo * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
             pointers[grNo] = sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256; // sprite actual address
         }
-        LookupTable lookupTable = new LookupTable();
         for(int grNo=0; grNo<size; grNo++) {
             int startAddress = pointers[grNo];
             int lines = sprite_graphics_data_728A.getU(startAddress+1);
             int bytesInLine = (sprite_graphics_data_728A.getU(startAddress) & 0x07) * 2;
             int endAddressExcl = startAddress + 2 + lines * bytesInLine;
-            sprites[grNo] = new Sprite(Arrays.copyOfRange(sprite_graphics_data_728A.getCopy(), startAddress - sprite_graphics_data_728A.start, endAddressExcl - sprite_graphics_data_728A.start), lookupTable);
+            sprites[grNo] = new Sprite(Arrays.copyOfRange(sprite_graphics_data_728A.getCopy(), startAddress - sprite_graphics_data_728A.start, endAddressExcl - sprite_graphics_data_728A.start));
         }
     }
 
