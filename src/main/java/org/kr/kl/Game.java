@@ -1479,7 +1479,7 @@ public class Game implements Runnable {
             case 0x03, 0x05: upd_3_5_C722(o); break;
             case 0x06, 0x07: upd_6_7_C4E3(o); break;
             case 0x08: upd_8_C65E(o); break;
-            case 0x09: upd_9_C6BD(ix); break;
+            case 0x09: upd_9_C6BD(o); break;
             case 0x0A: upd_10_C4E8(ix); break;
             case 0x0B: upd_11_C4ED(ix); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(ix); break;
@@ -1672,29 +1672,28 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_9_C6BD(int ix) {
+    private void upd_9_C6BD(GraphicObject o) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        graphicObjects.setXYAdj(ix, -12, -6);
+        o.setXYAdj(-12, -6);
 
-        graphicObjects.setDeadlyIfObjectHitsPlayer(ix);
-        int playerFlags =  graphicObjects.getFlagsC(ix);
-        boolean enteringRoom = (playerFlags & 0xF0)>0;
+        o.setDeadlyIfObjectHitsPlayer();
+        boolean enteringRoom = o.enteringScreen();
         if(enteringRoom) return;
-        int dZ =  graphicObjects.getDZ(ix);
+        int dZ =  o.getDZ();
         if(dZ >= 0) {
             // @label=move_portcullis_up
-            graphicObjects.setDZ(ix, 2);
+            o.setDZ(2);
             // $C6EE CALL $B467      ; // ignore audio
-            dec_dZ_and_update_XYZ_C700(ix);
+            dec_dZ_and_update_XYZ_C700(o.ix);
             int roomSizeZ = variables.getU(0x5BAE);
-            int z = graphicObjects.getZ(ix);
-            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(ix);
+            int z = o.getZ();
+            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(o.ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         } else {
-            graphicObjects.setDZ(ix, dZ - 1); // ; accelerate speed?
-            dec_dZ_and_update_XYZ_C700(ix);
-            boolean oob = graphicObjects.isOobZ(ix);
-            if(oob) stop_portcullis_C6E0(ix);
+            o.setDZ(dZ - 1); // ; accelerate speed?
+            dec_dZ_and_update_XYZ_C700(o.ix);
+            boolean oob = o.isOobZ();
+            if(oob) stop_portcullis_C6E0(o.ix);
             //set_wipe_and_draw_flags_C692(block, ix);
         }
     }

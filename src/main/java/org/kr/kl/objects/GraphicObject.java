@@ -66,6 +66,10 @@ public class GraphicObject {
     public boolean isDead() { return parent.isDead(ix); }
     public void setDead() { parent.setDead(ix); }
     public void resetDead() { parent.resetDead(ix); }
+    public void setDeadlyIfObjectHitsPlayer() { parent.setDeadlyIfObjectHitsPlayer(ix); }
+    //public void setDeadlyIfPlayerHitsObject(int ix) { data.setBit(5, ix + 0x0D); }
+    public void setBothDeadlyFlags() { parent.setBothDeadlyFlags(ix); }
+
 
     public int getSpriteWidthB() { return parent.getSpriteWidthB(ix); }
     public int getSpriteHeight() { return parent.getSpriteHeight(ix); }
@@ -80,6 +84,8 @@ public class GraphicObject {
         setOldPixelX(getPixelX());
         setOldPixelY(getPixelY());
     }
+
+
 
     // Flag 7
     public int getFlags7() { return parent.getFlags7(ix); }
@@ -108,5 +114,26 @@ public class GraphicObject {
     public void toggleHFlip() { parent.toggleHFlip(ix); }
 
     public boolean isVFlip() { return parent.isVFlip(ix); }
+
+    // Flags C
+    //public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
+    //public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
+
+    //public int getEnterCounter(int ix) { return getFlagsC(ix) & 0xF0; }
+    public boolean enteringScreen() { return parent.enteringScreen(ix); }
+    //public void initEnterCounter(int ix) { setFlagsC(ix, getFlagsC(ix) | 0x30); }
+    //public void decEnterCounter(int ix) {
+    //    int counter = getEnterCounter(ix);
+    //    if(counter >= 0x10) setFlagsC(ix, (getFlagsC(ix) & 0x0F) + counter - 0x10);
+    //}
+
+    public boolean isOobX() { return parent.isOobX(ix); }
+    public boolean isOobY() { return parent.isOobY(ix); }
+    public boolean isOobXY() { return isOobX() || isOobY(); }
+    public boolean isOobZ() { return parent.isOobZ(ix); }
+
+    //public void setOobX(int ix) { data.setBit(0, ix + 0x0C); }
+    //public void setOobY(int ix) { data.setBit(1, ix + 0x0C); }
+    //public void setOobZ(int ix) { data.setBit(2, ix + 0x0C); }
 
 }
