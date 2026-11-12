@@ -75,8 +75,10 @@ public class GraphicObjects {
 
     }
 
-    public void copyFrom(GraphicObjects other, int otherIx, int ix) {
-        for(int i = 0; i < 0x20; i++) data.set(ix + i, other.data.getU(otherIx + i));
+    public void copyFrom(GraphicObjects other, int otherIx, int ix) { copyFrom(other, otherIx, ix, 0x20); }
+
+    public void copyFrom(GraphicObjects other, int otherIx, int ix, int bytes) {
+        for(int i = 0; i < bytes; i++) data.set(ix + i, other.data.getU(otherIx + i));
     }
 
     public void copyFrom(DataBlock other, int otherIx, int ix, int bytes) {
@@ -246,6 +248,10 @@ public class GraphicObjects {
     public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
     public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
     public int getDirection(int ix) { return getFlagsD(ix) & 0x03; }
-    public void incDirection(int ix) { setFlagsD(ix, getFlagsD(ix) & 0xFC | ((getDirection(ix) + 1) & 0x03)); }
+    public void incDirection(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xFC) | ((getDirection(ix) + 1) & 0x03)); }
+
+    public int getLookAroundCounter(int ix) { return getFlagsD(ix) & 0x0F; } // NOTE: multi-purpose bits
+    public void decLookAroundCounter(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xF0) | ((getLookAroundCounter(ix) - 1) & 0x0F)); }
+    public void initLookAroundCounter(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xF0) | 8); }
 
 }

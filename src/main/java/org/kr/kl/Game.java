@@ -2745,39 +2745,37 @@ public class Game implements Runnable {
     private void upd_32_to_47_CDDA(int ix) {
         // c$C4F7 LD HL,$F8F4   ; -8, -12
         graphicObjects.setXYAdj(ix, -12, -8);
-        upd_player_top_CDE2(graphicObjects.data, ix);
+        upd_player_top_CDE2(ix);
     }
 
-    private void upd_player_top_CDE2(DataBlock block, int ix) {
-        boolean flag = block.isSet(6,ix + 0x0D);
-        if(flag && variables.getU(0x5BC3)==0) {
+    private void upd_player_top_CDE2(int ix) {
+        if(graphicObjects.isDead(ix) && variables.getU(0x5BC3)==0) {
             init_death_sparkles_BF21(ix);
             return;
         }
 
         // Player top is +32 from block start, player bottom is at block start
         // ; copy x,y,z,w,d,h,flags
-        for(int i=0; i<7; i++) block.set(ix+1+i, block.getU(ix-32+1+i));
-        block.set(ix + 6, 0);
-        block.setBit(1, ix + 0x07);
-        int flags = block.getU(ix + 0x0D);
-        int lookAroundCounter = flags & 0x0F;
+        graphicObjects.copyFrom(graphicObjects, ix - 0x20 + 1, ix + 1, 7);
+        graphicObjects.setH(ix, 0);
+        graphicObjects.setIgnore3D(ix);
+        int lookAroundCounter = graphicObjects.getLookAroundCounter(ix);
         if(lookAroundCounter == 0) { // look around again
-            int sprite = block.getU(ix - 32); // bottom half
+            int sprite = graphicObjects.getGrNo(ix - 0x20); // bottom half
             if(params.getRnd().getSeed3() < 2) {
                 sprite =  (sprite & 0xF8) | 6; // ; look one way
-                block.set(ix + 0x0D, 8);
+                graphicObjects.initLookAroundCounter(ix);
             } else if(params.getRnd().getSeed3() >= 0xFE) {
                 sprite = (sprite & 0xF8) | 7; // ; look the other way
-                block.set(ix + 0x0D, 8);
+                graphicObjects.initLookAroundCounter(ix);
             }
             //IO.println("upd_player_top_CDE2 sprite = " + sprite);
-            block.set(ix, sprite + 0x10);
+            graphicObjects.setGrNo(ix, sprite + 0x10);
         } else {
-            block.set(ix + 0x0D, flags - 1);
+            graphicObjects.decLookAroundCounter(ix);
         }
-        int bottomY = block.getU(ix -32 + 3);
-        block.set(ix + 3, bottomY + 0x0C);
+        int bottomZ = graphicObjects.getZ(ix - 0x20);
+        graphicObjects.setZ(ix, bottomZ + 0x0C);
     }
 
     private void upd_48_to_53_56_to_61_C828(int ix) {
@@ -2862,7 +2860,7 @@ public class Game implements Runnable {
     private void upd_64_to_79_CDDF(int ix) {
         // c$C501 LD HL,$F4F4   ; -12, -12
         graphicObjects.setXYAdj(ix, -12, -12); //F4
-        upd_player_top_CDE2(graphicObjects.data, ix);
+        upd_player_top_CDE2(ix);
     }
 
     private void upd_80_to_83_C5C8(int ix) {
