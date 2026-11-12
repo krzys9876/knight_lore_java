@@ -257,7 +257,6 @@ public class Game implements Runnable {
             //b$5BC6 DEFS $01
             variables.set(0x5BC6, 0);
 
-            //int v5C78 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable). It is incremented by ROM interrupt routine, servers as random seed
             // PUSH AF       ;
             // CALL $D53A    ;
             // POP AF        ;
@@ -2000,7 +1999,7 @@ public class Game implements Runnable {
             boolean canPickup = false;
             int b=2;
             while(b>0 && !canPickup) {
-                canPickup = can_pickup_spec_obj_C172(graphicObjects.data, ix, iy);
+                canPickup = can_pickup_spec_obj_C172(ix, iy);
                 if(!canPickup) {
                     b--;
                     iy+=0x20;
@@ -2129,21 +2128,21 @@ public class Game implements Runnable {
         }
     }
 
-    private boolean can_pickup_spec_obj_C172(DataBlock block, int ix, int iy) {
-        int grNo = block.getU(iy);
+    private boolean can_pickup_spec_obj_C172(int ix, int iy) {
+        int grNo = graphicObjects.getGrNo(iy);
         if (((grNo - 0x60) & 0xFF) >= 0x07) return false; // special objects base no.
-        return is_on_or_near_obj_C17A(block, ix, iy);
+        return is_on_or_near_obj_C17A(ix, iy);
     }
 
-    private boolean is_on_or_near_obj_C17A(DataBlock block, int ix, int iy) {
+    private boolean is_on_or_near_obj_C17A(int ix, int iy) {
         boolean intersectsX = do_objs_intersect_on_x_CC9D(ix, iy, 0);
         if(!intersectsX) return false;
         boolean intersectsY = do_objs_intersect_on_y_CCB2(ix, iy, 0);
         if(!intersectsY) return false;
-        int z = block.getU(ix + 3);
-        block.set(ix + 3, z - 4);
+        int z = graphicObjects.getZ(ix);
+        graphicObjects.setZ(ix, z - 4);
         boolean intersectsZ = do_objs_intersect_on_z_CCC7(ix, iy, 0);
-        block.set(ix + 3, z);
+        graphicObjects.setZ(ix, z);
         return intersectsZ;
     }
 
@@ -3069,7 +3068,7 @@ public class Game implements Runnable {
         int depth = graphicObjects.getD(ix);
         graphicObjects.setW(ix, width+1);
         graphicObjects.setD(ix, depth+1);
-        boolean isNear = is_on_or_near_obj_C17A(graphicObjects.data, ix, iy);
+        boolean isNear = is_on_or_near_obj_C17A(ix, iy);
         graphicObjects.setW(ix, width); //; restore width
         graphicObjects.setD(ix, depth); //; restore depth
         ix = iy; // ; restore ix (extra life object)
