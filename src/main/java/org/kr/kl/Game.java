@@ -2696,10 +2696,10 @@ public class Game implements Runnable {
 
     private void move_guard_wizard_NSEW_B9CC(int ix) {
         int dydx = switch(graphicObjects.getDirection(ix)) {
-            case 0 -> guard_W_B9E0(graphicObjects.data, ix);
-            case 1 -> guard_N_B9FB(graphicObjects.data, ix);
-            case 2 -> guard_E_BA08(graphicObjects.data, ix);
-            case 3 -> guard_S_BA15(graphicObjects.data, ix);
+            case 0 -> guard_W_B9E0(ix);
+            case 1 -> guard_N_B9FB(ix);
+            case 2 -> guard_E_BA08(ix);
+            case 3 -> guard_S_BA15(ix);
             default -> 0;
         };
         int dx = dydx & 0xFF;
@@ -2715,39 +2715,30 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
+    private void next_guard_dir_B9EB(int ix) { graphicObjects.incDirection(ix); }
+
     // returns HL: H - dY, L - dX
-    private int guard_W_B9E0(DataBlock block, int ix) {
-        boolean xOob = block.isSet(0, ix + 0x0C);
-        if(!xOob) return 0x00FE; // ; dY=0, dX=-2
-        next_guard_dir_B9EB(block, ix);
+    private int guard_W_B9E0(int ix) {
+        if(!graphicObjects.isOobX(ix)) return 0x00FE; // ; dY=0, dX=-2
+        next_guard_dir_B9EB(ix);
         return 0x0200; // ; dY=2, dX=0
     }
 
-    private void next_guard_dir_B9EB(DataBlock block, int ix) {
-        int flags = block.getU(ix + 0x0D);
-        int c = flags & 0xFC;
-        int b = (flags + 1) & 0x03;
-        block.set(ix + 0x0D, c | b); // ; inc lowest 2 bits (mod 4)
-    }
-
-    private int guard_N_B9FB(DataBlock block, int ix) {
-        boolean yOob = block.isSet(1, ix + 0x0C);
-        if(!yOob) return 0x0200; // ; dY=+2, dX=0
-        next_guard_dir_B9EB(block, ix);
+    private int guard_N_B9FB(int ix) {
+        if(!graphicObjects.isOobY(ix)) return 0x0200; // ; dY=+2, dX=0
+        next_guard_dir_B9EB(ix);
         return 0x0002; // ; dY=0, dX=+2
     }
 
-    private int guard_E_BA08(DataBlock block, int ix) {
-        boolean xOob = block.isSet(0, ix + 0x0C);
-        if(!xOob) return 0x0002; // ; dY=0, dX=+2
-        next_guard_dir_B9EB(block, ix);
+    private int guard_E_BA08(int ix) {
+        if(!graphicObjects.isOobX(ix)) return 0x0002; // ; dY=0, dX=+2
+        next_guard_dir_B9EB(ix);
         return 0xFE00; // ; dY=-2, dX=0
     }
 
-    private int guard_S_BA15(DataBlock block, int ix) {
-        boolean yOob = block.isSet(1, ix + 0x0C);
-        if(!yOob) return 0xFE00; // ; dY=-2, dX=0
-        next_guard_dir_B9EB(block, ix);
+    private int guard_S_BA15(int ix) {
+        if(!graphicObjects.isOobY(ix)) return 0xFE00; // ; dY=-2, dX=0
+        next_guard_dir_B9EB(ix);
         return 0x00FE; // ; dY=0, dX=-2
     }
 

@@ -117,11 +117,6 @@ public class GraphicObjects {
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isMoving(int ix) { return getDX(ix)!=0 || getDY(ix)!=0 || getDZ(ix)!=0; }
-    public boolean isTriggered(int ix) { return data.isSet(3, ix + 0x0D); }
-    public boolean justDropped(int ix) { return data.isSet(0, ix + 0x0D); }
-    public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
-    public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
-    public int getDirection(int ix) { return getFlagsD(ix) & 0x03; }
     public boolean isBitSetGrNo(int ix, int bit) { return data.isSet(bit, ix); }
 
 
@@ -244,5 +239,13 @@ public class GraphicObjects {
 
     public boolean getDeadlyIfObjectHitsPlayer(int ix) { return data.isSet(7, ix + 0x0D); }
     public boolean getDeadlyIfPlayerHitsObject(int ix) { return data.isSet(5, ix + 0x0D); }
+
+    public boolean isTriggered(int ix) { return data.isSet(3, ix + 0x0D); }
+    public boolean justDropped(int ix) { return data.isSet(0, ix + 0x0D); }
+
+    public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
+    public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
+    public int getDirection(int ix) { return getFlagsD(ix) & 0x03; }
+    public void incDirection(int ix) { setFlagsD(ix, getFlagsD(ix) & 0xFC | ((getDirection(ix) + 1) & 0x03)); }
 
 }
