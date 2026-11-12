@@ -90,4 +90,16 @@ public class Sprite {
         outBufByte = (outBufByte | d_spriteByte) & 0xFF;
         return outBufByte;
     }
+
+    public int applyToByteLeft(int bufByte, int pos, int offset) { return applyToByte(bufByte, pos, offset, true); }
+    public int applyToByteRight(int bufByte, int pos, int offset) { return applyToByte(bufByte, pos, offset, false); }
+
+    public int applyToByte(int bufByte, int pos, int offset, boolean left) {
+        int outBufByte = bufByte;
+        int e_mask = (left ? lookupTable.getLeft(getMask(pos), offset) : lookupTable.getRight(getMask(pos), offset)) ^ 0xFF;
+        int d_spriteByte = (left ? lookupTable.getLeft(getByte(pos), offset) : lookupTable.getRight(getByte(pos), offset)) ^ 0xFF;
+        outBufByte = (outBufByte & (e_mask ^ 0xFF));
+        outBufByte = (outBufByte | d_spriteByte) & 0xFF;
+        return  outBufByte;
+    }
 }
