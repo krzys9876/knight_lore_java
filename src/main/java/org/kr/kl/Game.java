@@ -1478,7 +1478,7 @@ public class Game implements Runnable {
             case 0x02, 0x04: upd_2_4_C73C(o); break;
             case 0x03, 0x05: upd_3_5_C722(o); break;
             case 0x06, 0x07: upd_6_7_C4E3(o); break;
-            case 0x08: upd_8_C65E(ix); break;
+            case 0x08: upd_8_C65E(o); break;
             case 0x09: upd_9_C6BD(ix); break;
             case 0x0A: upd_10_C4E8(ix); break;
             case 0x0B: upd_11_C4ED(ix); break;
@@ -1642,21 +1642,21 @@ public class Game implements Runnable {
         o.setXYAdj(-16, -8);
     }
 
-    private void upd_8_C65E(int ix) {
+    private void upd_8_C65E(GraphicObject o) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        graphicObjects.setXYAdj(ix, -12, -6); //FA
+        o.setXYAdj(-12, -6); //FA
 
         boolean moving = variables.getU(0x5BAF) > 0;
         if(moving) return;
         int roomSizeZ = variables.getU(0x5BAE);
-        int z = graphicObjects.getZ(ix);
+        int z = o.getZ();
         if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
             // @label=init_portcullis_up
             //int seed3 = variables.getU(0x5BA5);
             if((params.getRnd().getSeed3() & 0x1F) != 0) return; // ; 1in32 chance?
 
-            graphicObjects.setBitGrNo(ix, 0); // ; graphic_no=9
-            graphicObjects.setDZ(ix, 1); // ; dZ=1 (up)
+            o.setBitGrNo(0); // ; graphic_no=9
+            o.setDZ(1); // ; dZ=1 (up)
         } else {
             int moveCnt = variables.getU(0x5BB0);
             if(moveCnt >= 4) {
@@ -1665,8 +1665,8 @@ public class Game implements Runnable {
             }
             // @label=init_portcullis_down
             variables.set(0x5BB0, moveCnt + 1);
-            graphicObjects.setBitGrNo(ix, 0); // ; graphic_no=9
-            graphicObjects.setDZ(ix, -1); // ; dZ=-1 (down)
+            o.setBitGrNo(0); // ; graphic_no=9
+            o.setDZ(-1); // ; dZ=-1 (down)
         }
         variables.set(0x5BAF, variables.getU(0x5BAF) + 1);
         //set_wipe_and_draw_flags_C692(block, ix);

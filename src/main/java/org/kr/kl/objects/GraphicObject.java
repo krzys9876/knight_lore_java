@@ -13,6 +13,10 @@ public class GraphicObject {
 
     public int getGrNo() { return parent.getGrNo(ix); }
     public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }
+    public void setBitGrNo(int bit) { parent.setBitGrNo(ix, bit); }
+    public void resetBitGrNo(int bit) { parent.resetBitGrNo(ix, bit); }
+    public void toggleBitGrNo(int bit) { parent.toggleBitGrNo(ix, bit); }
+
 
     public int getX() { return parent.getX(ix); }
     public int getY() { return parent.getY(ix); }
