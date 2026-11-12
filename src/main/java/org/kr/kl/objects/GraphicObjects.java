@@ -66,6 +66,16 @@ public class GraphicObjects {
 
     public void reset() { data.reset(); }
 
+    private final GraphicObject[] objects;
+
+    public GraphicObject o(int i) { return objects[i]; }
+    public int a2i(int ix) { return (ix - start()) / 0x20; }
+    public GraphicObject playerBottom() { return o(0); }
+    public GraphicObject playerTop() { return o(1); }
+    public final int specialObjStartIx = 3;
+    public GraphicObject firstSpecObj() { return o(specialObjStartIx); }
+
+
     public final int size;
 
     public GraphicObjects(int start, int size) {
@@ -73,6 +83,10 @@ public class GraphicObjects {
         this.size = size;
         data = new DataBlock(start, size * 0x20);
 
+        objects = new GraphicObject[size];
+        for(int i=0; i < this.size; i++) {
+            objects[i] = new GraphicObject(this, start() + i * 0x20);
+        }
     }
 
     public void copyFrom(GraphicObjects other, int otherIx, int ix) { copyFrom(other, otherIx, ix, 0x20); }
