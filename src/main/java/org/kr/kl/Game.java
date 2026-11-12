@@ -2271,8 +2271,8 @@ public class Game implements Runnable {
         int newScreen = switch(get_sprite_dir_CA1E(ix)) {
             case 0 -> screen_west_CA9A(ix, oldRoomSizeX);
             case 1 -> screen_east_CAF3(ix, oldRoomSizeX);
-            case 2 -> screen_north_CB0E(graphicObjects.data, ix, oldRoomSizeX, oldRoomSizeY);
-            case 3 -> screen_south_CB29(graphicObjects.data, ix, oldRoomSizeX, oldRoomSizeY);
+            case 2 -> screen_north_CB0E(ix, oldRoomSizeY);
+            case 3 -> screen_south_CB29(ix, oldRoomSizeY);
             default -> currentScreen;
         };
 
@@ -2313,27 +2313,19 @@ public class Game implements Runnable {
     private int screen_west_CA9A(int ix, int oldRoomSizeX) { return screenEastWest(ix, oldRoomSizeX, false); }
     private int screen_east_CAF3(int ix, int oldRoomSizeX) { return screenEastWest(ix, oldRoomSizeX, true); }
 
-    private int screen_north_CB0E(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        int currentScreen = block.getU(ix + 0x08);
-        oldRoomSizeY = 0x80 + oldRoomSizeY;
-        int playerY = block.getU(ix + 0x02) + block.getS(ix + 0x0A) - block.getU(ix + 0x05);
-        if(oldRoomSizeY > playerY) return currentScreen;
+    private int screenNorthSouth(int ix, int oldRoomSizeY, boolean north) {
+        int currentScreen = graphicObjects.getScreen(ix);
+        oldRoomSizeY = 0x80 + (north ? oldRoomSizeY : -oldRoomSizeY);
+        int playerY = graphicObjects.getY(ix) + graphicObjects.getDY(ix) + (north ? -graphicObjects.getD(ix) : graphicObjects.getD(ix));
+        if((north && oldRoomSizeY > playerY) || (!north && oldRoomSizeY < playerY)) return currentScreen;
 
-        block.set(ix + 0x02, 0xFF); // y=0xFF
-        int newScreen = (currentScreen + 0x10) & 0xFF;
+        graphicObjects.setY(ix, north ? 0xFF : 0); // used later when determining which arch the player enters the room
+        int newScreen = (currentScreen + (north ? 0x10 : -0x10)) & 0xFF;
         return newScreen;
     }
 
-    private int screen_south_CB29(DataBlock block, int ix, int oldRoomSizeX, int oldRoomSizeY) {
-        int currentScreen = block.getU(ix + 0x08);
-        oldRoomSizeY = 0x80 - oldRoomSizeY;
-        int playerY = block.getU(ix + 0x02) + block.getS(ix + 0x0A) + block.getU(ix + 0x05);
-        if(oldRoomSizeY < playerY) return currentScreen;
-
-        block.set(ix + 0x02, 0); // y=0
-        int newScreen = (currentScreen - 0x10) & 0xFF;
-        return newScreen;
-    }
+    private int screen_north_CB0E(int ix, int oldRoomSizeY) { return screenNorthSouth(ix, oldRoomSizeY, true); }
+    private int screen_south_CB29(int ix, int oldRoomSizeY) { return screenNorthSouth(ix, oldRoomSizeY, false); }
 
     private boolean is_object_not_ignored_B538(int iy) {
         return graphicObjects.getGrNo(iy) != 0 && !graphicObjects.ignore3D(iy);
