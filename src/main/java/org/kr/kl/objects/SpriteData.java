@@ -3,19 +3,30 @@ package org.kr.kl.objects;
 import org.kr.DataBlock;
 import org.kr.InitialData;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public class SpriteData {
     private int size;
     private final int[] pointers;
     public final DataBlock sprite_graphics_data_728A = InitialData.block("sprite_graphics_data_728A");
     private final LookupTable lookupTable = new LookupTable();
 
+    private final Sprite[] sprites;
+
     public SpriteData() {
         DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112");
         size = sprite_tbl_7112.size / 2; // 2 bytes per object
         pointers = new int[size];
+        sprites = new Sprite[size];
         for(int grNo=0; grNo<size; grNo++) {
             int hl = grNo * 2 + 0x7112; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
             pointers[grNo] = sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256; // sprite actual address
+        }
+        for(int grNo=0; grNo<size; grNo++) {
+            int startAddress = pointers[grNo];
+            int endAddressExcl = grNo==size-1 ? sprite_graphics_data_728A.endExcl() : pointers[grNo]+1;
+            sprites[grNo] = new Sprite(Arrays.copyOfRange(sprite_graphics_data_728A.getCopy(), startAddress - sprite_graphics_data_728A.start, endAddressExcl - sprite_graphics_data_728A.start));
         }
     }
 
@@ -26,10 +37,12 @@ public class SpriteData {
     }
 
     // Returns address of sprite graphics data or 0 if null sprite
-    public int flip_sprite_D6EF(GraphicObjects metadata, int ix) {
-        int de = getPointer(metadata.getGrNo(ix));
-        int width = sprite_graphics_data_728A.getU(de);
-        // returns sprite address or 0 if sprite is spr_null
+    public Optional<Sprite> flip_sprite_D6EF(GraphicObjects metadata, int ix) {
+        int grNo = metadata.getGrNo(ix);
+        if(grNo == 0) return Optional.empty();
+
+        int de = getPointer(grNo);
+
         boolean flipVScratch = metadata.isVFlip(ix);
         boolean flipHScratch = metadata.isHFlip(ix);
         int flagsSpriteData = sprite_graphics_data_728A.getU(de) & 0xC0;
@@ -77,7 +90,11 @@ public class SpriteData {
             }
             sprite_graphics_data_728A.set(de, sprite_graphics_data_728A.getU(de) ^ 0x40);
         }
-        return width == 0 ? 0 : de;
+        int startAddress = de;
+        int lines = sprite_graphics_data_728A.getU(de+1);
+        int bytesInLine = (sprite_graphics_data_728A.getU(de) & 0x07) * 2;
+        int endAddress = de + 2 + lines * bytesInLine;
+        assert(endAddress > startAddress);
+        return Optional.of(new Sprite(Arrays.copyOfRange(sprite_graphics_data_728A.getCopy(), startAddress - sprite_graphics_data_728A.start, endAddress - sprite_graphics_data_728A.start)));
     }
-
 }

@@ -1,10 +1,7 @@
 package org.kr.kl;
 
 import org.kr.*;
-import org.kr.kl.objects.GraphicObjects;
-import org.kr.kl.objects.LookupTable;
-import org.kr.kl.objects.SpecialObjects;
-import org.kr.kl.objects.SpriteData;
+import org.kr.kl.objects.*;
 import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.DebugPanel;
 import org.kr.kl.utils.*;
@@ -580,8 +577,11 @@ public class Game implements Runnable {
     }
 
     private void print_sprite_D718(GraphicObjects metadata, int ix) {
-        int de = spriteData.flip_sprite_D6EF(metadata, ix);
-        if(de == 0) return; // spr_null used as a flag to return from routine
+        Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(metadata, ix);
+        if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
+        Sprite sprite = spriteO.get();
+
+        int de = 0;
 
         int x = metadata.getPixelX(ix);
         int y = metadata.getPixelY(ix);
@@ -591,10 +591,10 @@ public class Game implements Runnable {
 
         // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
         // we skip this part entirely, using inner for loop instead
-        int a = spriteData.sprite_graphics_data_728A.getU(de);
+        int a = sprite.data[de];
         a = (a & 0x7); // width_bytes, ignore rotation flags
         de ++;
-        metadata.setSpriteHeight(ix, spriteData.sprite_graphics_data_728A.getU(de)); // height_lines
+        metadata.setSpriteHeight(ix, sprite.data[de]); // height_lines
         // off bottom of screen?
         if(y + metadata.getSpriteHeight(ix)>0xC0) metadata.setSpriteHeight(ix, 0xC0 - y);
         de ++;
@@ -608,9 +608,9 @@ public class Game implements Runnable {
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 for (int i = 0; i < a; i++) {
                     int bufByte = shadowMemory.getByteAt(bc);
-                    int e_mask = spriteData.sprite_graphics_data_728A.getU(de);
+                    int e_mask = sprite.data[de];
                     de++;
-                    int d_spriteByte = spriteData.sprite_graphics_data_728A.getU(de);
+                    int d_spriteByte = sprite.data[de];
                     de++;
                     bufByte = (bufByte & (e_mask ^ 0xFF));
                     bufByte = (bufByte | d_spriteByte) & 0xFF;
@@ -627,9 +627,9 @@ public class Game implements Runnable {
                 for (int i = 0; i < a; i++) {
                     int bufByteLeft = shadowMemory.getByteAt(bc);
                     int bufByteRight = shadowMemory.getByteAt(bc+1);
-                    int e_mask = spriteData.sprite_graphics_data_728A.getU(de);
+                    int e_mask = sprite.data[de];
                     de++;
-                    int d_spriteByte = spriteData.sprite_graphics_data_728A.getU(de);
+                    int d_spriteByte = sprite.data[de];
                     de++;
                     int e_maskLeft = (lookupTable.get(lookupBase + e_mask)) ^ 0xFF;
                     int e_maskRight = (lookupTable.get(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
