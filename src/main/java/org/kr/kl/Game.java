@@ -615,10 +615,10 @@ public class Game implements Runnable {
                     int bufByteRight = shadowMemory.getByteAt(bc+i+1);
                     int e_mask = sprite.getMask(de+i);
                     int d_spriteByte = sprite.getByte(de+i);
-                    int e_maskLeft = (lookupTable.get(lookupBase + e_mask)) ^ 0xFF;
-                    int e_maskRight = (lookupTable.get(lookupBase + 0x0100 + e_mask)) ^ 0xFF;
-                    int d_spriteByteLeft = (lookupTable.get(lookupBase + d_spriteByte)) ^ 0xFF;
-                    int d_spriteByteRight = (lookupTable.get(lookupBase + 0x0100 + d_spriteByte)) ^ 0xFF;
+                    int e_maskLeft = (lookupTable.getLeft(e_mask, xOffset)) ^ 0xFF;
+                    int e_maskRight = (lookupTable.getRight(e_mask, xOffset)) ^ 0xFF;
+                    int d_spriteByteLeft = (lookupTable.getLeft(d_spriteByte, xOffset)) ^ 0xFF;
+                    int d_spriteByteRight = (lookupTable.getRight(d_spriteByte, xOffset)) ^ 0xFF;
                     bufByteLeft = (bufByteLeft & (e_maskLeft ^ 0xFF));
                     bufByteLeft = (bufByteLeft | d_spriteByteLeft) & 0xFF;
                     shadowMemory.setByteAt(bc+i, bufByteLeft);

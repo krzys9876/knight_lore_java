@@ -3,25 +3,25 @@ package org.kr.kl.objects;
 import org.kr.DataBlock;
 
 public class LookupTable {
-    private final DataBlock data = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
-
     private final DataBlock reverse = new DataBlock(0, 256);
+    private final DataBlock shiftLeftPart = new DataBlock(0, 256 * 7);
+    private final DataBlock shiftRightPart = new DataBlock(0, 256 * 7);
 
     public LookupTable() {
         build();
     }
 
-    public int get(int address) { return data.getU(address); }
-
     public int getReverse(int v) { return reverse.getU(v); }
+    public int getLeft(int v, int offset) { return shiftLeftPart.getU((offset - 1) * 256 + v); }
+    public int getRight(int v, int offset) { return shiftRightPart.getU((offset - 1) * 256 + v); }
 
     private void build() {
         // F200 - FFFF
         for(int offset = 1; offset < 8; offset ++) {
-            int base = 0xF000 + (offset * 0x0200);
+            int baseOffset = (offset - 1) * 256;
             for(int i=0; i<256; i++) {
-                data.set(base + i, shiftLeftPart(i, offset)); // F200, F400...
-                data.set(base + i + 0x100, shiftRightPart(i, offset)); // F300. F500...
+                shiftLeftPart.set(baseOffset + i, shiftLeftPart(i, offset)); // original addresses: F200, F400...
+                shiftRightPart.set(baseOffset + i, shiftRightPart(i, offset)); // original addresses: F300, F500...
             }
         }
         // original addresses: F100 - F1FF
