@@ -9,9 +9,13 @@ public class GraphicObject {
         this.ix = ix;
     }
 
+    public GraphicObjects getPaarent() { return parent; }
+
     public int getGrNo() { return parent.getGrNo(ix); }
     public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }
 
+    public int getPixelX() { return parent.getPixelX(ix); }
+    public int getPixelY() { return parent.getPixelY(ix); }
     public void setPixelX(int x) { parent.setPixelX(ix, x); }
     public void setPixelY(int y) { parent.setPixelY(ix, y); }
 
@@ -25,4 +29,8 @@ public class GraphicObject {
     public void setScreen(int screen) { parent.setScreen(ix, screen); }
 
     public void setXYAdj(int xAdj, int yAdj) { parent.setXYAdj(ix, xAdj, yAdj); }
+
+    public boolean isDead() { return parent.isDead(ix); }
+    public void setDead() { parent.setDead(ix); }
+    public void resetDead() { parent.resetDead(ix); }
 }

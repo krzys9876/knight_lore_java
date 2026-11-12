@@ -65,7 +65,7 @@ public class Game implements Runnable {
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
     private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_yoff_C440 = InitialData.block("sun_moon_yoff_C440");
-    private final GraphicObjects sun_moon_scratchpad_C44D = new GraphicObjects(0xC44D, 1);
+    private final GraphicObject sun_moon_scratchpad_C44D = new GraphicObjects(0xC44D, 1).o(0);
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
     private final GraphicObjects graphicObjects = new GraphicObjects(0x5C08, 40);
     //private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
@@ -576,6 +576,10 @@ public class Game implements Runnable {
         medatada.setPixelY(ix, source.getU(hl+3)); // pixel Y
     }
 
+    private void print_sprite_D718(GraphicObject metadata) {
+        print_sprite_D718(metadata.getPaarent(), metadata.ix);
+    }
+
     private void print_sprite_D718(GraphicObjects metadata, int ix) {
         Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(metadata, ix);
         if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
@@ -734,25 +738,25 @@ public class Game implements Runnable {
 
         // LD A,$12      ; graphic_no (player top half)
         // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
-        plyr_spr_1_scratchpad_D161.setTemp10(plyr_spr_1_scratchpad_D161.start(), 0x12);
+        plyr_spr_1_scratchpad_D161.o(0).setTemp10(0x12);
         //byte_D171.set(0xD171, 0x12);
         // LD A,$22      ; graphic_no (player bottom half)
         // LD ($D191),A  ; {plyr_spr_2_scratchpad (byte 16)
-        plyr_spr_2_scratchpad_D181.setTemp10(plyr_spr_2_scratchpad_D181.start(), 0x22);
+        plyr_spr_2_scratchpad_D181.o(0).setTemp10(0x22);
         int a = params.getRnd().getSeed1() & 0x3; // random
         int randomLoc = start_locations_D1E2.getU(0xD1E2 + a);
         // For testing only
         if(override != -1) randomLoc = override;
 
         //start_loc_1_D169.set(0xD169, randomLoc);
-        plyr_spr_1_scratchpad_D161.setScreen(plyr_spr_1_scratchpad_D161.start(), randomLoc);
-        plyr_spr_2_scratchpad_D181.setScreen(plyr_spr_2_scratchpad_D181.start(), randomLoc);
+        plyr_spr_1_scratchpad_D161.o(0).setScreen(randomLoc);
+        plyr_spr_2_scratchpad_D181.o(0).setScreen(randomLoc);
     }
 
     private void init_sun_C46D() {
-        sun_moon_scratchpad_C44D.setGrNo(sun_moon_scratchpad_C44D.start(), 0x58); // ; sprite index
-        sun_moon_scratchpad_C44D.setPixelX(sun_moon_scratchpad_C44D.start(), 0xB0); // ; pixel X
-        sun_moon_scratchpad_C44D.setPixelY(sun_moon_scratchpad_C44D.start(), 0x09); // ; pixel Y
+        sun_moon_scratchpad_C44D.setGrNo(0x58); // ; sprite index
+        sun_moon_scratchpad_C44D.setPixelX(0xB0); // ; pixel X
+        sun_moon_scratchpad_C44D.setPixelY(0x09); // ; pixel Y
     }
 
     private void init_special_objects_C47E() {
@@ -786,7 +790,7 @@ public class Game implements Runnable {
         }
         int newLivesLeft = params.isDisableLoseLife() ? livesLeft : decBCD(livesLeft);
         variables.set(0x5BBA, newLivesLeft);
-        int scratch = sun_moon_scratchpad_C44D.o(0).getGrNo();
+        int scratch = sun_moon_scratchpad_C44D.getGrNo();
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
         int playerGraphicsNo = graphicObjects.playerBottom().getTemp10();
         playerGraphicsNo = (playerGraphicsNo & 0x1F) + scratch;
@@ -1049,7 +1053,7 @@ public class Game implements Runnable {
         fill_window_C515(mainMemory, 0x5A97, 6, 4, 0x42);
         // $B055 CALL $D30D    ;
         // @label=colour_sun_moon
-        boolean isSun = ((sun_moon_scratchpad_C44D.getGrNo(sun_moon_scratchpad_C44D.start())) & 1) == 0;
+        boolean isSun = ((sun_moon_scratchpad_C44D.getGrNo()) & 1) == 0;
         int attr = isSun ? 0x46 : 0x47;
         fill_window_C515(mainMemory, 0x5AB8, 4, 2, attr);
 
@@ -1391,19 +1395,19 @@ public class Game implements Runnable {
     private void display_sun_moon_frame_C3A4() {
         if(variables.getU(0x5BC3)!=0) return;
 
-        int ix = sun_moon_scratchpad_C44D.start();
+        int ix = sun_moon_scratchpad_C44D.ix;
         // @label=display_frame
-        int x = sun_moon_scratchpad_C44D.getPixelX(ix);
+        int x = sun_moon_scratchpad_C44D.getPixelX();
         if (x == 0xE1 - 1) toggle_day_night_C3FF();
 
         int y = ((x + 0x10) >> 2) & 0x0F;
         int hl = 0xC440 + y;
-        sun_moon_scratchpad_C44D.setPixelY(ix, sun_moon_yoff_C440.getU(hl));
-        if (sunTick == 0) sun_moon_scratchpad_C44D.setPixelX(ix, x + 1);
+        sun_moon_scratchpad_C44D.setPixelY(sun_moon_yoff_C440.getU(hl));
+        if (sunTick == 0) sun_moon_scratchpad_C44D.setPixelX(x + 1);
 
         // @label=display_frame
         fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
-        print_sprite_D718(sun_moon_scratchpad_C44D, ix);
+        print_sprite_D718(sun_moon_scratchpad_C44D);
 
         ix = sprite_scratchpad_BFDB.start();
         sprite_scratchpad_BFDB.setGrNo(ix, 0x5A);
@@ -1426,11 +1430,10 @@ public class Game implements Runnable {
     }
 
     private void toggle_day_night_C3FF() {
-        int ix = sun_moon_scratchpad_C44D.start();
-        int currentSprite =  sun_moon_scratchpad_C44D.getGrNo(ix);
+        int currentSprite =  sun_moon_scratchpad_C44D.getGrNo();
         int nextSprite = currentSprite ^ 1; // flip last bit
-        sun_moon_scratchpad_C44D.setGrNo(ix, nextSprite);
-        sun_moon_scratchpad_C44D.setPixelX(ix, 0xB0); // ; pixel X
+        sun_moon_scratchpad_C44D.setGrNo(nextSprite);
+        sun_moon_scratchpad_C44D.setPixelX(0xB0); // ; pixel X
         variables.set(0x5BB1, 1); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
@@ -1459,17 +1462,15 @@ public class Game implements Runnable {
 
     private void update_sprite_loop_AFC7() {
         // block contains sprite metadata (32 bytes each)
-        int ix = graphicObjects.start();
-        while(ix < graphicObjects.endExcl()) {
-            updateOneSprite(ix);
+        for(int i=0; i<graphicObjects.size; i++) {
+            updateOneSprite(graphicObjects.o(i));
             if(exitingScreen || gameOver) return;
-            ix+=32;
-
             params.getRnd().updateSeed3();
         }
     }
 
-    private void updateOneSprite(int ix) {
+    private void updateOneSprite(GraphicObject o) {
+        int ix = o.ix;
         save_2d_info_CE49(ix);
         // @label=upd_sprite_jmp_tbl
         switch(graphicObjects.getGrNo(ix)) {
@@ -1507,7 +1508,7 @@ public class Game implements Runnable {
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
             case 0x77: upd_119_BF3F(ix); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
-            case 0x7F: upd_127_BF11(ix); break;
+            case 0x7F: upd_127_BF11(o); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(ix); break;
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(ix); break;
             case 0x8D: upd_141_B99C(ix); break;
@@ -3049,12 +3050,12 @@ public class Game implements Runnable {
         // Not used - all frame is redrawn
     }
 
-    private void upd_127_BF11(int ix) {
+    private void upd_127_BF11(GraphicObject o) {
         //c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4); //FC
-        graphicObjects.resetDead(ix);
-        graphicObjects.setGrNo(ix, graphicObjects.getTemp10(ix));
-        updateOneSprite(ix); // update after sparkes change to player
+        o.setXYAdj(-12, -4); //FC
+        o.resetDead();
+        o.setGrNo(o.getTemp10());
+        updateOneSprite(o); // update after sparkes change to player
     }
 
     private void upd_141_B99C(int ix) {
