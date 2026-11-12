@@ -72,12 +72,12 @@ public class SpriteData {
                     // NOTE: the data bytes and mask bytes must not be mixed
                     int leftByteAddress = firstByteAddress + b;
                     int rightByteAddress = lastByteAddress - b + shift;
-                    int leftBuffer = sprite.data[leftByteAddress];
+                    int leftBuffer = sprite.getByteRaw(leftByteAddress - 2);
                     leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
-                    int rightBuffer = sprite.data[rightByteAddress];
+                    int rightBuffer = sprite.getByteRaw(rightByteAddress - 2);
                     rightBuffer = lookupTable.get(0xF100 + rightBuffer);
-                    sprite.data[leftByteAddress] = isMiddlePair ? leftBuffer : rightBuffer;
-                    sprite.data[rightByteAddress] = isMiddlePair ? rightBuffer : leftBuffer;
+                    sprite.setByteRaw(leftByteAddress - 2, isMiddlePair ? leftBuffer : rightBuffer);
+                    sprite.setByteRaw(rightByteAddress - 2, isMiddlePair ? rightBuffer : leftBuffer);
                 }
             }
             sprite.data[de] = sprite.data[de] ^ 0x40;
