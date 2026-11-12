@@ -607,7 +607,6 @@ public class Game implements Runnable {
             }
         } else {
             metadata.setSpriteWidthB(ix, sprite.width + 1);
-            int lookupBase = 0xF000 + (xOffset << 9);
             for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
                 // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
                 for (int i = 0; i < sprite.width; i++) {
@@ -616,14 +615,14 @@ public class Game implements Runnable {
                     int e_mask = sprite.getMask(de+i);
                     int d_spriteByte = sprite.getByte(de+i);
                     int e_maskLeft = (lookupTable.getLeft(e_mask, xOffset)) ^ 0xFF;
-                    int e_maskRight = (lookupTable.getRight(e_mask, xOffset)) ^ 0xFF;
                     int d_spriteByteLeft = (lookupTable.getLeft(d_spriteByte, xOffset)) ^ 0xFF;
-                    int d_spriteByteRight = (lookupTable.getRight(d_spriteByte, xOffset)) ^ 0xFF;
                     bufByteLeft = (bufByteLeft & (e_maskLeft ^ 0xFF));
                     bufByteLeft = (bufByteLeft | d_spriteByteLeft) & 0xFF;
                     shadowMemory.setByteAt(bc+i, bufByteLeft);
                     // Do not modify next line
                     if(((bc - shadowMemory.start) & 0x001F)!=0x001F) {
+                        int e_maskRight = (lookupTable.getRight(e_mask, xOffset)) ^ 0xFF;
+                        int d_spriteByteRight = (lookupTable.getRight(d_spriteByte, xOffset)) ^ 0xFF;
                         bufByteRight = (bufByteRight & (e_maskRight ^ 0xFF));
                         bufByteRight = (bufByteRight | d_spriteByteRight) & 0xFF;
                         shadowMemory.setByteAt(bc+i+1, bufByteRight);
