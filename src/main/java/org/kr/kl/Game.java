@@ -2732,7 +2732,7 @@ public class Game implements Runnable {
         block.set(ix + 0x2A, dy); // ; next obj dY
         block.set(ix + 0x21, block.getU(ix + 1)); // ; copy to next obj X
         block.set(ix + 0x22, block.getU(ix + 2)); // ; copy to next obj Y
-        set_guard_wizard_sprite_B76C(block, ix);
+        set_guard_wizard_sprite_B76C(ix);
         set_both_deadly_flags_B85C(ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
@@ -3290,7 +3290,7 @@ public class Game implements Runnable {
 
         graphicObjects.setDX(ix, a);
         graphicObjects.setDX(ix + 0x20, a); // ; and for bottom half
-        set_guard_wizard_sprite_B76C(graphicObjects.data, ix);
+        set_guard_wizard_sprite_B76C(ix);
         dec_dZ_and_update_XYZ_C700(ix);
         boolean xOob =  graphicObjects.isOobX(ix);
         if(xOob) graphicObjects.toggleEastWest(ix); // ; toggle direction
@@ -3299,20 +3299,20 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);*/
     }
 
-    private void set_guard_wizard_sprite_B76C(DataBlock block, int ix) {
-        int dx = block.getS(ix + 0x09);
-        int dy = block.getS(ix + 0x0A);
+    private void set_guard_wizard_sprite_B76C(int ix) {
+        int dx = graphicObjects.getDX(ix);
+        int dy = graphicObjects.getDY(ix);
         if(dx ==0 && dy == 0) return;
-        int dxU = block.getU(ix + 0x09);
-        int dyU = block.getU(ix + 0x0A);
+        int dxU = graphicObjects.getDXu(ix);
+        int dyU = graphicObjects.getDYu(ix);
         if(dxU > dyU) {
-            if(dx >= 0) block.setBit(0, ix); // ; sprite 31/159
-            else block.resetBit(0, ix); // ; sprite 31/159
-            block.resetBit(6, ix + 0x07); // ; clear hflip
+            if(dx >= 0) graphicObjects.setBitGrNo(ix, 0); // ; sprite 31/159
+            else graphicObjects.resetBitGrNo(ix, 0); // ; sprite 31/159
+            graphicObjects.resetHFlip(ix); // ; clear hflip
         } else {
-            if(dy >=0) block.resetBit(0, ix); // ; sprite 31/159
-            else block.setBit(0, ix); // ; sprite 31/159
-            block.setBit(6, ix + 0x07); // ; set hflip
+            if(dy >=0) graphicObjects.resetBitGrNo(ix, 0); // ; sprite 31/159
+            else graphicObjects.setBitGrNo(ix, 0); // ; sprite 31/159
+            graphicObjects.setHFlip(ix); // ; set hflip
         }
     }
 
