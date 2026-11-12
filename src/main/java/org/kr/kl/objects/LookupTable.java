@@ -5,49 +5,27 @@ import org.kr.DataBlock;
 public class LookupTable {
     private final DataBlock data = new DataBlock(0xF100, 0xFFFF - 0xF100 + 1);
 
+    private final DataBlock reverse = new DataBlock(0, 256);
+
     public LookupTable() {
         build();
     }
 
     public int get(int address) { return data.getU(address); }
 
-    private void build() {
-        // NOTE: registers are treated as ints, not bytes due to lack of unsigned byte type in java
+    public int getReverse(int v) { return reverse.getU(v); }
 
-        // E is not reinitialized between the two loops
-        int e=0;
+    private void build() {
         // F200 - FFFF
-        for(int l = 0; l<=0xFF; l++) {
-            int d=0;
-            e=l;
-            int h = 0xFF;
-            for (int b = 7; b > 0; b--) {
-                // SLA E
-                boolean cy = (e & 0x80) > 0;
-                e = (e << 1) & 0xFF;
-                // RL D
-                d = (d << 1) & 0xFF;
-                if(cy) d++;
-                // LD A, E
-                int a = e;
-                // CPL
-                a = a ^ 0xFF;
-                // LD (HL), A
-                data.set(h * 256 + l, a);
-                // DEC H
-                h--;
-                // LD A, D
-                a = d;
-                // CPL
-                a = a ^ 0xFF;
-                data.set(h * 256 + l, a);
-                // DEC H
-                h--;
-                // DJNZ $D6A7
+        for(int offset = 1; offset < 8; offset ++) {
+            int base = 0xF000 + (offset * 0x0200);
+            for(int i=0; i<256; i++) {
+                data.set(base + i, shiftLeftPart(i, offset)); // F200, F400...
+                data.set(base + i + 0x100, shiftRightPart(i, offset)); // F300. F500...
             }
         }
-        // F100 - F1FF
-        for(int l = 0; l<=0xFF; l++) data.set(0xF100+l, reverseBits(l));
+        // original addresses: F100 - F1FF
+        for(int l = 0; l<=0xFF; l++) reverse.set(l, reverseBits(l));
         // Lookup table values verified with KL memory dump
     }
 
@@ -58,5 +36,13 @@ public class LookupTable {
             e |= bit << (7-b); // shift bit to desired position
         }
         return e;
+    }
+
+    private int shiftLeftPart(int v, int bits) {
+        return ((v >> bits) ^ 0xFF) & 0xFF;
+    }
+
+    private int shiftRightPart(int v, int bits) {
+        return ((v << (8-bits)) ^ 0xFF) & 0xFF;
     }
 }

@@ -62,9 +62,9 @@ public class Sprite {
                     int leftByteAddress = firstByteAddress + b;
                     int rightByteAddress = lastByteAddress - b + shift;
                     int leftBuffer = getByteRaw(leftByteAddress - 2);
-                    leftBuffer = lookupTable.get(0xF100 + leftBuffer); // F1xx - byte flip table
+                    leftBuffer = lookupTable.getReverse(leftBuffer); // F1xx - byte flip table
                     int rightBuffer = getByteRaw(rightByteAddress - 2);
-                    rightBuffer = lookupTable.get(0xF100 + rightBuffer);
+                    rightBuffer = lookupTable.getReverse(rightBuffer);
                     setByteRaw(leftByteAddress - 2, isMiddlePair ? leftBuffer : rightBuffer);
                     setByteRaw(rightByteAddress - 2, isMiddlePair ? rightBuffer : leftBuffer);
                 }
