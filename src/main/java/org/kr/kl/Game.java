@@ -1470,10 +1470,10 @@ public class Game implements Runnable {
     }
 
     private void updateOneSprite(GraphicObject o) {
-        int ix = o.ix;
-        save_2d_info_CE49(ix);
+        o.save2DInfo();
         // @label=upd_sprite_jmp_tbl
-        switch(graphicObjects.getGrNo(ix)) {
+        int ix = o.ix;
+        switch(o.getGrNo()) {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
             case 0x02, 0x04: upd_2_4_C73C(ix); break;
             case 0x03, 0x05: upd_3_5_C722(ix); break;
@@ -3589,13 +3589,6 @@ public class Game implements Runnable {
         int offsetByte = screenOrig / 8;
         int offsetBit = screenOrig % 8;
         scrn_visited_5BE8.setBit(offsetBit, scrn_visited_5BE8.start + offsetByte);
-    }
-
-    private void save_2d_info_CE49(int ix) {
-        graphicObjects.setOldSpriteWidthB(ix, graphicObjects.getSpriteWidthB(ix));
-        graphicObjects.setOldSpriteHeight(ix, graphicObjects.getSpriteHeight(ix));
-        graphicObjects.setOldPixelX(ix, graphicObjects.getPixelX(ix));
-        graphicObjects.setOldPixelY(ix, graphicObjects.getPixelY(ix));
     }
 
     private boolean calc_pixel_XY_D6C9(int ix) {

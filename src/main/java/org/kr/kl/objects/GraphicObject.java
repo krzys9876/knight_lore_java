@@ -33,4 +33,18 @@ public class GraphicObject {
     public boolean isDead() { return parent.isDead(ix); }
     public void setDead() { parent.setDead(ix); }
     public void resetDead() { parent.resetDead(ix); }
+
+    public int getSpriteWidthB() { return parent.getSpriteWidthB(ix); }
+    public int getSpriteHeight() { return parent.getSpriteHeight(ix); }
+    public void setOldSpriteWidthB(int w) { parent.setOldSpriteWidthB(ix, w); }
+    public void setOldSpriteHeight(int h) { parent.setOldSpriteHeight(ix, h); }
+    public void setOldPixelX(int x) { parent.setOldPixelX(ix, x); }
+    public void setOldPixelY(int y) { parent.setOldPixelY(ix, y); }
+
+    public void save2DInfo() {
+        setOldSpriteWidthB(getSpriteWidthB());
+        setOldSpriteHeight(getSpriteHeight());
+        setOldPixelX(getPixelX());
+        setOldPixelY(getPixelY());
+    }
 }
