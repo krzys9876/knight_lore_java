@@ -51,11 +51,9 @@ public class SpriteData {
         if(flipVScratch != flipVData) {
             for(int line = 0; line<(sprite.lines >> 1); line++) {
                 for(int b = 0; b < sprite.bytesInLine; b++) {
-                    int topByteAddress = de + 2 + line * sprite.bytesInLine + b;
-                    int bottomByteAddress = de + 2 + (sprite.lines - line - 1) * sprite.bytesInLine + b;
-                    int buffer = sprite.data[topByteAddress];
-                    sprite.data[topByteAddress] = sprite.data[bottomByteAddress];
-                    sprite.data[bottomByteAddress] = buffer;
+                    int topByteAddress = de + line * sprite.bytesInLine + b;
+                    int bottomByteAddress = de + (sprite.lines - line - 1) * sprite.bytesInLine + b;
+                    sprite.replaceBytes(topByteAddress, bottomByteAddress);
                 }
             }
             sprite.data[de] = sprite.data[de] ^ 0x80;
