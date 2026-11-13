@@ -1486,11 +1486,11 @@ public class Game implements Runnable {
             case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(o); break;
             case 0x16: upd_22_B7A3(o); break;
             case 0x17: upd_23_B7E7(o); break;
-            case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(ix); break;
-            case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(ix); break;
-            case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(ix); break;
-            case 0x36: upd_54_B6B9(ix); break;
-            case 0x37: upd_55_B6B1(ix); break;
+            case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(o); break;
+            case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(o); break;
+            case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(o); break;
+            case 0x36: upd_54_B6B9(o); break;
+            case 0x37: upd_55_B6B1(o); break;
             case 0x3E: upd_62_C4AA(ix); break;
             case 0x3F: upd_63_B7A9(ix); break;
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(ix); break;
@@ -2509,23 +2509,19 @@ public class Game implements Runnable {
 
     private void upd_22_B7A3(GraphicObject o) {
         o.setBothDeadlyFlags();
-        //c$C4FC LD HL,$F9F4   ; -7, -12
-        // $C4FF JR $C4E0      ;
         o.setXYAdj(-12, -7);
     }
 
     private void upd_23_B7E7(GraphicObject o) {
         o.setBothDeadlyFlags();
-        // c$C4E3 LD HL,$F8F0   ; -8, -16
         o.setXYAdj(-16, -8);
     }
 
-    private void upd_30_31_158_159_B9A5(int ix) {
-        //c$C510 LD HL,$03F4   ; +3, -12
-        graphicObjects.setXYAdj(ix, -12, 3);
+    private void upd_30_31_158_159_B9A5(GraphicObject o) {
+        o.setXYAdj(-12, 3);
 
-        dec_dZ_and_update_XYZ_C700(ix);
-        move_guard_wizard_NSEW_B9CC(ix);
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        move_guard_wizard_NSEW_B9CC(o.ix);
     }
 
     private void move_guard_wizard_NSEW_B9CC(int ix) {
@@ -2576,10 +2572,9 @@ public class Game implements Runnable {
         return 0x00FE; // ; dY=0, dX=-2
     }
 
-    private void upd_32_to_47_CDDA(int ix) {
-        // c$C4F7 LD HL,$F8F4   ; -8, -12
-        graphicObjects.setXYAdj(ix, -12, -8);
-        upd_player_top_CDE2(ix);
+    private void upd_32_to_47_CDDA(GraphicObject o) {
+        o.setXYAdj(-12, -8);
+        upd_player_top_CDE2(o.ix);
     }
 
     private void upd_player_top_CDE2(int ix) {
@@ -2612,39 +2607,36 @@ public class Game implements Runnable {
         graphicObjects.setZ(ix, bottomZ + 0x0C);
     }
 
-    private void upd_48_to_53_56_to_61_C828(int ix) {
-        // c$C4FC LD HL,$F9F4   ; -7, -12
-        graphicObjects.setXYAdj(ix, -12, -7);
-        upd_player_bottom_C82B(ix);
+    private void upd_48_to_53_56_to_61_C828(GraphicObject o) {
+        o.setXYAdj(-12, -7);
+        upd_player_bottom_C82B(o.ix);
     }
 
-    private void upd_54_B6B9(int ix) {
-        // c$B6B9 CALL $B45D    ; // ignore audio
-        loc_B6BF(ix, true);
+    private void upd_54_B6B9(GraphicObject o) {
+        loc_B6BF(o, true);
     }
 
-    private void upd_55_B6B1(int ix) {
+    private void upd_55_B6B1(GraphicObject o) {
         // c$B6B1 CALL $B462    ; // ignore audio
-        loc_B6BF(ix, false);
+        loc_B6BF(o, false);
     }
 
-    private void loc_B6BF(int ix, boolean isX) {
-        // c$C4E3 LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXYAdj(ix, -16, -8);
+    private void loc_B6BF(GraphicObject o, boolean isX) {
+        o.setXYAdj(-16, -8);
 
-        int c = ix & 0xFF; // $B6CD LD A,C        ;
+        int c = o.ix & 0xFF; // $B6CD LD A,C        ;
         c = (c >> 1) & 0x10;
         c = (c + params.getRnd().getSeed2()) & 0xFF;
         if((c & 0b10000) > 0) c = c ^ 0xFF;
         c = c & 0x0F;
 
-        int xy = isX ? graphicObjects.getX(ix) : graphicObjects.getY(ix);
+        int xy = isX ? o.getX() : o.getY();
         xy = (xy + 0x08) & 0x0F;
         if(c != xy) {
             int a = xy < c ? 1 : -1;
-            if(isX) graphicObjects.setDX(ix, a); else graphicObjects.setDY(ix, a);
-            graphicObjects.setDZ(ix, 1);
-            dec_dZ_and_update_XYZ_C700(ix);
+            if(isX) o.setDX(a); else o.setDY(a);
+            o.setDZ(1);
+            dec_dZ_and_update_XYZ_C700(o.ix);
         }
         //set_wipe_and_draw_flags_C692(block, ix);
     }
