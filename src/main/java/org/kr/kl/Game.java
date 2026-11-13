@@ -1988,10 +1988,10 @@ public class Game implements Runnable {
 
         int currentScreen = player.getScreen();
         int newScreen = switch(player.getSpriteDir()) {
-            case 0 -> screen_west_CA9A(player.ix, oldRoomSizeX);
-            case 1 -> screen_east_CAF3(player.ix, oldRoomSizeX);
-            case 2 -> screen_north_CB0E(player.ix, oldRoomSizeY);
-            case 3 -> screen_south_CB29(player.ix, oldRoomSizeY);
+            case 0 -> screen_west_CA9A(player, oldRoomSizeX);
+            case 1 -> screen_east_CAF3(player, oldRoomSizeX);
+            case 2 -> screen_north_CB0E(player, oldRoomSizeY);
+            case 3 -> screen_south_CB29(player, oldRoomSizeY);
             default -> currentScreen;
         };
 
@@ -2009,34 +2009,31 @@ public class Game implements Runnable {
         }
     }
 
-    private int screenEastWest(int ix, int oldRoomSizeX, boolean east) {
-        int currentScreen = graphicObjects.getScreen(ix);
+    private int screenEastWest(GraphicObject player, int oldRoomSizeX, boolean east) {
+        int currentScreen = player.getScreen();
         oldRoomSizeX = 0x80 + (east ? oldRoomSizeX : -oldRoomSizeX);
-        int playerX = graphicObjects.getX(ix) + graphicObjects.getDX(ix) + (east ? -graphicObjects.getW(ix) : graphicObjects.getW(ix));
+        int playerX = player.getX() + player.getDX() + (east ? -player.getW() : player.getW());
         if((east & oldRoomSizeX > playerX) || (!east && oldRoomSizeX < playerX)) return currentScreen;
 
-        graphicObjects.setX(ix, east ? 0xFF : 0); // used later when determining which arch the player enters the room
-        //@label=screen_e_w
-        int newScreen = ((currentScreen & 0x0F) + (east ? 1 : -1)) | (currentScreen & 0xF0); // do not change row
-        return newScreen;
+        player.setX(east ? 0xFF : 0); // used later when determining which arch the player enters the room
+        return ((currentScreen & 0x0F) + (east ? 1 : -1)) | (currentScreen & 0xF0); // do not change row;
     }
 
-    private int screen_west_CA9A(int ix, int oldRoomSizeX) { return screenEastWest(ix, oldRoomSizeX, false); }
-    private int screen_east_CAF3(int ix, int oldRoomSizeX) { return screenEastWest(ix, oldRoomSizeX, true); }
+    private int screen_west_CA9A(GraphicObject player, int oldRoomSizeX) { return screenEastWest(player, oldRoomSizeX, false); }
+    private int screen_east_CAF3(GraphicObject player, int oldRoomSizeX) { return screenEastWest(player, oldRoomSizeX, true); }
 
-    private int screenNorthSouth(int ix, int oldRoomSizeY, boolean north) {
-        int currentScreen = graphicObjects.getScreen(ix);
+    private int screenNorthSouth(GraphicObject player, int oldRoomSizeY, boolean north) {
+        int currentScreen = player.getScreen();
         oldRoomSizeY = 0x80 + (north ? oldRoomSizeY : -oldRoomSizeY);
-        int playerY = graphicObjects.getY(ix) + graphicObjects.getDY(ix) + (north ? -graphicObjects.getD(ix) : graphicObjects.getD(ix));
+        int playerY = player.getY() + player.getDY() + (north ? -player.getD() : player.getD());
         if((north && oldRoomSizeY > playerY) || (!north && oldRoomSizeY < playerY)) return currentScreen;
 
-        graphicObjects.setY(ix, north ? 0xFF : 0); // used later when determining which arch the player enters the room
-        int newScreen = (currentScreen + (north ? 0x10 : -0x10)) & 0xFF;
-        return newScreen;
+        player.setY(north ? 0xFF : 0); // used later when determining which arch the player enters the room
+        return (currentScreen + (north ? 0x10 : -0x10)) & 0xFF;
     }
 
-    private int screen_north_CB0E(int ix, int oldRoomSizeY) { return screenNorthSouth(ix, oldRoomSizeY, true); }
-    private int screen_south_CB29(int ix, int oldRoomSizeY) { return screenNorthSouth(ix, oldRoomSizeY, false); }
+    private int screen_north_CB0E(GraphicObject player, int oldRoomSizeY) { return screenNorthSouth(player, oldRoomSizeY, true); }
+    private int screen_south_CB29(GraphicObject player, int oldRoomSizeY) { return screenNorthSouth(player, oldRoomSizeY, false); }
 
     private void setDestroyedFlags(int objectIx, int playerIx) {
         if(params.isDisableDeath()) return;
