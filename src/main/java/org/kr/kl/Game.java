@@ -1768,7 +1768,7 @@ public class Game implements Runnable {
             // $C84D CALL $C969    ; handle_forward
             handle_forward_C969(o.ix);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
-            boolean oob = chk_plyr_OOB_C87A(o.ix);
+            boolean oob = chk_plyr_OOB_C87A(o);
             // $C853 JR NC,$C86D   ; plyr_OOB
             // @label=plyr_OOB
             if(oob && o.getDZ() > 0) o.setDZ(0);
@@ -1779,10 +1779,7 @@ public class Game implements Runnable {
     private void handle_pickup_drop_C00E(GraphicObject o) {
         boolean pressed = variables.getU(0x5BB3) != 0;
         if(!pressed) {
-            if(!chk_pickup_drop_BFFB()) return;
-            if(chk_plyr_OOB_C87A(o.ix)) return;
-            if(o.isJumping()) return;
-            if(!o.isOobZ()) return;
+            if(!chk_pickup_drop_BFFB() || chk_plyr_OOB_C87A(o) || o.isJumping() || !o.isOobZ()) return;
             cant_drop_5BD3.set(0x5BD3, 0);
             int zOrig = o.getZ();
             o.setZ(zOrig + 12); // ; Z+12
@@ -1814,16 +1811,16 @@ public class Game implements Runnable {
                 if(chk_pickup_drop_BFFB()) {
                     b=2;
                     if(graphicObjects.playerBottom().isCauldronRoom()) b=1; // ; only check 1st special object
-                    GraphicObject specObjD = graphicObjects.firstSpecObj();
+                    GraphicObject slotD = graphicObjects.firstSpecObj();
                     boolean foundPlace = false;
                     while(b>0 && !foundPlace) {
-                        foundPlace = specObjD.getGrNo() == 0;
+                        foundPlace = slotD.getGrNo() == 0;
                         if(!foundPlace) {
                             b--;
-                            specObjD = specObjD.next();
+                            slotD = slotD.next();
                         }
                     }
-                    if(foundPlace) room_to_drop_C0B2(o.ix, specObjD.ix);
+                    if(foundPlace) room_to_drop_C0B2(o, slotD);
                 };
             }
             done_pickup_drop_C09D(o.ix, origW, origD, origH);
@@ -1834,29 +1831,28 @@ public class Game implements Runnable {
         }
     }
 
-    private void room_to_drop_C0B2(int ix, int iy) {
+    private void room_to_drop_C0B2(GraphicObject player, GraphicObject toDrop) {
         int hl = inventory_5BD8.start + 0x0C;
         if(inventory_5BD8.getU(hl) == 0) {
             adjust_carried_C12B();
         } else {
             if(cant_drop_5BD3.getU(cant_drop_5BD3.start) == 0) {
                 int grNo = inventory_5BD8.getU(hl);
-                graphicObjects.setGrNo(iy, grNo);
-                boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
-                if(cauldronRoom) {
-                    int z = graphicObjects.getZ(ix);
+                toDrop.setGrNo(grNo);
+                if(player.isCauldronRoom()) {
+                    int z = player.getZ();
                     if(z >= 0x98) {
-                        graphicObjects.setBitGrNo(iy, 3);
+                        toDrop.setBitGrNo(3);
                         variables.set(0x5BC4, 1);
                     }
                 }
-                graphicObjects.setX(iy, graphicObjects.getX(ix));
-                graphicObjects.setY(iy, graphicObjects.getY(ix));
-                graphicObjects.setZ(iy, graphicObjects.getZ(ix));
-                graphicObjects.setZ(ix, graphicObjects.getZ(ix) + 0x0C);
-                graphicObjects.setZ(ix + 0x20, graphicObjects.getZ(ix + 0x20) + 0x0C);
-                calc_pixel_XY_D6C9(iy);
-                drop_object_C106(ix, iy);
+                toDrop.setX(player.getX());
+                toDrop.setY(player.getY());
+                toDrop.setZ(player.getZ());
+                player.setZ(player.getZ() + 0x0C);
+                player.next().setZ(player.next().getZ() + 0x0C);
+                calc_pixel_XY_D6C9(toDrop.ix);
+                drop_object_C106(player.ix, toDrop.ix);
             }
         }
     }
@@ -1970,14 +1966,14 @@ public class Game implements Runnable {
         return (keys & 0x10) > 0; // only standard keyboard input
     }
 
-    private boolean chk_plyr_OOB_C87A(int ix) {
+    private boolean chk_plyr_OOB_C87A(GraphicObject p) {
         int roomSizeX = variables.getU(0x5BAB);
         int roomSizeY = variables.getU(0x5BAC);
-        int xMax = roomSizeX - graphicObjects.getW(ix);
-        int yMax = roomSizeY - graphicObjects.getD(ix);
+        int xMax = roomSizeX - p.getW();
+        int yMax = roomSizeY - p.getD();
 
-        int xCalc = Math.abs(graphicObjects.getX(ix) - 0x80);
-        int yCalc = Math.abs(graphicObjects.getY(ix) - 0x80);
+        int xCalc = Math.abs(p.getX() - 0x80);
+        int yCalc = Math.abs(p.getY() - 0x80);
 
         // True if player is outside the room (entering or exiting)
         return xCalc >= xMax || yCalc >= yMax;
