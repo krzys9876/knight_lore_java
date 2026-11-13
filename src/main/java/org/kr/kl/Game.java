@@ -1660,21 +1660,21 @@ public class Game implements Runnable {
             dec_dZ_and_update_XYZ_C700(o.ix);
             int roomSizeZ = variables.getU(0x5BAE);
             int z = o.getZ();
-            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(o.ix);
+            if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(o);
             //set_wipe_and_draw_flags_C692(block, ix);
         } else {
             o.setDZ(dZ - 1); // ; accelerate speed?
             dec_dZ_and_update_XYZ_C700(o.ix);
             boolean oob = o.isOobZ();
-            if(oob) stop_portcullis_C6E0(o.ix);
+            if(oob) stop_portcullis_C6E0(o);
             //set_wipe_and_draw_flags_C692(block, ix);
         }
     }
 
-    private void stop_portcullis_C6E0(int ix) {
+    private void stop_portcullis_C6E0(GraphicObject o) {
         // @label=stop_portcullis
         variables.set(0x5BAF, 0);
-        graphicObjects.resetBitGrNo(ix, 0); // graphic_no=8
+        o.resetBitGrNo(0); // graphic_no=8
     }
 
     private void upd_10_C4E8(GraphicObject o) { o.setXYAdj(-20, -1); }
@@ -1760,7 +1760,7 @@ public class Game implements Runnable {
         // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
             // $C844 CALL $C00E    ; handle_pickup_drop
-            handle_pickup_drop_C00E(o.ix);
+            handle_pickup_drop_C00E(o);
             // $C847 CALL $C89F    ; handle_left_right
             handle_left_right_C89F(o.ix);
             // $C84A CALL $C948    ; handle_jump
@@ -1776,60 +1776,57 @@ public class Game implements Runnable {
         }
     }
 
-    private void handle_pickup_drop_C00E(int ix) {
+    private void handle_pickup_drop_C00E(GraphicObject o) {
         boolean pressed = variables.getU(0x5BB3) != 0;
         if(!pressed) {
             if(!chk_pickup_drop_BFFB()) return;
-            if(chk_plyr_OOB_C87A(ix)) return;
-            boolean jumping = graphicObjects.isJumping(ix);
-            if(jumping) return;
-            boolean zOob = graphicObjects.isOobZ(ix);
-            if(!zOob) return;
+            if(chk_plyr_OOB_C87A(o.ix)) return;
+            if(o.isJumping()) return;
+            if(!o.isOobZ()) return;
             cant_drop_5BD3.set(0x5BD3, 0);
-            int zOrig = graphicObjects.getZ(ix);
-            graphicObjects.setZ(ix, zOrig + 12); // ; Z+12
-            boolean intersects = do_any_objs_intersect_B4FD(ix);
-            graphicObjects.setZ(ix, zOrig); // ; restore original Z
+            int zOrig = o.getZ();
+            o.setZ(zOrig + 12); // ; Z+12
+            boolean intersects = do_any_objs_intersect_B4FD(o.ix);
+            o.setZ(zOrig); // ; restore original Z
             if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
             variables.set(0x5BB3, 1);
             variables.set(0x5BB4, 1);
-            int origW = graphicObjects.getW(ix);
-            int origD = graphicObjects.getD(ix);
-            int origH = graphicObjects.getH(ix);
-            graphicObjects.setW(ix, origW + 4); // ; width+4
-            graphicObjects.setD(ix, origD + 4); // ; depth+4
-            graphicObjects.setH(ix, origH + 4); // ; height+4
-            int iy = graphicObjects.start() + 0x40;
+            int origW = o.getW();
+            int origD = o.getD();
+            int origH = o.getH();
+            o.setW(origW + 4); // ; width+4
+            o.setD(origD + 4); // ; depth+4
+            o.setH(origH + 4); // ; height+4
+            GraphicObject specObjP = graphicObjects.firstSpecObj();
             boolean canPickup = false;
             int b=2;
             while(b>0 && !canPickup) {
-                canPickup = can_pickup_spec_obj_C172(ix, iy);
+                canPickup = can_pickup_spec_obj_C172(o.ix, specObjP.ix);
                 if(!canPickup) {
                     b--;
-                    iy+=0x20;
+                    specObjP = specObjP.next();
                 }
             }
             if(canPickup) {
-                pickup_object_C141(ix, iy, origW, origD, origH);
+                pickup_object_C141(o.ix, specObjP.ix, origW, origD, origH);
             } else {
                 if(chk_pickup_drop_BFFB()) {
                     b=2;
                     if(graphicObjects.playerBottom().isCauldronRoom()) b=1; // ; only check 1st special object
-                    GraphicObject specObj = graphicObjects.firstSpecObj();
+                    GraphicObject specObjD = graphicObjects.firstSpecObj();
                     boolean foundPlace = false;
                     while(b>0 && !foundPlace) {
-                        foundPlace = specObj.getGrNo() == 0;
+                        foundPlace = specObjD.getGrNo() == 0;
                         if(!foundPlace) {
                             b--;
-                            specObj = specObj.next();
+                            specObjD = specObjD.next();
                         }
                     }
-                    if(foundPlace) room_to_drop_C0B2(ix, specObj.ix);
+                    if(foundPlace) room_to_drop_C0B2(o.ix, specObjD.ix);
                 };
             }
-
-            done_pickup_drop_C09D(ix, origW, origD, origH);
+            done_pickup_drop_C09D(o.ix, origW, origD, origH);
         } else {
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;

@@ -152,6 +152,8 @@ public class GraphicObject {
     //public void setOobY(int ix) { data.setBit(1, ix + 0x0C); }
     //public void setOobZ(int ix) { data.setBit(2, ix + 0x0C); }
 
+    public boolean isJumping() { return parent.isJumping(ix); }
+
     // Flag D
 
     public boolean isDropping() { return parent.isDropping(ix); }
