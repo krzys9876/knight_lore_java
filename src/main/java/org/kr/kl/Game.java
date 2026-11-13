@@ -1472,7 +1472,6 @@ public class Game implements Runnable {
     private void updateOneSprite(GraphicObject o) {
         o.save2DInfo();
         // @label=upd_sprite_jmp_tbl
-        int ix = o.ix;
         switch(o.getGrNo()) {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
             case 0x02, 0x04: upd_2_4_C73C(o); break;
@@ -1562,7 +1561,7 @@ public class Game implements Runnable {
         }
         int z = o.getZ();
         o.setDZ(z); // dZ=Z
-        chk_plyr_spec_near_arch_C7DB(graphicObjects, ix, centreY, centreX);
+        chk_plyr_spec_near_arch_C7DB(o, centreY, centreX);
 
         // @label=loc_C785
         int grNo = o.getGrNo();
@@ -1571,7 +1570,7 @@ public class Game implements Runnable {
                 GraphicObject checkO = graphicObjects.o(objToCheck);
                 boolean autoAdjust = checkO.isAutoAdjust();
                 if (autoAdjust) {
-                    if (is_near_to_C7FE(graphicObjects, ix, checkO.ix, 0x0F, 0x0F)) {
+                    if (is_near_to_C7FE(o, checkO, 0x0F, 0x0F)) {
                         switch (get_sprite_dir_CA1E(ix)) {
                             case 0, 1: adj_ew_C7B1(ix, checkO.ix); break;
                             case 2, 3: adj_ns_C7C4(ix, checkO.ix); break;
@@ -1601,33 +1600,24 @@ public class Game implements Runnable {
     }
 
     // centre Y -> H, centre x -> L
-    private void chk_plyr_spec_near_arch_C7DB(GraphicObjects block, int ix, int centreY, int centreX) {
-        int iy = 0x5C08; // start of graphics table, first two objects are player top and bottom
-        for(int objToCheck = 0; objToCheck < 4; objToCheck++) {
-            int grNo = graphicObjects.getGrNo(iy);
-            if(grNo!=0) {
-                boolean autoAdjust = graphicObjects.isAutoAdjust(iy);
-                if(autoAdjust) {
-                    if(is_near_to_C7FE(block, ix, iy, centreY, centreX)) {
-                        // C7F5 SET 0,(IY+$07)
-                        graphicObjects.setNearArch(iy);
-                    }
-                }
-            }
-            iy += 0x20;
+    private void chk_plyr_spec_near_arch_C7DB(GraphicObject o, int centreY, int centreX) {
+        for(int posToCheck = 0; posToCheck < 4; posToCheck++) {
+            GraphicObject objToCheck = graphicObjects.o(posToCheck);
+            if(objToCheck.getGrNo() != 0 && objToCheck.isAutoAdjust() &&
+                    is_near_to_C7FE(o, objToCheck, centreY, centreX)) objToCheck.setNearArch();
         }
     }
 
-    private boolean is_near_to_C7FE(GraphicObjects block, int ix, int iy, int centreY, int centreX) {
+    private boolean is_near_to_C7FE(GraphicObject o, GraphicObject objToCheck, int centreY, int centreX) {
         //@label=is_near_to
         // ix - arch, iy - object (player), centreY - H, centreX - L
         // NOTE: we compare unsigned values - the dX, dY and dZ values are set as temporary variables and contain x, y and z
-        int archCentreX = block.getDXu(ix);
-        int archCentreY = block.getDYu(ix);
-        int archCentreZ = block.getDZu(ix);
-        int objX = graphicObjects.getX(iy);
-        int objY = graphicObjects.getY(iy);
-        int objZ = graphicObjects.getZ(iy);
+        int archCentreX = o.getDXu();
+        int archCentreY = o.getDYu();
+        int archCentreZ = o.getDZu();
+        int objX = objToCheck.getX();
+        int objY = objToCheck.getY();
+        int objZ = objToCheck.getZ();
 
         return (Math.abs(archCentreX - objX) < centreX) && (Math.abs(archCentreY - objY) < centreY) &&
                 (Math.abs(archCentreZ - objZ) < 4);
