@@ -1495,8 +1495,8 @@ public class Game implements Runnable {
             case 0x3F: upd_63_B7A9(o); break;
             case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(o); break;
             case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(o); break;
-            case 0x54: upd_84_C4C3(ix); break;
-            case 0x55: upd_85_C4B6(ix); break;
+            case 0x54: upd_84_C4C3(o); break;
+            case 0x55: upd_85_C4B6(o); break;
             case 0x56, 0x57: upd_86_87_B7ED(ix); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(ix); break;
             case 0x5B: upd_91_B683(ix); break;
@@ -2726,20 +2726,18 @@ public class Game implements Runnable {
         return delta_tbl[a];
     }
 
-    private void upd_84_C4C3(int ix) {
-        //LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXYAdj(ix, -16, -8);
-        dec_dZ_and_update_XYZ_C700(ix);
-        if(graphicObjects.isMoving(ix)) {
-            graphicObjects.setDX(ix, 0);
-            graphicObjects.setDY(ix, 0);
+    private void upd_84_C4C3(GraphicObject o) {
+        o.setXYAdj(-16, -8);
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        if(o.isMoving()) {
+            o.setDX(0);
+            o.setDY(0);
         }
     }
 
-    private void upd_85_C4B6(int ix) {
-        //LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXYAdj(ix, -16, -8);
-        dec_dZ_and_update_XYZ_C700(ix);
+    private void upd_85_C4B6(GraphicObject o) {
+        o.setXYAdj(-16, -8);
+        dec_dZ_and_update_XYZ_C700(o.ix);
         // $C4C0 JP $C232      ;// ignore audio
     }
 
