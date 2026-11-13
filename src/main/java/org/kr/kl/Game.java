@@ -1979,7 +1979,6 @@ public class Game implements Runnable {
     }
 
     private void handle_exit_screen_CA70(GraphicObject player) {
-        int ix = player.ix;
         if(player.enteringScreen() || !player.isNearArch()) return;
 
         player.resetNearArch();
@@ -2255,7 +2254,6 @@ public class Game implements Runnable {
     }
 
     private void handle_left_right_C89F(GraphicObject o) {
-        int ix = o.ix;
         //NOTE: we ignore input method and react to keyboard only
         // @label=left_right_rotational
         if(o.getTurnCounter() > 0) { // ; too soon to turn again?
@@ -2323,54 +2321,52 @@ public class Game implements Runnable {
         o.setXYAdj(-12, 3);
 
         dec_dZ_and_update_XYZ_C700(o);
-        move_guard_wizard_NSEW_B9CC(o.ix);
+        move_guard_wizard_NSEW_B9CC(o);
     }
 
-    private void move_guard_wizard_NSEW_B9CC(int ix) {
-        int dydx = switch(graphicObjects.getDirection(ix)) {
-            case 0 -> guard_W_B9E0(ix);
-            case 1 -> guard_N_B9FB(ix);
-            case 2 -> guard_E_BA08(ix);
-            case 3 -> guard_S_BA15(ix);
+    private void move_guard_wizard_NSEW_B9CC(GraphicObject o) {
+        int dydx = switch(o.getDirection()) {
+            case 0 -> guard_W_B9E0(o);
+            case 1 -> guard_N_B9FB(o);
+            case 2 -> guard_E_BA08(o);
+            case 3 -> guard_S_BA15(o);
             default -> 0;
         };
         int dx = dydx & 0xFF;
-        graphicObjects.setDX(ix, dx);
-        graphicObjects.setDX(ix + 0x20, dx); // ; next obj dX
+        o.setDX(dx);
+        o.next().setDX(dx); // ; next obj dX
         int dy = (dydx & 0xFF00) >> 8;
-        graphicObjects.setDY(ix, dy);
-        graphicObjects.setDY(ix + 0x20, dy); // ; next obj dY
-        graphicObjects.setX(ix + 0x20, graphicObjects.getX(ix)); // ; copy to next obj X
-        graphicObjects.setY(ix + 0x20, graphicObjects.getY(ix)); // ; copy to next obj Y
-        set_guard_wizard_sprite_B76C(ix);
-        graphicObjects.i2o(ix).setBothDeadlyFlags();
+        o.setDY(dy);
+        o.next().setDY(dy); // ; next obj dY
+        o.next().setX(o.getX()); // ; copy to next obj X
+        o.next().setY(o.getY()); // ; copy to next obj Y
+        set_guard_wizard_sprite_B76C(o.ix);
+        o.setBothDeadlyFlags();
         //o.setWipeAndDraw();
     }
 
-    private void next_guard_dir_B9EB(int ix) { graphicObjects.incDirection(ix); }
-
     // returns HL: H - dY, L - dX
-    private int guard_W_B9E0(int ix) {
-        if(!graphicObjects.isOobX(ix)) return 0x00FE; // ; dY=0, dX=-2
-        next_guard_dir_B9EB(ix);
+    private int guard_W_B9E0(GraphicObject o) {
+        if(!o.isOobX()) return 0x00FE; // ; dY=0, dX=-2
+        o.incDirection();
         return 0x0200; // ; dY=2, dX=0
     }
 
-    private int guard_N_B9FB(int ix) {
-        if(!graphicObjects.isOobY(ix)) return 0x0200; // ; dY=+2, dX=0
-        next_guard_dir_B9EB(ix);
+    private int guard_N_B9FB(GraphicObject o) {
+        if(!o.isOobY()) return 0x0200; // ; dY=+2, dX=0
+        o.incDirection();
         return 0x0002; // ; dY=0, dX=+2
     }
 
-    private int guard_E_BA08(int ix) {
-        if(!graphicObjects.isOobX(ix)) return 0x0002; // ; dY=0, dX=+2
-        next_guard_dir_B9EB(ix);
+    private int guard_E_BA08(GraphicObject o) {
+        if(!o.isOobX()) return 0x0002; // ; dY=0, dX=+2
+        o.incDirection();
         return 0xFE00; // ; dY=-2, dX=0
     }
 
-    private int guard_S_BA15(int ix) {
-        if(!graphicObjects.isOobY(ix)) return 0xFE00; // ; dY=-2, dX=0
-        next_guard_dir_B9EB(ix);
+    private int guard_S_BA15(GraphicObject o) {
+        if(!o.isOobY()) return 0xFE00; // ; dY=-2, dX=0
+        o.incDirection();
         return 0x00FE; // ; dY=0, dX=-2
     }
 
