@@ -10,6 +10,7 @@ public class GraphicObject {
     }
 
     public GraphicObjects getPaarent() { return parent; }
+    public GraphicObject next() { return parent.next(this);}
 
     public int getGrNo() { return parent.getGrNo(ix); }
     public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }

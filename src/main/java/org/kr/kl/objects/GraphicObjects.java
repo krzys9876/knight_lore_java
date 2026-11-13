@@ -74,6 +74,11 @@ public class GraphicObjects {
     public GraphicObject playerTop() { return o(1); }
     public final int specialObjStartIx = 3;
     public GraphicObject firstSpecObj() { return o(specialObjStartIx); }
+    public GraphicObject next(GraphicObject o) {
+        int nextIndex = (o.ix - start() + 0x20) / 0x20;
+        assert(nextIndex < objects.length);
+        return o(nextIndex);
+    }
 
 
     public final int size;

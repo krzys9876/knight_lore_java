@@ -1515,7 +1515,7 @@ public class Game implements Runnable {
             case 0x8E: upd_142_B99F(o); break;
             case 0x8F: upd_143_B6A2(o); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(o); break;
-            case 0x96, 0x97: upd_150_151_B73C(ix); break;
+            case 0x96, 0x97: upd_150_151_B73C(o); break;
             case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(ix); break;
             case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(ix); break;
             case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(ix); break;
@@ -3037,21 +3037,17 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_150_151_B73C(int ix) {
-        //c$C50B LD HL,$07F4   ; +7, -12
-        graphicObjects.setXYAdj(ix, -12, 7);
+    private void upd_150_151_B73C(GraphicObject o) {
+        o.setXYAdj(-12, 7);
 
-        boolean directionE =  graphicObjects.isEast(ix);
-        int a = directionE ? 2 : -2;
-
-        graphicObjects.setDX(ix, a);
-        graphicObjects.setDX(ix + 0x20, a); // ; and for bottom half
-        set_guard_wizard_sprite_B76C(ix);
-        dec_dZ_and_update_XYZ_C700(ix);
-        boolean xOob =  graphicObjects.isOobX(ix);
-        if(xOob) graphicObjects.toggleEastWest(ix); // ; toggle direction
-        graphicObjects.setX(ix + 0x20, graphicObjects.getX(ix)); // ; copy to bottom half
-        graphicObjects.i2o(ix).setBothDeadlyFlags();
+        int dx = o.isEast() ? 2 : -2;
+        o.setDX(dx);
+        o.next().setDX(dx); // ; and for bottom half
+        set_guard_wizard_sprite_B76C(o.ix);
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        if(o.isOobX()) o.toggleEastWest(); // ; toggle direction
+        o.next().setX(o.getX()); // ; copy to bottom half
+        o.setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);*/
     }
 
