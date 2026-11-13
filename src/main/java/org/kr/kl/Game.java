@@ -1964,17 +1964,17 @@ public class Game implements Runnable {
         o.clearOob();
         int dzAdj = o.getDZ(); // H
         if(dzAdj != 0) {
-            dzAdj = adj_dZ_for_out_of_bounds_CA5A(o.ix);
+            dzAdj = adj_dZ_for_out_of_bounds_CA5A(o);
             if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(o, 0, 0, dzAdj);
         }
         int dxAdj = o.getDX(); // C
         if(dxAdj != 0) {
-            dxAdj = adj_dX_for_out_of_bounds_CCDD(o.ix);
+            dxAdj = adj_dX_for_out_of_bounds_CCDD(o);
             if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(o, dxAdj, 0, dzAdj);
         }
         int dyAdj = o.getDY(); // L
         if(dyAdj != 0) {
-            dyAdj = adj_dY_for_out_of_bounds_CD08(o.ix);
+            dyAdj = adj_dY_for_out_of_bounds_CD08(o);
             if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(o, dxAdj, dyAdj, dzAdj);
         }
 
@@ -2124,47 +2124,47 @@ public class Game implements Runnable {
         return dyAdj;
     }
 
-    private int adj_dZ_for_out_of_bounds_CA5A(int ix) {
+    private int adj_dZ_for_out_of_bounds_CA5A(GraphicObject o) {
         int roomSize = variables.getU(0x5BAE);
-        int dz = graphicObjects.getDZ(ix);
-        int z = graphicObjects.getZ(ix);
+        int dz = o.getDZ();
+        int z = o.getZ();
         while(true) {
             if (z + dz >= roomSize) return dz;
-            graphicObjects.setOobZ(ix);
+            o.setOobZ();
             dz = adj_d_for_out_of_bounds_CA89(dz);
             if (dz == 0) return dz;
         }
     }
 
-    private int adj_dX_for_out_of_bounds_CCDD(int ix) {
-        int dx = graphicObjects.getDX(ix);
-        if(graphicObjects.enteringScreen(ix)) return dx;
-        if(graphicObjects.isNearArch(ix)) return dx;
+    private int adj_dX_for_out_of_bounds_CCDD(GraphicObject o) {
+        int dx = o.getDX();
+        if(o.enteringScreen()) return dx;
+        if(o.isNearArch()) return dx;
 
         int roomSizeX = variables.getU(0x5BAB);
 
-        int x = graphicObjects.getX(ix);
+        int x = o.getX();
         while(true) {
-            int a = Math.abs(((x + dx) & 0xFF) - 0x80) + graphicObjects.getW(ix);
+            int a = Math.abs(((x + dx) & 0xFF) - 0x80) + o.getW();
             if(a < roomSizeX) return dx;
-            graphicObjects.setOobX(ix);
+            o.setOobX();
             dx = adj_d_for_out_of_bounds_CA89(dx);
             if(dx == 0) return dx;
         }
     }
 
-    private int adj_dY_for_out_of_bounds_CD08(int ix) {
-        int dy = graphicObjects.getDY(ix);
-        if(graphicObjects.enteringScreen(ix)) return dy;
-        if(graphicObjects.isNearArch(ix)) return dy;
+    private int adj_dY_for_out_of_bounds_CD08(GraphicObject o) {
+        int dy = o.getDY();
+        if(o.enteringScreen()) return dy;
+        if(o.isNearArch()) return dy;
 
         int roomSizeY = variables.getU(0x5BAC);
 
-        int y = graphicObjects.getY(ix);
+        int y = o.getY();
         while(true) {
-            int a = Math.abs(((y + dy) & 0xFF) - 0x80) + graphicObjects.getD(ix);
+            int a = Math.abs(((y + dy) & 0xFF) - 0x80) + o.getD();
             if(a < roomSizeY) return dy;
-            graphicObjects.setOobY(ix);
+            o.setOobY();
             dy = adj_d_for_out_of_bounds_CA89(dy);
             if(dy == 0) return dy;
         }
