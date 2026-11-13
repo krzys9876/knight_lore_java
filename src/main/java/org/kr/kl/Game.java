@@ -1519,9 +1519,9 @@ public class Game implements Runnable {
             case 0x96, 0x97: upd_150_151_B73C(o); break;
             case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(o); break;
             case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(o); break;
-            case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(ix); break;
+            case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(o); break;
             case 0xB0, 0xB1: upd_176_177_B83F(o); break;
-            case 0xB2, 0xB3: upd_178_179_B865(ix); break;
+            case 0xB2, 0xB3: upd_178_179_B865(o); break;
             case 0xB4, 0xB5: upd_180_181_B80F(ix); break;
             case 0xB6, 0xB7: upd_182_183_B5FF(ix); break;
             case 0xB9, 0xBB: upd_185_187_BF37(o); break;
@@ -3109,7 +3109,6 @@ public class Game implements Runnable {
     private void upd_164_to_167_B92C(GraphicObject o) {
         o.setXYAdj(-12, -4);
 
-        int ix=o.ix;
         boolean cauldronRoom = o.getScreen() == 0x88;
         int dx = 4;
         int dy = 4;
@@ -3121,12 +3120,9 @@ public class Game implements Runnable {
         dec_dZ_and_update_XYZ_C700(o.ix);
         next_graphic_no_mod_4_B98C(o.ix);
 
-        if(cauldronRoom) {
-            int grNo = graphicObjects.playerBottom().getGrNo();
-            if (((grNo - 0x10) & 0xFF) >= 0x40) { // is player dead (sparkles)
-                upd_111_B95E(o); // ; final sparkles in cauldron
-                return;
-            }
+        if(cauldronRoom & graphicObjects.playerBottom().isSparkles()) { // is player dead (sparkles)
+            upd_111_B95E(o); // ; final sparkles in cauldron
+            return;
         }
         //set_wipe_and_draw_flags_C692();
     }
@@ -3150,11 +3146,9 @@ public class Game implements Runnable {
         graphicObjects.setGrNo(ix, newGrNo);
     }
 
-    private void upd_168_to_175_B923(int ix) {
-        // c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
-
-        graphicObjects.setGrNo(ix, 0xA0);
+    private void upd_168_to_175_B923(GraphicObject o) {
+        o.setXYAdj(-12, -4);
+        o.setGrNo(0xA0);
     }
 
     // NOTE: commented as: not used
@@ -3163,31 +3157,24 @@ public class Game implements Runnable {
         // NOTE: rest of the routine is not implemented
     }
 
-    private void upd_178_179_B865(int ix) {
-        // c$C4F2 LD HL,$FCF8   ; -4, -8
-        graphicObjects.setXYAdj(ix, -8, -4);
+    private void upd_178_179_B865(GraphicObject o) {
+        o.setXYAdj(-8, -4);
 
         int bouncingHeight = variables.getU(0x5BBD);
-        if(bouncingHeight == 0) {
-            int z = graphicObjects.getZ(ix);
-            variables.set(0x5BBD, z + 0x20); // ; calc bounce height
-        }
-        toggle_next_prev_sprite_B985(ix);
+        if(bouncingHeight == 0) variables.set(0x5BBD, o.getZ() + 0x20); // ; calc bounce height
+        toggle_next_prev_sprite_B985(o.ix);
         // $B879 CALL $B451     ; // ignore audio
-        boolean dirUp = graphicObjects.isDirUp(ix);
-        if(dirUp) {
-            graphicObjects.setDZ(ix, 3);
-            dec_dZ_and_update_XYZ_C700(ix);
-            int z = graphicObjects.getZ(ix);
-            if(z > variables.getU(0x5BBD))
-                graphicObjects.setDirDown(ix); // ; set dir=down
+        if(o.isDirUp()) {
+            o.setDZ(3);
+            dec_dZ_and_update_XYZ_C700(o.ix);
+            if(o.getZ() > variables.getU(0x5BBD))
+                o.setDirDown();
         } else {
-            dec_dZ_and_update_XYZ_C700(ix);
-            boolean zOob = graphicObjects.isOobZ(ix);
-            if(zOob) graphicObjects.setDirUp(ix);
+            dec_dZ_and_update_XYZ_C700(o.ix);
+            if(o.isOobZ()) o.setDirUp();
             // $B88F CALL $B42E     ; // ignore audio
         }
-        graphicObjects.i2o(ix).setBothDeadlyFlags();
+        o.setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 

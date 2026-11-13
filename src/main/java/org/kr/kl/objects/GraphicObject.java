@@ -18,6 +18,7 @@ public class GraphicObject {
     public void resetBitGrNo(int bit) { parent.resetBitGrNo(ix, bit); }
     public void toggleBitGrNo(int bit) { parent.toggleBitGrNo(ix, bit); }
     public boolean isBitSetGrNo(int bit) { return parent.isBitSetGrNo(ix, bit); }
+    public boolean isSparkles() { return ((getGrNo() - 0x10) & 0xFF) >= 0x40; }
 
     public int getX() { return parent.getX(ix); }
     public int getY() { return parent.getY(ix); }
@@ -145,6 +146,9 @@ public class GraphicObject {
     public boolean isDropping() { return parent.isDropping(ix); }
     public void setRising() { parent.setRising(ix); }
     public void setDropping() { parent.setDropping(ix); }
+    public boolean isDirUp() { return parent.isDirUp(ix); }
+    public void setDirUp() { parent.setDirUp(ix); }
+    public void setDirDown() { parent.setDirDown(ix); }
 
     public boolean isTriggered() { return parent.isTriggered(ix); }
     public boolean justDropped() { return parent.justDropped(ix); }
