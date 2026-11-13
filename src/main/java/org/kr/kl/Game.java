@@ -3107,15 +3107,6 @@ public class Game implements Runnable {
         upd_119_BF3F(o);
     }
 
-    private void renderAllSprites(GraphicObjects block, int from, int cnt) {
-        for(int i=from;i<from+cnt;i++) {
-            GraphicObject o = block.o(i);
-            if(o.getGrNo() != 0) {
-                if(calc_pixel_XY_D6C9(o.ix)) print_sprite_D718(o);
-            }
-        }
-    }
-
     private void build_screen_objects_D1E6() {
         if(variables.getU(0x5BB2) != 0) {
             // update special objects if not the first screen of the game
