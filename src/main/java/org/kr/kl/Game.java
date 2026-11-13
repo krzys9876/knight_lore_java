@@ -1797,9 +1797,8 @@ public class Game implements Runnable {
                     specObjP = specObjP.next();
                 }
             }
-            if(canPickup) {
-                pickup_object_C141(o.ix, specObjP.ix, origW, origD, origH);
-            } else {
+            if(canPickup) pickup_object_C141(o, specObjP);
+            else {
                 if(chk_pickup_drop_BFFB()) {
                     b=2;
                     if(graphicObjects.playerBottom().isCauldronRoom()) b=1; // ; only check 1st special object
@@ -1849,35 +1848,34 @@ public class Game implements Runnable {
         }
     }
 
-    private void pickup_object_C141(int ix, int iy, int origW, int origD, int origH) {
+    private void pickup_object_C141(GraphicObject o, GraphicObject obj) {
         variables.set(0x5BC0, 0);
-        int grNo = graphicObjects.getGrNo(iy);
+        int grNo = obj.getGrNo();
         int hl = inventory_5BD8.start;
         inventory_5BD8.set(hl, grNo);
         hl++;
-        int flags = graphicObjects.getFlags7(iy);
+        int flags = obj.getFlags7();
         inventory_5BD8.set(hl, flags);
         hl++;
-        int e = graphicObjects.getTemp10(iy);
-        int d = graphicObjects.getTemp11(iy);
+        int e = obj.getTemp10();
+        int d = obj.getTemp11();
         int ptr =  d * 256 + e; // ; ptr graphic object
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
         inventory_5BD8.set(hl, e);
         hl++;
         inventory_5BD8.set(hl, d);
-        //o.setWipeAndDraw();
-        graphicObjects.setGrNo(iy, 1);
+        obj.setWipeAndDraw();
+        obj.setGrNo(1);
 
         hl = inventory_5BD8.start + 0x0C;
         int a = inventory_5BD8.getU(hl);
         if(a == 0) {
             adjust_carried_C12B();
         } else {
-            graphicObjects.setGrNo(iy, a);
-            drop_object_C106(ix, iy);
+            obj.setGrNo(a);
+            drop_object_C106(o.ix, obj.ix);
         }
-
     }
 
     private void drop_object_C106(int ix, int iy) {
