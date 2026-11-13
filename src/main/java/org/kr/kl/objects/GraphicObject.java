@@ -154,7 +154,7 @@ public class GraphicObject {
     public void setIgnore3D() { parent.setIgnore3D(ix); }
     public void resetIgnore3D() { parent.resetIgnore3D(ix); }
 
-    //public boolean isMoveable(int ix) { return Flags7.isMoveable(getFlags7(ix)); }
+    public boolean isMoveable() { return parent.isMoveable(ix); }
 
     public boolean isAutoAdjust() { return parent.isAutoAdjust(ix); }
 
@@ -188,9 +188,10 @@ public class GraphicObject {
     public boolean isOobXY() { return isOobX() || isOobY(); }
     public boolean isOobZ() { return parent.isOobZ(ix); }
 
-    //public void setOobX(int ix) { data.setBit(0, ix + 0x0C); }
-    //public void setOobY(int ix) { data.setBit(1, ix + 0x0C); }
-    //public void setOobZ(int ix) { data.setBit(2, ix + 0x0C); }
+    public void setOobX() { parent.setOobX(ix); }
+    public void setOobY() { parent.setOobY(ix); }
+    public void setOobZ() { parent.setOobZ(ix); }
+    public void clearOob() { parent.clearOob(ix); }
 
     public boolean isJumping() { return parent.isJumping(ix); }
     public void setJumping() { parent.setJumping(ix); }

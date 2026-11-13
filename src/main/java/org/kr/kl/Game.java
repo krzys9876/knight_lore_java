@@ -1612,14 +1612,14 @@ public class Game implements Runnable {
             // @label=move_portcullis_up
             o.setDZ(2);
             // $C6EE CALL $B467      ; // ignore audio
-            dec_dZ_and_update_XYZ_C700(o.ix);
+            dec_dZ_and_update_XYZ_C700(o);
             int roomSizeZ = variables.getU(0x5BAE);
             int z = o.getZ();
             if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(o);
             o.setWipeAndDraw();
         } else {
             o.setDZ(dZ - 1); // ; accelerate speed?
-            dec_dZ_and_update_XYZ_C700(o.ix);
+            dec_dZ_and_update_XYZ_C700(o);
             boolean oob = o.isOobZ();
             if(oob) stop_portcullis_C6E0(o);
             o.setWipeAndDraw();
@@ -1689,7 +1689,7 @@ public class Game implements Runnable {
             move_towards_plyr_B965(o.ix, 4, 4);
         }
         variables.set(0x5BC5, o.getZ());
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         o.setWipeAndDraw();
     }
 
@@ -1746,7 +1746,7 @@ public class Game implements Runnable {
             boolean canPickup = false;
             int b=2;
             while(b>0 && !canPickup) {
-                canPickup = can_pickup_spec_obj_C172(o.ix, specObjP.ix);
+                canPickup = can_pickup_spec_obj_C172(o, specObjP);
                 if(!canPickup) {
                     b--;
                     specObjP = specObjP.next();
@@ -1800,7 +1800,7 @@ public class Game implements Runnable {
                 player.setZ(player.getZ() + 0x0C);
                 player.next().setZ(player.next().getZ() + 0x0C);
                 calc_pixel_XY_D6C9(toDrop);
-                drop_object_C106(player.ix, toDrop.ix);
+                drop_object_C106(player, toDrop);
             }
         }
     }
@@ -1831,23 +1831,23 @@ public class Game implements Runnable {
             adjust_carried_C12B();
         } else {
             obj.setGrNo(a);
-            drop_object_C106(o.ix, obj.ix);
+            drop_object_C106(o, obj);
         }
     }
 
-    private void drop_object_C106(int ix, int iy) {
+    private void drop_object_C106(GraphicObject player, GraphicObject obj) {
         int hl = inventory_5BD8.start + 0x0C; // current slot
         int flags = inventory_5BD8.getU(hl + 1);
         int d = inventory_5BD8.getU(hl + 3); // 2-byte pointer to special objects table
         int e = inventory_5BD8.getU(hl + 2);
-        graphicObjects.setW(iy, 5); // width=5
-        graphicObjects.setD(iy, 5); // depth=5
-        graphicObjects.setH(iy, 0x0C); // height=12
-        graphicObjects.setFlags7(iy, flags); //flags7
-        graphicObjects.setScreen(iy, graphicObjects.getScreen(ix)); // ; scrn
-        graphicObjects.setTemp10(iy, e); // set ptr to obj_tbl entry
-        graphicObjects.setTemp11(iy, d);
-        graphicObjects.setJustDropped(iy); // flag just dropped
+        obj.setW(5); // width=5
+        obj.setD(5); // depth=5
+        obj.setH(0x0C); // height=12
+        obj.setFlags7(flags); //flags7
+        obj.setScreen(player.getScreen()); // ; scrn
+        obj.setTemp10(e); // set ptr to obj_tbl entry
+        obj.setTemp11(d);
+        obj.setJustDropped(); // flag just dropped
         adjust_carried_C12B();
     }
 
@@ -1866,21 +1866,19 @@ public class Game implements Runnable {
         }
     }
 
-    private boolean can_pickup_spec_obj_C172(int ix, int iy) {
-        int grNo = graphicObjects.getGrNo(iy);
+    private boolean can_pickup_spec_obj_C172(GraphicObject player, GraphicObject obj) {
+        int grNo = obj.getGrNo();
         if (((grNo - 0x60) & 0xFF) >= 0x07) return false; // special objects base no.
-        return is_on_or_near_obj_C17A(ix, iy);
+        return is_on_or_near_obj_C17A(player, obj);
     }
 
-    private boolean is_on_or_near_obj_C17A(int ix, int iy) {
-        boolean intersectsX = graphicObjects.i2o(ix).intersectOnX(graphicObjects.i2o(iy), 0);
-        if(!intersectsX) return false;
-        boolean intersectsY = graphicObjects.i2o(ix).intersectOnY(graphicObjects.i2o(iy), 0);
-        if(!intersectsY) return false;
-        int z = graphicObjects.getZ(ix);
-        graphicObjects.setZ(ix, z - 4);
-        boolean intersectsZ = graphicObjects.i2o(ix).intersectOnZ(graphicObjects.i2o(iy), 0);
-        graphicObjects.setZ(ix, z);
+    private boolean is_on_or_near_obj_C17A(GraphicObject player, GraphicObject obj) {
+        if(!player.intersectOnX(obj, 0)) return false;
+        if(!player.intersectOnY(obj, 0)) return false;
+        int z = player.getZ();
+        player.setZ(z - 4);
+        boolean intersectsZ = player.intersectOnZ(obj, 0);
+        player.setZ(z);
         return intersectsZ;
     }
 
@@ -1945,12 +1943,12 @@ public class Game implements Runnable {
         //$C9D6 CALL M,$B451   ; ignore audio
 
         //$C9D9 CALL $CB45     ;
-        adj_for_out_of_bounds_CB45(ix);
+        adj_for_out_of_bounds_CB45(graphicObjects.i2o(ix));
         //$C9DC CALL $CA70     ;
         handle_exit_screen_CA70(ix);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
         if(!exitingScreen) {
-            add_dXYZ_C706(ix);
+            add_dXYZ_C706(graphicObjects.i2o(ix));
             if (graphicObjects.isOobZ(ix)) {
                 int tmpDz = variables.getS(0x5BC1);
                 if (tmpDz < 0) graphicObjects.resetJumping(ix);
@@ -1960,31 +1958,31 @@ public class Game implements Runnable {
         }
     }
 
-    private void adj_for_out_of_bounds_CB45(int ix) {
-        if(graphicObjects.ignore3D(ix)) return;
-        graphicObjects.setIgnore3D(ix);
-        graphicObjects.clearOob(ix);
-        int dzAdj = graphicObjects.getDZ(ix); // H
+    private void adj_for_out_of_bounds_CB45(GraphicObject o) {
+        if(o.ignore3D()) return;
+        o.setIgnore3D();
+        o.clearOob();
+        int dzAdj = o.getDZ(); // H
         if(dzAdj != 0) {
-            dzAdj = adj_dZ_for_out_of_bounds_CA5A(ix);
-            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(ix, 0, 0, dzAdj);
+            dzAdj = adj_dZ_for_out_of_bounds_CA5A(o.ix);
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(o, 0, 0, dzAdj);
         }
-        int dxAdj = graphicObjects.getDX(ix); // C
+        int dxAdj = o.getDX(); // C
         if(dxAdj != 0) {
-            dxAdj = adj_dX_for_out_of_bounds_CCDD(ix);
-            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(ix, dxAdj, 0, dzAdj);
+            dxAdj = adj_dX_for_out_of_bounds_CCDD(o.ix);
+            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(o, dxAdj, 0, dzAdj);
         }
-        int dyAdj = graphicObjects.getDY(ix); // L
+        int dyAdj = o.getDY(); // L
         if(dyAdj != 0) {
-            dyAdj = adj_dY_for_out_of_bounds_CD08(ix);
-            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(ix, dxAdj, dyAdj, dzAdj);
+            dyAdj = adj_dY_for_out_of_bounds_CD08(o.ix);
+            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(o.ix, dxAdj, dyAdj, dzAdj);
         }
 
-        graphicObjects.resetIgnore3D(ix);
+        o.resetIgnore3D();
 
-        graphicObjects.setDX(ix, dxAdj);
-        graphicObjects.setDY(ix, dyAdj);
-        graphicObjects.setDZ(ix, dzAdj);
+        o.setDX(dxAdj);
+        o.setDY(dyAdj);
+        o.setDZ(dzAdj);
     }
 
     private void handle_exit_screen_CA70(int ix) {
@@ -2065,49 +2063,44 @@ public class Game implements Runnable {
         if(graphicObjects.getDeadlyIfPlayerHitsObject(playerIx)) graphicObjects.setDead(objectIx); // bit 5->6
     }
 
-    private int adj_dZ_for_obj_intersect_CC38(int ix, int dxAdj, int dyAdj, int dzAdj) {
-        int iy = graphicObjects.start();
+    private int adj_dZ_for_obj_intersect_CC38(GraphicObject o, int dxAdj, int dyAdj, int dzAdj) {
+        GraphicObject obj = graphicObjects.playerBottom();
         for(int i=0; i<graphicObjects.size; i++) {
-            if(graphicObjects.i2o(iy).isNotIgnored()) {
-                //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if (graphicObjects.i2o(ix).intersectOnX(graphicObjects.i2o(iy), dxAdj) && graphicObjects.i2o(ix).intersectOnY(graphicObjects.i2o(iy), dyAdj)) {
-                    while (graphicObjects.i2o(ix).intersectOnZ(graphicObjects.i2o(iy), dzAdj)) {
-                        //IO.println("Intersects " + i + ":" + block.getU(iy));
-                        graphicObjects.setOobZ(ix); // set Z OOB
-                        setDestroyedFlags(ix, iy);
-                        graphicObjects.setTriggered(iy); //triggered (falling, collapsing blocks)
-                        if (graphicObjects.isMoveable(ix)) {
-                            if (graphicObjects.getDX(ix) == 0) graphicObjects.setDX(ix, graphicObjects.getDX(iy)); //copy dX
-                            if (graphicObjects.getDY(ix) == 0) graphicObjects.setDY(ix, graphicObjects.getDY(iy)); //copy dY
+            if(obj.isNotIgnored()) {
+                if (o.intersectOnX(obj, dxAdj) && o.intersectOnY(obj, dyAdj)) {
+                    while (o.intersectOnZ(obj, dzAdj)) {
+                        o.setOobZ();
+                        setDestroyedFlags(o.ix, obj.ix);
+                        obj.setTriggered(); //triggered (falling, collapsing blocks)
+                        if (o.isMoveable()) {
+                            if (o.getDX() == 0) o.setDX(obj.getDX()); //copy dX
+                            if (o.getDY() == 0) o.setDY(obj.getDY()); //copy dY
                         }
                         dzAdj = adj_d_for_out_of_bounds_CA89(dzAdj);
                         if (dzAdj == 0) return dzAdj;
                     }
                 }
             }
-            iy += 0x20;
+            if(i < graphicObjects.size - 1) obj = obj.next();
         }
         return dzAdj;
     }
 
-    private int adj_dX_for_obj_intersect_CB9A(int ix, int dxAdj, int dyAdj, int dzAdj) {
-        int iy = graphicObjects.start();
+    private int adj_dX_for_obj_intersect_CB9A(GraphicObject o, int dxAdj, int dyAdj, int dzAdj) {
+        GraphicObject obj = graphicObjects.playerBottom();
         for(int i=0; i<graphicObjects.size; i++) {
-            if(graphicObjects.i2o(iy).isNotIgnored()) {
-                //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if(graphicObjects.i2o(ix).intersectOnY(graphicObjects.i2o(iy), dyAdj) && graphicObjects.i2o(ix).intersectOnZ(graphicObjects.i2o(iy), dzAdj)) {
-                    while(graphicObjects.i2o(ix).intersectOnX(graphicObjects.i2o(iy), dxAdj)) {
-                        //IO.println("Intersects " + i + ":" + block.getU(iy));
-                        graphicObjects.setOobX(ix); // set X OOB
-                        setDestroyedFlags(ix, iy);
-                        if(graphicObjects.isMoveable(iy)) graphicObjects.setDX(iy, graphicObjects.getDX(ix)); //copy dX
+            if(obj.isNotIgnored()) {
+                if(o.intersectOnY(obj, dyAdj) && o.intersectOnZ(obj, dzAdj)) {
+                    while(o.intersectOnX(obj, dxAdj)) {
+                        o.setOobX(); // set X OOB
+                        setDestroyedFlags(o.ix, obj.ix);
+                        if(obj.isMoveable()) obj.setDX(o.getDX()); //copy dX
                         dxAdj = adj_d_for_out_of_bounds_CA89(dxAdj);
                         if (dxAdj == 0) return dxAdj;
                     }
                 }
-
             }
-            iy += 0x20;
+            if(i < graphicObjects.size - 1) obj = obj.next();
         }
         return dxAdj;
     }
@@ -2186,13 +2179,13 @@ public class Game implements Runnable {
         return a-1;
     }
 
-    private void add_dXYZ_C706(int ix) {
+    private void add_dXYZ_C706(GraphicObject o) {
         // skip this when entering room
-        if(graphicObjects.getX(ix)==0xFF || graphicObjects.getY(ix)==0xFF) return;
+        if(o.getX()==0xFF || o.getY()==0xFF) return;
 
-        graphicObjects.setX(ix, graphicObjects.getX(ix) + graphicObjects.getDX(ix));
-        graphicObjects.setY(ix, graphicObjects.getY(ix) + graphicObjects.getDY(ix));
-        graphicObjects.setZ(ix, graphicObjects.getZ(ix) + graphicObjects.getDZ(ix));
+        o.setX(o.getX() + o.getDX());
+        o.setY(o.getY() + o.getDY());
+        o.setZ(o.getZ() + o.getDZ());
     }
 
     private void calc_plyr_dXY_C9FB(int ix) {
@@ -2354,7 +2347,7 @@ public class Game implements Runnable {
     private void upd_30_31_158_159_B9A5(GraphicObject o) {
         o.setXYAdj(-12, 3);
 
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         move_guard_wizard_NSEW_B9CC(o.ix);
     }
 
@@ -2470,7 +2463,7 @@ public class Game implements Runnable {
             int dXY = xy < cycle ? 1 : -1; // flip direction
             if(isX) o.setDX(dXY); else o.setDY(dXY);
             o.setDZ(1);
-            dec_dZ_and_update_XYZ_C700(o.ix);
+            dec_dZ_and_update_XYZ_C700(o);
         }
         o.setWipeAndDraw();
     }
@@ -2481,7 +2474,7 @@ public class Game implements Runnable {
         o.setDY(0);
         // $C4B0 CALL $B3E9    ; // ignore audio
 
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         o.setWipeAndDraw();
     }
 
@@ -2495,7 +2488,7 @@ public class Game implements Runnable {
         boolean disableSpikeBallDrop = variables.getU(0x5BC0) != 0;
         if(disableSpikeBallDrop) return;
         if(o.isDropping()) {
-            dec_dZ_and_update_XYZ_C700(o.ix);
+            dec_dZ_and_update_XYZ_C700(o);
             if(o.isOobZ()) { //; Z OOB? (hit the floor?)
                 o.setRising();
                 variables.set(0x5BBF, 0); // ; flag no spiked balls dropping
@@ -2522,7 +2515,7 @@ public class Game implements Runnable {
     private void upd_80_to_83_C5C8(GraphicObject o) {
         o.setXYAdj(-12, -6);
 
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         if(!o.isMovingXY() || o.isOobXY()) {
             // @label=loc_C5DD
             int rnd3 = (params.getRnd().getSeed3() & 0x03) + 4;
@@ -2560,7 +2553,7 @@ public class Game implements Runnable {
 
     private void upd_84_C4C3(GraphicObject o) {
         o.setXYAdj(-16, -8);
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         if(o.isMoving()) {
             o.setDX(0);
             o.setDY(0);
@@ -2569,7 +2562,7 @@ public class Game implements Runnable {
 
     private void upd_85_C4B6(GraphicObject o) {
         o.setXYAdj(-16, -8);
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         // $C4C0 JP $C232      ;// ignore audio
     }
 
@@ -2579,7 +2572,7 @@ public class Game implements Runnable {
         o.setDZ(1); // ; pre-load dZ=1
         o.setDX(o.isEast() ? 2 : -2);
         // $B801 CALL $B45D     ; // ignore audio
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         loc_B82F(o.ix, true);
     }
 
@@ -2607,14 +2600,14 @@ public class Game implements Runnable {
         if(!o.isTriggered()) return;
         o.resetTriggered();
         o.setDZ(0); // ; dZ=0
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         // $B69C CALL $B451      ; } // ignore audio
     }
 
-    private void dec_dZ_and_update_XYZ_C700(int ix) {
-        graphicObjects.setDZ(ix, graphicObjects.getDZ(ix)-1); // ; dec dZ?
-        adj_for_out_of_bounds_CB45(ix);
-        add_dXYZ_C706(ix);
+    private void dec_dZ_and_update_XYZ_C700(GraphicObject o) {
+        o.setDZ(o.getDZ()-1);
+        adj_for_out_of_bounds_CB45(o);
+        add_dXYZ_C706(o);
     }
 
     private void upd_92_to_95_C337(GraphicObject o) {
@@ -2654,7 +2647,7 @@ public class Game implements Runnable {
     private void upd_96_to_102_C28B(GraphicObject o) {
         o.setXYAdj(-12, -4);
 
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         if(!o.justDropped() && !o.isMoving()) return;
 
         o.resetJustDropped();
@@ -2673,7 +2666,7 @@ public class Game implements Runnable {
         int depth = p.getD();
         p.setW(width+1);
         p.setD(depth+1);
-        boolean isNear = is_on_or_near_obj_C17A(p.ix, o.ix);
+        boolean isNear = is_on_or_near_obj_C17A(p, o);
         p.setW(width); //; restore width
         p.setD(depth); //; restore depth
         if(isNear) {
@@ -2690,7 +2683,7 @@ public class Game implements Runnable {
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
         }
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         if(o.isMoving()) {
             o.setDX(0);
             o.setDY(0);
@@ -2725,7 +2718,7 @@ public class Game implements Runnable {
                 return;
             } else o.setIgnore3D(); // ; ignore in 3D calcs
         }
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         // c$C232 CALL $B467    ; // ignore audio
         // set_wipe_and_draw_flags_C692(block, ix);
     }
@@ -2866,7 +2859,7 @@ public class Game implements Runnable {
         o.setDX(dx);
         o.next().setDX(dx); // ; and for bottom half
         set_guard_wizard_sprite_B76C(o.ix);
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         if(o.isOobX()) o.toggleEastWest(); // ; toggle direction
         o.next().setX(o.getX()); // ; copy to bottom half
         o.setBothDeadlyFlags();
@@ -2899,7 +2892,7 @@ public class Game implements Runnable {
         }
 
         o.setIgnore3D(); // ; ignore in 3D calcs
-        dec_dZ_and_update_XYZ_C700(o.ix); // apply dXYZ now
+        dec_dZ_and_update_XYZ_C700(o); // apply dXYZ now
         next_graphic_no_mod_4_B98C(o.ix);
 
         int z = o.getZ();
@@ -2936,7 +2929,7 @@ public class Game implements Runnable {
             dy = 1;
         }
         move_towards_plyr_B965(o.ix, dx, dy);
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         next_graphic_no_mod_4_B98C(o.ix);
 
         if(cauldronRoom & graphicObjects.playerBottom().isSparkles()) { // is player dead (sparkles)
@@ -2985,11 +2978,11 @@ public class Game implements Runnable {
         // $B879 CALL $B451     ; // ignore audio
         if(o.isDirUp()) {
             o.setDZ(3);
-            dec_dZ_and_update_XYZ_C700(o.ix);
+            dec_dZ_and_update_XYZ_C700(o);
             if(o.getZ() > variables.getU(0x5BBD))
                 o.setDirDown();
         } else {
-            dec_dZ_and_update_XYZ_C700(o.ix);
+            dec_dZ_and_update_XYZ_C700(o);
             if(o.isOobZ()) o.setDirUp();
             // $B88F CALL $B42E     ; // ignore audio
         }
@@ -3003,7 +2996,7 @@ public class Game implements Runnable {
         o.setDZ(1); // ; pre-load dZ=1
         if(o.isNorth()) o.setDY(2); else o.setDY(-2);
         // $B801 CALL $B45D     ; // ignore audio
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
         loc_B82F(o.ix, false);
     }
 
@@ -3015,7 +3008,7 @@ public class Game implements Runnable {
         int dz = o.getDZu();
 
         variables.set(0x5BC2, dz); // ; {tmp store
-        dec_dZ_and_update_XYZ_C700(o.ix);
+        dec_dZ_and_update_XYZ_C700(o);
 
         o.setDX(dx); // ; preserve old dX
         o.setDY(dy); // ; preserve old dY
