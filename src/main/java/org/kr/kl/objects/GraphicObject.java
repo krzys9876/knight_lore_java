@@ -168,6 +168,8 @@ public class GraphicObject {
     //public void setOobZ(int ix) { data.setBit(2, ix + 0x0C); }
 
     public boolean isJumping() { return parent.isJumping(ix); }
+    public void setJumping() { parent.setJumping(ix); }
+    public void resetJumping() { parent.resetJumping(ix); }
 
     // Flag D
 

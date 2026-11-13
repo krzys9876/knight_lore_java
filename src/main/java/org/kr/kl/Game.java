@@ -1764,7 +1764,7 @@ public class Game implements Runnable {
             // $C847 CALL $C89F    ; handle_left_right
             handle_left_right_C89F(o);
             // $C84A CALL $C948    ; handle_jump
-            handle_jump_C948(o.ix);
+            handle_jump_C948(o);
             // $C84D CALL $C969    ; handle_forward
             handle_forward_C969(o.ix);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
@@ -2373,16 +2373,12 @@ public class Game implements Runnable {
         o.next().setGrNo(o.getGrNo() + 0x10); // ; set sprite for top half
     }
 
-    private void handle_jump_C948(int ix) {
-        boolean enteringScreen = graphicObjects.enteringScreen(ix);
-        boolean jumping = graphicObjects.isJumping(ix);
+    private void handle_jump_C948(GraphicObject o) {
         boolean jump = DataBlock.isSetS(3, variables.getU(0x5BB5));
-        if(!jump || enteringScreen || jumping) return;
-        int dz = graphicObjects.getDZ(ix);
-        dz++;
-        if(dz < 0) return;
-        graphicObjects.setJumping(ix); // ; flag jumping
-        graphicObjects.setDZ(ix, 8);
+        if(!jump || o.enteringScreen() || o.isJumping()) return;
+        if(o.getDZ() < -1) return;
+        o.setJumping();
+        o.setDZ(8);
     }
 
     private void handle_forward_C969(int ix) {
