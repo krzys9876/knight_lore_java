@@ -50,6 +50,14 @@ public class GraphicObject {
     }
     public void toggleNextPrevSprite() { parent.toggleNextPrevSprite(ix); }
 
+    public void nextGrNoMod4() {
+        int grNo = getGrNo();
+        int grNo2Bits = grNo & 0x03;
+        int newGrNo = grNo & 0xFC | ((grNo2Bits + 1) & 0x03); // ; inc low 2 bits
+        setGrNo(newGrNo);
+    }
+
+
     //; abs(objX+newdX-thisX)-(objW+thisW), o1 - obj, o2 - this
     public boolean intersectOnX(GraphicObject other, int dxAdj) {
         return Math.abs(getX() + dxAdj - other.getX()) - (getW() + other.getW()) < 0;

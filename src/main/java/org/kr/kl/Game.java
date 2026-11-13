@@ -2857,7 +2857,7 @@ public class Game implements Runnable {
 
         o.setIgnore3D(); // ; ignore in 3D calcs
         dec_dZ_and_update_XYZ_C700(o); // apply dXYZ now
-        next_graphic_no_mod_4_B98C(o.ix);
+        o.nextGrNoMod4();
 
         int z = o.getZ();
         o.setDZ(2); // ; dZ=2 - NOTE: will be applied next frame as C700 has already been called
@@ -2894,7 +2894,7 @@ public class Game implements Runnable {
         }
         move_towards_plyr_B965(o.ix, dx, dy);
         dec_dZ_and_update_XYZ_C700(o);
-        next_graphic_no_mod_4_B98C(o.ix);
+        o.nextGrNoMod4();
 
         if(cauldronRoom & graphicObjects.playerBottom().isSparkles()) { // is player dead (sparkles)
             upd_111_B95E(o); // ; final sparkles in cauldron
@@ -2913,13 +2913,6 @@ public class Game implements Runnable {
         int y = graphicObjects.getY(ix);
         if(y >= playerY) dy = -dy; // player S
         graphicObjects.setDY(ix, dy);
-    }
-
-    private void next_graphic_no_mod_4_B98C(int ix) {
-        int grNo = graphicObjects.getGrNo(ix);
-        int grNo2Bits = grNo & 0x03;
-        int newGrNo = grNo & 0xFC | ((grNo2Bits + 1) & 0x03); // ; inc low 2 bits
-        graphicObjects.setGrNo(ix, newGrNo);
     }
 
     private void upd_168_to_175_B923(GraphicObject o) {
