@@ -2495,7 +2495,7 @@ public class Game implements Runnable {
             int rnd2 = (params.getRnd().getSeed2() & 0x03) + 4;
             int dy = get_delta_from_tbl_C645(rnd2);
             o.setDY(dy);
-            calc_ghost_sprite_C603(o.ix);
+            calc_ghost_sprite_C603(o);
             // $C5FA CALL $B467    ; // ignore audio
         }
         toggle_next_prev_sprite_B985(o.ix);
@@ -2503,17 +2503,17 @@ public class Game implements Runnable {
         o.setWipeAndDraw();
     }
 
-    private void calc_ghost_sprite_C603(int ix) {
-        int dx = graphicObjects.getDX(ix);
-        int dy = graphicObjects.getDY(ix);
+    private void calc_ghost_sprite_C603(GraphicObject o) {
+        int dx = o.getDX();
+        int dy = o.getDY();
         if(Math.abs(dy) < Math.abs(dx)) {
-            if(dx > 0) graphicObjects.resetBitGrNo(ix, 1); // ; sprite=80/81
-            else graphicObjects.setBitGrNo(ix, 1); // ; sprite=80/81
-            graphicObjects.setHFlip(ix); // set hflip
+            if(dx > 0) o.resetBitGrNo(1); // ; sprite=80/81
+            else o.setBitGrNo(1); // ; sprite=80/81
+            o.setHFlip();
         } else {
-            if(dy > 0) graphicObjects.setBitGrNo(ix, 1);
-            else graphicObjects.resetBitGrNo(ix, 1);
-            graphicObjects.resetHFlip(ix); // reset hflip
+            if(dy > 0) o.setBitGrNo(1);
+            else o.resetBitGrNo(1);
+            o.resetHFlip();
         }
     }
 
