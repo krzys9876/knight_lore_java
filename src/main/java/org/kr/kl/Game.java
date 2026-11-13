@@ -2340,7 +2340,7 @@ public class Game implements Runnable {
         o.next().setDY(dy); // ; next obj dY
         o.next().setX(o.getX()); // ; copy to next obj X
         o.next().setY(o.getY()); // ; copy to next obj Y
-        set_guard_wizard_sprite_B76C(o.ix);
+        set_guard_wizard_sprite_B76C(o);
         o.setBothDeadlyFlags();
         //o.setWipeAndDraw();
     }
@@ -2822,7 +2822,7 @@ public class Game implements Runnable {
         int dx = o.isEast() ? 2 : -2;
         o.setDX(dx);
         o.next().setDX(dx); // ; and for bottom half
-        set_guard_wizard_sprite_B76C(o.ix);
+        set_guard_wizard_sprite_B76C(o);
         dec_dZ_and_update_XYZ_C700(o);
         if(o.isOobX()) o.toggleEastWest(); // ; toggle direction
         o.next().setX(o.getX()); // ; copy to bottom half
@@ -2830,20 +2830,20 @@ public class Game implements Runnable {
         o.setWipeAndDraw();
     }
 
-    private void set_guard_wizard_sprite_B76C(int ix) {
-        int dx = graphicObjects.getDX(ix);
-        int dy = graphicObjects.getDY(ix);
+    private void set_guard_wizard_sprite_B76C(GraphicObject o) {
+        int dx = o.getDX();
+        int dy = o.getDY();
         if(dx ==0 && dy == 0) return;
-        int dxU = graphicObjects.getDXu(ix);
-        int dyU = graphicObjects.getDYu(ix);
+        int dxU = o.getDXu();
+        int dyU = o.getDYu();
         if(dxU > dyU) {
-            if(dx >= 0) graphicObjects.setBitGrNo(ix, 0); // ; sprite 31/159
-            else graphicObjects.resetBitGrNo(ix, 0); // ; sprite 31/159
-            graphicObjects.resetHFlip(ix); // ; clear hflip
+            if(dx >= 0) o.setBitGrNo(0); // ; sprite 31/159
+            else o.resetBitGrNo(0); // ; sprite 31/159
+            o.resetHFlip();
         } else {
-            if(dy >=0) graphicObjects.resetBitGrNo(ix, 0); // ; sprite 31/159
-            else graphicObjects.setBitGrNo(ix, 0); // ; sprite 31/159
-            graphicObjects.setHFlip(ix); // ; set hflip
+            if(dy >=0) o.resetBitGrNo(0); // ; sprite 31/159
+            else o.setBitGrNo(0); // ; sprite 31/159
+            o.setHFlip();
         }
     }
 
