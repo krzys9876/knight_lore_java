@@ -773,13 +773,9 @@ public class Game implements Runnable {
         lose_life_D12A();
     }
 
-    private void initPlayerData() {
+    private void lose_life_D12A() {
         graphicObjects.playerBottom().copyFrom(plyr_spr_1_scratchpad_D161);
         graphicObjects.playerTop().copyFrom(plyr_spr_2_scratchpad_D181);
-    }
-
-    private void lose_life_D12A() {
-        initPlayerData();
         variables.set(0x5BB1, 0);
         int livesLeft = variables.getU(0x5BBA);
         if(livesLeft < 1) {
@@ -2061,18 +2057,13 @@ public class Game implements Runnable {
             exitingScreen = true; //TODO: rethink if this is the correct way to flag this
             graphicObjects.setScreen(ix, newScreen);
             graphicObjects.initEnterCounter(ix);
-            copyPlayerData();
+            plyr_spr_1_scratchpad_D161.copyFrom(graphicObjects.playerBottom());
+            plyr_spr_2_scratchpad_D181.copyFrom(graphicObjects.playerTop());
             plyr_spr_1_scratchpad_D161.setTemp10(plyr_spr_1_scratchpad_D161.getGrNo());
             plyr_spr_2_scratchpad_D181.setTemp10(plyr_spr_2_scratchpad_D181.getGrNo());
             plyr_spr_1_scratchpad_D161.setGrNo(0x78); // sparkly transform #1
             plyr_spr_2_scratchpad_D181.setGrNo(0x78);
         }
-    }
-
-    private void copyPlayerData() {
-        // This is the opposite of the initPlayerData
-        plyr_spr_1_scratchpad_D161.copyFrom(graphicObjects.playerBottom());
-        plyr_spr_2_scratchpad_D181.copyFrom(graphicObjects.playerTop());
     }
 
     private int screenEastWest(int ix, int oldRoomSizeX, boolean east) {
