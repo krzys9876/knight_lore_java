@@ -1483,9 +1483,9 @@ public class Game implements Runnable {
             case 0x0A: upd_10_C4E8(o); break;
             case 0x0B: upd_11_C4ED(o); break;
             case 0x0C, 0x0D, 0x0E, 0x0F: upd_12_to_15_C4F2(o); break;
-            case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(ix); break;
-            case 0x16: upd_22_B7A3(ix); break;
-            case 0x17: upd_23_B7E7(ix); break;
+            case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D: upd_16_to_21_24_to_29_C823(o); break;
+            case 0x16: upd_22_B7A3(o); break;
+            case 0x17: upd_23_B7E7(o); break;
             case 0x1E, 0x1F, 0x9E, 0x9F: upd_30_31_158_159_B9A5(ix); break;
             case 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F: upd_32_to_47_CDDA(ix); break;
             case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(ix); break;
@@ -1766,10 +1766,10 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_16_to_21_24_to_29_C823(int ix) {
+    private void upd_16_to_21_24_to_29_C823(GraphicObject o) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
-        graphicObjects.setXYAdj(ix, -12, -6);
-        upd_player_bottom_C82B(ix);
+        o.setXYAdj(-12, -6);
+        upd_player_bottom_C82B(o.ix);
     }
 
     private void upd_player_bottom_C82B(int ix) {
@@ -2507,17 +2507,17 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_22_B7A3(int ix) {
-        set_both_deadly_flags_B85C(ix);
+    private void upd_22_B7A3(GraphicObject o) {
+        o.setBothDeadlyFlags();
         //c$C4FC LD HL,$F9F4   ; -7, -12
         // $C4FF JR $C4E0      ;
-        graphicObjects.setXYAdj(ix, -12, -7);
+        o.setXYAdj(-12, -7);
     }
 
-    private void upd_23_B7E7(int ix) {
-        set_both_deadly_flags_B85C(ix);
+    private void upd_23_B7E7(GraphicObject o) {
+        o.setBothDeadlyFlags();
         // c$C4E3 LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXYAdj(ix, -16, -8);
+        o.setXYAdj(-16, -8);
     }
 
     private void upd_30_31_158_159_B9A5(int ix) {
@@ -2545,7 +2545,7 @@ public class Game implements Runnable {
         graphicObjects.setX(ix + 0x20, graphicObjects.getX(ix)); // ; copy to next obj X
         graphicObjects.setY(ix + 0x20, graphicObjects.getY(ix)); // ; copy to next obj Y
         set_guard_wizard_sprite_B76C(ix);
-        set_both_deadly_flags_B85C(ix);
+        graphicObjects.i2o(ix).setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -2661,7 +2661,7 @@ public class Game implements Runnable {
     }
 
     private void upd_63_B7A9(int ix) {
-        set_both_deadly_flags_B85C(ix);
+        graphicObjects.i2o(ix).setBothDeadlyFlags();
         // c$C4E3 LD HL,$F8F0   ; -8, -16
         graphicObjects.setXYAdj(ix, -16, -8);
 
@@ -2716,7 +2716,7 @@ public class Game implements Runnable {
             // $C5FA CALL $B467    ; // ignore audio
         }
         toggle_next_prev_sprite_B985(ix);
-        set_both_deadly_flags_B85C(ix);
+        graphicObjects.i2o(ix).setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -2774,7 +2774,7 @@ public class Game implements Runnable {
         else if(!isX && graphicObjects.isOobY(ix)) graphicObjects.toggleNorthSouth(ix);
 
         toggle_next_prev_sprite_B985(ix);
-        set_both_deadly_flags_B85C(ix);
+        graphicObjects.i2o(ix).setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3095,7 +3095,7 @@ public class Game implements Runnable {
         boolean xOob =  graphicObjects.isOobX(ix);
         if(xOob) graphicObjects.toggleEastWest(ix); // ; toggle direction
         graphicObjects.setX(ix + 0x20, graphicObjects.getX(ix)); // ; copy to bottom half
-        set_both_deadly_flags_B85C(ix);
+        graphicObjects.i2o(ix).setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);*/
     }
 
@@ -3239,7 +3239,7 @@ public class Game implements Runnable {
             if(zOob) graphicObjects.setDirUp(ix);
             // $B88F CALL $B42E     ; // ignore audio
         }
-        set_both_deadly_flags_B85C(ix);
+        graphicObjects.i2o(ix).setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3294,7 +3294,7 @@ public class Game implements Runnable {
             }
         }
         toggle_next_prev_sprite_B985(ix);
-        set_both_deadly_flags_B85C(ix);
+        graphicObjects.i2o(ix).setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3592,10 +3592,6 @@ public class Game implements Runnable {
         graphicObjects.setPixelY(ix, y);
         // $D6EC CP $C0         ; bottom line of screen?
         return y < 0xC0; // 192
-    }
-
-    private void set_both_deadly_flags_B85C(int ix) {
-        graphicObjects.setBothDeadlyFlags(ix);
     }
 
     private void printVideoMemory() {

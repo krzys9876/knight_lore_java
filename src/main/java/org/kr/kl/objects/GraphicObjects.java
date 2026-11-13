@@ -69,7 +69,7 @@ public class GraphicObjects {
     private final GraphicObject[] objects;
 
     public GraphicObject o(int i) { return objects[i]; }
-    public int a2i(int ix) { return (ix - start()) / 0x20; }
+    public GraphicObject i2o(int ix) { return objects[(ix - start()) / 0x20]; }
     public GraphicObject playerBottom() { return o(0); }
     public GraphicObject playerTop() { return o(1); }
     public final int specialObjStartIx = 3;
