@@ -1960,12 +1960,12 @@ public class Game implements Runnable {
         int dzAdj = o.getDZ(); // H
         if(dzAdj != 0) {
             dzAdj = adj_dZ_for_out_of_bounds_CA5A(o);
-            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(o, 0, 0, dzAdj);
+            if(dzAdj!=0) dzAdj = adj_dZ_for_obj_intersect_CC38(o, dzAdj);
         }
         int dxAdj = o.getDX(); // C
         if(dxAdj != 0) {
             dxAdj = adj_dX_for_out_of_bounds_CCDD(o);
-            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(o, dxAdj, 0, dzAdj);
+            if(dxAdj!=0) dxAdj = adj_dX_for_obj_intersect_CB9A(o, dxAdj, dzAdj);
         }
         int dyAdj = o.getDY(); // L
         if(dyAdj != 0) {
@@ -2042,11 +2042,11 @@ public class Game implements Runnable {
         if(graphicObjects.getDeadlyIfPlayerHitsObject(playerIx)) graphicObjects.setDead(objectIx); // bit 5->6
     }
 
-    private int adj_dZ_for_obj_intersect_CC38(GraphicObject o, int dxAdj, int dyAdj, int dzAdj) {
+    private int adj_dZ_for_obj_intersect_CC38(GraphicObject o, int dzAdj) {
         GraphicObject obj = graphicObjects.playerBottom();
         for(int i=0; i<graphicObjects.size; i++) {
             if(obj.isNotIgnored()) {
-                if (o.intersectOnX(obj, dxAdj) && o.intersectOnY(obj, dyAdj)) {
+                if (o.intersectOnX(obj, 0) && o.intersectOnY(obj, 0)) {
                     while (o.intersectOnZ(obj, dzAdj)) {
                         o.setOobZ();
                         setDestroyedFlags(o.ix, obj.ix);
@@ -2065,11 +2065,11 @@ public class Game implements Runnable {
         return dzAdj;
     }
 
-    private int adj_dX_for_obj_intersect_CB9A(GraphicObject o, int dxAdj, int dyAdj, int dzAdj) {
+    private int adj_dX_for_obj_intersect_CB9A(GraphicObject o, int dxAdj, int dzAdj) {
         GraphicObject obj = graphicObjects.playerBottom();
         for(int i=0; i<graphicObjects.size; i++) {
             if(obj.isNotIgnored()) {
-                if(o.intersectOnY(obj, dyAdj) && o.intersectOnZ(obj, dzAdj)) {
+                if(o.intersectOnY(obj, 0) && o.intersectOnZ(obj, dzAdj)) {
                     while(o.intersectOnX(obj, dxAdj)) {
                         o.setOobX(); // set X OOB
                         setDestroyedFlags(o.ix, obj.ix);
