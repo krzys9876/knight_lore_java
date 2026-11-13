@@ -1766,7 +1766,7 @@ public class Game implements Runnable {
             // $C84A CALL $C948    ; handle_jump
             handle_jump_C948(o);
             // $C84D CALL $C969    ; handle_forward
-            handle_forward_C969(o.ix);
+            handle_forward_C969(o);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
             boolean oob = chk_plyr_OOB_C87A(o);
             // $C853 JR NC,$C86D   ; plyr_OOB
@@ -2381,25 +2381,21 @@ public class Game implements Runnable {
         o.setDZ(8);
     }
 
-    private void handle_forward_C969(int ix) {
-        boolean enteringScreen = graphicObjects.enteringScreen(ix);
-        boolean jumping = graphicObjects.isJumping(ix);
+    private void handle_forward_C969(GraphicObject o) {
         boolean forward = DataBlock.isSetS(2, variables.getU(0x5BB5));
         // ignore audio: @label=loc_C97A
-        if(!enteringScreen && !jumping & !forward) {
+        if(!o.enteringScreen() && !o.isJumping() & !forward) {
             //@label=loc_C994
-            int sprite = graphicObjects.getGrNo(ix) & 0x07;
+            int sprite = o.getGrNo() & 0x07;
             if(sprite == 2 || sprite == 4) return;
         }
-        animate_human_legs_C97F(ix);
+        animate_human_legs_C97F(o);
     }
 
-    private void animate_human_legs_C97F(int ix) {
-        // @label=animate_human_legs
-        int sprite = graphicObjects.getGrNo(ix);
+    private void animate_human_legs_C97F(GraphicObject o) {
+        int sprite = o.getGrNo();
         int nextSprite = ((sprite+1) & 7) % 6; // ; wrap?
-        // @label=loc_C98B
-        graphicObjects.setGrNo(ix, (sprite & 0xF8) | nextSprite); //  ; update sprite - NOTE we update only bottom half
+        o.setGrNo((sprite & 0xF8) | nextSprite); //  ; update sprite - NOTE we update only bottom half
     }
 
     private void init_death_sparkles_BF21(GraphicObject o) {
@@ -2929,7 +2925,7 @@ public class Game implements Runnable {
             o.setHFlip();
         }
 
-        animate_human_legs_C97F(o.ix);
+        animate_human_legs_C97F(o);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
