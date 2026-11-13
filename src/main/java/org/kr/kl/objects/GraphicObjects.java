@@ -73,6 +73,7 @@ public class GraphicObjects {
     public GraphicObject playerBottom() { return o(0); }
     public GraphicObject playerTop() { return o(1); }
     public final int specialObjStartIx = 2;
+    public final int specialObjEndIxExcl = 4;
     public GraphicObject firstSpecObj() { return o(specialObjStartIx); }
     public GraphicObject next(GraphicObject o) {
         int nextIndex = (o.ix - start() + 0x20) / 0x20;

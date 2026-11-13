@@ -20,6 +20,7 @@ public class GraphicObject {
     public GraphicObject prev() { return parent.prev(this);}
 
     public void reset() { parent.reset(); }
+    public void resetObject() { parent.resetObject(ix); }
 
     public void copyFrom(DataBlock other, int otherIx, int bytes) {
         for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.getU(otherIx + i));

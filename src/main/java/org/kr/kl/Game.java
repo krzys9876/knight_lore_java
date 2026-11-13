@@ -3179,26 +3179,27 @@ public class Game implements Runnable {
         for(int i=graphicObjects.start() + 2*0x20; i<graphicObjects.start() + 4*0x20; i+=0x20) graphicObjects.resetObject(i);
         for(int spi = 0; spi < specialObjects.size;  spi++) {
             int specialObjGrNo = specialObjects.getGraphicNo(spi);
-            int ix = 0x5C48;
+            int i = graphicObjects.specialObjStartIx;
             boolean saved = false;
-            while(ix < 0x5C88 && !saved) {
-                int screenObjGrNo = graphicObjects.getGrNo(ix);
+            while(i < graphicObjects.specialObjEndIxExcl && !saved) {
+                GraphicObject o = graphicObjects.o(i);
+                int screenObjGrNo = o.getGrNo();
                 if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == specialObjects.getScreen(spi)) {
-                    graphicObjects.resetObject(ix);
-                    graphicObjects.setGrNo(ix, specialObjGrNo);
-                    graphicObjects.setX(ix, specialObjects.getCurrentX(spi));
-                    graphicObjects.setY(ix, specialObjects.getCurrentY(spi));
-                    graphicObjects.setZ(ix, specialObjects.getCurrentZ(spi));
-                    graphicObjects.setW(ix, 5);
-                    graphicObjects.setD(ix, 5);
-                    graphicObjects.setH(ix, 0x0C);
-                    graphicObjects.setFlags7(ix, 0x14);
-                    graphicObjects.setScreen(ix, currLocId);
-                    graphicObjects.setTemp10(ix, specialObjects.getAddress(spi) & 0xFF);
-                    graphicObjects.setTemp11(ix, (specialObjects.getAddress(spi) & 0xFF00) >> 8);
+                    o.resetObject();
+                    o.setGrNo(specialObjGrNo);
+                    o.setX(specialObjects.getCurrentX(spi));
+                    o.setY(specialObjects.getCurrentY(spi));
+                    o.setZ(specialObjects.getCurrentZ(spi));
+                    o.setW(5);
+                    o.setD(5);
+                    o.setH(0x0C);
+                    o.setFlags7(0x14);
+                    o.setScreen(currLocId);
+                    o.setTemp10(specialObjects.getAddress(spi) & 0xFF);
+                    o.setTemp11((specialObjects.getAddress(spi) & 0xFF00) >> 8);
                     saved = true;
                 }
-                ix += 0x20;
+                i++;
             }
         }
     }
