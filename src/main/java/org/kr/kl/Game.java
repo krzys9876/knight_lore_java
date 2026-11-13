@@ -1686,7 +1686,7 @@ public class Game implements Runnable {
             o.setDeadlyIfObjectHitsPlayer();
             o.setIgnore3D(); // ; ignore object in 3D calculations
             o.setDZ(1); // ; dZ=1
-            move_towards_plyr_B965(o.ix, 4, 4);
+            move_towards_plyr_B965(o, 4, 4);
         }
         variables.set(0x5BC5, o.getZ());
         dec_dZ_and_update_XYZ_C700(o);
@@ -2892,7 +2892,7 @@ public class Game implements Runnable {
             dx = 1;
             dy = 1;
         }
-        move_towards_plyr_B965(o.ix, dx, dy);
+        move_towards_plyr_B965(o, dx, dy);
         dec_dZ_and_update_XYZ_C700(o);
         o.nextGrNoMod4();
 
@@ -2903,16 +2903,13 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692();
     }
 
-    private void move_towards_plyr_B965(int ix, int dx, int dy) {
-        int playerX = graphicObjects.getX(graphicObjects.start());
-        int x = graphicObjects.getX(ix);
-        if(x >= playerX) dx = -dx; // player W
-        graphicObjects.setDX(ix, dx);
+    private void move_towards_plyr_B965(GraphicObject o, int dx, int dy) {
+        GraphicObject player = graphicObjects.playerBottom();
+        if(o.getX() >= player.getX()) dx = -dx; // player W
+        o.setDX(dx);
 
-        int playerY = graphicObjects.getY(graphicObjects.start());
-        int y = graphicObjects.getY(ix);
-        if(y >= playerY) dy = -dy; // player S
-        graphicObjects.setDY(ix, dy);
+        if(o.getY() >= player.getY()) dy = -dy; // player S
+        o.setDY(dy);
     }
 
     private void upd_168_to_175_B923(GraphicObject o) {
@@ -3056,13 +3053,8 @@ public class Game implements Runnable {
     private void retrieve_screen_D3C6() {
         int bc = location_tbl_6251.endExcl()-1; // location table end
         int hl = location_tbl_6251.start; // location table start
-        // $D12D LD DE,$5C08   ;
-        // $D130 PUSH DE       ;
-        // $D131 POP IX        ;
-        int ix = graphicObjects.start(); // set in lose_life_D12A
-
         boolean found = false;
-        int currLocId = graphicObjects.getScreen(ix);
+        int currLocId = graphicObjects.playerBottom().getScreen();
 
         while(hl < bc && !found) {
             int tableLocId = location_tbl_6251.getU(hl);
