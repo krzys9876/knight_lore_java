@@ -25,8 +25,10 @@ public class GraphicObject {
         for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.getU(otherIx + i));
     }
 
-    public void copyFrom(GraphicObject other) {
-        for(int i = 0; i < 0x20; i++) parent.data.set(ix + i, other.parent.data.getU(other.parent.start() + i));
+    public void copyFrom(GraphicObject other) { copyFrom(other, 0x20);  }
+
+    public void copyFrom(GraphicObject other, int bytes) {
+        for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.parent.data.getU(other.parent.start() + i));
     }
 
 

@@ -1078,11 +1078,9 @@ public class Game implements Runnable {
         // NOTE: first special object is cauldron bubbles
         GraphicObject secondSpecObj = graphicObjects.firstSpecObj().next(); // ; special_objs_here[1]
         if(secondSpecObj.getGrNo() != 0) return;
-
         if(variables.getU(0x5BC3) != 0) return;
-        // 18 bytes to copy
-        graphicObjects.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, secondSpecObj.ix, 0x12);
-        // c$C4D8 LD HL,$FCF4   ; -4, -12
+
+        secondSpecObj.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, 0x12); // 18 bytes to copy
         secondSpecObj.setXYAdj(-12, -4);
     }
 
