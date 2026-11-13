@@ -346,7 +346,7 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             int overrideRoomId=-1;
-            //int overrideRoomId = 0x87;
+            //int overrideRoomId = 0x2D;
             int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
@@ -2624,17 +2624,19 @@ public class Game implements Runnable {
     private void loc_B6BF(GraphicObject o, boolean isX) {
         o.setXYAdj(-16, -8);
 
-        int c = o.ix & 0xFF; // $B6CD LD A,C        ;
-        c = (c >> 1) & 0x10;
-        c = (c + params.getRnd().getSeed2()) & 0xFF;
-        if((c & 0b10000) > 0) c = c ^ 0xFF;
-        c = c & 0x0F;
+        // A random number derived from object index (only starting point is random)
+        int blockSeed = ((o.ix >> 1) & 0x10);
+        int cycle = blockSeed + params.getRnd().getSeed2(); // seed 2 increases every tick
+        if((cycle & 0x10) > 0) cycle ^= 0x0F; // bit 4 flips C's direction: 0->15 then 15->0
+        cycle &= 0x0F; // ensure 0-15, which is the size of a block - this limits block movement
 
         int xy = isX ? o.getX() : o.getY();
         xy = (xy + 0x08) & 0x0F;
-        if(c != xy) {
-            int a = xy < c ? 1 : -1;
-            if(isX) o.setDX(a); else o.setDY(a);
+        // These two numbers always differ except for points for cycle = 0 or 14 (and initial random number)
+        // When they are equal, the block stops for one cycle and then moves the opposite direction
+        if(cycle != xy) {
+            int dXY = xy < cycle ? 1 : -1; // flip direction
+            if(isX) o.setDX(dXY); else o.setDY(dXY);
             o.setDZ(1);
             dec_dZ_and_update_XYZ_C700(o.ix);
         }
