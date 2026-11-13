@@ -1522,8 +1522,8 @@ public class Game implements Runnable {
             case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(o); break;
             case 0xB0, 0xB1: upd_176_177_B83F(o); break;
             case 0xB2, 0xB3: upd_178_179_B865(o); break;
-            case 0xB4, 0xB5: upd_180_181_B80F(ix); break;
-            case 0xB6, 0xB7: upd_182_183_B5FF(ix); break;
+            case 0xB4, 0xB5: upd_180_181_B80F(o); break;
+            case 0xB6, 0xB7: upd_182_183_B5FF(o); break;
             case 0xB9, 0xBB: upd_185_187_BF37(o); break;
 
             default: IO.println("Not updated: %02x (%d)".formatted(o.getGrNo(),o.getGrNo())); break;
@@ -3178,58 +3178,53 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_180_181_B80F(int ix) {
-        // c$C4F2 LD HL,$FCF8   ; -4, -8
-        graphicObjects.setXYAdj(ix, -8, -4);
+    private void upd_180_181_B80F(GraphicObject o) {
+        o.setXYAdj(-8, -4);
 
-        graphicObjects.setDZ(ix, 1); // ; pre-load dZ=1
-        boolean movingNorth = graphicObjects.isNorth(ix);
-        if(movingNorth) graphicObjects.setDY(ix, 2); else graphicObjects.setDY(ix, -2);
+        o.setDZ(1); // ; pre-load dZ=1
+        if(o.isNorth()) o.setDY(2); else o.setDY(-2);
         // $B801 CALL $B45D     ; // ignore audio
-        dec_dZ_and_update_XYZ_C700(ix);
-        loc_B82F(ix, false);
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        loc_B82F(o.ix, false);
     }
 
-    private void upd_182_183_B5FF(int ix) {
-        // c$C4F2 LD HL,$FCF8   ; -4, -8
-        graphicObjects.setXYAdj(ix, -8, -4);
+    private void upd_182_183_B5FF(GraphicObject o) {
+        o.setXYAdj(-8, -4);
 
-        int dx = graphicObjects.getDXu(ix);
-        int dy = graphicObjects.getDYu(ix);
-        int dz = graphicObjects.getDZu(ix);
+        int dx = o.getDXu();
+        int dy = o.getDYu();
+        int dz = o.getDZu();
 
         variables.set(0x5BC2, dz); // ; {tmp store
-        dec_dZ_and_update_XYZ_C700(ix);
+        dec_dZ_and_update_XYZ_C700(o.ix);
 
-        graphicObjects.setDX(ix, dx); // ; preserve old dX
-        graphicObjects.setDY(ix, dy); // ; preserve old dY
-        int playerGrNo = graphicObjects.getGrNo(graphicObjects.start());
-        boolean isWulf = ((playerGrNo - 0x10) & 0xFF) >= 0x20;
-        int screen = graphicObjects.getScreen(graphicObjects.start());
+        o.setDX(dx); // ; preserve old dX
+        o.setDY(dy); // ; preserve old dY
+        boolean isWulf = graphicObjects.playerBottom().isWulf();
+        int screen = graphicObjects.playerBottom().getScreen();
         boolean screenFlg = (screen & 0x01) == 0;
         int newDz = 4;
         if(!screenFlg) newDz += params.getRnd().getSeed3() & 0x03;
-        boolean zOob = graphicObjects.isOobZ(ix);
-        if(zOob) {
-            graphicObjects.setDZ(ix, newDz);
+        if(o.isOobZ()) {
+            o.setDZ(newDz);
             // $B64C CALL $B42E     ; } // ignore audio
             params.getRnd().updateSeed3();
             if((params.getRnd().getSeed3() & 0x01) == 1) {
-                int playerY = graphicObjects.getY(graphicObjects.start());
-                int newdY = graphicObjects.getY(ix) > playerY ? 2 : -2;
+                int playerY = graphicObjects.playerBottom().getY();
+                int newdY = o.getY() > playerY ? 2 : -2;
                 if(isWulf) newdY = -newdY; // ; towards player
-                graphicObjects.setDY(ix, newdY);
-                graphicObjects.setDX(ix, 0); // ; new dX=0
+                o.setDY(newdY);
+                o.setDX(0);
             } else {
-                int playerX = graphicObjects.getX(graphicObjects.start());
-                int newdX = graphicObjects.getX(ix) > playerX ? 2 : -2;
+                int playerX = graphicObjects.playerBottom().getX();
+                int newdX = o.getX() > playerX ? 2 : -2;
                 if(isWulf) newdX = -newdX; // ; towards player
-                graphicObjects.setDX(ix, newdX);
-                graphicObjects.setDY(ix, 0); // ; new dY=0
+                o.setDX(newdX);
+                o.setDY(0);
             }
         }
-        toggle_next_prev_sprite_B985(ix);
-        graphicObjects.i2o(ix).setBothDeadlyFlags();
+        toggle_next_prev_sprite_B985(o.ix);
+        o.setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 

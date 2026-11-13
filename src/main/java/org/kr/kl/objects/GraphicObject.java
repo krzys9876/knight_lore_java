@@ -19,6 +19,7 @@ public class GraphicObject {
     public void toggleBitGrNo(int bit) { parent.toggleBitGrNo(ix, bit); }
     public boolean isBitSetGrNo(int bit) { return parent.isBitSetGrNo(ix, bit); }
     public boolean isSparkles() { return ((getGrNo() - 0x10) & 0xFF) >= 0x40; }
+    public boolean isWulf() { return ((getGrNo() - 0x10) & 0xFF) >= 0x20; }
 
     public int getX() { return parent.getX(ix); }
     public int getY() { return parent.getY(ix); }
