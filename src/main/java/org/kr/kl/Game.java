@@ -966,11 +966,11 @@ public class Game implements Runnable {
                 debugPanel1.append(String.format("Rooms visited: %d", calcScreensVisited()));
                 debugPanel1.append(String.format("Max days: %d", params.getMaxDays()));
                 debugPanel1.append("Special objects (name / location):");
-                for(int ix = 0; ix < specialObjects.size; ix++) {
-                    int grNo = specialObjects.getGraphicNo(ix);
+                for(int i = 0; i < specialObjects.size; i++) {
+                    int grNo = specialObjects.getGraphicNo(i);
                     if(grNo!=0) {
                         String name = DataBlock.GRAPHIC_NAMES[grNo];
-                        int location = specialObjects.getScreen(ix);
+                        int location = specialObjects.getScreen(i);
                         debugPanel1.append(String.format("%s / %02X", name, location));
                     }
                 }
@@ -1003,19 +1003,8 @@ public class Game implements Runnable {
         clear_scrn_buffer_D567(); // For testing
         calc_display_order_and_render_CEBB();
 
-        //print_sprite_D718(graphic_objs_tbl_5C08, ix);
-        // This is all just to verify if objects render at all
-        //renderAllSprites(graphic_objs_tbl_5C08, 0, 2);
-        //renderAllSprites(other_objs_here_5C88, 2,36);
-        //renderAllSprites(graphic_objs_tbl_5C08, 0,2 + 2 + 36);
-        //debugTable("Other objects (after render):", other_objs_here_5C88.start, other_objs_here_5C88.getCopy());
-
-        //@label=delay_loop
-        //NOTE: we ignore delay loop (calculated), instead we will schedule game loop every game tick
-
         //@label=no_delay
         //TODO: implement checking if first render ($B042 AND A         ; rendered before?)
-
 
         variables.set(0x5BB7, 0);
         int a = variables.getU(0x5BAD); // screen attribute
@@ -1024,16 +1013,12 @@ public class Game implements Runnable {
             //shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
         }
 
-        //TODO: implement
-        //$B04F CALL $BF4E    ; {inventory
         display_objects_BF4E();
 
-        // $B052 CALL $D2EF    ;
         //@label=colour_panel
         fill_window_C515(mainMemory, 0x5AB6, 1, 3, 0);
         fill_window_C515(mainMemory, 0x5ABD, 1, 3, 0);
         fill_window_C515(mainMemory, 0x5A97, 6, 4, 0x42);
-        // $B055 CALL $D30D    ;
         // @label=colour_sun_moon
         boolean isSun = ((sun_moon_scratchpad_C44D.getGrNo()) & 1) == 0;
         int attr = isSun ? 0x46 : 0x47;
