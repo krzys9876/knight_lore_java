@@ -29,6 +29,23 @@ public class GraphicObject {
         return grNo;
     }
 
+    //; abs(objX+newdX-thisX)-(objW+thisW), o1 - obj, o2 - this
+    public boolean intersectOnX(GraphicObject other, int dxAdj) {
+        return Math.abs(getX() + dxAdj - other.getX()) - (getW() + other.getW()) < 0;
+    }
+
+    //; (objY+l-thisY)-(objD+thisD) - note: there is an error in comment in original source
+    public boolean intersectOnY(GraphicObject other, int dyAdj) {
+        return Math.abs(getY() + dyAdj - other.getY()) - (getD() + other.getD()) < 0;
+    }
+
+    //; (objZ+H-thisZ)-(objH or thisH)
+    public boolean intersectOnZ(GraphicObject other, int dzAdj) {
+        int check = getZ() + dzAdj - other.getZ();
+        int d = check >= 0 ? other.getH() : getH();
+        return Math.abs(check) - d < 0;
+    }
+
     public boolean isNotIgnored() { return getGrNo() != 0 && !ignore3D(); }
 
     public int getX() { return parent.getX(ix); }
