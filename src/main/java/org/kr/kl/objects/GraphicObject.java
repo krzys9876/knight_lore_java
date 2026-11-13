@@ -47,6 +47,7 @@ public class GraphicObject {
         grNo = (grNo >> 3) & 3;
         return grNo;
     }
+    public void toggleNextPrevSprite() { parent.toggleNextPrevSprite(ix); }
 
     //; abs(objX+newdX-thisX)-(objW+thisW), o1 - obj, o2 - this
     public boolean intersectOnX(GraphicObject other, int dxAdj) {

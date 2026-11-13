@@ -2498,7 +2498,7 @@ public class Game implements Runnable {
             calc_ghost_sprite_C603(o);
             // $C5FA CALL $B467    ; // ignore audio
         }
-        toggle_next_prev_sprite_B985(o.ix);
+        o.toggleNextPrevSprite();
         o.setBothDeadlyFlags();
         o.setWipeAndDraw();
     }
@@ -2552,13 +2552,9 @@ public class Game implements Runnable {
         if(isX && graphicObjects.isOobX(ix)) graphicObjects.toggleEastWest(ix);
         else if(!isX && graphicObjects.isOobY(ix)) graphicObjects.toggleNorthSouth(ix);
 
-        toggle_next_prev_sprite_B985(ix);
+        graphicObjects.i2o(ix).toggleNextPrevSprite();
         graphicObjects.i2o(ix).setBothDeadlyFlags();
         //o.setWipeAndDraw();
-    }
-
-    private void toggle_next_prev_sprite_B985(int ix) {
-        graphicObjects.toggleNextPrevSprite(ix);
     }
 
     private void upd_88_to_90_C506(GraphicObject o) {
@@ -2945,7 +2941,7 @@ public class Game implements Runnable {
 
         int bouncingHeight = variables.getU(0x5BBD);
         if(bouncingHeight == 0) variables.set(0x5BBD, o.getZ() + 0x20); // ; calc bounce height
-        toggle_next_prev_sprite_B985(o.ix);
+        o.toggleNextPrevSprite();
         // $B879 CALL $B451     ; // ignore audio
         if(o.isDirUp()) {
             o.setDZ(3);
@@ -3006,7 +3002,7 @@ public class Game implements Runnable {
                 o.setDY(0);
             }
         }
-        toggle_next_prev_sprite_B985(o.ix);
+        o.toggleNextPrevSprite();
         o.setBothDeadlyFlags();
         o.setWipeAndDraw();
     }
