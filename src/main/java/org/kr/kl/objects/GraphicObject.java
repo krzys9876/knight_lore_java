@@ -32,7 +32,8 @@ public class GraphicObject {
     public int getDZu() { return parent.getDZu(ix); }
     public int getDXAdj() { return parent.getDXAdj(ix); }
     public int getDYAdj() { return parent.getDYAdj(ix); }
-
+    public boolean isMoving() { return getDX()!=0 || getDY()!=0 || getDZ()!=0; }
+    public boolean isMovingXY() { return getDX()!=0 || getDY()!=0; }
 
     public int getPixelX() { return parent.getPixelX(ix); }
     public int getPixelY() { return parent.getPixelY(ix); }
@@ -135,5 +136,12 @@ public class GraphicObject {
     //public void setOobX(int ix) { data.setBit(0, ix + 0x0C); }
     //public void setOobY(int ix) { data.setBit(1, ix + 0x0C); }
     //public void setOobZ(int ix) { data.setBit(2, ix + 0x0C); }
+
+    // Flag D
+
+    public boolean isDropping() { return parent.isDropping(ix); }
+    public void setRising() { parent.setRising(ix); }
+    public void setDropping() { parent.setDropping(ix); }
+
 
 }

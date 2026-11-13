@@ -133,6 +133,7 @@ public class GraphicObjects {
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isMoving(int ix) { return getDX(ix)!=0 || getDY(ix)!=0 || getDZ(ix)!=0; }
+    public boolean isMovingXY(int ix) { return getDX(ix)!=0 || getDY(ix)!=0; }
     public boolean isBitSetGrNo(int ix, int bit) { return data.isSet(bit, ix); }
 
 

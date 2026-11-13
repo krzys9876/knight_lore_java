@@ -1491,10 +1491,10 @@ public class Game implements Runnable {
             case 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D: upd_48_to_53_56_to_61_C828(o); break;
             case 0x36: upd_54_B6B9(o); break;
             case 0x37: upd_55_B6B1(o); break;
-            case 0x3E: upd_62_C4AA(ix); break;
-            case 0x3F: upd_63_B7A9(ix); break;
-            case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(ix); break;
-            case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(ix); break;
+            case 0x3E: upd_62_C4AA(o); break;
+            case 0x3F: upd_63_B7A9(o); break;
+            case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F: upd_64_to_79_CDDF(o); break;
+            case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(o); break;
             case 0x54: upd_84_C4C3(ix); break;
             case 0x55: upd_85_C4B6(ix); break;
             case 0x56, 0x57: upd_86_87_B7ED(ix); break;
@@ -2643,32 +2643,29 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_62_C4AA(int ix) {
-        // c$C4E3 LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXYAdj(ix, -16, -8); //F8
-        graphicObjects.setDX(ix, 0);
-        graphicObjects.setDY(ix, 0);
+    private void upd_62_C4AA(GraphicObject o) {
+        o.setXYAdj(-16, -8);
+        o.setDX(0);
+        o.setDY(0);
         // $C4B0 CALL $B3E9    ; // ignore audio
 
-        dec_dZ_and_update_XYZ_C700(ix);
+        dec_dZ_and_update_XYZ_C700(o.ix);
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_63_B7A9(int ix) {
-        graphicObjects.i2o(ix).setBothDeadlyFlags();
+    private void upd_63_B7A9(GraphicObject o) {
+        o.setBothDeadlyFlags();
         // c$C4E3 LD HL,$F8F0   ; -8, -16
-        graphicObjects.setXYAdj(ix, -16, -8);
+        o.setXYAdj(-16, -8);
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
         boolean disableSpikeBallDrop = variables.getU(0x5BC0) != 0;
         if(disableSpikeBallDrop) return;
-        boolean isDropping = graphicObjects.isDropping(ix);
-        if(isDropping) {
-            dec_dZ_and_update_XYZ_C700(ix);
-            boolean zOob = graphicObjects.isOobZ(ix); // ; Z OOB? (hit the floor?)
-            if(zOob) {
-                graphicObjects.setRising(ix);
+        if(o.isDropping()) {
+            dec_dZ_and_update_XYZ_C700(o.ix);
+            if(o.isOobZ()) { //; Z OOB? (hit the floor?)
+                o.setRising();
                 variables.set(0x5BBF, 0); // ; flag no spiked balls dropping
             }
             // $B7D6 CALL $B451     ; } // ignore audio
@@ -2677,7 +2674,7 @@ public class Game implements Runnable {
             if(!isOtherDropping) {
                 // ; 1-in-16 chance
                 if((params.getRnd().getSeed3() & 0xF0) > 0) {
-                    graphicObjects.setDropping(ix); // ; flag this one as dropping
+                    o.setDropping(); // ; flag this one as dropping
                     variables.set(0x5BBF, 1); // ; flag a spike ball dropping
                 }
             }
@@ -2685,32 +2682,28 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_64_to_79_CDDF(int ix) {
-        // c$C501 LD HL,$F4F4   ; -12, -12
-        graphicObjects.setXYAdj(ix, -12, -12); //F4
-        upd_player_top_CDE2(ix);
+    private void upd_64_to_79_CDDF(GraphicObject o) {
+        o.setXYAdj(-12, -12);
+        upd_player_top_CDE2(o.ix);
     }
 
-    private void upd_80_to_83_C5C8(int ix) {
-        // c$C4DD LD HL,$FAF4   ; -6, -12
-        graphicObjects.setXYAdj(ix, -12, -6);
+    private void upd_80_to_83_C5C8(GraphicObject o) {
+        o.setXYAdj(-12, -6);
 
-        dec_dZ_and_update_XYZ_C700(ix);
-        boolean moving = graphicObjects.getDX(ix) != 0 || graphicObjects.getDY(ix) != 0;
-        boolean xyOob = graphicObjects.isOobXY(ix); // ; OOB X/Y?
-        if(!moving || xyOob) {
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        if(!o.isMovingXY() || o.isOobXY()) {
             // @label=loc_C5DD
             int rnd3 = (params.getRnd().getSeed3() & 0x03) + 4;
             int dx = get_delta_from_tbl_C645(rnd3);
-            graphicObjects.setDX(ix, dx);
+            o.setDX(dx);
             int rnd2 = (params.getRnd().getSeed2() & 0x03) + 4;
             int dy = get_delta_from_tbl_C645(rnd2);
-            graphicObjects.setDY(ix, dy);
-            calc_ghost_sprite_C603(ix);
+            o.setDY(dy);
+            calc_ghost_sprite_C603(o.ix);
             // $C5FA CALL $B467    ; // ignore audio
         }
-        toggle_next_prev_sprite_B985(ix);
-        graphicObjects.i2o(ix).setBothDeadlyFlags();
+        toggle_next_prev_sprite_B985(o.ix);
+        o.setBothDeadlyFlags();
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
