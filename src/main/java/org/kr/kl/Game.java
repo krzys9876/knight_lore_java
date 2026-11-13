@@ -1506,9 +1506,9 @@ public class Game implements Runnable {
             case 0x67: upd_103_C1AB(o); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(o); break;
             case 0x6F: upd_111_B95E(o); break;
-            case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
+            case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(o); break;
             case 0x77: upd_119_BF3F(o); break;
-            case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
+            case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(o); break;
             case 0x7F: upd_127_BF11(o); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(o); break;
             case 0x83, 0x84, 0x85: upd_131_to_133_B566(o); break;
@@ -2967,11 +2967,9 @@ public class Game implements Runnable {
         // ignore audio
     }
 
-    private void upd_112_to_118_184_BF2B(int ix) {
-        //c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
-
-        graphicObjects.setGrNo(ix, graphicObjects.getGrNo(ix)+1);
+    private void upd_112_to_118_184_BF2B(GraphicObject o) {
+        o.setXYAdj(-12, -4);
+        o.setGrNo(o.getGrNo()+1);
         // ignore audio
     }
 
@@ -2980,11 +2978,9 @@ public class Game implements Runnable {
         upd_111_B95E(o); // Fix bug/feature in the source (writing to ROM)
     }
 
-    private void upd_120_to_126_BEFE(int ix) {
-        //c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
-
-        if(((params.getRnd().getSeed2() ^ 0xFF) & 0x01) == 0) graphicObjects.setGrNo(ix, graphicObjects.getGrNo(ix) + 1); // next sprite on odd frames
+    private void upd_120_to_126_BEFE(GraphicObject o) {
+        o.setXYAdj(-12, -4);
+        if(((params.getRnd().getSeed2() ^ 0xFF) & 0x01) == 0) o.setGrNo(o.getGrNo() + 1); // next sprite on odd frames
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
@@ -3011,7 +3007,7 @@ public class Game implements Runnable {
 
         if(o.isTriggered()) {
             o.setGrNo(0xB8); // ; graphic_no = sparkles
-            upd_112_to_118_184_BF2B(o.ix);
+            upd_112_to_118_184_BF2B(o);
         }
     }
 
