@@ -1529,9 +1529,8 @@ public class Game implements Runnable {
     }
 
     private void upd_2_4_C73C(GraphicObject o) {
-        boolean hFlip = o.isHFlip(); // BIT 6,(IX+$07)
         int centreX, centreY;
-        if (hFlip) {
+        if (o.isHFlip()) {
             // LD HL,$FEEF
             o.setXYAdj(-17, -2);
             int x = o.getX() - 0x0D;
@@ -1542,14 +1541,8 @@ public class Game implements Runnable {
             centreY = 15;
             centreX = 6;
         } else {
-            if (o.getGrNo() == 4) {
-                //@label=adj_m3_p1
-                //c$C737 LD HL,$FD01   ;
-                o.setXYAdj(1, -3);
-            } else {
-                // LD HL,$FDF9    ; -3, -7
-                o.setXYAdj(-7, -3);
-            }
+            if (o.getGrNo() == 4) o.setXYAdj(1, -3);
+            else o.setXYAdj(-7, -3);
             int y = o.getY() + 0x0D;
             o.setDY(y); // dY
             int x = o.getX();
@@ -1558,8 +1551,7 @@ public class Game implements Runnable {
             centreY = 6;
             centreX = 15;
         }
-        int z = o.getZ();
-        o.setDZ(z); // dZ=Z
+        o.setDZ(o.getZ());
         chk_plyr_spec_near_arch_C7DB(o, centreY, centreX);
 
         // @label=loc_C785
