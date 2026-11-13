@@ -1918,43 +1918,38 @@ public class Game implements Runnable {
 
     private void loc_C855(GraphicObject player) {
         player.next().setIgnore3D();
-        move_player_C9A1(player.ix);
+        move_player_C9A1(player);
         player.next().resetIgnore3D();
         player.decEnterCounter(); // decrement entering screen counter (upper 4 bits)
         //player.setWipeAndDraw();
     }
 
-    private void move_player_C9A1(int ix) {
-        if(variables.getU(0x5BC4)!=0) graphicObjects.setDZ(ix, 2); // D (IX+$0B),$02 ; dZ=2
-        int enterCounter = graphicObjects.getEnterCounter(ix); // LD A,(IX+$0C)  ; flags12
-        boolean jumping = graphicObjects.isJumping(ix);
+    private void move_player_C9A1(GraphicObject player) {
+        if(variables.getU(0x5BC4)!=0) player.setDZ(2);
         boolean forward = variables.isSet(2, 0x5BB5);
-        if(jumping || enterCounter != 0 || forward) calc_plyr_dXY_C9FB(graphicObjects.i2o(ix));
+        if(player.isJumping() || player.enteringScreen() || forward) calc_plyr_dXY_C9FB(player);
 
-        int dz = graphicObjects.getDZ(ix);
+        int dz = player.getDZ();
         if(dz < 0) dz -= 2;
         else {
             boolean jumpingKey = variables.isSet(3, 0x5BB5);
-            if (jumpingKey) dz -= 1;
-            else dz -= 2;
+            if (jumpingKey) dz -= 1; else dz -= 2;
         }
-        graphicObjects.setDZ(ix, dz);
+        player.setDZ(dz);
         variables.set(0x5BC1, dz);
         //$C9D6 CALL M,$B451   ; ignore audio
 
-        //$C9D9 CALL $CB45     ;
-        adj_for_out_of_bounds_CB45(graphicObjects.i2o(ix));
-        //$C9DC CALL $CA70     ;
-        handle_exit_screen_CA70(ix);
+        adj_for_out_of_bounds_CB45(player);
+        handle_exit_screen_CA70(player.ix);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
         if(!exitingScreen) {
-            add_dXYZ_C706(graphicObjects.i2o(ix));
-            if (graphicObjects.isOobZ(ix)) {
+            add_dXYZ_C706(player);
+            if (player.isOobZ()) {
                 int tmpDz = variables.getS(0x5BC1);
-                if (tmpDz < 0) graphicObjects.resetJumping(ix);
+                if (tmpDz < 0) player.resetJumping();
             }
-            graphicObjects.setDX(ix, 0);
-            graphicObjects.setDY(ix, 0);
+            player.setDX(0);
+            player.setDY(0);
         }
     }
 
