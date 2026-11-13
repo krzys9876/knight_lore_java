@@ -1,5 +1,7 @@
 package org.kr.kl.objects;
 
+import org.kr.DataBlock;
+
 public class GraphicObject {
     private final GraphicObjects parent;
     public final int ix;
@@ -9,9 +11,24 @@ public class GraphicObject {
         this.ix = ix;
     }
 
-    public GraphicObjects getPaarent() { return parent; }
+    public GraphicObject() {
+        this(new GraphicObjects(0, 1), 0);
+    }
+
+    public GraphicObjects getParent() { return parent; }
     public GraphicObject next() { return parent.next(this);}
     public GraphicObject prev() { return parent.prev(this);}
+
+    public void reset() { parent.reset(); }
+
+    public void copyFrom(DataBlock other, int otherIx, int bytes) {
+        for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.getU(otherIx + i));
+    }
+
+    public void copyFrom(GraphicObject other) {
+        for(int i = 0; i < 0x20; i++) parent.data.set(ix + i, other.parent.data.getU(other.parent.start() + i));
+    }
+
 
     public int getGrNo() { return parent.getGrNo(ix); }
     public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }
@@ -155,7 +172,7 @@ public class GraphicObject {
 
     // Flags C
     //public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
-    //public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
+    public void setFlagsC(int f) { parent.setFlagsC(ix, f); }
 
     public int getEnterCounter() { return parent.getEnterCounter(ix); }
     public boolean enteringScreen() { return parent.enteringScreen(ix); }
