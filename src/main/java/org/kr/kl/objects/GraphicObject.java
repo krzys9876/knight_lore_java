@@ -98,9 +98,9 @@ public class GraphicObject {
     //public void setNearArch(int ix) { setFlags7(ix, Flags7.setNearArch(getFlags7(ix))); }
     //public void resetNearArch(int ix) { setFlags7(ix, Flags7.resetNearArch(getFlags7(ix))); }
 
-    //public boolean ignore3D(int ix) { return Flags7.ignore3D(getFlags7(ix)); }
-    //public void setIgnore3D(int ix) { setFlags7(ix, Flags7.setIgnore3D(getFlags7(ix))); }
-    //public void resetIgnore3D(int ix) { setFlags7(ix, Flags7.resetIgnore3D(getFlags7(ix))); }
+    public boolean ignore3D() { return parent.ignore3D(ix); }
+    public void setIgnore3D() { parent.setIgnore3D(ix); }
+    public void resetIgnore3D() { parent.resetIgnore3D(ix); }
 
     //public boolean isMoveable(int ix) { return Flags7.isMoveable(getFlags7(ix)); }
 

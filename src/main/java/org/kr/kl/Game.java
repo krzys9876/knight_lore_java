@@ -346,7 +346,7 @@ public class Game implements Runnable {
             //int id = location_tbl_6251.get(a);
             //IO.println("Room id: "+id);
             int overrideRoomId=-1;
-            //int overrideRoomId = 0x2D;
+            //int overrideRoomId = 0xA8;
             int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
             int overrideNS = 0; // -S +N
             int overrideZ = 0; // + only : 60 is a little above upper entrance
@@ -1503,7 +1503,7 @@ public class Game implements Runnable {
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(o); break;
             case 0x67: upd_103_C1AB(o); break;
-            case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(ix); break;
+            case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(o); break;
             case 0x6F: upd_111_B95E(ix); break;
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
             case 0x77: upd_119_BF3F(ix); break;
@@ -2867,37 +2867,34 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_104_to_110_C1F1(int ix) {
-        //c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
+    private void upd_104_to_110_C1F1(GraphicObject o) {
+        o.setXYAdj(-12, -4);
 
-        int x = graphicObjects.getX(ix);
-        int dX = x - 0x80;
+        int x = o.getX();
+        int dX = o.getX() - 0x80;
         if(dX < 0) dX = 1;
         else if(dX > 0) dX = -1;
-        graphicObjects.setDX(ix, dX);
+        o.setDX(dX);
 
-        int y = graphicObjects.getY(ix);
+        int y = o.getY();
         int dY = y - 0x80;
         if(dY < 0) dY = 1;
         else if(dY > 0) dY = -1;
-        graphicObjects.setDY(ix, dY);
+        o.setDY(dY);
 
         boolean center = x == 0x80 && y == 0x80;
-        int z = graphicObjects.getZ(ix);
+        int z = o.getZ();
         if(!center) {
             int dZ = 1;
             if(z < 0x98) dZ++;
-            graphicObjects.setDZ(ix, dZ);
+            o.setDZ(dZ);
         } else {
             if(z <= 0x80) {
-                add_obj_to_cauldron_C245(ix);
+                add_obj_to_cauldron_C245(o.ix);
                 return;
-            } else {
-                graphicObjects.setIgnore3D(ix); // ; ignore in 3D calcs
-            }
+            } else o.setIgnore3D(); // ; ignore in 3D calcs
         }
-        dec_dZ_and_update_XYZ_C700(ix);
+        dec_dZ_and_update_XYZ_C700(o.ix);
         // c$C232 CALL $B467    ; // ignore audio
         // set_wipe_and_draw_flags_C692(block, ix);
     }
