@@ -1220,11 +1220,9 @@ public class Game implements Runnable {
 
     private void list_objects_to_draw_CE62() {
         objects_to_draw_CE8B.reset();
-        int ix = graphicObjects.start();
         int hl = objects_to_draw_CE8B.start;
-        final int cnt = 40;
-        for(int i=0; i<cnt; i++) {
-            if(graphicObjects.getGrNo(ix + i*0x20) != 0/* && (!graphicObjects.isWipe(ix + i*0x20))*/) {
+        for(int i = 0; i < graphicObjects.size; i++) {
+            if(graphicObjects.o(i).getGrNo() != 0/* && (!graphicObjects.isWipe(ix + i*0x20))*/) {
                 objects_to_draw_CE8B.set(hl, i);
                 hl++;
             }
@@ -1379,8 +1377,6 @@ public class Game implements Runnable {
     private void display_sun_moon_frame_C3A4() {
         if(variables.getU(0x5BC3)!=0) return;
 
-        int ix = sun_moon_scratchpad_C44D.ix;
-        // @label=display_frame
         int x = sun_moon_scratchpad_C44D.getPixelX();
         if (x == 0xE1 - 1) toggle_day_night_C3FF();
 
@@ -1389,7 +1385,6 @@ public class Game implements Runnable {
         sun_moon_scratchpad_C44D.setPixelY(sun_moon_yoff_C440.getU(hl));
         if (sunTick == 0) sun_moon_scratchpad_C44D.setPixelX(x + 1);
 
-        // @label=display_frame
         fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
         print_sprite_D718(sun_moon_scratchpad_C44D);
 
