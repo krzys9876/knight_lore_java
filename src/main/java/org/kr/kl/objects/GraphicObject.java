@@ -137,10 +137,14 @@ public class GraphicObject {
 
     public boolean isAutoAdjust() { return parent.isAutoAdjust(ix); }
 
-    //public void setDraw(int ix) { setFlags7(ix, Flags7.setDraw(getFlags7(ix))); }
-
-    //public void setWipe(int ix) { setFlags7(ix, Flags7.setWipe(getFlags7(ix))); }
-    //public void resetWipe(int ix) { setFlags7(ix, Flags7.resetWipe(getFlags7(ix))); }
+    public void setDraw() { parent.setDraw(ix); }
+    public void setWipe() { parent.setWipe(ix); }
+    public void resetWipe() { parent.resetWipe(ix); }
+    public void setWipeAndDraw() {
+        // Not used - al objects are redrawn every tick
+        setWipe();
+        setDraw();
+    }
 
     public boolean isHFlip() { return parent.isHFlip(ix); }
     public void setHFlip() { parent.setHFlip(ix); }

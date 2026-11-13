@@ -1642,7 +1642,7 @@ public class Game implements Runnable {
             o.setDZ(-1); // ; dZ=-1 (down)
         }
         variables.set(0x5BAF, variables.getU(0x5BAF) + 1);
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_9_C6BD(GraphicObject o) {
@@ -1661,13 +1661,13 @@ public class Game implements Runnable {
             int roomSizeZ = variables.getU(0x5BAE);
             int z = o.getZ();
             if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(o);
-            //set_wipe_and_draw_flags_C692(block, ix);
+            o.setWipeAndDraw();
         } else {
             o.setDZ(dZ - 1); // ; accelerate speed?
             dec_dZ_and_update_XYZ_C700(o.ix);
             boolean oob = o.isOobZ();
             if(oob) stop_portcullis_C6E0(o);
-            //set_wipe_and_draw_flags_C692(block, ix);
+            o.setWipeAndDraw();
         }
     }
 
@@ -1735,7 +1735,7 @@ public class Game implements Runnable {
         }
         variables.set(0x5BC5, o.getZ());
         dec_dZ_and_update_XYZ_C700(o.ix);
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_16_to_21_24_to_29_C823(GraphicObject o) {
@@ -1757,22 +1757,14 @@ public class Game implements Runnable {
         // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317
         boolean transformStarted = chk_and_init_transform_C306(o);
         if(!transformStarted) {
-        // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
-            // $C844 CALL $C00E    ; handle_pickup_drop
             handle_pickup_drop_C00E(o);
-            // $C847 CALL $C89F    ; handle_left_right
             handle_left_right_C89F(o);
-            // $C84A CALL $C948    ; handle_jump
             handle_jump_C948(o);
-            // $C84D CALL $C969    ; handle_forward
             handle_forward_C969(o);
-            // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
             boolean oob = chk_plyr_OOB_C87A(o);
-            // $C853 JR NC,$C86D   ; plyr_OOB
-            // @label=plyr_OOB
             if(oob && o.getDZ() > 0) o.setDZ(0);
-            loc_C855(o.ix) ;
+            loc_C855(o);
         }
     }
 
@@ -1874,7 +1866,7 @@ public class Game implements Runnable {
         inventory_5BD8.set(hl, e);
         hl++;
         inventory_5BD8.set(hl, d);
-        //set_wipe_and_draw_flags_C692(block, ix);
+        //o.setWipeAndDraw();
         graphicObjects.setGrNo(iy, 1);
 
         hl = inventory_5BD8.start + 0x0C;
@@ -1977,12 +1969,12 @@ public class Game implements Runnable {
         return xCalc >= xMax || yCalc >= yMax;
     }
 
-    private void loc_C855(int ix) {
-        graphicObjects.setIgnore3D(ix + 0x20);
-        move_player_C9A1(ix);
-        graphicObjects.resetIgnore3D(ix + 0x20);
-        graphicObjects.decEnterCounter(ix); // decrement entering screen counter (upper 4 bits)
-        set_wipe_and_draw_flags_C692(ix);
+    private void loc_C855(GraphicObject player) {
+        player.next().setIgnore3D();
+        move_player_C9A1(player.ix);
+        player.next().resetIgnore3D();
+        player.decEnterCounter(); // decrement entering screen counter (upper 4 bits)
+        //player.setWipeAndDraw();
     }
 
     private void move_player_C9A1(int ix) {
@@ -2402,7 +2394,7 @@ public class Game implements Runnable {
         o.setGrNo(0x70);
         o.setIgnore3D();
         // c$BF31 CALL $B403    ; // ignore audio
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_22_B7A3(GraphicObject o) {
@@ -2440,7 +2432,7 @@ public class Game implements Runnable {
         graphicObjects.setY(ix + 0x20, graphicObjects.getY(ix)); // ; copy to next obj Y
         set_guard_wizard_sprite_B76C(ix);
         graphicObjects.i2o(ix).setBothDeadlyFlags();
-        //set_wipe_and_draw_flags_C692(block, ix);
+        //o.setWipeAndDraw();
     }
 
     private void next_guard_dir_B9EB(int ix) { graphicObjects.incDirection(ix); }
@@ -2536,7 +2528,7 @@ public class Game implements Runnable {
             o.setDZ(1);
             dec_dZ_and_update_XYZ_C700(o.ix);
         }
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_62_C4AA(GraphicObject o) {
@@ -2546,7 +2538,7 @@ public class Game implements Runnable {
         // $C4B0 CALL $B3E9    ; // ignore audio
 
         dec_dZ_and_update_XYZ_C700(o.ix);
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_63_B7A9(GraphicObject o) {
@@ -2575,7 +2567,7 @@ public class Game implements Runnable {
                 }
             }
         }
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_64_to_79_CDDF(GraphicObject o) {
@@ -2600,7 +2592,7 @@ public class Game implements Runnable {
         }
         toggle_next_prev_sprite_B985(o.ix);
         o.setBothDeadlyFlags();
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void calc_ghost_sprite_C603(int ix) {
@@ -2654,7 +2646,7 @@ public class Game implements Runnable {
 
         toggle_next_prev_sprite_B985(ix);
         graphicObjects.i2o(ix).setBothDeadlyFlags();
-        //set_wipe_and_draw_flags_C692(block, ix);
+        //o.setWipeAndDraw();
     }
 
     private void toggle_next_prev_sprite_B985(int ix) {
@@ -2725,7 +2717,7 @@ public class Game implements Runnable {
         o.setDX(0);
         o.setDY(0);
         // c$C232 CALL $B467    ; // ignore audio
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_103_C1AB(GraphicObject o) {
@@ -2759,7 +2751,7 @@ public class Game implements Runnable {
             o.setDX(0);
             o.setDY(0);
         }
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_104_to_110_C1F1(GraphicObject o) {
@@ -2876,13 +2868,7 @@ public class Game implements Runnable {
     private void upd_120_to_126_BEFE(GraphicObject o) {
         o.setXYAdj(-12, -4);
         if(((params.getRnd().getSeed2() ^ 0xFF) & 0x01) == 0) o.setGrNo(o.getGrNo() + 1); // next sprite on odd frames
-        //set_wipe_and_draw_flags_C692(block, ix);
-    }
-
-    private void set_wipe_and_draw_flags_C692(int ix) {
-        graphicObjects.setWipe(ix);
-        graphicObjects.setDraw(ix);
-        // Not used - all frame is redrawn
+        o.setWipeAndDraw();
     }
 
     private void upd_127_BF11(GraphicObject o) {
@@ -2926,7 +2912,7 @@ public class Game implements Runnable {
         }
 
         animate_human_legs_C97F(o);
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_150_151_B73C(GraphicObject o) {
@@ -2940,7 +2926,7 @@ public class Game implements Runnable {
         if(o.isOobX()) o.toggleEastWest(); // ; toggle direction
         o.next().setX(o.getX()); // ; copy to bottom half
         o.setBothDeadlyFlags();
-        //set_wipe_and_draw_flags_C692(block, ix);*/
+        o.setWipeAndDraw();
     }
 
     private void set_guard_wizard_sprite_B76C(int ix) {
@@ -2987,7 +2973,7 @@ public class Game implements Runnable {
                 o.resetIgnore3D();
             }
         }
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private int ret_next_obj_required_C274() {
@@ -3064,7 +3050,7 @@ public class Game implements Runnable {
             // $B88F CALL $B42E     ; // ignore audio
         }
         o.setBothDeadlyFlags();
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_180_181_B80F(GraphicObject o) {
@@ -3114,7 +3100,7 @@ public class Game implements Runnable {
         }
         toggle_next_prev_sprite_B985(o.ix);
         o.setBothDeadlyFlags();
-        //set_wipe_and_draw_flags_C692(block, ix);
+        o.setWipeAndDraw();
     }
 
     private void upd_185_187_BF37(GraphicObject o) {
