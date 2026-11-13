@@ -3208,41 +3208,41 @@ public class Game implements Runnable {
         debugTable2("Graphic objects table:", 0x5C08, graphicObjects.getCopy());
         int roomSizeX = variables.getU(0x5BAB) - 2;
         int roomSizeY = variables.getU(0x5BAC) - 2;
-        int ix = 0x5C08;
-        int x = graphicObjects.getX(ix);
-        int y = graphicObjects.getY(ix);
+        GraphicObject player = graphicObjects.playerBottom();
+        int x = player.getX();
+        int y = player.getY();
         if(x == 0) {
             // @label=enter_arch_e
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0x37);
-            int a = roomSizeX + 0x80 + graphicObjects.getW(ix);
-            graphicObjects.setX(ix, a);
-            copy_spr_1_xy_2_D34D(ix);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0x37);
+            int a = roomSizeX + 0x80 + player.getW();
+            player.setX(a);
+            copy_spr_1_xy_2_D34D(player);
         } else if(x == 0xFF) {
             // @label=enter_arch_w
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0xAE);
-            int a = 0x80 - roomSizeX - graphicObjects.getW(ix);
-            graphicObjects.setX(ix, a);
-            copy_spr_1_xy_2_D34D(ix);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0xAE);
+            int a = 0x80 - roomSizeX - player.getW();
+            player.setX(a);
+            copy_spr_1_xy_2_D34D(player);
         } else if(y == 0) {
             // @label=enter_arch_n
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0x51);
-            int a = roomSizeY + 0x80 + graphicObjects.getD(ix);
-            graphicObjects.setY(ix, a);
-            copy_spr_1_xy_2_D34D(ix);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0x51);
+            int a = roomSizeY + 0x80 + player.getD();
+            player.setY(a);
+            copy_spr_1_xy_2_D34D(player);
         } else if(y == 0xFF) {
             // @label=enter_arch_s
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, ix,0xC8);
-            int a = 0x80 - roomSizeY - graphicObjects.getD(ix);
-            graphicObjects.setY(ix, a);
-            copy_spr_1_xy_2_D34D(ix);
+            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0xC8);
+            int a = 0x80 - roomSizeY - player.getD();
+            player.setY(a);
+            copy_spr_1_xy_2_D34D(player);
         }
     }
 
-    private void copy_spr_1_xy_2_D34D(int ix) {
-        graphicObjects.setDraw(ix);
-        graphicObjects.setDraw(ix + 0x20);
-        graphicObjects.setX(ix + 0x20, graphicObjects.getX(ix));
-        graphicObjects.setY(ix + 0x20, graphicObjects.getY(ix));
+    private void copy_spr_1_xy_2_D34D(GraphicObject player) {
+        player.setDraw();
+        player.next().setDraw();
+        player.next().setX(player.getX());
+        player.next().setY(player.getY());
     }
 
     private void adjust_plyr_Z_for_arch_D38C(GraphicObjects block, int ix, int c) {
