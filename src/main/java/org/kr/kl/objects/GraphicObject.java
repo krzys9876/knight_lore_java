@@ -53,6 +53,7 @@ public class GraphicObject {
 
     public int getScreen() { return parent.getScreen(ix); }
     public void setScreen(int screen) { parent.setScreen(ix, screen); }
+    public boolean isCauldronRoom() { return getScreen() == 0x88; }
 
     public void setX(int x) { parent.setX(ix, x); }
     public void setY(int y) { parent.setY(ix, y); }

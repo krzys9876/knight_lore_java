@@ -1083,8 +1083,7 @@ public class Game implements Runnable {
     }
 
     private void init_cauldron_bubbles_B8A9() {
-        boolean cauldronRoom = graphicObjects.playerBottom().getScreen() == 0x88;
-        if(!cauldronRoom) return;
+        if(!graphicObjects.playerBottom().isCauldronRoom()) return;
 
         // NOTE: first special object is cauldron bubbles
         GraphicObject secondSpecObj = graphicObjects.firstSpecObj().next();
@@ -1769,39 +1768,38 @@ public class Game implements Runnable {
     private void upd_16_to_21_24_to_29_C823(GraphicObject o) {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         o.setXYAdj(-12, -6);
-        upd_player_bottom_C82B(o.ix);
+        upd_player_bottom_C82B(o);
     }
 
-    private void upd_player_bottom_C82B(int ix) {
-        boolean isDead = graphicObjects.isDead(ix);
-        if(isDead) {
+    private void upd_player_bottom_C82B(GraphicObject o) {
+        if(o.isDead()) {
             if (variables.getU(0x5BC3) == 0) {
-                graphicObjects.setDeadOtherHalf(ix); // SET 6,(IX+$2D)
-                init_death_sparkles_BF21(ix);
+                o.next().setDead(); // SET 6,(IX+$2D)
+                init_death_sparkles_BF21(o.ix);
                 return;
             }
         }
         // @label=loc_C83E
             // c$C83E CALL $C306    ;
         // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317
-        boolean transformStarted = chk_and_init_transform_C306(ix);
+        boolean transformStarted = chk_and_init_transform_C306(o.ix);
         if(!transformStarted) {
         // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
             // $C844 CALL $C00E    ; handle_pickup_drop
-            handle_pickup_drop_C00E(ix);
+            handle_pickup_drop_C00E(o.ix);
             // $C847 CALL $C89F    ; handle_left_right
-            handle_left_right_C89F(ix);
+            handle_left_right_C89F(o.ix);
             // $C84A CALL $C948    ; handle_jump
-            handle_jump_C948(ix);
+            handle_jump_C948(o.ix);
             // $C84D CALL $C969    ; handle_forward
-            handle_forward_C969(ix);
+            handle_forward_C969(o.ix);
             // $C850 CALL $C87A    ; chk_plyr_OOB (out of bounds)
-            boolean oob = chk_plyr_OOB_C87A(ix);
+            boolean oob = chk_plyr_OOB_C87A(o.ix);
             // $C853 JR NC,$C86D   ; plyr_OOB
             // @label=plyr_OOB
-            if(oob && graphicObjects.getDZ(ix) > 0) graphicObjects.setDZ(ix, 0);
-            loc_C855(ix) ;
+            if(oob && o.getDZ() > 0) o.setDZ(0);
+            loc_C855(o.ix) ;
         }
     }
 
@@ -1844,18 +1842,17 @@ public class Game implements Runnable {
             } else {
                 if(chk_pickup_drop_BFFB()) {
                     b=2;
-                    boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
-                    if(cauldronRoom) b=1; // ; only check 1st special object
-                    iy = graphicObjects.start() + 0x40;
+                    if(graphicObjects.playerBottom().isCauldronRoom()) b=1; // ; only check 1st special object
+                    GraphicObject specObj = graphicObjects.firstSpecObj();
                     boolean foundPlace = false;
                     while(b>0 && !foundPlace) {
-                        foundPlace = graphicObjects.getGrNo(iy) == 0;
+                        foundPlace = specObj.getGrNo() == 0;
                         if(!foundPlace) {
                             b--;
-                            iy+=0x20;
+                            specObj = specObj.next();
                         }
                     }
-                    if(foundPlace) room_to_drop_C0B2(ix, iy);
+                    if(foundPlace) room_to_drop_C0B2(ix, specObj.ix);
                 };
             }
 
@@ -2609,7 +2606,7 @@ public class Game implements Runnable {
 
     private void upd_48_to_53_56_to_61_C828(GraphicObject o) {
         o.setXYAdj(-12, -7);
-        upd_player_bottom_C82B(o.ix);
+        upd_player_bottom_C82B(o);
     }
 
     private void upd_54_B6B9(GraphicObject o) {
@@ -3081,9 +3078,7 @@ public class Game implements Runnable {
         o.setDZ(2); // ; dZ=2 - NOTE: will be applied next frame as C700 has already been called
         if(z >= 0xA0) {
             o.setDZ(1); // dZ=1
-            int playerGrNo = graphicObjects.playerBottom().getGrNo();
-            boolean isWulf = ((playerGrNo - 0x30) & 0xFF) < 0x10;
-            if(!isWulf) {
+            if(!graphicObjects.playerBottom().isWulf()) {
                 int grNo = o.getGrNo();
                 if((grNo & 3) == 0) {
                     int hl = ret_next_obj_required_C274();
@@ -3105,7 +3100,7 @@ public class Game implements Runnable {
     private void upd_164_to_167_B92C(GraphicObject o) {
         o.setXYAdj(-12, -4);
 
-        boolean cauldronRoom = o.getScreen() == 0x88;
+        boolean cauldronRoom = o.isCauldronRoom();
         int dx = 4;
         int dy = 4;
         if(!cauldronRoom && graphicObjects.playerBottom().isNearArch()) {

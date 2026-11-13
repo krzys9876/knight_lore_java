@@ -169,7 +169,6 @@ public class GraphicObjects {
     public void setBothDeadlyFlags(int ix) { data.set(ix + 0x0D, data.getU(ix + 0x0D) | 0xA0); }
     public void setDead(int ix) { data.setBit(6, ix + 0x0D); }
     public void resetDead(int ix) { data.resetBit(6, ix + 0x0D); }
-    public void setDeadOtherHalf(int ix) { setDead(ix + 0x20); }
     public void setTemp10(int ix, int temp10) { data.set(ix + 0x10, temp10); }
     public void setTemp11(int ix, int temp11) { data.set(ix + 0x11, temp11); }
     public void setRising(int ix) { data.resetBit(2, ix + 0x0D); }
