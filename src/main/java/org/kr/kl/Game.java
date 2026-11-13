@@ -1929,7 +1929,7 @@ public class Game implements Runnable {
         int enterCounter = graphicObjects.getEnterCounter(ix); // LD A,(IX+$0C)  ; flags12
         boolean jumping = graphicObjects.isJumping(ix);
         boolean forward = variables.isSet(2, 0x5BB5);
-        if(jumping || enterCounter != 0 || forward) calc_plyr_dXY_C9FB(ix);
+        if(jumping || enterCounter != 0 || forward) calc_plyr_dXY_C9FB(graphicObjects.i2o(ix));
 
         int dz = graphicObjects.getDZ(ix);
         if(dz < 0) dz -= 2;
@@ -2185,16 +2185,16 @@ public class Game implements Runnable {
         o.setZ(o.getZ() + o.getDZ());
     }
 
-    private void calc_plyr_dXY_C9FB(int ix) {
-        graphicObjects.setDX(ix, graphicObjects.getDX(ix) + graphicObjects.getDXAdj(ix)); // dX
-        graphicObjects.setDY(ix, graphicObjects.getDY(ix) + graphicObjects.getDYAdj(ix)); // dY
-        graphicObjects.setDXAdj(ix, 0); // dX_adj
-        graphicObjects.setDYAdj(ix, 0); // dY_adj
-        switch(graphicObjects.i2o(ix).getSpriteDir()) {
-            case 0: graphicObjects.setDX(ix, (graphicObjects.getDX(ix) - 3)); break;
-            case 1: graphicObjects.setDX(ix, (graphicObjects.getDX(ix) + 3)); break;
-            case 2: graphicObjects.setDY(ix, (graphicObjects.getDY(ix) + 3)); break;
-            case 3: graphicObjects.setDY(ix, (graphicObjects.getDY(ix) - 3)); break;
+    private void calc_plyr_dXY_C9FB(GraphicObject o) {
+        o.setDX(o.getDX() + o.getDXAdj());
+        o.setDY(o.getDY() + o.getDYAdj());
+        o.setDXAdj(0);
+        o.setDYAdj(0);
+        switch(o.getSpriteDir()) {
+            case 0: o.setDX(o.getDX() - 3); break;
+            case 1: o.setDX(o.getDX() + 3); break;
+            case 2: o.setDY(o.getDY() + 3); break;
+            case 3: o.setDY(o.getDY() - 3); break;
         }
     }
 
