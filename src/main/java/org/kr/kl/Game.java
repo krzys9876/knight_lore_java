@@ -1529,10 +1529,9 @@ public class Game implements Runnable {
     }
 
     private void upd_2_4_C73C(GraphicObject o) {
-        int ix=o.ix;
         boolean hFlip = o.isHFlip(); // BIT 6,(IX+$07)
         int centreX, centreY;
-        if(hFlip) {
+        if (hFlip) {
             // LD HL,$FEEF
             o.setXYAdj(-17, -2);
             int x = o.getX() - 0x0D;
@@ -1543,7 +1542,7 @@ public class Game implements Runnable {
             centreY = 15;
             centreX = 6;
         } else {
-            if(o.getGrNo() == 4) {
+            if (o.getGrNo() == 4) {
                 //@label=adj_m3_p1
                 //c$C737 LD HL,$FD01   ;
                 o.setXYAdj(1, -3);
@@ -1564,39 +1563,31 @@ public class Game implements Runnable {
         chk_plyr_spec_near_arch_C7DB(o, centreY, centreX);
 
         // @label=loc_C785
-        int grNo = o.getGrNo();
-        if(grNo != 0) {
-            for (int objToCheck = 0; objToCheck < 2; objToCheck++) {
-                GraphicObject checkO = graphicObjects.o(objToCheck);
-                boolean autoAdjust = checkO.isAutoAdjust();
-                if (autoAdjust) {
-                    if (is_near_to_C7FE(o, checkO, 0x0F, 0x0F)) {
-                        switch (get_sprite_dir_CA1E(ix)) {
-                            case 0, 1: adj_ew_C7B1(ix, checkO.ix); break;
-                            case 2, 3: adj_ns_C7C4(ix, checkO.ix); break;
-                        }
-                    }
+        for (int posToCheck = 0; posToCheck < 2; posToCheck++) {
+            GraphicObject checkPlayer = graphicObjects.o(posToCheck);
+            if (checkPlayer.isAutoAdjust() && is_near_to_C7FE(o, checkPlayer, 0x0F, 0x0F)) {
+                switch (o.getSpriteDir()) {
+                    case 0, 1: adj_ew_C7B1(o, checkPlayer); break;
+                    case 2, 3: adj_ns_C7C4(o, checkPlayer); break;
                 }
             }
         }
     }
 
-    private void adj_ew_C7B1(int ix, int iy) {
-        // ix - arch, iy - player
-        int dyArch = graphicObjects.getDYu(ix);
-        int yPlayer = graphicObjects.getY(iy);
+    private void adj_ew_C7B1(GraphicObject arch, GraphicObject player) {
+        int dyArch = arch.getDYu();
+        int yPlayer = player.getY();
         if(dyArch == yPlayer) return;
         int newDy = (dyArch > yPlayer) ? 1 : -1;
-        graphicObjects.setDYAdj(iy, newDy);
+        player.setDYAdj(newDy);
     }
 
-    private void adj_ns_C7C4(int ix, int iy) {
-        // ix - arch, iy - player
-        int dxArch = graphicObjects.getDXu(ix);
-        int xPlayer = graphicObjects.getX(iy);
+    private void adj_ns_C7C4(GraphicObject arch, GraphicObject player) {
+        int dxArch = arch.getDXu();
+        int xPlayer = player.getX();
         if(dxArch == xPlayer) return;
         int newDx = (dxArch > xPlayer) ? 1 : -1;
-        graphicObjects.setDXAdj(iy, newDx);
+        player.setDXAdj(newDx);
     }
 
     // centre Y -> H, centre x -> L
@@ -2089,7 +2080,7 @@ public class Game implements Runnable {
         //$CA96 DEFW $CB0E
         //$CA98 DEFW $CB29
         int currentScreen = graphicObjects.getScreen(ix);
-        int newScreen = switch(get_sprite_dir_CA1E(ix)) {
+        int newScreen = switch(graphicObjects.i2o(ix).getSpriteDir()) {
             case 0 -> screen_west_CA9A(ix, oldRoomSizeX);
             case 1 -> screen_east_CAF3(ix, oldRoomSizeX);
             case 2 -> screen_north_CB0E(ix, oldRoomSizeY);
@@ -2329,20 +2320,12 @@ public class Game implements Runnable {
         graphicObjects.setDY(ix, graphicObjects.getDY(ix) + graphicObjects.getDYAdj(ix)); // dY
         graphicObjects.setDXAdj(ix, 0); // dX_adj
         graphicObjects.setDYAdj(ix, 0); // dY_adj
-        switch(get_sprite_dir_CA1E(ix)) {
+        switch(graphicObjects.i2o(ix).getSpriteDir()) {
             case 0: graphicObjects.setDX(ix, (graphicObjects.getDX(ix) - 3)); break;
             case 1: graphicObjects.setDX(ix, (graphicObjects.getDX(ix) + 3)); break;
             case 2: graphicObjects.setDY(ix, (graphicObjects.getDY(ix) + 3)); break;
             case 3: graphicObjects.setDY(ix, (graphicObjects.getDY(ix) - 3)); break;
         }
-    }
-
-    private int get_sprite_dir_CA1E(int ix) {
-        boolean hFlip = graphicObjects.isHFlip(ix);
-        int flags = hFlip ? 0x10 : 0;
-        int grNo = (graphicObjects.getGrNo(ix) & 8) | flags;
-        grNo = (grNo >> 3) & 3;
-        return grNo;
     }
 
     private boolean chk_and_init_transform_C306(int ix) {
