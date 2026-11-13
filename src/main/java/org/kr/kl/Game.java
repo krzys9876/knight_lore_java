@@ -3213,25 +3213,25 @@ public class Game implements Runnable {
         int y = player.getY();
         if(x == 0) {
             // @label=enter_arch_e
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0x37);
+            adjust_plyr_Z_for_arch_D38C(player,0x37);
             int a = roomSizeX + 0x80 + player.getW();
             player.setX(a);
             copy_spr_1_xy_2_D34D(player);
         } else if(x == 0xFF) {
             // @label=enter_arch_w
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0xAE);
+            adjust_plyr_Z_for_arch_D38C(player,0xAE);
             int a = 0x80 - roomSizeX - player.getW();
             player.setX(a);
             copy_spr_1_xy_2_D34D(player);
         } else if(y == 0) {
             // @label=enter_arch_n
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0x51);
+            adjust_plyr_Z_for_arch_D38C(player,0x51);
             int a = roomSizeY + 0x80 + player.getD();
             player.setY(a);
             copy_spr_1_xy_2_D34D(player);
         } else if(y == 0xFF) {
             // @label=enter_arch_s
-            adjust_plyr_Z_for_arch_D38C(graphicObjects, player.ix,0xC8);
+            adjust_plyr_Z_for_arch_D38C(player,0xC8);
             int a = 0x80 - roomSizeY - player.getD();
             player.setY(a);
             copy_spr_1_xy_2_D34D(player);
@@ -3245,21 +3245,21 @@ public class Game implements Runnable {
         player.next().setY(player.getY());
     }
 
-    private void adjust_plyr_Z_for_arch_D38C(GraphicObjects block, int ix, int c) {
-        int iy = graphicObjects.start() + 0x80; // arch location
+    private void adjust_plyr_Z_for_arch_D38C(GraphicObject player, int c) {
+        GraphicObject arch = graphicObjects.firstArch();
         int de = 0x40;
         for(int b=0; b<4; b++) {
-            if(graphicObjects.getGrNo(iy) < 0x06) { // is arch
+            if(arch.getGrNo() < 0x06) { // is arch
                 // Arches are recognized by sum of their coordinates (8-bit unsigned, meaning & 0xFF or module 256)
-                int xy = (graphicObjects.getX(iy)+graphicObjects.getY(iy)) & 0xFF;
+                int xy = (arch.getX()+arch.getY()) & 0xFF;
                 if(xy == c) {
                     // @label=adj_plyr_Z
-                    int archZ = graphicObjects.getZ(iy);
-                    block.setZ(ix, archZ);
-                    block.setZ(ix + 0x20, archZ + 0x0C);
+                    int archZ = arch.getZ();
+                    player.setZ(archZ);
+                    player.next().setZ(archZ + 0x0C);
                 }
             }
-            iy+=de;
+            arch = arch.next().next(); // each arch is defined as two objects, max 4 arches - always in the same position in graphic object table
         }
     }
 

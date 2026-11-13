@@ -85,6 +85,8 @@ public class GraphicObjects {
         assert(nextIndex >=0);
         return o(nextIndex);
     }
+    public final int firstArchIx = 4;
+    public GraphicObject firstArch() { return o(firstArchIx); }
 
 
     public final int size;
