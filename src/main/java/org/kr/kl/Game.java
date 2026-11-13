@@ -557,20 +557,15 @@ public class Game implements Runnable {
     }
 
     private int transfer_sprite_and_print_D24C(GraphicObject o, int hl, DataBlock source) {
-        GraphicObjects metadata = o.getParent();
-        int ix = o.ix;
         // hl: sprite index, ix: scratchpad address
-        //debugPanel1.append("transfer_sprite_and_print_D24C");
         transfer_sprite_D237(o, hl, source);
         print_sprite_D718(o);
-
         return hl+4;
     }
 
     // Populate sprite metadata
     private void transfer_sprite_D237(GraphicObject o, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
-        //debugPanel1.append("transfer_sprite_D237 (hl: %02x, ix: %04x)".formatted(hl, ix));
         o.setGrNo(source.getU(hl)); // sprite index
         o.setFlags7(source.getU(hl+1)); // flags
         o.setPixelX(source.getU(hl+2)); // pixel X
@@ -578,22 +573,19 @@ public class Game implements Runnable {
     }
 
     private void print_sprite_D718(GraphicObject o) {
-        GraphicObjects metadata = o.getParent();
-        int ix = o.ix;
-        Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(metadata, ix);
+        Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(o);
         if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
         Sprite sprite = spriteO.get();
 
-        int x = metadata.getPixelX(ix);
-        int y = metadata.getPixelY(ix);
+        int x = o.getPixelX();
+        int y = o.getPixelY();
         int xOffset = (x & 7);
-        // JR Z,$D76F    ; {no, skip
 
         // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
         // we skip this part entirely, using inner for loop instead
-        metadata.setSpriteHeight(ix, sprite.lines); // height_lines
+        o.setSpriteHeight(sprite.lines);
         // off bottom of screen?
-        if(y + metadata.getSpriteHeight(ix)>0xC0) metadata.setSpriteHeight(ix, 0xC0 - y);
+        if(y + o.getSpriteHeight()>0xC0) o.setSpriteHeight(0xC0 - y);
 
         int de = 0;
 
@@ -602,15 +594,15 @@ public class Game implements Runnable {
 
         if(xOffset == 0) {
             //@label=loc_D76F
-            metadata.setSpriteWidthB(ix, sprite.width);
-            for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
+            o.setSpriteWidthB(sprite.width);
+            for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
                 for (int i = 0; i < sprite.width; i++) shadowMemory.setByteAt(bc+i, sprite.applyToByte(shadowMemory.getByteAt(bc+i), de+i));
                 bc += 0x20;
                 de += sprite.width;
             }
         } else {
-            metadata.setSpriteWidthB(ix, sprite.width + 1);
-            for(int lineNo = 0; lineNo<metadata.getSpriteHeight(ix); lineNo++) {
+            o.setSpriteWidthB(sprite.width + 1);
+            for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
                 // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
                 for (int i = 0; i < sprite.width; i++) {
                     int bufByteLeft = shadowMemory.getByteAt(bc+i);

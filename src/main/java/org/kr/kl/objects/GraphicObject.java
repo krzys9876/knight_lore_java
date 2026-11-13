@@ -115,6 +115,8 @@ public class GraphicObject {
     public void setXAdj(int xAdj) { parent.setXAdj(ix, xAdj); }
     public void setYAdj(int yAdj) { parent.setYAdj(ix, yAdj); }
     public void setXYAdj(int xAdj, int yAdj) { parent.setXYAdj(ix, xAdj, yAdj); }
+    public void setSpriteWidthB(int w) { parent.setSpriteWidthB(ix, w); }
+    public void setSpriteHeight(int h) { parent.setSpriteHeight(ix, h); }
 
     public boolean isDead() { return parent.isDead(ix); }
     public void setDead() { parent.setDead(ix); }

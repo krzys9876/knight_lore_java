@@ -26,12 +26,12 @@ public class SpriteData {
     }
 
     // Returns address of sprite graphics data or 0 if null sprite
-    public Optional<Sprite> flip_sprite_D6EF(GraphicObjects metadata, int ix) {
-        int grNo = metadata.getGrNo(ix);
+    public Optional<Sprite> flip_sprite_D6EF(GraphicObject o) {
+        int grNo = o.getGrNo();
         if(grNo == 0) return Optional.empty();
 
         Sprite sprite = sprites[grNo];
-        sprite.flip(metadata.isHFlip(ix), metadata.isVFlip(ix));
+        sprite.flip(o.isHFlip(), o.isVFlip());
         return Optional.of(sprite);
     }
 }
