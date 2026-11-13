@@ -960,15 +960,10 @@ public class Game implements Runnable {
                 exit = onscreen_loop_AFBD();
                 debugPanel1.setText("");
                 debugPanel2.setText("");
-                int cnt = 0;
-                for(int ix = graphicObjects.start(); ix < graphicObjects.endExcl(); ix+=0x20) {
-                    if(graphicObjects.getGrNo(ix)!=0) {
-                        debugPanel2.append(graphicObjects.objectInfo(cnt, ix));
-                    }
-                    cnt++;
-                }
+                for(int i = 0; i < graphicObjects.size; i++)
+                    if(graphicObjects.o(i).getGrNo() !=0) debugPanel2.append(graphicObjects.objectInfo(i, graphicObjects.o(i).ix));
+
                 debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
-                //debugTable("Sp.obj", special_objs_tbl_6FF2.start, special_objs_tbl_6FF2.getCopy(), 9, debugPanel1);
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphicObjects.playerBottom().getScreen()));
                 debugPanel1.append(String.format("Objects collected: %d of %d", variables.getU(0x5BBB), params.getCauldronRequiredObjects()));
                 int hl = ret_next_obj_required_C274();
