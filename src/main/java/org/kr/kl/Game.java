@@ -1525,7 +1525,7 @@ public class Game implements Runnable {
             case 0xB6, 0xB7: upd_182_183_B5FF(ix); break;
             case 0xB9, 0xBB: upd_185_187_BF37(ix); break;
 
-            default: IO.println("Not updated: %02x (%d)".formatted(graphicObjects.getGrNo(ix),graphicObjects.getGrNo(ix))); break;
+            default: IO.println("Not updated: %02x (%d)".formatted(o.getGrNo(),o.getGrNo())); break;
         }
     }
 
