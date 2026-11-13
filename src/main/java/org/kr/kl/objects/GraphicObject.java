@@ -147,6 +147,8 @@ public class GraphicObject {
 
     public boolean isTriggered() { return parent.isTriggered(ix); }
     public boolean justDropped() { return parent.justDropped(ix); }
+    public void setJustDropped() { parent.setJustDropped(ix); }
+    public void resetJustDropped() { parent.resetJustDropped(ix); }
 
     public void setTriggered() { parent.setTriggered(ix); }
     public void resetTriggered() { parent.resetTriggered(ix); }

@@ -1501,7 +1501,7 @@ public class Game implements Runnable {
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(o); break;
             case 0x5B: upd_91_B683(o); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(); break;
-            case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(ix); break;
+            case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(o); break;
             case 0x67: upd_103_C1AB(ix); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(ix); break;
             case 0x6F: upd_111_B95E(ix); break;
@@ -2820,19 +2820,15 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_96_to_102_C28B(int ix) {
-        //c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
+    private void upd_96_to_102_C28B(GraphicObject o) {
+        o.setXYAdj(-12, -4);
 
-        dec_dZ_and_update_XYZ_C700(ix);
-        boolean justDropped = graphicObjects.justDropped(ix);
-        if(!justDropped) {
-            boolean moving = graphicObjects.isMoving(ix);
-            if(!moving) return;
-        }
-        graphicObjects.resetJustDropped(ix);
-        graphicObjects.setDX(ix, 0);
-        graphicObjects.setDY(ix, 0);
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        if(!o.justDropped() && !o.isMoving()) return;
+
+        o.resetJustDropped();
+        o.setDX(0);
+        o.setDY(0);
         // c$C232 CALL $B467    ; // ignore audio
         //set_wipe_and_draw_flags_C692(block, ix);
     }
