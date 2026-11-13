@@ -1058,14 +1058,14 @@ public class Game implements Runnable {
 
         // @label=loc_B074
         variables.set(0x5BC5, 0);
-        int ix = 0x5C08;
-        if(graphicObjects.getGrNo(ix)==0 && graphicObjects.getGrNo(ix + 0x20)==0) {
+        if(graphicObjects.playerBottom().getGrNo()==0 && graphicObjects.playerTop().getGrNo()==0) {
             player_dies_AFB7();
             exitingScreen = true;
             return gameOver;
         }
 
         // @label=reset_objs_wipe_flag
+        // Mot used - all objects are redrawn
         for(int addr = graphicObjects.start(); addr<graphicObjects.endExcl(); addr+=0x20)
             graphicObjects.resetWipe(addr); // c$B090 RES 5,(HL)    ;
 
