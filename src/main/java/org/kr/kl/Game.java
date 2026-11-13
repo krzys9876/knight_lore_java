@@ -1504,9 +1504,9 @@ public class Game implements Runnable {
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(o); break;
             case 0x67: upd_103_C1AB(o); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(o); break;
-            case 0x6F: upd_111_B95E(ix); break;
+            case 0x6F: upd_111_B95E(o); break;
             case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0xB8: upd_112_to_118_184_BF2B(ix); break;
-            case 0x77: upd_119_BF3F(ix); break;
+            case 0x77: upd_119_BF3F(o); break;
             case 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E: upd_120_to_126_BEFE(ix); break;
             case 0x7F: upd_127_BF11(o); break;
             case 0x80, 0x81, 0x82: upd_128_to_130_C4D3(o); break;
@@ -1523,7 +1523,7 @@ public class Game implements Runnable {
             case 0xB2, 0xB3: upd_178_179_B865(ix); break;
             case 0xB4, 0xB5: upd_180_181_B80F(ix); break;
             case 0xB6, 0xB7: upd_182_183_B5FF(ix); break;
-            case 0xB9, 0xBB: upd_185_187_BF37(ix); break;
+            case 0xB9, 0xBB: upd_185_187_BF37(o); break;
 
             default: IO.println("Not updated: %02x (%d)".formatted(o.getGrNo(),o.getGrNo())); break;
         }
@@ -2916,7 +2916,7 @@ public class Game implements Runnable {
         int ptr = h * 256 + l;
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
-        upd_111_B95E(ix);
+        upd_111_B95E(graphicObjects.i2o(ix));
     }
 
     private void prepare_final_animation_C2CC() {
@@ -2961,10 +2961,9 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_111_B95E(int ix) {
+    private void upd_111_B95E(GraphicObject o) {
         // ; invalid
-        // @label=upd_111
-        graphicObjects.setGrNo(ix, 1);
+        o.setGrNo(1);
         // ignore audio
     }
 
@@ -2976,11 +2975,9 @@ public class Game implements Runnable {
         // ignore audio
     }
 
-    private void upd_119_BF3F(int ix) {
-        //c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
-
-        upd_111_B95E(ix); // Fix bug/feature in the source (writing to ROM)
+    private void upd_119_BF3F(GraphicObject o) {
+        o.setXYAdj(-12, -4);
+        upd_111_B95E(o); // Fix bug/feature in the source (writing to ROM)
     }
 
     private void upd_120_to_126_BEFE(int ix) {
@@ -3091,7 +3088,7 @@ public class Game implements Runnable {
 
         int firstSpObjGrNo =  graphicObjects.getGrNo(0x5C48);
         if(firstSpObjGrNo != 0) {
-            upd_111_B95E(ix);
+            upd_111_B95E(graphicObjects.i2o(ix));
             return;
         }
 
@@ -3145,7 +3142,7 @@ public class Game implements Runnable {
         if(cauldronRoom) {
             int grNo = graphicObjects.getGrNo(graphicObjects.start());
             if (((grNo - 0x10) & 0xFF) >= 0x40) { // is player dead (sparkles)
-                upd_111_B95E(ix); // ; final sparkles in cauldron
+                upd_111_B95E(graphicObjects.i2o(ix)); // ; final sparkles in cauldron
                 return;
             }
         }
@@ -3267,14 +3264,14 @@ public class Game implements Runnable {
         //set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void upd_185_187_BF37(int ix) {
-        int l = graphicObjects.getTemp10(ix);
-        int h = graphicObjects.getTemp11(ix);
+    private void upd_185_187_BF37(GraphicObject o) {
+        int l = o.getTemp10();
+        int h = o.getTemp11();
         if(l!=0 || h!=0) {
             int spi = specialObjects.getIndex(h*256+l);
             specialObjects.clearGraphicNo(spi); //  $BF3D LD (HL),$00   ; zap graphic_no in special_objs_tbl
         }
-        upd_119_BF3F(ix);
+        upd_119_BF3F(o);
     }
 
     private void renderAllSprites(GraphicObjects block, int from, int cnt) {
