@@ -16,7 +16,7 @@ public class GraphicObject {
     public void setBitGrNo(int bit) { parent.setBitGrNo(ix, bit); }
     public void resetBitGrNo(int bit) { parent.resetBitGrNo(ix, bit); }
     public void toggleBitGrNo(int bit) { parent.toggleBitGrNo(ix, bit); }
-
+    public boolean isBitSetGrNo(int bit) { return parent.isBitSetGrNo(ix, bit); }
 
     public int getX() { return parent.getX(ix); }
     public int getY() { return parent.getY(ix); }
@@ -30,6 +30,8 @@ public class GraphicObject {
     public int getDYu() { return parent.getDYu(ix); }
     public int getDZ() { return parent.getDZ(ix); }
     public int getDZu() { return parent.getDZu(ix); }
+    public int getXAdj() { return parent.getXAdj(ix); }
+    public int getYAdj() { return parent.getYAdj(ix); }
     public int getDXAdj() { return parent.getDXAdj(ix); }
     public int getDYAdj() { return parent.getDYAdj(ix); }
     public boolean isMoving() { return getDX()!=0 || getDY()!=0 || getDZ()!=0; }

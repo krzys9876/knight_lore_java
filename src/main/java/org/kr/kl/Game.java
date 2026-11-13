@@ -1500,7 +1500,7 @@ public class Game implements Runnable {
             case 0x56, 0x57: upd_86_87_B7ED(o); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(o); break;
             case 0x5B: upd_91_B683(o); break;
-            case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(ix); break;
+            case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(ix); break;
             case 0x67: upd_103_C1AB(ix); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(ix); break;
@@ -2785,39 +2785,38 @@ public class Game implements Runnable {
         add_dXYZ_C706(ix);
     }
 
-    private void upd_92_to_95_C337(int ix) {
-        //c$C4ED LD HL,$FEF4   ; -2, -12
-        graphicObjects.setXYAdj(ix, -12, -2);
-        if(graphicObjects.isDead(ix)) {
+    private void upd_92_to_95_C337() {
+        // NOTE: this applies only to player sprite
+        GraphicObject o = graphicObjects.playerBottom();
+        o.setXYAdj(-12, -2);
+        if(o.isDead()) {
             if (variables.getU(0x5BC3) == 0) {
-                init_death_sparkles_BF21(ix);
+                init_death_sparkles_BF21(o.ix);
                 return;
             }
         }
         //if((rnd.getSeed2() & 3) != 0) return;
         // No randomness - transformation looks more dynamic
         if((tickNo % 3) != 0) return;
-        int counter = graphicObjects.getTemp10(ix) -1;
-        graphicObjects.setTemp10(ix, counter);
-        //IO.println("upd_92_to_95_C337 sprite = "+block.get(ix));
-        //debugTableConsole("Graphics while transforming:", graphic_objs_tbl_5C08.start, graphic_objs_tbl_5C08.getCopy());
+        int counter = o.getTemp10() -1;
+        o.setTemp10(counter);
 
         if(counter == 0) {
             // End transformation
             int a = variables.getU(0x5BB1) ^ 0x20;
-            graphicObjects.setGrNo(ix, a);
+            o.setGrNo(a);
             a += 0x10;
-            graphicObjects.setGrNo(ix + 0x20, a);
+            graphicObjects.playerTop().setGrNo(a);
             variables.set(0x5BB1, 0);
-            graphicObjects.setXYAdj(ix, -12, -6);
-            boolean spriteFlag = graphicObjects.isBitSetGrNo(ix, 5);
-            if (spriteFlag) graphicObjects.setYAdj(ix, graphicObjects.getYAdj(ix) - 1);
+            o.setXYAdj(-12, -6);
+            boolean spriteFlag = o.isBitSetGrNo(5);
+            if (spriteFlag) o.setYAdj(o.getYAdj() - 1);
         } else {
             // Continue transformation
             int nextSprite = (params.getRnd().getSeed3() & 3) | 0x5C;
-            if(nextSprite != graphicObjects.getGrNo(ix)) nextSprite = nextSprite ^ 1;
-            graphicObjects.setGrNo(ix, nextSprite);
-            graphicObjects.toggleHFlip(ix);
+            if(nextSprite != o.getGrNo()) nextSprite = nextSprite ^ 1;
+            o.setGrNo(nextSprite);
+            o.toggleHFlip();
         }
     }
 
