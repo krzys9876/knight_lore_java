@@ -2544,16 +2544,16 @@ public class Game implements Runnable {
         o.setDX(o.isEast() ? 2 : -2);
         // $B801 CALL $B45D     ; // ignore audio
         dec_dZ_and_update_XYZ_C700(o);
-        loc_B82F(o.ix, true);
+        loc_B82F(o, true);
     }
 
     // Toggle direction if OOB
-    private void loc_B82F(int ix, boolean isX) {
-        if(isX && graphicObjects.isOobX(ix)) graphicObjects.toggleEastWest(ix);
-        else if(!isX && graphicObjects.isOobY(ix)) graphicObjects.toggleNorthSouth(ix);
+    private void loc_B82F(GraphicObject o, boolean isX) {
+        if(isX && o.isOobX()) o.toggleEastWest();
+        else if(!isX && o.isOobY()) o.toggleNorthSouth();
 
-        graphicObjects.i2o(ix).toggleNextPrevSprite();
-        graphicObjects.i2o(ix).setBothDeadlyFlags();
+        o.toggleNextPrevSprite();
+        o.setBothDeadlyFlags();
         //o.setWipeAndDraw();
     }
 
@@ -2681,7 +2681,7 @@ public class Game implements Runnable {
             o.setDZ(dZ);
         } else {
             if(z <= 0x80) {
-                add_obj_to_cauldron_C245(o.ix);
+                add_obj_to_cauldron_C245(o);
                 return;
             } else o.setIgnore3D(); // ; ignore in 3D calcs
         }
@@ -2690,10 +2690,10 @@ public class Game implements Runnable {
         // set_wipe_and_draw_flags_C692(block, ix);
     }
 
-    private void add_obj_to_cauldron_C245(int ix) {
-        graphicObjects.setZ(ix, 0x80);
+    private void add_obj_to_cauldron_C245(GraphicObject o) {
+        o.setZ(0x80);
         int hl = ret_next_obj_required_C274();
-        int grNo = graphicObjects.getGrNo(ix);
+        int grNo = o.getGrNo();
         boolean sameAsRequired = objects_required_C27D.getU(hl) == (grNo & 0x07);
         if(sameAsRequired) {
             variables.set(0x5BBB, variables.getU(0x5BBB) + 1);
@@ -2702,12 +2702,12 @@ public class Game implements Runnable {
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
         variables.set(0x5BC4, 0);
-        int l = graphicObjects.getTemp10(ix);
-        int h = graphicObjects.getTemp11(ix);
+        int l = o.getTemp10();
+        int h = o.getTemp11();
         int ptr = h * 256 + l;
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
-        upd_111_B95E(graphicObjects.i2o(ix));
+        upd_111_B95E(o);
     }
 
     private void prepare_final_animation_C2CC() {
@@ -2964,7 +2964,7 @@ public class Game implements Runnable {
         if(o.isNorth()) o.setDY(2); else o.setDY(-2);
         // $B801 CALL $B45D     ; // ignore audio
         dec_dZ_and_update_XYZ_C700(o);
-        loc_B82F(o.ix, false);
+        loc_B82F(o, false);
     }
 
     private void upd_182_183_B5FF(GraphicObject o) {
