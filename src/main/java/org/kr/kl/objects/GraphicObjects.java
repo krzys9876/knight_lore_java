@@ -72,7 +72,7 @@ public class GraphicObjects {
     public GraphicObject i2o(int ix) { return objects[(ix - start()) / 0x20]; }
     public GraphicObject playerBottom() { return o(0); }
     public GraphicObject playerTop() { return o(1); }
-    public final int specialObjStartIx = 3;
+    public final int specialObjStartIx = 2;
     public GraphicObject firstSpecObj() { return o(specialObjStartIx); }
     public GraphicObject next(GraphicObject o) {
         int nextIndex = (o.ix - start() + 0x20) / 0x20;

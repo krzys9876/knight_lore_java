@@ -95,9 +95,9 @@ public class GraphicObject {
     public int getFlags7() { return parent.getFlags7(ix); }
     //public void setFlags7(int ix, int f) { data.set(ix + 7, f); }
 
-    //public boolean isNearArch(int ix) { return Flags7.isNearArch(getFlags7(ix)); }
-    //public void setNearArch(int ix) { setFlags7(ix, Flags7.setNearArch(getFlags7(ix))); }
-    //public void resetNearArch(int ix) { setFlags7(ix, Flags7.resetNearArch(getFlags7(ix))); }
+    public boolean isNearArch() { return parent.isNearArch(ix); }
+    public void setNearArch() { parent.setNearArch(ix); }
+    public void resetNearArch() { parent.resetNearArch(ix); }
 
     public boolean ignore3D() { return parent.ignore3D(ix); }
     public void setIgnore3D() { parent.setIgnore3D(ix); }

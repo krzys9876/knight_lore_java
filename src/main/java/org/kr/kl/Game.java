@@ -1086,16 +1086,17 @@ public class Game implements Runnable {
         boolean cauldronRoom = graphicObjects.playerBottom().getScreen() == 0x88;
         if(!cauldronRoom) return;
 
-        GraphicObject firstSpecObj = graphicObjects.firstSpecObj();
-        int grNo = firstSpecObj.getGrNo(); // ; special_objs_here[1]
+        // NOTE: first special object is cauldron bubbles
+        GraphicObject secondSpecObj = graphicObjects.firstSpecObj().next();
+        int grNo = secondSpecObj.getGrNo(); // ; special_objs_here[1]
         if(grNo != 0) return;
 
         if(variables.getU(0x5BC3) != 0) return;
 
         // 18 bytes to copy
-        graphicObjects.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, firstSpecObj.ix, 0x12);
+        graphicObjects.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, secondSpecObj.ix, 0x12);
         // c$C4D8 LD HL,$FCF4   ; -4, -12
-        firstSpecObj.setXYAdj(-12, -4);
+        secondSpecObj.setXYAdj(-12, -4);
     }
 
     private long getDelayMs() {
@@ -1516,8 +1517,8 @@ public class Game implements Runnable {
             case 0x8F: upd_143_B6A2(o); break;
             case 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D: upd_144_to_149_152_to_157_B6F9(o); break;
             case 0x96, 0x97: upd_150_151_B73C(o); break;
-            case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(ix); break;
-            case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(ix); break;
+            case 0xA0, 0xA1, 0xA2, 0xA3: upd_160_to_163_B8DA(o); break;
+            case 0xA4, 0xA5, 0xA6, 0xA7: upd_164_to_167_B92C(o); break;
             case 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF: upd_168_to_175_B923(ix); break;
             case 0xB0, 0xB1: upd_176_177_B83F(o); break;
             case 0xB2, 0xB3: upd_178_179_B865(ix); break;
@@ -3068,35 +3069,33 @@ public class Game implements Runnable {
         }
     }
 
-    private void upd_160_to_163_B8DA(int ix) {
-        // c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
+    private void upd_160_to_163_B8DA(GraphicObject o) {
+        o.setXYAdj(-12, -4);
 
-        int firstSpObjGrNo =  graphicObjects.getGrNo(0x5C48);
-        if(firstSpObjGrNo != 0) {
-            upd_111_B95E(graphicObjects.i2o(ix));
+        if(graphicObjects.firstSpecObj().getGrNo() != 0) {
+            upd_111_B95E(o);
             return;
         }
 
-        graphicObjects.setIgnore3D(ix); // ; ignore in 3D calcs
-        dec_dZ_and_update_XYZ_C700(ix); // apply dXYZ now
-        next_graphic_no_mod_4_B98C(ix);
+        o.setIgnore3D(); // ; ignore in 3D calcs
+        dec_dZ_and_update_XYZ_C700(o.ix); // apply dXYZ now
+        next_graphic_no_mod_4_B98C(o.ix);
 
-        int z = graphicObjects.getZ(ix);
-        graphicObjects.setDZ(ix, 2); // ; dZ=2 - will be applied next frame as C700 has already been called
+        int z = o.getZ();
+        o.setDZ(2); // ; dZ=2 - NOTE: will be applied next frame as C700 has already been called
         if(z >= 0xA0) {
-            graphicObjects.setDZ(ix, 1); // dZ=1
-            int playerGrNo = graphicObjects.getGrNo(graphicObjects.start());
+            o.setDZ(1); // dZ=1
+            int playerGrNo = graphicObjects.playerBottom().getGrNo();
             boolean isWulf = ((playerGrNo - 0x30) & 0xFF) < 0x10;
             if(!isWulf) {
-                int grNo = graphicObjects.getGrNo(ix);
+                int grNo = o.getGrNo();
                 if((grNo & 3) == 0) {
                     int hl = ret_next_obj_required_C274();
-                    graphicObjects.setGrNo(ix, objects_required_C27D.getU(hl) | 0xA8);
+                    o.setGrNo(objects_required_C27D.getU(hl) | 0xA8);
                 }
             } else {
-                graphicObjects.setBitGrNo(ix, 3);
-                graphicObjects.resetIgnore3D(ix); // ; don't ignore in 3D calcs
+                o.setBitGrNo(3);
+                o.resetIgnore3D();
             }
         }
         //set_wipe_and_draw_flags_C692(block, ix);
@@ -3107,28 +3106,25 @@ public class Game implements Runnable {
         return objects_required_C27D.start + objsInCauldron;
     }
 
-    private void upd_164_to_167_B92C(int ix) {
-        // c$C4D8 LD HL,$FCF4   ; -4, -12
-        graphicObjects.setXYAdj(ix, -12, -4);
+    private void upd_164_to_167_B92C(GraphicObject o) {
+        o.setXYAdj(-12, -4);
 
-        boolean cauldronRoom = graphicObjects.getScreen(ix) == 0x88;
+        int ix=o.ix;
+        boolean cauldronRoom = o.getScreen() == 0x88;
         int dx = 4;
         int dy = 4;
-        if(!cauldronRoom) {
-            boolean nearArch = graphicObjects.isNearArch(graphicObjects.start());
-            if(nearArch) {
-                dx = 1;
-                dy = 1;
-            }
+        if(!cauldronRoom && graphicObjects.playerBottom().isNearArch()) {
+            dx = 1;
+            dy = 1;
         }
-        move_towards_plyr_B965(ix, dx, dy);
-        dec_dZ_and_update_XYZ_C700(ix);
-        next_graphic_no_mod_4_B98C(ix);
+        move_towards_plyr_B965(o.ix, dx, dy);
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        next_graphic_no_mod_4_B98C(o.ix);
 
         if(cauldronRoom) {
-            int grNo = graphicObjects.getGrNo(graphicObjects.start());
+            int grNo = graphicObjects.playerBottom().getGrNo();
             if (((grNo - 0x10) & 0xFF) >= 0x40) { // is player dead (sparkles)
-                upd_111_B95E(graphicObjects.i2o(ix)); // ; final sparkles in cauldron
+                upd_111_B95E(o); // ; final sparkles in cauldron
                 return;
             }
         }
