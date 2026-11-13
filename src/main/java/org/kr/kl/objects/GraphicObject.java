@@ -197,4 +197,8 @@ public class GraphicObject {
     public void decLookAroundCounter() { parent.decLookAroundCounter(ix); }
     public void initLookAroundCounter() { parent.initLookAroundCounter(ix); }
 
+    public int getTurnCounter() { return parent.getTurnCounter(ix); }
+    public void initTurnCounter() { parent.initTurnCounter(ix); }
+    public void decTurnCounter() { parent.decTurnCounter(ix); }
+
 }

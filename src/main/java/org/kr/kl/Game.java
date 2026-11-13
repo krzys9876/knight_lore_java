@@ -1762,7 +1762,7 @@ public class Game implements Runnable {
             // $C844 CALL $C00E    ; handle_pickup_drop
             handle_pickup_drop_C00E(o);
             // $C847 CALL $C89F    ; handle_left_right
-            handle_left_right_C89F(o.ix);
+            handle_left_right_C89F(o);
             // $C84A CALL $C948    ; handle_jump
             handle_jump_C948(o.ix);
             // $C84D CALL $C969    ; handle_forward
@@ -2350,31 +2350,27 @@ public class Game implements Runnable {
         keySequence.save(String.format("saves/%s/key_sequence.csv", gameId));
     }
 
-    private void handle_left_right_C89F(int ix) {
+    private void handle_left_right_C89F(GraphicObject o) {
+        int ix = o.ix;
         //NOTE: we ignore input method and react to keyboard only
         // @label=left_right_rotational
-        if(graphicObjects.getTurnCounter(ix) > 0) { // ; too soon to turn again?
-            graphicObjects.decTurnCounter(ix);
+        if(o.getTurnCounter() > 0) { // ; too soon to turn again?
+            o.decTurnCounter();
             return;
         }
         int keys = variables.getU(0x5BB5);
         if((keys & 3) == 0) return; // ; left or right?
 
-        if(graphicObjects.getEnterCounter(ix) > 0) return; // ; entering screen?
-        if(graphicObjects.isJumping(ix)) return; // ; already jumping?
+        if(o.getTurnCounter() > 0 || o.isJumping()) return; // ; already jumping?
         // $C911 CALL $B4C1     ;
         // ignore audio
         // @label=loc_C915
-        //int turnCounter = 2; // ; init turning delay counter
-        graphicObjects.initTurnCounter(ix);
+        o.initTurnCounter();
         boolean right = (keys & 1)>0;
         boolean left = (keys & 2)>0;
-        boolean hflip = !graphicObjects.isHFlip(ix);
-        if((right & hflip) || (left & !hflip)) graphicObjects.toggleBitGrNo(ix, 3);
-        graphicObjects.toggleHFlip(ix);
-        int sprite = graphicObjects.getGrNo(ix);
-        sprite += 0x10; // ; top half
-        graphicObjects.setGrNo(ix + 0x20, sprite); // ; set sprite for top half
+        if((right & !o.isHFlip()) || (left & o.isHFlip())) o.toggleBitGrNo(3);
+        o.toggleHFlip();
+        o.next().setGrNo(o.getGrNo() + 0x10); // ; set sprite for top half
     }
 
     private void handle_jump_C948(int ix) {
