@@ -2199,12 +2199,11 @@ public class Game implements Runnable {
     }
 
     private boolean chk_and_init_transform_C306(GraphicObject o) {
-        int ix = o.ix;
         boolean transforming = variables.getU(0x5BB1) > 0;
         if(!transforming || o.getEnterCounter() > 0 || o.isJumping()) return false;
 
         variables.set(0x5BB1, o.getGrNo());
-        graphicObjects.setTemp10(ix, 8); // transform counter
+        o.setTemp10(8); // transform counter
 
         o.next().setGrNo(1); // update player top
         //set_wipe_and_draw_flags_C692(o.ix + 0x20);
