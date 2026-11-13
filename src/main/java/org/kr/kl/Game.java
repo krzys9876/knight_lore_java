@@ -1932,13 +1932,13 @@ public class Game implements Runnable {
     }
 
     private boolean is_on_or_near_obj_C17A(int ix, int iy) {
-        boolean intersectsX = do_objs_intersect_on_x_CC9D(ix, iy, 0);
+        boolean intersectsX = do_objs_intersect_on_x_CC9D(graphicObjects.i2o(ix), graphicObjects.i2o(iy), 0);
         if(!intersectsX) return false;
-        boolean intersectsY = do_objs_intersect_on_y_CCB2(ix, iy, 0);
+        boolean intersectsY = do_objs_intersect_on_y_CCB2(graphicObjects.i2o(ix), graphicObjects.i2o(iy), 0);
         if(!intersectsY) return false;
         int z = graphicObjects.getZ(ix);
         graphicObjects.setZ(ix, z - 4);
-        boolean intersectsZ = do_objs_intersect_on_z_CCC7(ix, iy, 0);
+        boolean intersectsZ = do_objs_intersect_on_z_CCC7(graphicObjects.i2o(ix), graphicObjects.i2o(iy), 0);
         graphicObjects.setZ(ix, z);
         return intersectsZ;
     }
@@ -1948,9 +1948,9 @@ public class Game implements Runnable {
         for(int b = 0; b<graphicObjects.size; b++) {
             GraphicObject objToCheck = graphicObjects.o(b);
             if(objToCheck.isNotIgnored() &&
-                    do_objs_intersect_on_x_CC9D(o.ix, objToCheck.ix, 0) &&
-                    do_objs_intersect_on_y_CCB2(o.ix, objToCheck.ix, 0) &&
-                    do_objs_intersect_on_z_CCC7(o.ix, objToCheck.ix, 0)) {
+                    do_objs_intersect_on_x_CC9D(o, objToCheck, 0) &&
+                    do_objs_intersect_on_y_CCB2(o, objToCheck, 0) &&
+                    do_objs_intersect_on_z_CCC7(o, objToCheck, 0)) {
                 o.resetIgnore3D(); // ; ignore this object
                 return true;
             }
@@ -2123,37 +2123,19 @@ public class Game implements Runnable {
     private int screen_south_CB29(int ix, int oldRoomSizeY) { return screenNorthSouth(ix, oldRoomSizeY, false); }
 
     //; abs(objX+newdX-thisX)-(objW+thisW)
-    private boolean do_objs_intersect_on_x_CC9D(int ix, int iy, int dxAdj) {
-        // dxAdj - C register
-        // ix: obj, iy: this
-        int objW = graphicObjects.getW(ix);
-        int thisW = graphicObjects.getW(iy);
-        int objX = graphicObjects.getX(ix);
-        int thisX = graphicObjects.getX(iy);
-        return Math.abs(objX + dxAdj - thisX) - (objW + thisW) < 0;
+    private boolean do_objs_intersect_on_x_CC9D(GraphicObject o1, GraphicObject o2, int dxAdj) {
+        return Math.abs(o1.getX() + dxAdj - o2.getX()) - (o1.getW() + o2.getW()) < 0;
     }
 
     //; (objY+l-thisY)-(objD+thisD) - note: there is an error in comment in original source
-    private boolean do_objs_intersect_on_y_CCB2(int ix, int iy, int dyAdj) {
-        // dyAdj - L register
-        // ix: obj, iy: this
-        int objD = graphicObjects.getD(ix);
-        int thisD = graphicObjects.getD(iy);
-        int objY = graphicObjects.getY(ix);
-        int thisY = graphicObjects.getY(iy);
-        return Math.abs(objY + dyAdj - thisY) - (objD + thisD) < 0;
+    private boolean do_objs_intersect_on_y_CCB2(GraphicObject o1, GraphicObject o2, int dyAdj) {
+        return Math.abs(o1.getY() + dyAdj - o2.getY()) - (o1.getD() + o2.getD()) < 0;
     }
 
     //; (objZ+H-thisZ)-(objH or thisH)
-    private boolean do_objs_intersect_on_z_CCC7(int ix, int iy, int dzAdj) {
-        // dzAdj - H register
-        // ix: obj, iy: this
-        int objZ = graphicObjects.getZ(ix);
-        int thisZ = graphicObjects.getZ(iy);
-        int objH = graphicObjects.getH(ix);
-        int thisH = graphicObjects.getH(iy);
-        int check = objZ + dzAdj - thisZ;
-        int d = check >= 0 ? thisH : objH;
+    private boolean do_objs_intersect_on_z_CCC7(GraphicObject o1, GraphicObject o2, int dzAdj) {
+        int check = o1.getZ() + dzAdj - o2.getZ();
+        int d = check >= 0 ? o2.getH() : o1.getH();
         return Math.abs(check) - d < 0;
     }
 
@@ -2169,8 +2151,8 @@ public class Game implements Runnable {
         for(int i=0; i<graphicObjects.size; i++) {
             if(graphicObjects.i2o(iy).isNotIgnored()) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if (do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
-                    while (do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
+                if (do_objs_intersect_on_x_CC9D(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dxAdj) && do_objs_intersect_on_y_CCB2(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dyAdj)) {
+                    while (do_objs_intersect_on_z_CCC7(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dzAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         graphicObjects.setOobZ(ix); // set Z OOB
                         setDestroyedFlags(ix, iy);
@@ -2194,8 +2176,8 @@ public class Game implements Runnable {
         for(int i=0; i<graphicObjects.size; i++) {
             if(graphicObjects.i2o(iy).isNotIgnored()) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
-                    while(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj)) {
+                if(do_objs_intersect_on_y_CCB2(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dyAdj) && do_objs_intersect_on_z_CCC7(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dzAdj)) {
+                    while(do_objs_intersect_on_x_CC9D(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dxAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         graphicObjects.setOobX(ix); // set X OOB
                         setDestroyedFlags(ix, iy);
@@ -2216,8 +2198,8 @@ public class Game implements Runnable {
         for(int i=0; i<graphicObjects.size; i++) {
             if(graphicObjects.i2o(iy).isNotIgnored()) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
-                    while(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
+                if(do_objs_intersect_on_x_CC9D(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dxAdj) && do_objs_intersect_on_z_CCC7(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dzAdj)) {
+                    while(do_objs_intersect_on_y_CCB2(graphicObjects.i2o(ix), graphicObjects.i2o(iy), dyAdj)) {
                         //IO.println("Intersects " + i + ":" + block.getU(iy));
                         graphicObjects.setOobY(ix); // set Y OOB
                         setDestroyedFlags(ix, iy);
