@@ -29,6 +29,7 @@ public class GraphicObject {
         return grNo;
     }
 
+    public boolean isNotIgnored() { return getGrNo() != 0 && !ignore3D(); }
 
     public int getX() { return parent.getX(ix); }
     public int getY() { return parent.getY(ix); }

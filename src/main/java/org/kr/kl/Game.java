@@ -1783,7 +1783,7 @@ public class Game implements Runnable {
             cant_drop_5BD3.set(0x5BD3, 0);
             int zOrig = o.getZ();
             o.setZ(zOrig + 12); // ; Z+12
-            boolean intersects = do_any_objs_intersect_B4FD(o.ix);
+            boolean intersects = do_any_objs_intersect_B4FD(o);
             o.setZ(zOrig); // ; restore original Z
             if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
@@ -1943,21 +1943,19 @@ public class Game implements Runnable {
         return intersectsZ;
     }
 
-    private boolean do_any_objs_intersect_B4FD(int ix) {
-        int iy = graphicObjects.start();
-        graphicObjects.setIgnore3D(ix); // ; ignore this object
+    private boolean do_any_objs_intersect_B4FD(GraphicObject o) {
+        o.setIgnore3D(); // ; ignore this object
         for(int b = 0; b<graphicObjects.size; b++) {
-            if(is_object_not_ignored_B538(iy)) {
-                if(do_objs_intersect_on_x_CC9D(ix, iy, 0) &&
-                        do_objs_intersect_on_y_CCB2(ix, iy, 0) &&
-                        do_objs_intersect_on_z_CCC7(ix, iy, 0)) {
-                    graphicObjects.resetIgnore3D(ix); // ; ignore this object
-                    return true;
-                }
+            GraphicObject objToCheck = graphicObjects.o(b);
+            if(objToCheck.isNotIgnored() &&
+                    do_objs_intersect_on_x_CC9D(o.ix, objToCheck.ix, 0) &&
+                    do_objs_intersect_on_y_CCB2(o.ix, objToCheck.ix, 0) &&
+                    do_objs_intersect_on_z_CCC7(o.ix, objToCheck.ix, 0)) {
+                o.resetIgnore3D(); // ; ignore this object
+                return true;
             }
-            iy += 0x20;
         }
-        graphicObjects.resetIgnore3D(ix); // ; ignore this object
+        o.resetIgnore3D(); // ; ignore this object
         return false;
     }
 
@@ -2124,10 +2122,6 @@ public class Game implements Runnable {
     private int screen_north_CB0E(int ix, int oldRoomSizeY) { return screenNorthSouth(ix, oldRoomSizeY, true); }
     private int screen_south_CB29(int ix, int oldRoomSizeY) { return screenNorthSouth(ix, oldRoomSizeY, false); }
 
-    private boolean is_object_not_ignored_B538(int iy) {
-        return graphicObjects.getGrNo(iy) != 0 && !graphicObjects.ignore3D(iy);
-    }
-
     //; abs(objX+newdX-thisX)-(objW+thisW)
     private boolean do_objs_intersect_on_x_CC9D(int ix, int iy, int dxAdj) {
         // dxAdj - C register
@@ -2173,7 +2167,7 @@ public class Game implements Runnable {
     private int adj_dZ_for_obj_intersect_CC38(int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
         for(int i=0; i<graphicObjects.size; i++) {
-            if(is_object_not_ignored_B538(iy)) {
+            if(graphicObjects.i2o(iy).isNotIgnored()) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
                 if (do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
                     while (do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
@@ -2198,7 +2192,7 @@ public class Game implements Runnable {
     private int adj_dX_for_obj_intersect_CB9A(int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
         for(int i=0; i<graphicObjects.size; i++) {
-            if(is_object_not_ignored_B538(iy)) {
+            if(graphicObjects.i2o(iy).isNotIgnored()) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
                 if(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
                     while(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj)) {
@@ -2220,7 +2214,7 @@ public class Game implements Runnable {
     private int adj_dY_for_obj_intersect_CBE9(int ix, int dxAdj, int dyAdj, int dzAdj) {
         int iy = graphicObjects.start();
         for(int i=0; i<graphicObjects.size; i++) {
-            if(is_object_not_ignored_B538(iy)) {
+            if(graphicObjects.i2o(iy).isNotIgnored()) {
                 //IO.println("Analyze: "+i+":"+block.getU(iy));
                 if(do_objs_intersect_on_x_CC9D(ix, iy, dxAdj) && do_objs_intersect_on_z_CCC7(ix, iy, dzAdj)) {
                     while(do_objs_intersect_on_y_CCB2(ix, iy, dyAdj)) {
