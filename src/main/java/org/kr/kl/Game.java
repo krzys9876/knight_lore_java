@@ -1814,7 +1814,9 @@ public class Game implements Runnable {
                     if(foundPlace) room_to_drop_C0B2(o, slotD);
                 };
             }
-            done_pickup_drop_C09D(o.ix, origW, origD, origH);
+            o.setW(origW);
+            o.setD(origD);
+            o.setH(origH);
         } else {
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
@@ -1892,12 +1894,6 @@ public class Game implements Runnable {
         graphicObjects.setTemp11(iy, d);
         graphicObjects.setJustDropped(iy); // flag just dropped
         adjust_carried_C12B();
-    }
-
-    private void done_pickup_drop_C09D(int ix, int origW, int origD, int origH) {
-        graphicObjects.setW(ix, origW);
-        graphicObjects.setD(ix, origD);
-        graphicObjects.setH(ix, origH);
     }
 
     private void adjust_carried_C12B() {
