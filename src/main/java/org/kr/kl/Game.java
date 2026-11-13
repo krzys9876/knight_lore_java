@@ -1500,7 +1500,7 @@ public class Game implements Runnable {
             case 0x56, 0x57: upd_86_87_B7ED(o); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(o); break;
             case 0x5B: upd_91_B683(o); break;
-            case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(); break;
+            case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(o); break;
             case 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66: upd_96_to_102_C28B(o); break;
             case 0x67: upd_103_C1AB(o); break;
             case 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E: upd_104_to_110_C1F1(o); break;
@@ -1775,7 +1775,7 @@ public class Game implements Runnable {
         if(o.isDead()) {
             if (variables.getU(0x5BC3) == 0) {
                 o.next().setDead(); // SET 6,(IX+$2D)
-                init_death_sparkles_BF21(o.ix);
+                init_death_sparkles_BF21(o);
                 return;
             }
         }
@@ -2497,9 +2497,9 @@ public class Game implements Runnable {
         graphicObjects.setGrNo(ix, (sprite & 0xF8) | nextSprite); //  ; update sprite - NOTE we update only bottom half
     }
 
-    private void init_death_sparkles_BF21(int ix) {
-        graphicObjects.setGrNo(ix, 0x70);
-        graphicObjects.setIgnore3D(ix);
+    private void init_death_sparkles_BF21(GraphicObject o) {
+        o.setGrNo(0x70);
+        o.setIgnore3D();
         // c$BF31 CALL $B403    ; // ignore audio
         //set_wipe_and_draw_flags_C692(block, ix);
     }
@@ -2571,37 +2571,35 @@ public class Game implements Runnable {
 
     private void upd_32_to_47_CDDA(GraphicObject o) {
         o.setXYAdj(-12, -8);
-        upd_player_top_CDE2(o.ix);
+        upd_player_top_CDE2(o);
     }
 
-    private void upd_player_top_CDE2(int ix) {
-        if(graphicObjects.isDead(ix) && variables.getU(0x5BC3)==0) {
-            init_death_sparkles_BF21(ix);
+    private void upd_player_top_CDE2(GraphicObject o) {
+        if(o.isDead() && variables.getU(0x5BC3)==0) {
+            init_death_sparkles_BF21(o);
             return;
         }
 
-        // Player top is +32 from block start, player bottom is at block start
+        // Player top is the second object, player bottom is at block start
         // ; copy x,y,z,w,d,h,flags
-        graphicObjects.copyFrom(graphicObjects, ix - 0x20 + 1, ix + 1, 7);
-        graphicObjects.setH(ix, 0);
-        graphicObjects.setIgnore3D(ix);
-        int lookAroundCounter = graphicObjects.getLookAroundCounter(ix);
-        if(lookAroundCounter == 0) { // look around again
-            int sprite = graphicObjects.getGrNo(ix - 0x20); // bottom half
+        graphicObjects.copyFrom(graphicObjects, o.prev().ix + 1, o.ix + 1, 7);
+        o.setH(0);
+        o.setIgnore3D();
+        if(o.getLookAroundCounter() == 0) { // look around again
+            int sprite = o.prev().getGrNo(); // bottom half
             if(params.getRnd().getSeed3() < 2) {
                 sprite =  (sprite & 0xF8) | 6; // ; look one way
-                graphicObjects.initLookAroundCounter(ix);
+                o.initLookAroundCounter();
             } else if(params.getRnd().getSeed3() >= 0xFE) {
                 sprite = (sprite & 0xF8) | 7; // ; look the other way
-                graphicObjects.initLookAroundCounter(ix);
+                o.initLookAroundCounter();
             }
-            //IO.println("upd_player_top_CDE2 sprite = " + sprite);
-            graphicObjects.setGrNo(ix, sprite + 0x10);
+            o.setGrNo(sprite + 0x10);
         } else {
-            graphicObjects.decLookAroundCounter(ix);
+            o.decLookAroundCounter();
         }
-        int bottomZ = graphicObjects.getZ(ix - 0x20);
-        graphicObjects.setZ(ix, bottomZ + 0x0C);
+        int bottomZ = o.prev().getZ();
+        o.setZ(bottomZ + 0x0C);
     }
 
     private void upd_48_to_53_56_to_61_C828(GraphicObject o) {
@@ -2681,7 +2679,7 @@ public class Game implements Runnable {
 
     private void upd_64_to_79_CDDF(GraphicObject o) {
         o.setXYAdj(-12, -12);
-        upd_player_top_CDE2(o.ix);
+        upd_player_top_CDE2(o);
     }
 
     private void upd_80_to_83_C5C8(GraphicObject o) {
@@ -2782,13 +2780,12 @@ public class Game implements Runnable {
         add_dXYZ_C706(ix);
     }
 
-    private void upd_92_to_95_C337() {
+    private void upd_92_to_95_C337(GraphicObject o) {
         // NOTE: this applies only to player sprite
-        GraphicObject o = graphicObjects.playerBottom();
         o.setXYAdj(-12, -2);
         if(o.isDead()) {
             if (variables.getU(0x5BC3) == 0) {
-                init_death_sparkles_BF21(o.ix);
+                init_death_sparkles_BF21(o);
                 return;
             }
         }

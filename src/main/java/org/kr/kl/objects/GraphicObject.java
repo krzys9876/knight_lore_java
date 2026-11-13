@@ -11,6 +11,7 @@ public class GraphicObject {
 
     public GraphicObjects getPaarent() { return parent; }
     public GraphicObject next() { return parent.next(this);}
+    public GraphicObject prev() { return parent.prev(this);}
 
     public int getGrNo() { return parent.getGrNo(ix); }
     public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }
@@ -166,5 +167,9 @@ public class GraphicObject {
     public void incDirection() { parent.incDirection(ix); }
     public void toggleEastWest() { parent.toggleEastWest(ix); }
     public void toggleNorthSouth() { parent.toggleNorthSouth(ix); }
+
+    public int getLookAroundCounter() { return parent.getLookAroundCounter(ix); } // NOTE: multi-purpose bits
+    public void decLookAroundCounter() { parent.decLookAroundCounter(ix); }
+    public void initLookAroundCounter() { parent.initLookAroundCounter(ix); }
 
 }

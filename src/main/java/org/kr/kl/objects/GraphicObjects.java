@@ -79,6 +79,11 @@ public class GraphicObjects {
         assert(nextIndex < objects.length);
         return o(nextIndex);
     }
+    public GraphicObject prev(GraphicObject o) {
+        int nextIndex = (o.ix - start() - 0x20) / 0x20;
+        assert(nextIndex >=0);
+        return o(nextIndex);
+    }
 
 
     public final int size;
