@@ -143,5 +143,11 @@ public class GraphicObject {
     public void setRising() { parent.setRising(ix); }
     public void setDropping() { parent.setDropping(ix); }
 
+    public boolean isEast() { return parent.isEast(ix); }
+    public boolean isNorth() { return parent.isNorth(ix); }
+    public int getDirection() { return parent.getDirection(ix); }
+    public void incDirection() { parent.incDirection(ix); }
+    public void toggleEastWest() { parent.toggleEastWest(ix); }
+    public void toggleNorthSouth() { parent.toggleNorthSouth(ix); }
 
 }

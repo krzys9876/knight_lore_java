@@ -1497,7 +1497,7 @@ public class Game implements Runnable {
             case 0x50, 0x51, 0x52, 0x53: upd_80_to_83_C5C8(o); break;
             case 0x54: upd_84_C4C3(o); break;
             case 0x55: upd_85_C4B6(o); break;
-            case 0x56, 0x57: upd_86_87_B7ED(ix); break;
+            case 0x56, 0x57: upd_86_87_B7ED(o); break;
             case 0x58, 0x59, 0x5A: upd_88_to_90_C506(ix); break;
             case 0x5B: upd_91_B683(ix); break;
             case 0x5C, 0x5D, 0x5E, 0x5F: upd_92_to_95_C337(ix); break;
@@ -2741,16 +2741,14 @@ public class Game implements Runnable {
         // $C4C0 JP $C232      ;// ignore audio
     }
 
-    private void upd_86_87_B7ED(int ix) {
-        // c$C4F2 LD HL,$FCF8   ; -4, -8
-        graphicObjects.setXYAdj(ix, -8, -4);
+    private void upd_86_87_B7ED(GraphicObject o) {
+        o.setXYAdj(-8, -4);
 
-        graphicObjects.setDZ(ix, 1); // ; pre-load dZ=1
-        boolean movingEast = graphicObjects.isEast(ix);
-        if(movingEast) graphicObjects.setDX(ix, 2); else graphicObjects.setDX(ix, -2);
+        o.setDZ(1); // ; pre-load dZ=1
+        o.setDX(o.isEast() ? 2 : -2);
         // $B801 CALL $B45D     ; // ignore audio
-        dec_dZ_and_update_XYZ_C700(ix);
-        loc_B82F(ix, true);
+        dec_dZ_and_update_XYZ_C700(o.ix);
+        loc_B82F(o.ix, true);
     }
 
     // Toggle direction if OOB
