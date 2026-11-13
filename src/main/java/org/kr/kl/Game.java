@@ -544,43 +544,42 @@ public class Game implements Runnable {
 
     private void print_border_D296() {
         debugPanel1.append("print_border_D296");
-        int ix = 0xBFDB;
         int hl = 0xD2CF;
         // CALL $D24C x4
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF); // corners
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, ix, hl, border_data_D2CF); // horizontal lines
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, ix, hl, border_data_D2CF);
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 0, 1, 0x80, ix, hl, border_data_D2CF); // vertical lines
-        transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 0, 1, 0x80, ix, hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, border_data_D2CF); // corners
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, border_data_D2CF);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.o(0), 8, 0, 0x18, hl, border_data_D2CF); // horizontal lines
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.o(0), 8, 0, 0x18, hl, border_data_D2CF);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.o(0), 0, 1, 0x80, hl, border_data_D2CF); // vertical lines
+        transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.o(0), 0, 1, 0x80, hl, border_data_D2CF);
     }
 
-    private int transfer_sprite_and_print_D24C(GraphicObjects metadata, int ix, int hl, DataBlock source) {
+    private int transfer_sprite_and_print_D24C(GraphicObject o, int hl, DataBlock source) {
+        GraphicObjects metadata = o.getPaarent();
+        int ix = o.ix;
         // hl: sprite index, ix: scratchpad address
         //debugPanel1.append("transfer_sprite_and_print_D24C");
-        transfer_sprite_D237(metadata, ix, hl, source);
-        print_sprite_D718(metadata, ix);
+        transfer_sprite_D237(o, hl, source);
+        print_sprite_D718(o);
 
         return hl+4;
     }
 
     // Populate sprite metadata
-    private void transfer_sprite_D237(GraphicObjects medatada, int ix, int hl, DataBlock source) {
+    private void transfer_sprite_D237(GraphicObject o, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         //debugPanel1.append("transfer_sprite_D237 (hl: %02x, ix: %04x)".formatted(hl, ix));
-        medatada.setGrNo(ix, source.getU(hl)); // sprite index
-        medatada.setFlags7(ix, source.getU(hl+1)); // flags
-        medatada.setPixelX(ix, source.getU(hl+2)); // pixel X
-        medatada.setPixelY(ix, source.getU(hl+3)); // pixel Y
+        o.setGrNo(source.getU(hl)); // sprite index
+        o.setFlags7(source.getU(hl+1)); // flags
+        o.setPixelX(source.getU(hl+2)); // pixel X
+        o.setPixelY(source.getU(hl+3)); // pixel Y
     }
 
-    private void print_sprite_D718(GraphicObject metadata) {
-        print_sprite_D718(metadata.getPaarent(), metadata.ix);
-    }
-
-    private void print_sprite_D718(GraphicObjects metadata, int ix) {
+    private void print_sprite_D718(GraphicObject o) {
+        GraphicObjects metadata = o.getPaarent();
+        int ix = o.ix;
         Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(metadata, ix);
         if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
         Sprite sprite = spriteO.get();
@@ -626,14 +625,16 @@ public class Game implements Runnable {
         }
     }
 
-    private int transfer_and_multiple_print_sprite(GraphicObjects metadata, int dx, int dy, int times, int ix, int hl, DataBlock dataBlock) {
-        transfer_sprite_D237(metadata, ix, hl, dataBlock);
+    private int transfer_and_multiple_print_sprite(GraphicObject o, int dx, int dy, int times, int hl, DataBlock dataBlock) {
+        GraphicObjects metadata = o.getPaarent();
+        int ix = o.ix;
+        transfer_sprite_D237(o, hl, dataBlock);
         return multiple_print_sprite_BEE4(metadata, dx, dy, times, ix, hl);
     }
 
     private int multiple_print_sprite_BEE4(GraphicObjects metadata, int dx, int dy, int times, int ix, int hl) {
         for(int i=0; i<times; i++) {
-            print_sprite_D718(metadata, ix);
+            print_sprite_D718(metadata.i2o(ix));
             metadata.setPixelX(ix, metadata.getPixelX(ix) + dx);
             metadata.setPixelY(ix, metadata.getPixelY(ix) + dy);
         }
@@ -1185,7 +1186,7 @@ public class Game implements Runnable {
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
                 int spriteIndex = inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4);
                 scratch.setGrNo(spriteIndex);
-                print_sprite_D718(sprite_scratchpad_BFDB, scratch.ix);
+                print_sprite_D718(scratch);
                 // TODO: implement blit_to_screen
                 // $BFA2 CALL $D67C    ;
                 int attr = object_attributes_BFD3.getU(object_attributes_BFD3.start + (spriteIndex & 0x0F));
@@ -1224,7 +1225,7 @@ public class Game implements Runnable {
         sprite_scratchpad_BFDB.setFlags7(sprite_scratchpad_BFDB.start(), 0);
         sprite_scratchpad_BFDB.setPixelX(sprite_scratchpad_BFDB.start(), 0x10);
         sprite_scratchpad_BFDB.setPixelY(sprite_scratchpad_BFDB.start(), 0x20);
-        print_sprite_D718(sprite_scratchpad_BFDB, sprite_scratchpad_BFDB.start());
+        print_sprite_D718(sprite_scratchpad_BFDB.o(0));
         for(int i=0; i<2; i++) mainMemory.setByteAt(0x5A42+i, 0x47);
         for(int i=0; i<4; i++) mainMemory.setByteAt(0x5A62+i, 0x47);
     }
@@ -1323,7 +1324,7 @@ public class Game implements Runnable {
 
     private void renderOne(int de, RenderStack renderList) {
         int objectLoc = objects_to_draw_CE8B.getU(de) * 32 + graphicObjects.start();
-        if(calc_pixel_XY_D6C9(objectLoc)) print_sprite_D718(graphicObjects, objectLoc);
+        if(calc_pixel_XY_D6C9(objectLoc)) print_sprite_D718(graphicObjects.i2o(objectLoc));
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
         variables.set(0x5BBE, variables.getU(0x5BBE) + 1);
         renderList.reset();
@@ -1382,14 +1383,13 @@ public class Game implements Runnable {
 
     private void display_panel_D255() {
         sprite_scratchpad_BFDB.reset();
-        int ix = sprite_scratchpad_BFDB.start();
         int hl = panel_data_D27E.start;
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 16, -8, 5, ix, hl, panel_data_D27E);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
-        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 16, 8, 5, ix, hl, panel_data_D27E);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
-        transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, ix, hl, panel_data_D27E);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.o(0), 16, -8, 5, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, panel_data_D27E);
+        hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB.o(0), 16, 8, 5, hl, panel_data_D27E);
+        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, panel_data_D27E);
+        transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB.o(0), hl, panel_data_D27E);
     }
 
     private void display_sun_moon_frame_C3A4() {
@@ -1414,10 +1414,10 @@ public class Game implements Runnable {
         sprite_scratchpad_BFDB.setFlags7(ix, 0);
         sprite_scratchpad_BFDB.setPixelX(ix, 0xB8);
         sprite_scratchpad_BFDB.setPixelY(ix, 0);
-        print_sprite_D718(sprite_scratchpad_BFDB, ix);
+        print_sprite_D718(sprite_scratchpad_BFDB.o(0));
         sprite_scratchpad_BFDB.setPixelX(ix, 0xD0);
         sprite_scratchpad_BFDB.setGrNo(ix, 0xBA);
-        print_sprite_D718(sprite_scratchpad_BFDB, ix);
+        print_sprite_D718(sprite_scratchpad_BFDB.o(0));
     }
 
     // ; Input:HL starting location B  width (bytes) C  height (lines), A - value
@@ -3109,9 +3109,9 @@ public class Game implements Runnable {
 
     private void renderAllSprites(GraphicObjects block, int from, int cnt) {
         for(int i=from;i<from+cnt;i++) {
-            int ix = block.start() + i*0x20;
-            if(block.getGrNo(ix) != 0) {
-                if(calc_pixel_XY_D6C9(ix)) print_sprite_D718(block, ix);
+            GraphicObject o = block.o(i);
+            if(o.getGrNo() != 0) {
+                if(calc_pixel_XY_D6C9(o.ix)) print_sprite_D718(o);
             }
         }
     }

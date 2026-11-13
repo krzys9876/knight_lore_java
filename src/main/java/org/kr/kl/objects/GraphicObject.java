@@ -123,7 +123,7 @@ public class GraphicObject {
 
     // Flag 7
     public int getFlags7() { return parent.getFlags7(ix); }
-    //public void setFlags7(int ix, int f) { data.set(ix + 7, f); }
+    public void setFlags7(int f) { parent.setFlags7(ix, f); }
 
     public boolean isNearArch() { return parent.isNearArch(ix); }
     public void setNearArch() { parent.setNearArch(ix); }
