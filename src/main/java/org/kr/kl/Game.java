@@ -1755,7 +1755,7 @@ public class Game implements Runnable {
         // @label=loc_C83E
             // c$C83E CALL $C306    ;
         // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317
-        boolean transformStarted = chk_and_init_transform_C306(o.ix);
+        boolean transformStarted = chk_and_init_transform_C306(o);
         if(!transformStarted) {
         // $C841 CALL $D022    ; check_user_input
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
@@ -2272,25 +2272,21 @@ public class Game implements Runnable {
         }
     }
 
-    private boolean chk_and_init_transform_C306(int ix) {
+    private boolean chk_and_init_transform_C306(GraphicObject o) {
+        int ix = o.ix;
         boolean transforming = variables.getU(0x5BB1) > 0;
-        if(!transforming) return false;
-        int a =  graphicObjects.getFlagsC(ix) & 0xF0; // counter when entering the room
-        if (a > 0) return false;
-        boolean jumping = graphicObjects.isJumping(ix);
-        if (jumping) return false;
+        if(!transforming || o.getEnterCounter() > 0 || o.isJumping()) return false;
 
-        int sprite = graphicObjects.getGrNo(ix);
-        variables.set(0x5BB1, sprite);
+        variables.set(0x5BB1, o.getGrNo());
         graphicObjects.setTemp10(ix, 8); // transform counter
 
-        graphicObjects.setGrNo(ix + 0x20, 1); // update player top
-        set_wipe_and_draw_flags_C692(ix + 0x20);
+        o.next().setGrNo(1); // update player top
+        //set_wipe_and_draw_flags_C692(o.ix + 0x20);
         //@label=rand_legs_sprite
         int newSprite = (params.getRnd().getSeed3() & 0x03) | 0x5C;
-        if(graphicObjects.getGrNo(ix) == newSprite) newSprite^=1; // change if same as current
-        graphicObjects.setGrNo(ix, newSprite);
-        graphicObjects.toggleHFlip(ix);
+        if(o.getGrNo() == newSprite) newSprite^=1; // change if same as current
+        o.setGrNo(newSprite);
+        o.toggleHFlip();
 
         return true;
     }

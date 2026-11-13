@@ -153,13 +153,10 @@ public class GraphicObject {
     //public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
     //public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
 
-    //public int getEnterCounter(int ix) { return getFlagsC(ix) & 0xF0; }
+    public int getEnterCounter() { return parent.getEnterCounter(ix); }
     public boolean enteringScreen() { return parent.enteringScreen(ix); }
-    //public void initEnterCounter(int ix) { setFlagsC(ix, getFlagsC(ix) | 0x30); }
-    //public void decEnterCounter(int ix) {
-    //    int counter = getEnterCounter(ix);
-    //    if(counter >= 0x10) setFlagsC(ix, (getFlagsC(ix) & 0x0F) + counter - 0x10);
-    //}
+    public void initEnterCounter() { parent.initEnterCounter(ix); }
+    public void decEnterCounter() { parent.decEnterCounter(ix); }
 
     public boolean isOobX() { return parent.isOobX(ix); }
     public boolean isOobY() { return parent.isOobY(ix); }
