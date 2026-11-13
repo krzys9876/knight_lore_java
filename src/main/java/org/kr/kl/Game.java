@@ -2714,20 +2714,17 @@ public class Game implements Runnable {
         IO.println("prepare_final_animation_C2CC");
 
         variables.set(0x5BC3, 1);
-        int ix = 0x5C68; // ; special_objs_here[1]
+        int objIx = graphicObjects.specialObjStartIx + 1;
         for(int i=0; i< 0x0B; i++) { // ; wipe 11 objects in the room (1 special, 7 bg, 3 fg)
-            graphicObjects.setGrNo(ix, 1); // ; set graphic no. = INVALID
+            graphicObjects.o(objIx).setGrNo(1); // ; set graphic no. = INVALID
             //set_wipe_and_draw_flags_C692(graphic_objs_tbl_5C08, ix);
-            ix += 0x20; // ; entry size
+            objIx++;
         }
-
-        int bc = 0x6108; // end of table
-        while(ix < bc) {
-            int grNo = graphicObjects.getGrNo(ix);
-            if (grNo == 7) { // block
-                graphicObjects.setGrNo(ix, 0x83); // ; set to twinkly sprite
-            }
-            ix += 0x20;
+        while(objIx < graphicObjects.size) {
+            int grNo = graphicObjects.o(objIx).getGrNo();
+            if (grNo == 7)  // block
+                graphicObjects.o(objIx).setGrNo(0x83); // ; set to twinkly sprite
+            objIx++;
         }
     }
 
