@@ -1975,7 +1975,7 @@ public class Game implements Runnable {
         int dyAdj = o.getDY(); // L
         if(dyAdj != 0) {
             dyAdj = adj_dY_for_out_of_bounds_CD08(o.ix);
-            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(o.ix, dxAdj, dyAdj, dzAdj);
+            if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(o, dxAdj, dyAdj, dzAdj);
         }
 
         o.resetIgnore3D();
@@ -2105,24 +2105,21 @@ public class Game implements Runnable {
         return dxAdj;
     }
 
-    private int adj_dY_for_obj_intersect_CBE9(int ix, int dxAdj, int dyAdj, int dzAdj) {
-        int iy = graphicObjects.start();
+    private int adj_dY_for_obj_intersect_CBE9(GraphicObject o, int dxAdj, int dyAdj, int dzAdj) {
+        GraphicObject obj = graphicObjects.playerBottom();
         for(int i=0; i<graphicObjects.size; i++) {
-            if(graphicObjects.i2o(iy).isNotIgnored()) {
-                //IO.println("Analyze: "+i+":"+block.getU(iy));
-                if(graphicObjects.i2o(ix).intersectOnX(graphicObjects.i2o(iy), dxAdj) && graphicObjects.i2o(ix).intersectOnZ(graphicObjects.i2o(iy), dzAdj)) {
-                    while(graphicObjects.i2o(ix).intersectOnY(graphicObjects.i2o(iy), dyAdj)) {
-                        //IO.println("Intersects " + i + ":" + block.getU(iy));
-                        graphicObjects.setOobY(ix); // set Y OOB
-                        setDestroyedFlags(ix, iy);
-                        if(graphicObjects.isMoveable(iy)) graphicObjects.setDY(iy, graphicObjects.getDY(ix)); //copy dY
+            if(obj.isNotIgnored()) {
+                if(o.intersectOnX(obj, dxAdj) && o.intersectOnZ(obj, dzAdj)) {
+                    while(o.intersectOnY(obj, dyAdj)) {
+                        o.setOobY(); // set Y OOB
+                        setDestroyedFlags(o.ix, obj.ix);
+                        if(obj.isMoveable()) obj.setDY(o.getDY()); //copy dY
                         dyAdj = adj_d_for_out_of_bounds_CA89(dyAdj);
                         if (dyAdj == 0) return dyAdj;
-
                     }
                 }
             }
-            iy += 0x20;
+            if(i < graphicObjects.size - 1) obj = obj.next();
         }
         return dyAdj;
     }
