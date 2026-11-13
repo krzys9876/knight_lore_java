@@ -1940,7 +1940,7 @@ public class Game implements Runnable {
         //$C9D6 CALL M,$B451   ; ignore audio
 
         adj_for_out_of_bounds_CB45(player);
-        handle_exit_screen_CA70(player.ix);
+        handle_exit_screen_CA70(player);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
         if(!exitingScreen) {
             add_dXYZ_C706(player);
@@ -1972,47 +1972,34 @@ public class Game implements Runnable {
             dyAdj = adj_dY_for_out_of_bounds_CD08(o);
             if(dyAdj!=0) dyAdj = adj_dY_for_obj_intersect_CBE9(o, dxAdj, dyAdj, dzAdj);
         }
-
         o.resetIgnore3D();
-
         o.setDX(dxAdj);
         o.setDY(dyAdj);
         o.setDZ(dzAdj);
     }
 
-    private void handle_exit_screen_CA70(int ix) {
-        if(graphicObjects.enteringScreen(ix)) return;
-        if(!graphicObjects.isNearArch(ix)) return;
+    private void handle_exit_screen_CA70(GraphicObject player) {
+        int ix = player.ix;
+        if(player.enteringScreen() || !player.isNearArch()) return;
 
-        graphicObjects.resetNearArch(ix);
-
-        // $CA82 LD HL,($5BAB)  ;
-        // $CA85 PUSH HL        ;
+        player.resetNearArch();
         int oldRoomSizeX = variables.getU(0x5BAB); // L
         int oldRoomSizeY = variables.getU(0x5BAC); // H
 
-        //@label=screen_move_tbl
-        //b$CA92 DEFW $CA9A
-        //$CA94 DEFW $CAF3
-        //$CA96 DEFW $CB0E
-        //$CA98 DEFW $CB29
-        int currentScreen = graphicObjects.getScreen(ix);
-        int newScreen = switch(graphicObjects.i2o(ix).getSpriteDir()) {
-            case 0 -> screen_west_CA9A(ix, oldRoomSizeX);
-            case 1 -> screen_east_CAF3(ix, oldRoomSizeX);
-            case 2 -> screen_north_CB0E(ix, oldRoomSizeY);
-            case 3 -> screen_south_CB29(ix, oldRoomSizeY);
+        int currentScreen = player.getScreen();
+        int newScreen = switch(player.getSpriteDir()) {
+            case 0 -> screen_west_CA9A(player.ix, oldRoomSizeX);
+            case 1 -> screen_east_CAF3(player.ix, oldRoomSizeX);
+            case 2 -> screen_north_CB0E(player.ix, oldRoomSizeY);
+            case 3 -> screen_south_CB29(player.ix, oldRoomSizeY);
             default -> currentScreen;
         };
 
         if(currentScreen!=newScreen) {
-            // @label=exit_screen
-            int grNo = graphicObjects.getGrNo(ix);
-            if(grNo - 0x10 > 0x40) return;
-            //IO.println(String.format("EXIT: %d (%02X) -> %d (%02X)",currentScreen,currentScreen,newScreen,newScreen));
+            if(player.getGrNo() - 0x10 > 0x40) return;
             exitingScreen = true; //TODO: rethink if this is the correct way to flag this
-            graphicObjects.setScreen(ix, newScreen);
-            graphicObjects.initEnterCounter(ix);
+            player.setScreen(newScreen);
+            player.initEnterCounter();
             plyr_spr_1_scratchpad_D161.copyFrom(graphicObjects.playerBottom());
             plyr_spr_2_scratchpad_D181.copyFrom(graphicObjects.playerTop());
             plyr_spr_1_scratchpad_D161.setTemp10(plyr_spr_1_scratchpad_D161.getGrNo());
