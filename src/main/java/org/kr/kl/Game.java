@@ -1305,8 +1305,8 @@ public class Game implements Runnable {
     }
 
     private void renderOne(int de, RenderStack renderList) {
-        int objectLoc = objects_to_draw_CE8B.getU(de) * 32 + graphicObjects.start();
-        if(calc_pixel_XY_D6C9(objectLoc)) print_sprite_D718(graphicObjects.i2o(objectLoc));
+        GraphicObject o = graphicObjects.o(objects_to_draw_CE8B.getU(de));
+        if(calc_pixel_XY_D6C9(o)) print_sprite_D718(o);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
         variables.set(0x5BBE, variables.getU(0x5BBE) + 1);
         renderList.reset();
@@ -1822,7 +1822,7 @@ public class Game implements Runnable {
                 toDrop.setZ(player.getZ());
                 player.setZ(player.getZ() + 0x0C);
                 player.next().setZ(player.next().getZ() + 0x0C);
-                calc_pixel_XY_D6C9(toDrop.ix);
+                calc_pixel_XY_D6C9(toDrop);
                 drop_object_C106(player.ix, toDrop.ix);
             }
         }
@@ -3332,27 +3332,17 @@ public class Game implements Runnable {
         scrn_visited_5BE8.setBit(offsetBit, scrn_visited_5BE8.start + offsetByte);
     }
 
-    private boolean calc_pixel_XY_D6C9(int ix) {
+    private boolean calc_pixel_XY_D6C9(GraphicObject o) {
         // first check if object should disappear (including player)
-        //@label=calc_pixel_XY_and_render
-        if(graphicObjects.getGrNo(ix) == 1) { //; flagged as ???
-            graphicObjects.setGrNo(ix, 0);
+        if(o.getGrNo() == 1) { //; flagged as ???
+            o.setGrNo(0);
             return false;
         }
 
-        int x = graphicObjects.getX(ix);
-        x = x + graphicObjects.getY(ix);
-        x = x - 0x80;
-        x = (x + graphicObjects.getXAdj(ix)) & 0xFF;
-        graphicObjects.setPixelX(ix, x);
-        int y = graphicObjects.getY(ix);
-        y = y - graphicObjects.getX(ix);
-        y = y + 0x80;
-        y = y >> 1;
-        y = y + graphicObjects.getZ(ix);
-        y = y - 0x68;
-        y = y + graphicObjects.getYAdj(ix);
-        graphicObjects.setPixelY(ix, y);
+        int x = o.getX() + o.getY() - 0x80 + o.getXAdj();
+        o.setPixelX(x & 0xFF);
+        int y = (o.getY() - o.getX() + 0x80) / 2 + o.getZ() - 0x68 + o.getYAdj();
+        o.setPixelY(y & 0xFF);
         // $D6EC CP $C0         ; bottom line of screen?
         return y < 0xC0; // 192
     }
