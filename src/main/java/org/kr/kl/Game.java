@@ -686,7 +686,7 @@ public class Game implements Runnable {
     private void lose_life_D12A() {
         graphicObjects.playerBottom().copyFrom(plyr_spr_1_scratchpad_D161);
         graphicObjects.playerTop().copyFrom(plyr_spr_2_scratchpad_D181);
-        variables.setTransformFlag_5BB1(0);
+        variables.resetTransformFlag_5BB1();
         int livesLeft = variables.get_5BBA();
         if(livesLeft < 1) {
             variables.set_5BBA(-1);
@@ -1306,7 +1306,7 @@ public class Game implements Runnable {
         int nextSprite = currentSprite ^ 1; // flip last bit
         sun_moon_scratchpad_C44D.setGrNo(nextSprite);
         sun_moon_scratchpad_C44D.setPixelX(0xB0); // ; pixel X
-        variables.setTransformFlag_5BB1(1); // transform flag
+        variables.setTransformFlag_5BB1(); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
             int currDays = variables.getDays_5BB9();
@@ -1649,7 +1649,6 @@ public class Game implements Runnable {
             if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
             variables.setPickupPressed_5BB3();
-            variables.set_5BB4(1);
             int origW = o.getW();
             int origD = o.getD();
             int origH = o.getH();
@@ -2090,10 +2089,9 @@ public class Game implements Runnable {
     }
 
     private boolean chk_and_init_transform_C306(GraphicObject o) {
-        boolean transforming = variables.getTransformFlag_5BB1() > 0;
-        if(!transforming || o.getEnterCounter() > 0 || o.isJumping()) return false;
+        if(!variables.isTransformFlag_5BB1() || o.getEnterCounter() > 0 || o.isJumping()) return false;
 
-        variables.setTransformFlag_5BB1(o.getGrNo());
+        variables.setTransformGrNo_5BB1(o.getGrNo()); // preserve graphics no
         o.setTemp10(8); // transform counter
 
         o.next().setGrNo(1); // update player top
@@ -2507,11 +2505,11 @@ public class Game implements Runnable {
 
         if(counter == 0) {
             // End transformation
-            int a = variables.getTransformFlag_5BB1() ^ 0x20;
+            int a = variables.getTransformGrNo_5BB1() ^ 0x20;
             o.setGrNo(a);
             a += 0x10;
             graphicObjects.playerTop().setGrNo(a);
-            variables.setTransformFlag_5BB1(0);
+            variables.resetTransformFlag_5BB1();
             o.setXYAdj(-12, -6);
             boolean spriteFlag = o.isBitSetGrNo(5);
             if (spriteFlag) o.setYAdj(o.getYAdj() - 1);

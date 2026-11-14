@@ -8,12 +8,15 @@ public class Variables {
     private boolean exitingScreen = false;
     private boolean gameOver = false;
     private boolean shouldQuit = false;
+    private boolean transformFlag = false;
 
     public void setUserInputMethod(int value) { data.set(0x5BA4, value); }
     public void setSuppressBorder_5BB8(int value) { data.set(0x5BB8, value); }
     public void setOldInputMethod_5BA6(int value) { data.set(0x5BA6, value); }
     public void setOldInputMethod2_5BA7(int value) { data.set(0x5BA7, value); }
-    public void setTransformFlag_5BB1(int value) { data.set(0x5BB1, value); }
+    public void setTransformGrNo_5BB1(int value) { data.set(0x5BB1, value); }
+    public void setTransformFlag_5BB1() { transformFlag = true; }
+    public void resetTransformFlag_5BB1() { transformFlag = false; }
     public void setAllObjectsInCauldron_5BC3(int value) { data.set(0x5BC3, value); }
     public void setDays_5BB9(int value) { data.set(0x5BB9, value); }
     public void setUserInput_5BB5(int value) { data.set(0x5BB5, value); }
@@ -22,7 +25,6 @@ public class Variables {
     public void setNumScreensVisited_5BC6(int value) { data.set(0x5BC6, value); }
     public void setPickupPressed_5BB3() { data.set(0x5BB3, 1); }
     public void resetPickupPressed_5BB3() { data.set(0x5BB3, 0); }
-    public void set_5BB4(int value) { data.set(0x5BB4, value); }
     public void set_5BB2(int value) { data.set(0x5BB2, value); }
     public void set_5BBA(int value) { data.set(0x5BBA, value); }
     public void set_5BB6(int value) { data.set(0x5BB6, value); }
@@ -45,7 +47,8 @@ public class Variables {
     public int getSuppressBorder_5BB8() { return data.getU(0x5BB8); }
     public int getOldInputMethod_5BA6() { return data.getU(0x5BA6); }
     public int getOldInputMethod2_5BA7() { return data.getU(0x5BA7); }
-    public int getTransformFlag_5BB1() { return data.getU(0x5BB1); }
+    public boolean isTransformFlag_5BB1() { return transformFlag; }
+    public int getTransformGrNo_5BB1() { return data.getU(0x5BB1); }
     public int getAllObjectsInCauldron_5BC3() { return data.getU(0x5BC3); }
     public int getDays_5BB9() { return data.getU(0x5BB9); }
     public int getUserInput_5BB5() { return data.getU(0x5BB5); }
@@ -53,7 +56,6 @@ public class Variables {
     public int getObjectsPutInCauldron_5BBB() { return data.getU(0x5BBB); }
     public int getNumScreensVisited_5BC6() { return data.getU(0x5BC6); }
     public boolean isPickupPressed_5BB3() { return data.getU(0x5BB3) == 1; }
-    public int get_5BB4() { return data.getU(0x5BB4); }
     public int get_5BB2() { return data.getU(0x5BB2); }
     public int get_5BBA() { return data.getU(0x5BBA); }
     public int get_5BB6() { return data.getU(0x5BB6); }
