@@ -252,7 +252,7 @@ public class Game implements Runnable {
             }*/
 
         debugPanel2.append("START THE GAME");
-        debugPanel2.append("Input method: " + variables.data.getU(0x5BA4));
+        debugPanel2.append("Input method: " + variables.get_5BA4());
 
         // LD DE,$B20E   ; }
         // CALL $B2CF    ; play tune // ignore audio
@@ -369,7 +369,7 @@ public class Game implements Runnable {
             hl2 += 2;
             de2 = print_text_single_colour_BE31(menu_text_BDBA, x, y, de2);
         }
-        int a = variables.data.getU(0x5BB8); // suppress border
+        int a = variables.get_5BB8(); // suppress border
         if(a == 0) {
             variables.set_5BB8(1);
             print_border_D296();
@@ -393,7 +393,7 @@ public class Game implements Runnable {
         // for testing only
         //mainMemory.setByteAt(hl, Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
 
-        de = printText(text, de, bc, hl, variables.data.getU(0x5BB6));
+        de = printText(text, de, bc, hl, variables.get_5BB6());
         return de;
     }
 
@@ -453,14 +453,14 @@ public class Game implements Runnable {
     private void flash_menu_BD89() {
         debugPanel1.append("flash_menu_BD89");
         int hl = 0xBDA3; // first menu entry
-        int a = variables.data.getU(0x5BA4); // input method
+        int a = variables.get_5BA4(); // input method
         a = (a >> 1) & 0x3; // joystick / keyboard flag
         // CALL $BEA3
         for(int i = 0; i < 4; i++) {
             if(a == i) menu_colours_BDA2.set(hl+i, menu_colours_BDA2.getU(hl+i) | 0x80 );
             else menu_colours_BDA2.set(hl+i, menu_colours_BDA2.getU(hl+i) & 0x7F );
         }
-        if((variables.data.getU(0x5BA4) & 0x08)>0) menu_colours_BDA2.set(hl+4, menu_colours_BDA2.getU(hl+4) | 0x80 );
+        if((variables.get_5BA4() & 0x08)>0) menu_colours_BDA2.set(hl+4, menu_colours_BDA2.getU(hl+4) | 0x80 );
         else menu_colours_BDA2.set(hl+5, menu_colours_BDA2.getU(hl+5) & 0x7F );
     }
 
@@ -582,7 +582,7 @@ public class Game implements Runnable {
         if(skip) keyQueue.add(KeyEvent.VK_0);
         while(!startGame) {
             if (!keyQueue.isEmpty()) {
-                int a = variables.data.getU(0x5BA4);
+                int a = variables.get_5BA4();
                 variables.set_5BA6(a);
                 Integer key = keyQueue.first();
                 keyQueue.remove(key);
@@ -691,7 +691,7 @@ public class Game implements Runnable {
         graphicObjects.playerBottom().copyFrom(plyr_spr_1_scratchpad_D161);
         graphicObjects.playerTop().copyFrom(plyr_spr_2_scratchpad_D181);
         variables.set_5BB1(0);
-        int livesLeft = variables.data.getU(0x5BBA);
+        int livesLeft = variables.get_5BBA();
         if(livesLeft < 1) {
             variables.set_5BBA(-1);
             game_over_BA22();
@@ -716,7 +716,7 @@ public class Game implements Runnable {
         clear_scrn_buffer_D567();
         clear_scrn_D55F();
 
-        if(variables.data.getU(0x5BC3) != 0)  game_complete_msg_BAAB(); // all objects in cauldron
+        if(variables.get_5BC3() != 0)  game_complete_msg_BAAB(); // all objects in cauldron
 
         clear_scrn_buffer_D567();
         clear_scrn_D55F();
@@ -728,21 +728,21 @@ public class Game implements Runnable {
     private void gameOverScreen() {
         variables.set_5BB8(0);
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
-        int days = variables.data.getU(0x5BB9);
+        int days = variables.get_5BB9();
         if(days > byteToBCD(params.getMaxDays())) days --; // game over due to timeout
         int daysAddr = 0xE8E2;
         if(days < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, days);
         else print_BCD_number_BCAE(daysAddr, new int[] { days });
         calc_and_display_percent_BC10();
 
-        int objectsInCauldron = variables.data.getU(0x5BBB);
+        int objectsInCauldron = variables.get_5BBB();
         int objBCD = byteToBCD(objectsInCauldron);
         int objAddr = 0xE2EA;
         if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
         else print_BCD_number_BCAE(objAddr, new int[] { objBCD });
 
-        int screens = variables.data.getU(0x5BC6);
-        int allObjInCauldron = variables.data.getU(0x5BC3);
+        int screens = variables.get_5BC6();
+        int allObjInCauldron = variables.get_5BC3();
 
         int a = screens;
         int c = ((a << 1) & 0xFF) | ((a >> 7) & 1);
@@ -778,7 +778,7 @@ public class Game implements Runnable {
     private void calc_and_display_percent_BC10() {
         int screens = calcScreensVisited();
         //IO.println("screens = " + screens);
-        int objInCauldron = variables.data.getU(0x5BBB);
+        int objInCauldron = variables.get_5BBB();
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
         screens --; // don't count first room
         variables.set_5BC6(screens);
@@ -856,7 +856,7 @@ public class Game implements Runnable {
             int y = xy.getU(xy.start + i*2+1);
             de = print_text_single_colour_BE31(text, x, y, de);
         }
-        int a = variables.data.getU(0x5BB8); // suppress border
+        int a = variables.get_5BB8(); // suppress border
         if(a == 0) {
             variables.data.set(0x5BB8,1);
             print_border_D296();
@@ -879,7 +879,7 @@ public class Game implements Runnable {
 
                 debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphicObjects.playerBottom().getScreen()));
-                debugPanel1.append(String.format("Objects collected: %d of %d", variables.data.getU(0x5BBB), params.getCauldronRequiredObjects()));
+                debugPanel1.append(String.format("Objects collected: %d of %d", variables.get_5BBB(), params.getCauldronRequiredObjects()));
                 int hl = ret_next_obj_required_C274();
                 if(hl < objects_required_C27D.endExcl()) {
                     int required = objects_required_C27D.getU(hl) | 0x60;
@@ -929,7 +929,7 @@ public class Game implements Runnable {
         //TODO: implement checking if first render ($B042 AND A         ; rendered before?)
 
         variables.set_5BB7(0);
-        int a = variables.data.getU(0x5BAD); // screen attribute
+        int a = variables.get_5BAD(); // screen attribute
         for(int addr = 0x5800; addr<0x5800+0x0300; addr++) {
             mainMemory.setByteAt(addr, a);
             //shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
@@ -977,7 +977,7 @@ public class Game implements Runnable {
         // NOTE: first special object is cauldron bubbles
         GraphicObject secondSpecObj = graphicObjects.firstSpecObj().next(); // ; special_objs_here[1]
         if(secondSpecObj.getGrNo() != 0) return;
-        if(variables.data.getU(0x5BC3) != 0) return;
+        if(variables.get_5BC3() != 0) return;
 
         secondSpecObj.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, 0x12); // 18 bytes to copy
         secondSpecObj.setXYAdj(-12, -4);
@@ -1035,7 +1035,7 @@ public class Game implements Runnable {
     public long getTickNo() { return tickNo; }
 
     private void display_day_BCCA() {
-        int attr = variables.data.getU(0x5BAD); // room attribute
+        int attr = variables.get_5BAD(); // room attribute
         attr = (((attr ^ 0xFF) + 2) & 0x07) | 0x40;
         day_txt_BCE7.set(day_txt_BCE7.start, attr);
         int de = day_txt_BCE7.start;
@@ -1081,7 +1081,7 @@ public class Game implements Runnable {
 
     private void print_days_BC66() {
         int videoAddress = 0xD9E2; // (120, 7)
-        print_BCD_number_BCAE(videoAddress, new int[] {variables.data.getU(0x5BB9)});
+        print_BCD_number_BCAE(videoAddress, new int[] {variables.get_5BB9()});
     }
 
     private void print_BCD_number_BCAE(int bc, int[] values) {
@@ -1114,7 +1114,7 @@ public class Game implements Runnable {
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(0xDDD7, new int[] {variables.data.getU(0x5BBA)});
+        print_BCD_number_BCAE(0xDDD7, new int[] {variables.get_5BBA()});
     }
 
     private void list_objects_to_draw_CE62() {
@@ -1136,10 +1136,10 @@ public class Game implements Runnable {
         while(objects_to_draw_CE8B.getU(i) !=0xFF) i++;
         int cntToRender = i - de1;
         RenderStack renderList = new RenderStack();
-        while(variables.data.getU(0x5BBE) < cntToRender) {
+        while(variables.get_5BBE() < cntToRender) {
             boolean rendered1 = (objects_to_draw_CE8B.getU(de1) & 0x80) > 0;
             if(!rendered1) {
-                boolean isLast = variables.data.getU(0x5BBE) >= cntToRender-1;
+                boolean isLast = variables.get_5BBE() >= cntToRender-1;
                 // if only one object remains, we should render it and exit
                 if(isLast)
                     renderOne(de1, renderList);
@@ -1207,7 +1207,7 @@ public class Game implements Runnable {
         GraphicObject o = graphicObjects.o(objects_to_draw_CE8B.getU(de));
         if(calc_pixel_XY_D6C9(o)) print_sprite_D718(o);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
-        variables.set_5BBE(variables.data.getU(0x5BBE) + 1);
+        variables.set_5BBE(variables.get_5BBE() + 1);
         renderList.reset();
     }
 
@@ -1274,7 +1274,7 @@ public class Game implements Runnable {
     }
 
     private void display_sun_moon_frame_C3A4() {
-        if(variables.data.getU(0x5BC3)!=0) return;
+        if(variables.get_5BC3()!=0) return;
 
         int x = sun_moon_scratchpad_C44D.getPixelX();
         if (x == 0xE1 - 1) toggle_day_night_C3FF();
@@ -1314,7 +1314,7 @@ public class Game implements Runnable {
         variables.set_5BB1(1); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
-            int currDays = variables.data.getU(0x5BB9);
+            int currDays = variables.get_5BB9();
             int incDays = params.isDisableIncDays() ? currDays : incBCD(currDays) % 0xA0; // wrap days at 99
             variables.set_5BB9(incDays);
             if(incDays == byteToBCD(params.getMaxDays())+1) {
@@ -1496,19 +1496,19 @@ public class Game implements Runnable {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         o.setXYAdj(-12, -6); //FA
 
-        boolean moving = variables.data.getU(0x5BAF) > 0;
+        boolean moving = variables.get_5BAF() > 0;
         if(moving) return;
-        int roomSizeZ = variables.data.getU(0x5BAE);
+        int roomSizeZ = variables.get_5BAE();
         int z = o.getZ();
         if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
             // @label=init_portcullis_up
-            //int seed3 = variables.data.getU(0x5BA5);
+            //int seed3 = variables.get_5BA5);
             if((params.getRnd().getSeed3() & 0x1F) != 0) return; // ; 1in32 chance?
 
             o.setBitGrNo(0); // ; graphic_no=9
             o.setDZ(1); // ; dZ=1 (up)
         } else {
-            int moveCnt = variables.data.getU(0x5BB0);
+            int moveCnt = variables.get_5BB0();
             if(moveCnt >= 4) {
                 if((params.getRnd().getSeed3() & 0x1F) != 0) return;
                 moveCnt = 0x80; // ; arbitrarily large count
@@ -1518,7 +1518,7 @@ public class Game implements Runnable {
             o.setBitGrNo(0); // ; graphic_no=9
             o.setDZ(-1); // ; dZ=-1 (down)
         }
-        variables.set_5BAF(variables.data.getU(0x5BAF) + 1);
+        variables.set_5BAF(variables.get_5BAF() + 1);
         o.setWipeAndDraw();
     }
 
@@ -1535,7 +1535,7 @@ public class Game implements Runnable {
             o.setDZ(2);
             // $C6EE CALL $B467      ; // ignore audio
             dec_dZ_and_update_XYZ_C700(o);
-            int roomSizeZ = variables.data.getU(0x5BAE);
+            int roomSizeZ = variables.get_5BAE();
             int z = o.getZ();
             if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(o);
             o.setWipeAndDraw();
@@ -1586,7 +1586,7 @@ public class Game implements Runnable {
             o.setDX(dX);
             o.setDY(dY);
 
-            int rnd = variables.data.getU(0x5BA5);
+            int rnd = variables.get_5BA5();
             int a = rnd & 0x03;
             if(a==0) a++;
             a+=0x82;
@@ -1623,7 +1623,7 @@ public class Game implements Runnable {
 
     private void upd_player_bottom_C82B(GraphicObject o) {
         if(o.isDead()) {
-            if (variables.data.getU(0x5BC3) == 0) {
+            if (variables.get_5BC3() == 0) {
                 o.next().setDead(); // SET 6,(IX+$2D)
                 init_death_sparkles_BF21(o);
                 return;
@@ -1646,7 +1646,7 @@ public class Game implements Runnable {
     }
 
     private void handle_pickup_drop_C00E(GraphicObject o) {
-        boolean pressed = variables.data.getU(0x5BB3) != 0;
+        boolean pressed = variables.get_5BB3() != 0;
         if(!pressed) {
             if(!chk_pickup_drop_BFFB() || chk_plyr_OOB_C87A(o) || o.isJumping() || !o.isOobZ()) return;
             cant_drop_5BD3.set(0x5BD3, 0);
@@ -1821,13 +1821,13 @@ public class Game implements Runnable {
     }
 
     private boolean chk_pickup_drop_BFFB() {
-        int keys = variables.data.getU(0x5BB5);
+        int keys = variables.get_5BB5();
         return (keys & 0x10) > 0; // only standard keyboard input
     }
 
     private boolean chk_plyr_OOB_C87A(GraphicObject p) {
-        int roomSizeX = variables.data.getU(0x5BAB);
-        int roomSizeY = variables.data.getU(0x5BAC);
+        int roomSizeX = variables.get_5BAB();
+        int roomSizeY = variables.get_5BAC();
         int xMax = roomSizeX - p.getW();
         int yMax = roomSizeY - p.getD();
 
@@ -1847,7 +1847,7 @@ public class Game implements Runnable {
     }
 
     private void move_player_C9A1(GraphicObject player) {
-        if(variables.data.getU(0x5BC4)!=0) player.setDZ(2);
+        if(variables.get_5BC4()!=0) player.setDZ(2);
         boolean forward = variables.data.isSet(2, 0x5BB5);
         if(player.isJumping() || player.enteringScreen() || forward) calc_plyr_dXY_C9FB(player);
 
@@ -1904,8 +1904,8 @@ public class Game implements Runnable {
         if(player.enteringScreen() || !player.isNearArch()) return;
 
         player.resetNearArch();
-        int oldRoomSizeX = variables.data.getU(0x5BAB); // L
-        int oldRoomSizeY = variables.data.getU(0x5BAC); // H
+        int oldRoomSizeX = variables.get_5BAB(); // L
+        int oldRoomSizeY = variables.get_5BAC(); // H
 
         int currentScreen = player.getScreen();
         int newScreen = switch(player.getSpriteDir()) {
@@ -2025,7 +2025,7 @@ public class Game implements Runnable {
     }
 
     private int adj_dZ_for_out_of_bounds_CA5A(GraphicObject o) {
-        int roomSize = variables.data.getU(0x5BAE);
+        int roomSize = variables.get_5BAE();
         int dz = o.getDZ();
         int z = o.getZ();
         while(true) {
@@ -2041,7 +2041,7 @@ public class Game implements Runnable {
         if(o.enteringScreen()) return dx;
         if(o.isNearArch()) return dx;
 
-        int roomSizeX = variables.data.getU(0x5BAB);
+        int roomSizeX = variables.get_5BAB();
 
         int x = o.getX();
         while(true) {
@@ -2058,7 +2058,7 @@ public class Game implements Runnable {
         if(o.enteringScreen()) return dy;
         if(o.isNearArch()) return dy;
 
-        int roomSizeY = variables.data.getU(0x5BAC);
+        int roomSizeY = variables.get_5BAC();
 
         int y = o.getY();
         while(true) {
@@ -2099,7 +2099,7 @@ public class Game implements Runnable {
     }
 
     private boolean chk_and_init_transform_C306(GraphicObject o) {
-        boolean transforming = variables.data.getU(0x5BB1) > 0;
+        boolean transforming = variables.get_5BB1() > 0;
         if(!transforming || o.getEnterCounter() > 0 || o.isJumping()) return false;
 
         variables.set_5BB1(o.getGrNo());
@@ -2143,7 +2143,7 @@ public class Game implements Runnable {
             saveKeySequence();
             System.exit(0);
         }
-        int prevC = variables.data.getU(0x5BB5);
+        int prevC = variables.get_5BB5();
         if(c != prevC) {
             boolean leftCurr = (c & 0b00001) > 0;
             boolean leftPrev = (prevC & 0b00001) > 0;
@@ -2182,7 +2182,7 @@ public class Game implements Runnable {
             o.decTurnCounter();
             return;
         }
-        int keys = variables.data.getU(0x5BB5);
+        int keys = variables.get_5BB5();
         if((keys & 3) == 0) return; // ; left or right?
 
         if(o.getTurnCounter() > 0 || o.isJumping()) return; // ; already jumping?
@@ -2198,7 +2198,7 @@ public class Game implements Runnable {
     }
 
     private void handle_jump_C948(GraphicObject o) {
-        boolean jump = DataBlock.isSetS(3, variables.data.getU(0x5BB5));
+        boolean jump = DataBlock.isSetS(3, variables.get_5BB5());
         if(!jump || o.enteringScreen() || o.isJumping()) return;
         if(o.getDZ() < -1) return;
         o.setJumping();
@@ -2206,7 +2206,7 @@ public class Game implements Runnable {
     }
 
     private void handle_forward_C969(GraphicObject o) {
-        boolean forward = DataBlock.isSetS(2, variables.data.getU(0x5BB5));
+        boolean forward = DataBlock.isSetS(2, variables.get_5BB5());
         // ignore audio: @label=loc_C97A
         if(!o.enteringScreen() && !o.isJumping() & !forward) {
             //@label=loc_C994
@@ -2298,7 +2298,7 @@ public class Game implements Runnable {
     }
 
     private void upd_player_top_CDE2(GraphicObject o) {
-        if(o.isDead() && variables.data.getU(0x5BC3)==0) {
+        if(o.isDead() && variables.get_5BC3()==0) {
             init_death_sparkles_BF21(o);
             return;
         }
@@ -2378,7 +2378,7 @@ public class Game implements Runnable {
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
-        boolean disableSpikeBallDrop = variables.data.getU(0x5BC0) != 0;
+        boolean disableSpikeBallDrop = variables.get_5BC0() != 0;
         if(disableSpikeBallDrop) return;
         if(o.isDropping()) {
             dec_dZ_and_update_XYZ_C700(o);
@@ -2388,7 +2388,7 @@ public class Game implements Runnable {
             }
             // $B7D6 CALL $B451     ; } // ignore audio
         } else {
-            boolean isOtherDropping = variables.data.getU(0x5BBF) != 0;
+            boolean isOtherDropping = variables.get_5BBF() != 0;
             if(!isOtherDropping) {
                 // ; 1-in-16 chance
                 if((params.getRnd().getSeed3() & 0xF0) > 0) {
@@ -2503,7 +2503,7 @@ public class Game implements Runnable {
         // NOTE: this applies only to player sprite
         o.setXYAdj(-12, -2);
         if(o.isDead()) {
-            if (variables.data.getU(0x5BC3) == 0) {
+            if (variables.get_5BC3() == 0) {
                 init_death_sparkles_BF21(o);
                 return;
             }
@@ -2516,7 +2516,7 @@ public class Game implements Runnable {
 
         if(counter == 0) {
             // End transformation
-            int a = variables.data.getU(0x5BB1) ^ 0x20;
+            int a = variables.get_5BB1() ^ 0x20;
             o.setGrNo(a);
             a += 0x10;
             graphicObjects.playerTop().setGrNo(a);
@@ -2566,7 +2566,7 @@ public class Game implements Runnable {
             int ptr = h * 256 + l;
             int spi = specialObjects.getIndex(ptr);
             specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
-            int lives = variables.data.getU(0x5BBA);
+            int lives = variables.get_5BBA();
             variables.set_5BBA(incBCD(lives));
             variables.set_5BC0(0);
             // $C1E2 CALL $B4A3     ; // ignore audio
@@ -2618,9 +2618,9 @@ public class Game implements Runnable {
         int grNo = o.getGrNo();
         boolean sameAsRequired = objects_required_C27D.getU(hl) == (grNo & 0x07);
         if(sameAsRequired) {
-            variables.set_5BBB(variables.data.getU(0x5BBB) + 1);
+            variables.set_5BBB(variables.get_5BBB() + 1);
             cycle_colours_with_sound_C2A5();
-            boolean gotAllObjects = variables.data.getU(0x5BBB) == params.getCauldronRequiredObjects();
+            boolean gotAllObjects = variables.get_5BBB() == params.getCauldronRequiredObjects();
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
         variables.set_5BC4(0);
@@ -2800,7 +2800,7 @@ public class Game implements Runnable {
     }
 
     private int ret_next_obj_required_C274() {
-        int objsInCauldron = variables.data.getU(0x5BBB);
+        int objsInCauldron = variables.get_5BBB();
         return objects_required_C27D.start + objsInCauldron;
     }
 
@@ -2848,14 +2848,14 @@ public class Game implements Runnable {
     private void upd_178_179_B865(GraphicObject o) {
         o.setXYAdj(-8, -4);
 
-        int bouncingHeight = variables.data.getU(0x5BBD);
+        int bouncingHeight = variables.get_5BBD();
         if(bouncingHeight == 0) variables.set_5BBD(o.getZ() + 0x20); // ; calc bounce height
         o.toggleNextPrevSprite();
         // $B879 CALL $B451     ; // ignore audio
         if(o.isDirUp()) {
             o.setDZ(3);
             dec_dZ_and_update_XYZ_C700(o);
-            if(o.getZ() > variables.data.getU(0x5BBD))
+            if(o.getZ() > variables.get_5BBD())
                 o.setDirDown();
         } else {
             dec_dZ_and_update_XYZ_C700(o);
@@ -2927,7 +2927,7 @@ public class Game implements Runnable {
     }
 
     private void build_screen_objects_D1E6() {
-        if(variables.data.getU(0x5BB2) != 0) {
+        if(variables.get_5BB2() != 0) {
             // update special objects if not the first screen of the game
             update_special_objs_C591();
         }
@@ -3009,7 +3009,7 @@ public class Game implements Runnable {
         variables.set_5BAB(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3)); // room size X
         variables.set_5BAC(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
         variables.set_5BAE(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Z
-        debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.data.getU(0x5BAB)+" Y:"+variables.data.getU(0x5BAC)+" Z:"+variables.data.getU(0x5BAE));
+        debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.get_5BAB()+" Y:"+variables.get_5BAC()+" Z:"+variables.get_5BAE());
         hl++; // background objects start
 
         // @label=next_bg_obj
@@ -3061,7 +3061,7 @@ public class Game implements Runnable {
                     int y1 = ((offsets << 2) & 8);
                     graphicObjects.setX(targetAddr, x1 + x * 16 + 0x48); // X
                     graphicObjects.setY(targetAddr, y1 + y * 16 + 0x48); // Y
-                    graphicObjects.setZ(targetAddr, ((z * 12 + offsets) & 0xFC) + variables.data.getU(0x5BAE)); // Y, variable stores room size Z
+                    graphicObjects.setZ(targetAddr, ((z * 12 + offsets) & 0xFC) + variables.get_5BAE()); // Y, variable stores room size Z
                     targetAddr += 0x20;
                     templateDone = blockDef.getU(blockDef.start + templatePart * 6 + 6) == 0; // some templates consists of two objects (guards)
                     templatePart++;
@@ -3110,8 +3110,8 @@ public class Game implements Runnable {
 
     private void adjust_plyr_xyz_for_room_size_D320() {
         debugTable2("Graphic objects table:", 0x5C08, graphicObjects.getCopy());
-        int roomSizeX = variables.data.getU(0x5BAB) - 2;
-        int roomSizeY = variables.data.getU(0x5BAC) - 2;
+        int roomSizeX = variables.get_5BAB() - 2;
+        int roomSizeY = variables.get_5BAC() - 2;
         GraphicObject player = graphicObjects.playerBottom();
         int x = player.getX();
         int y = player.getY();

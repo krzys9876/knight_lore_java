@@ -7,6 +7,7 @@ public class Variables {
 
     public void reset() { data.reset(); }
 
+    public void set_5BA5(int value) { data.set(0x5BA5, value); }
     public void set_5BA4(int value) { data.set(0x5BA4, value); }
     public void set_5BB8(int value) { data.set(0x5BB8, value); }
     public void set_5BA6(int value) { data.set(0x5BA6, value); }
@@ -38,6 +39,37 @@ public class Variables {
     public void set_5BAC(int value) { data.set(0x5BAC, value); }
     public void set_5BAE(int value) { data.set(0x5BAE, value); }
 
+    public int get_5BA5() { return data.getU(0x5BA5); }
+    public int get_5BA4() { return data.getU(0x5BA4); }
+    public int get_5BB8() { return data.getU(0x5BB8); }
+    public int get_5BA6() { return data.getU(0x5BA6); }
+    public int get_5BA7() { return data.getU(0x5BA7); }
+    public int get_5BB1() { return data.getU(0x5BB1); }
+    public int get_5BC3() { return data.getU(0x5BC3); }
+    public int get_5BB9() { return data.getU(0x5BB9); }
+    public int get_5BB5() { return data.getU(0x5BB5); }
+    public int get_5BC4() { return data.getU(0x5BC4); }
+    public int get_5BC1() { return data.getS(0x5BC1); } // NOTE: getS
+    public int get_5BC2() { return data.getU(0x5BC2); }
+    public int get_5BBB() { return data.getU(0x5BBB); }
+    public int get_5BC5() { return data.getU(0x5BC5); }
+    public int get_5BC6() { return data.getU(0x5BC6); }
+    public int get_5BB3() { return data.getU(0x5BB3); }
+    public int get_5BB4() { return data.getU(0x5BB4); }
+    public int get_5BB2() { return data.getU(0x5BB2); }
+    public int get_5BBA() { return data.getU(0x5BBA); }
+    public int get_5BB6() { return data.getU(0x5BB6); }
+    public int get_5BB7() { return data.getU(0x5BB7); }
+    public int get_5BBE() { return data.getU(0x5BBE); }
+    public int get_5BB0() { return data.getU(0x5BB0); }
+    public int get_5BAF() { return data.getU(0x5BAF); }
+    public int get_5BC0() { return data.getU(0x5BC0); }
+    public int get_5BBF() { return data.getU(0x5BBF); }
+    public int get_5BBD() { return data.getU(0x5BBD); }
+    public int get_5BAD() { return data.getU(0x5BAD); }
+    public int get_5BAB() { return data.getU(0x5BAB); }
+    public int get_5BAC() { return data.getU(0x5BAC); }
+    public int get_5BAE() { return data.getU(0x5BAE); }
 
 
     public void init() {
