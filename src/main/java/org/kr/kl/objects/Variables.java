@@ -23,6 +23,22 @@ public class Variables {
     public void set_5BC6(int value) { data.set(0x5BC6, value); }
     public void set_5BB3(int value) { data.set(0x5BB3, value); }
     public void set_5BB4(int value) { data.set(0x5BB4, value); }
+    public void set_5BB2(int value) { data.set(0x5BB2, value); }
+    public void set_5BBA(int value) { data.set(0x5BBA, value); }
+    public void set_5BB6(int value) { data.set(0x5BB6, value); }
+    public void set_5BB7(int value) { data.set(0x5BB7, value); }
+    public void set_5BBE(int value) { data.set(0x5BBE, value); }
+    public void set_5BB0(int value) { data.set(0x5BB0, value); }
+    public void set_5BAF(int value) { data.set(0x5BAF, value); }
+    public void set_5BC0(int value) { data.set(0x5BC0, value); }
+    public void set_5BBF(int value) { data.set(0x5BBF, value); }
+    public void set_5BBD(int value) { data.set(0x5BBD, value); }
+    public void set_5BAD(int value) { data.set(0x5BAD, value); }
+    public void set_5BAB(int value) { data.set(0x5BAB, value); }
+    public void set_5BAC(int value) { data.set(0x5BAC, value); }
+    public void set_5BAE(int value) { data.set(0x5BAE, value); }
+
+
 
     public void init() {
         reset();

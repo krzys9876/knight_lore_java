@@ -226,12 +226,12 @@ public class Game implements Runnable {
 
         // XOR A
         // LD ($5BB2),A
-        variables.data.set(0x5BB2, 0);
+        variables.set_5BB2(0);
         // LD ($D16D),A  ; plyr_spr_1_scratchpad
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
         // LD A,$05      ; 5 lives to start
         // LD ($5BBA),A  ;
-        variables.data.set(0x5BBA, byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
+        variables.set_5BBA(byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
         // LD HL,$5BA0   ;
         // LD A,($5BA2)  ;
         // ADD A,(HL)    ; seed_1 += seed_2
@@ -329,7 +329,7 @@ public class Game implements Runnable {
         debugPanel1.append("do_menu_selection_BD0C");
         // XOR A         ;
         // LD ($5BB8),A  ;
-        variables.data.set(0x5BB8, 0);
+        variables.set_5BB8(0);
         // LD HL,$BDA2   ;
         // LD B,$08      ; # menu entries
 
@@ -362,7 +362,7 @@ public class Game implements Runnable {
         int hl2 = 0xBDAA; // menu xy
         int de2 = 0xBDBA; // menu text
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
-            variables.data.set(0x5BB6, menu_colours_BDA2.getU(de1));
+            variables.set_5BB6(menu_colours_BDA2.getU(de1));
             //debugPanel2.append("menu attrib: %02x".formatted(variables.get(0x5BB6))) ;
             int x = menu_xy_BDAA.getU(hl2); // x - menu position
             int y = menu_xy_BDAA.getU(hl2+1); // y
@@ -371,7 +371,7 @@ public class Game implements Runnable {
         }
         int a = variables.data.getU(0x5BB8); // suppress border
         if(a == 0) {
-            variables.data.set(0x5BB8,1);
+            variables.set_5BB8(1);
             print_border_D296();
             update_screen_D56F(true);
         }
@@ -583,7 +583,7 @@ public class Game implements Runnable {
         while(!startGame) {
             if (!keyQueue.isEmpty()) {
                 int a = variables.data.getU(0x5BA4);
-                variables.data.set(0x5BA6, a);
+                variables.set_5BA6(a);
                 Integer key = keyQueue.first();
                 keyQueue.remove(key);
                 //IO.println("Key: " + key);
@@ -600,7 +600,7 @@ public class Game implements Runnable {
                 if (key == KeyEvent.VK_4) a |= 6;
                 //variables.data.set(0x5BA4, a);
                 if (key == KeyEvent.VK_5) a ^= 0x08; //; toggle directional
-                variables.data.set(0x5BA4, a);
+                variables.set_5BA4(a);
                 // CALL NZ,$B4A3 ; yes // ignore audio
                 do_menu_selection_BD0C();
                 if (key == KeyEvent.VK_0) startGame = true;
@@ -690,15 +690,15 @@ public class Game implements Runnable {
     private void lose_life_D12A() {
         graphicObjects.playerBottom().copyFrom(plyr_spr_1_scratchpad_D161);
         graphicObjects.playerTop().copyFrom(plyr_spr_2_scratchpad_D181);
-        variables.data.set(0x5BB1, 0);
+        variables.set_5BB1(0);
         int livesLeft = variables.data.getU(0x5BBA);
         if(livesLeft < 1) {
-            variables.data.set(0x5BBA, -1);
+            variables.set_5BBA(-1);
             game_over_BA22();
             return;
         }
         int newLivesLeft = params.isDisableLoseLife() ? livesLeft : decBCD(livesLeft);
-        variables.data.set(0x5BBA, newLivesLeft);
+        variables.set_5BBA(newLivesLeft);
         int scratch = sun_moon_scratchpad_C44D.getGrNo();
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
         int playerGraphicsNo = graphicObjects.playerBottom().getTemp10();
@@ -726,7 +726,7 @@ public class Game implements Runnable {
     }
 
     private void gameOverScreen() {
-        variables.data.set(0x5BB8, 0);
+        variables.set_5BB8(0);
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
         int days = variables.data.getU(0x5BB9);
         if(days > byteToBCD(params.getMaxDays())) days --; // game over due to timeout
@@ -781,7 +781,7 @@ public class Game implements Runnable {
         int objInCauldron = variables.data.getU(0x5BBB);
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
         screens --; // don't count first room
-        variables.data.set(0x5BC6, screens);
+        variables.set_5BC6(screens);
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 0xE4E6;
         int percentBCD = byteToBCD(percent);
@@ -814,7 +814,7 @@ public class Game implements Runnable {
     }
 
     private void game_complete_msg_BAAB() {
-        variables.data.set(0x5BB8, 0);
+        variables.set_5BB8(0);
         display_text_list_BEBF(complete_colours_BAD2, complete_xy_BAD8, the_potion_casts_BAE4);
         // $BAC4 LD DE,$B239   ;
         // $BAC7 CALL $B2CF    ; // ignore audio
@@ -851,7 +851,7 @@ public class Game implements Runnable {
     private void display_text_list_BEBF(DataBlock colors, DataBlock xy, DataBlock text) {
         int de = text.start;
         for(int i = 0; i < colors.size; i++) {
-            variables.data.set(0x5BB6, colors.getU(colors.start + i));
+            variables.set_5BB6(colors.getU(colors.start + i));
             int x = xy.getU(xy.start + i*2);
             int y = xy.getU(xy.start + i*2+1);
             de = print_text_single_colour_BE31(text, x, y, de);
@@ -928,7 +928,7 @@ public class Game implements Runnable {
         //@label=no_delay
         //TODO: implement checking if first render ($B042 AND A         ; rendered before?)
 
-        variables.data.set(0x5BB7, 0);
+        variables.set_5BB7(0);
         int a = variables.data.getU(0x5BAD); // screen attribute
         for(int addr = 0x5800; addr<0x5800+0x0300; addr++) {
             mainMemory.setByteAt(addr, a);
@@ -956,7 +956,7 @@ public class Game implements Runnable {
         update_screen_D56F(false);
 
         // @label=loc_B074
-        variables.data.set(0x5BC5, 0);
+        variables.set_5BC5(0);
         if(graphicObjects.playerBottom().getGrNo()==0 && graphicObjects.playerTop().getGrNo()==0) {
             player_dies_AFB7();
             exitingScreen = true;
@@ -1130,7 +1130,7 @@ public class Game implements Runnable {
     }
 
     private void calc_display_order_and_render_CEBB() {
-        variables.data.set(0x5BBE, 0); // rendered objects cnt
+        variables.set_5BBE(0); // rendered objects cnt
         int de1 = objects_to_draw_CE8B.start;
         int i = de1;
         while(objects_to_draw_CE8B.getU(i) !=0xFF) i++;
@@ -1207,7 +1207,7 @@ public class Game implements Runnable {
         GraphicObject o = graphicObjects.o(objects_to_draw_CE8B.getU(de));
         if(calc_pixel_XY_D6C9(o)) print_sprite_D718(o);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
-        variables.data.set(0x5BBE, variables.data.getU(0x5BBE) + 1);
+        variables.set_5BBE(variables.data.getU(0x5BBE) + 1);
         renderList.reset();
     }
 
@@ -1311,12 +1311,12 @@ public class Game implements Runnable {
         int nextSprite = currentSprite ^ 1; // flip last bit
         sun_moon_scratchpad_C44D.setGrNo(nextSprite);
         sun_moon_scratchpad_C44D.setPixelX(0xB0); // ; pixel X
-        variables.data.set(0x5BB1, 1); // transform flag
+        variables.set_5BB1(1); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
             int currDays = variables.data.getU(0x5BB9);
             int incDays = params.isDisableIncDays() ? currDays : incBCD(currDays) % 0xA0; // wrap days at 99
-            variables.data.set(0x5BB9, incDays);
+            variables.set_5BB9(incDays);
             if(incDays == byteToBCD(params.getMaxDays())+1) {
                 game_over_BA22();
                 return;
@@ -1514,11 +1514,11 @@ public class Game implements Runnable {
                 moveCnt = 0x80; // ; arbitrarily large count
             }
             // @label=init_portcullis_down
-            variables.data.set(0x5BB0, moveCnt + 1);
+            variables.set_5BB0(moveCnt + 1);
             o.setBitGrNo(0); // ; graphic_no=9
             o.setDZ(-1); // ; dZ=-1 (down)
         }
-        variables.data.set(0x5BAF, variables.data.getU(0x5BAF) + 1);
+        variables.set_5BAF(variables.data.getU(0x5BAF) + 1);
         o.setWipeAndDraw();
     }
 
@@ -1550,7 +1550,7 @@ public class Game implements Runnable {
 
     private void stop_portcullis_C6E0(GraphicObject o) {
         // @label=stop_portcullis
-        variables.data.set(0x5BAF, 0);
+        variables.set_5BAF(0);
         o.resetBitGrNo(0); // graphic_no=8
     }
 
@@ -1610,7 +1610,7 @@ public class Game implements Runnable {
             o.setDZ(1); // ; dZ=1
             move_towards_plyr_B965(o, 4, 4);
         }
-        variables.data.set(0x5BC5, o.getZ());
+        variables.set_5BC5(o.getZ());
         dec_dZ_and_update_XYZ_C700(o);
         o.setWipeAndDraw();
     }
@@ -1656,8 +1656,8 @@ public class Game implements Runnable {
             o.setZ(zOrig); // ; restore original Z
             if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
-            variables.data.set(0x5BB3, 1);
-            variables.data.set(0x5BB4, 1);
+            variables.set_5BB3(1);
+            variables.set_5BB4(1);
             int origW = o.getW();
             int origD = o.getD();
             int origH = o.getH();
@@ -1697,7 +1697,7 @@ public class Game implements Runnable {
         } else {
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
-            variables.data.set(0x5BB3, 0);
+            variables.set_5BB3(0);
         }
     }
 
@@ -1713,7 +1713,7 @@ public class Game implements Runnable {
                     int z = player.getZ();
                     if(z >= 0x98) {
                         toDrop.setBitGrNo(3);
-                        variables.data.set(0x5BC4, 1);
+                        variables.set_5BC4(1);
                     }
                 }
                 toDrop.setX(player.getX());
@@ -1728,7 +1728,7 @@ public class Game implements Runnable {
     }
 
     private void pickup_object_C141(GraphicObject o, GraphicObject obj) {
-        variables.data.set(0x5BC0, 0);
+        variables.set_5BC0(0);
         int grNo = obj.getGrNo();
         int hl = inventory_5BD8.start;
         inventory_5BD8.set(hl, grNo);
@@ -1858,7 +1858,7 @@ public class Game implements Runnable {
             if (jumpingKey) dz -= 1; else dz -= 2;
         }
         player.setDZ(dz);
-        variables.data.set(0x5BC1, dz);
+        variables.set_5BC1(dz);
         //$C9D6 CALL M,$B451   ; ignore audio
 
         adj_for_out_of_bounds_CB45(player);
@@ -2102,7 +2102,7 @@ public class Game implements Runnable {
         boolean transforming = variables.data.getU(0x5BB1) > 0;
         if(!transforming || o.getEnterCounter() > 0 || o.isJumping()) return false;
 
-        variables.data.set(0x5BB1, o.getGrNo());
+        variables.set_5BB1(o.getGrNo());
         o.setTemp10(8); // transform counter
 
         o.next().setGrNo(1); // update player top
@@ -2166,7 +2166,7 @@ public class Game implements Runnable {
             if(pickupDropCurr && !pickupDropPrev) keySequence.putPressed(tickNo, KeyEvent.VK_1);
             if(!pickupDropCurr && pickupDropPrev) keySequence.putReleased(tickNo, KeyEvent.VK_1);
 
-            variables.data.set(0x5BB5, c);
+            variables.set_5BB5(c);
             //IO.println("Pressed: "+Integer.toBinaryString(c));
         }
     }
@@ -2384,7 +2384,7 @@ public class Game implements Runnable {
             dec_dZ_and_update_XYZ_C700(o);
             if(o.isOobZ()) { //; Z OOB? (hit the floor?)
                 o.setRising();
-                variables.data.set(0x5BBF, 0); // ; flag no spiked balls dropping
+                variables.set_5BBF(0); // ; flag no spiked balls dropping
             }
             // $B7D6 CALL $B451     ; } // ignore audio
         } else {
@@ -2393,7 +2393,7 @@ public class Game implements Runnable {
                 // ; 1-in-16 chance
                 if((params.getRnd().getSeed3() & 0xF0) > 0) {
                     o.setDropping(); // ; flag this one as dropping
-                    variables.data.set(0x5BBF, 1); // ; flag a spike ball dropping
+                    variables.set_5BBF(1); // ; flag a spike ball dropping
                 }
             }
         }
@@ -2520,7 +2520,7 @@ public class Game implements Runnable {
             o.setGrNo(a);
             a += 0x10;
             graphicObjects.playerTop().setGrNo(a);
-            variables.data.set(0x5BB1, 0);
+            variables.set_5BB1(0);
             o.setXYAdj(-12, -6);
             boolean spriteFlag = o.isBitSetGrNo(5);
             if (spriteFlag) o.setYAdj(o.getYAdj() - 1);
@@ -2567,8 +2567,8 @@ public class Game implements Runnable {
             int spi = specialObjects.getIndex(ptr);
             specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
             int lives = variables.data.getU(0x5BBA);
-            variables.data.set(0x5BBA, incBCD(lives));
-            variables.data.set(0x5BC0, 0);
+            variables.set_5BBA(incBCD(lives));
+            variables.set_5BC0(0);
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
         }
@@ -2618,12 +2618,12 @@ public class Game implements Runnable {
         int grNo = o.getGrNo();
         boolean sameAsRequired = objects_required_C27D.getU(hl) == (grNo & 0x07);
         if(sameAsRequired) {
-            variables.data.set(0x5BBB, variables.data.getU(0x5BBB) + 1);
+            variables.set_5BBB(variables.data.getU(0x5BBB) + 1);
             cycle_colours_with_sound_C2A5();
             boolean gotAllObjects = variables.data.getU(0x5BBB) == params.getCauldronRequiredObjects();
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
-        variables.data.set(0x5BC4, 0);
+        variables.set_5BC4(0);
         int l = o.getTemp10();
         int h = o.getTemp11();
         int ptr = h * 256 + l;
@@ -2635,7 +2635,7 @@ public class Game implements Runnable {
     private void prepare_final_animation_C2CC() {
         IO.println("prepare_final_animation_C2CC");
 
-        variables.data.set(0x5BC3, 1);
+        variables.set_5BC3(1);
         int objIx = graphicObjects.specialObjStartIx + 1;
         for(int i=0; i< 0x0B; i++) { // ; wipe 11 objects in the room (1 special, 7 bg, 3 fg)
             graphicObjects.o(objIx).setGrNo(1); // ; set graphic no. = INVALID
@@ -2663,7 +2663,7 @@ public class Game implements Runnable {
                 // $C2BD CALL $B403    ; // ignore audio
             }
             try {
-                if(keySequence.isSaving() && !keySequence.isReplaying()) Thread.sleep(CAULDRON_ATTR_DELAY_MS);
+                if(!keySequence.isReplaying()) Thread.sleep(CAULDRON_ATTR_DELAY_MS);
                 updateMemory();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -2849,7 +2849,7 @@ public class Game implements Runnable {
         o.setXYAdj(-8, -4);
 
         int bouncingHeight = variables.data.getU(0x5BBD);
-        if(bouncingHeight == 0) variables.data.set(0x5BBD, o.getZ() + 0x20); // ; calc bounce height
+        if(bouncingHeight == 0) variables.set_5BBD(o.getZ() + 0x20); // ; calc bounce height
         o.toggleNextPrevSprite();
         // $B879 CALL $B451     ; // ignore audio
         if(o.isDirUp()) {
@@ -2883,7 +2883,7 @@ public class Game implements Runnable {
         int dy = o.getDYu();
         int dz = o.getDZu();
 
-        variables.data.set(0x5BC2, dz); // ; {tmp store
+        variables.set_5BC2(dz); // ; {tmp store
         dec_dZ_and_update_XYZ_C700(o);
 
         o.setDX(dx); // ; preserve old dX
@@ -2937,15 +2937,15 @@ public class Game implements Runnable {
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();
 
-        variables.data.set(0x5BAF, 0);
-        variables.data.set(0x5BB0, 0);
-        variables.data.set(0x5BBD, 0);
-        variables.data.set(0x5BBF, 0);
-        variables.data.set(0x5BB7, 1);
+        variables.set_5BAF(0);
+        variables.set_5BB0(0);
+        variables.set_5BBD(0);
+        variables.set_5BBF(0);
+        variables.set_5BB7(1);
         // NOTE: this means that in odd rooms spike balls do not drop until an object is picked up.
         // This is not straightforward but these are the traps - a player may be killed when picking up an object
         // and these traps are only in odd rooms
-        variables.data.set(0x5BC0, graphicObjects.getScreen(graphicObjects.start()) & 1);
+        variables.set_5BC0(graphicObjects.getScreen(graphicObjects.start()) & 1);
 
         flag_room_visited_D219();
     }
@@ -3004,11 +3004,11 @@ public class Game implements Runnable {
         hl++;
         int attrOrig = location_tbl_6251.getU(hl);
         int attr = (attrOrig & 0x07) | 0x40;
-        variables.data.set(0x5BAD, attr); // current room attributes (color)
+        variables.set_5BAD(attr); // current room attributes (color)
         int roomSize = ((attrOrig >> 3) & 0x1F);
-        variables.data.set(0x5BAB, room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3)); // room size X
-        variables.data.set(0x5BAC, room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
-        variables.data.set(0x5BAE, room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Z
+        variables.set_5BAB(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3)); // room size X
+        variables.set_5BAC(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
+        variables.set_5BAE(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Z
         debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.data.getU(0x5BAB)+" Y:"+variables.data.getU(0x5BAC)+" Z:"+variables.data.getU(0x5BAE));
         hl++; // background objects start
 
