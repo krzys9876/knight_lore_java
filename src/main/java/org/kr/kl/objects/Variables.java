@@ -20,7 +20,8 @@ public class Variables {
     public void setObjectDroppingIntoCauldron_5BC4(int value) { data.set(0x5BC4, value); }
     public void setObjectsPutInCauldron_5BBB(int value) { data.set(0x5BBB, value); }
     public void setNumScreensVisited_5BC6(int value) { data.set(0x5BC6, value); }
-    public void set_5BB3(int value) { data.set(0x5BB3, value); }
+    public void setPickupPressed_5BB3() { data.set(0x5BB3, 1); }
+    public void resetPickupPressed_5BB3() { data.set(0x5BB3, 0); }
     public void set_5BB4(int value) { data.set(0x5BB4, value); }
     public void set_5BB2(int value) { data.set(0x5BB2, value); }
     public void set_5BBA(int value) { data.set(0x5BBA, value); }
@@ -51,7 +52,7 @@ public class Variables {
     public int getObjectDroppingIntoCauldron_5BC4() { return data.getU(0x5BC4); }
     public int getObjectsPutInCauldron_5BBB() { return data.getU(0x5BBB); }
     public int getNumScreensVisited_5BC6() { return data.getU(0x5BC6); }
-    public int get_5BB3() { return data.getU(0x5BB3); }
+    public boolean isPickupPressed_5BB3() { return data.getU(0x5BB3) == 1; }
     public int get_5BB4() { return data.getU(0x5BB4); }
     public int get_5BB2() { return data.getU(0x5BB2); }
     public int get_5BBA() { return data.getU(0x5BBA); }
@@ -71,68 +72,7 @@ public class Variables {
 
     public void init() {
         data.reset();
-
-        //; Data block at 5BC7
-        // @label=gfxbase_8x8
-        // b$5BC7 DEFB $08,$61
-        //variables.set(0x5BC7, 0x08); // variables NOT USED (passing DataBlock with font data instead)
-        //variables.set(0x5BC8, 0x61);
-        // @label=user_input_method
-        // b$5BA4 DEFS $01
-        setUserInputMethod(0);
-        //; Data block at 5BB8
-        //@label=suppress_border
-        //b$5BB8 DEFB $01
         setSuppressBorder_5BB8(1);
-        //@label=old_input_method
-        //b$5BA6 DEFS $01
-        //$5BA7 DEFS $01
-        setOldInputMethod_5BA6(0);
-        setOldInputMethod2_5BA7(0);
-        // @label=transform_flag_graphic
-        // b$5BB1 DEFS $01
-        setTransformFlag_5BB1(0);
-        //@label=all_objs_in_cauldron
-        //b$5BC3 DEFS $01
-        setAllObjectsInCauldron_5BC3(0);
-        //@label=days
-        //b$5BB9 DEFS $01
-        setDays_5BB9(0);
-        //; #TABLE(default,centre,:w)
-        //; { =h Bit(n) | =h Description }
-        //; { b5 | ??? }
-        //; { b4 | pickup/drop }
-        //; { b3 | jump }
-        //; { b2 | forward }
-        //; { b1 | right }
-        //; { b0 | left }
-        //; TABLE#
-        //@label=user_input
-        //b$5BB5 DEFS $01
-        setUserInput_5BB5(0);
-        //@label=obj_dropping_into_cauldron
-        //b$5BC4 DEFS $01
-        setObjectDroppingIntoCauldron_5BC4(0);
-
-        //; Data block at 5BBB
-        //@label=objects_put_in_cauldron
-        //b$5BBB DEFS $01
-        setObjectsPutInCauldron_5BBB(0);
-
-        //; Data block at 5BC6
-        //@label=num_scrns_visited
-        //b$5BC6 DEFS $01
-        setNumScreensVisited_5BC6(0);
-
-        //; Data block at 5BB3
-        //@label=pickup_drop_pressed
-        //b$5BB3 DEFS $01
-        set_5BB3(0);
-
-        //; Data block at 5BB4
-        //@label=objects_carried_changed
-        //b$5BB4 DEFS $01
-        set_5BB4(0);
     }
 
     public boolean isExitingScreen() { return exitingScreen; }

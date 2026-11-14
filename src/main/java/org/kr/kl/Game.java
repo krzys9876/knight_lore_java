@@ -1639,8 +1639,7 @@ public class Game implements Runnable {
     }
 
     private void handle_pickup_drop_C00E(GraphicObject o) {
-        boolean pressed = variables.get_5BB3() != 0;
-        if(!pressed) {
+        if(!variables.isPickupPressed_5BB3()) {
             if(!chk_pickup_drop_BFFB() || chk_plyr_OOB_C87A(o) || o.isJumping() || !o.isOobZ()) return;
             cant_drop_5BD3.set(0x5BD3, 0);
             int zOrig = o.getZ();
@@ -1649,7 +1648,7 @@ public class Game implements Runnable {
             o.setZ(zOrig); // ; restore original Z
             if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
             // @label=loc_C041
-            variables.set_5BB3(1);
+            variables.setPickupPressed_5BB3();
             variables.set_5BB4(1);
             int origW = o.getW();
             int origD = o.getD();
@@ -1690,7 +1689,7 @@ public class Game implements Runnable {
         } else {
             // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
-            variables.set_5BB3(0);
+            variables.resetPickupPressed_5BB3();
         }
     }
 
