@@ -1586,8 +1586,7 @@ public class Game implements Runnable {
             o.setDX(dX);
             o.setDY(dY);
 
-            int rnd = variables.get_5BA5(); // TODO: replace this with random number!
-            int a = rnd & 0x03;
+            int a = params.getRnd().getSeed3() & 0x03;
             if(a==0) a++;
             a+=0x82;
             o.setGrNo(a); // ; set graphic no.

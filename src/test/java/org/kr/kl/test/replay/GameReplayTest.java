@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameReplayTest {
     Thread gameThread = null;
-    String referencePath = "saves/20261110_195359";
+    String referencePath = "saves/20261114_115736"; // hardcoded full gave save
 
     @Test
     @DisplayName("Replay complete gameplay")
