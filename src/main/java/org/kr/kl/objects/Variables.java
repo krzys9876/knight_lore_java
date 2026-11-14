@@ -5,6 +5,10 @@ import org.kr.DataBlock;
 public class Variables {
     private final DataBlock data = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
 
+    private boolean exitingScreen = false;
+    private boolean gameOver = false;
+    private boolean shouldQuit = false;
+
     public void set_5BA4(int value) { data.set(0x5BA4, value); }
     public void set_5BB8(int value) { data.set(0x5BB8, value); }
     public void set_5BA6(int value) { data.set(0x5BA6, value); }
@@ -151,4 +155,16 @@ public class Variables {
         //b$5BB4 DEFS $01
         set_5BB4(0);
     }
+
+    public boolean isExitingScreen() { return exitingScreen; }
+    public void resetExitingScreen() { this.exitingScreen = false; }
+    public void setExitingScreen() { this.exitingScreen = true; }
+
+    public boolean isGameOver() { return gameOver; }
+    public void setGameOver() { this.gameOver = true; }
+    public void resetGameOver() { this.gameOver = false; }
+
+    public boolean shouldQuit() { return shouldQuit; }
+    public void setShouldQuit() { this.shouldQuit = true; }
+    public void resetShouldQuit() { this.shouldQuit = true; }
 }

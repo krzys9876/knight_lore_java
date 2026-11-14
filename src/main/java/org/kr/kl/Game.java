@@ -23,8 +23,6 @@ public class Game implements Runnable {
 
     private final GameParams params;
 
-    private boolean shouldQuit = false;
-
     private final int SUN_TICK_PER_GAME_TICK = 8;
     private final long CAULDRON_ATTR_DELAY_MS = 120;
 
@@ -40,8 +38,6 @@ public class Game implements Runnable {
     // $5BA0-$6107 - variables
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
     private final Variables variables = new Variables();
-    private boolean exitingScreen = false;
-    private boolean gameOver = false;
     private int gameCounter = 0;
     private String gameId = "";
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
@@ -184,7 +180,7 @@ public class Game implements Runnable {
         debugPanel1.append("start_AF6C");
 
         gameCounter = 0;
-        while(!shouldQuit) {
+        while(!variables.shouldQuit()) {
             variables.init();
 
             // PUSH AF       ;
@@ -212,7 +208,7 @@ public class Game implements Runnable {
             //other_objs_here_5C88.reset();
 
             //variables.data.set(0x5BA0, v5C78);
-            gameOver = false;
+            variables.resetGameOver();;
             gameId = nowAsString();
             if(!keySequence.isInactive()) new File("saves/"+gameId).mkdir();
             main_AF88();
@@ -609,7 +605,7 @@ public class Game implements Runnable {
                 params.getRnd().updateSeed1();
             }
             delay();
-            if(shouldQuit) return;
+            if(variables.shouldQuit()) return;
         }
     }
 
@@ -722,7 +718,7 @@ public class Game implements Runnable {
         clear_scrn_D55F();
 
         gameOverScreen();
-        gameOver = true;
+        variables.setGameOver();
     }
 
     private void gameOverScreen() {
@@ -824,7 +820,7 @@ public class Game implements Runnable {
     }
 
     private void waitForKey() {
-        while(keyQueue.isEmpty() && !shouldQuit) {
+        while(keyQueue.isEmpty() && !variables.shouldQuit()) {
             delay();
         }
         keyQueue.clear();
@@ -867,10 +863,10 @@ public class Game implements Runnable {
     private void game_loop_AFBA() {
         debugPanel2.append("Game loop AFBA\n");
         boolean exit = false;
-        while(!exit && !shouldQuit) {
-            exitingScreen = false;
+        while(!exit && !variables.shouldQuit()) {
+            variables.resetExitingScreen();
             build_screen_objects_D1E6();
-            while (!exit && !exitingScreen && !shouldQuit) {
+            while (!exit && !variables.isExitingScreen() && !variables.shouldQuit()) {
                 exit = onscreen_loop_AFBD();
                 debugPanel1.setText("");
                 debugPanel2.setText("");
@@ -912,7 +908,7 @@ public class Game implements Runnable {
         params.getRnd().updateSeed2();
         update_sprite_loop_AFC7();
 
-        if(exitingScreen) return false;
+        if(variables.isExitingScreen()) return false;
         // loc_B000
         variables.setBit_5BB2(0); // ; update special objects table next time
         init_cauldron_bubbles_B8A9();
@@ -952,15 +948,15 @@ public class Game implements Runnable {
         print_days_BC66();
         print_lives_gfx_BC7A();
         print_lives_BCA3();
-        if(gameOver) return true;
+        if(variables.isGameOver()) return true;
         update_screen_D56F(false);
 
         // @label=loc_B074
         variables.set_5BC5(0);
         if(graphicObjects.playerBottom().getGrNo()==0 && graphicObjects.playerTop().getGrNo()==0) {
             player_dies_AFB7();
-            exitingScreen = true;
-            return gameOver;
+            variables.setExitingScreen();
+            return variables.isGameOver();
         }
 
         // @label=reset_objs_wipe_flag
@@ -968,7 +964,7 @@ public class Game implements Runnable {
         for(int addr = graphicObjects.start(); addr<graphicObjects.endExcl(); addr+=0x20)
             graphicObjects.resetWipe(addr); // c$B090 RES 5,(HL)    ;
 
-        return gameOver;
+        return variables.isGameOver();
     }
 
     private void init_cauldron_bubbles_B8A9() {
@@ -1011,7 +1007,7 @@ public class Game implements Runnable {
 
         if(params.getTickLimit() > 0 && tickNo >= params.getTickLimit()) {
             IO.println("tick: " + tickNo + ", should quit");
-            shouldQuit = true;
+            variables.setShouldQuit();
         }
 
         keySequence.switchMode(tickNo);
@@ -1341,7 +1337,7 @@ public class Game implements Runnable {
         // block contains sprite metadata (32 bytes each)
         for(int i=0; i<graphicObjects.size; i++) {
             updateOneSprite(graphicObjects.o(i));
-            if(exitingScreen || gameOver) return;
+            if(variables.isExitingScreen() || variables.isGameOver()) return;
             params.getRnd().updateSeed3();
         }
     }
@@ -1863,7 +1859,7 @@ public class Game implements Runnable {
         adj_for_out_of_bounds_CB45(player);
         handle_exit_screen_CA70(player);
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
-        if(!exitingScreen) {
+        if(!variables.isExitingScreen()) {
             add_dXYZ_C706(player);
             if (player.isOobZ()) {
                 int tmpDz = variables.get_5BC1();
@@ -1917,7 +1913,7 @@ public class Game implements Runnable {
 
         if(currentScreen!=newScreen) {
             if(player.getGrNo() - 0x10 > 0x40) return;
-            exitingScreen = true; //TODO: rethink if this is the correct way to flag this
+            variables.setExitingScreen();
             player.setScreen(newScreen);
             player.initEnterCounter();
             plyr_spr_1_scratchpad_D161.copyFrom(graphicObjects.playerBottom());
