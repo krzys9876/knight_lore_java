@@ -3,9 +3,7 @@ package org.kr.kl.objects;
 import org.kr.DataBlock;
 
 public class Variables {
-    public DataBlock data = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
-
-    public void reset() { data.reset(); }
+    private final DataBlock data = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
 
     public void set_5BA5(int value) { data.set(0x5BA5, value); }
     public void set_5BA4(int value) { data.set(0x5BA4, value); }
@@ -38,6 +36,9 @@ public class Variables {
     public void set_5BAB(int value) { data.set(0x5BAB, value); }
     public void set_5BAC(int value) { data.set(0x5BAC, value); }
     public void set_5BAE(int value) { data.set(0x5BAE, value); }
+
+    public void setBit_5BB2(int bit) { data.setBit(bit, 0x5BB2); }
+    public boolean isSet_5BB5(int bit) { return data.isSet(bit, 0x5BB5); }
 
     public int get_5BA5() { return data.getU(0x5BA5); }
     public int get_5BA4() { return data.getU(0x5BA4); }
@@ -73,7 +74,7 @@ public class Variables {
 
 
     public void init() {
-        reset();
+        data.reset();
 
         //; Data block at 5BC7
         // @label=gfxbase_8x8

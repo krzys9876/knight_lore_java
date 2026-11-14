@@ -858,7 +858,7 @@ public class Game implements Runnable {
         }
         int a = variables.get_5BB8(); // suppress border
         if(a == 0) {
-            variables.data.set(0x5BB8,1);
+            variables.set_5BB8(1);
             print_border_D296();
         }
         // update_screen_D56F(true); // called after the routine
@@ -914,7 +914,7 @@ public class Game implements Runnable {
 
         if(exitingScreen) return false;
         // loc_B000
-        variables.data.setBit(0, 0x5BB2); // ; update special objects table next time
+        variables.setBit_5BB2(0); // ; update special objects table next time
         init_cauldron_bubbles_B8A9();
         list_objects_to_draw_CE62();
         //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
@@ -1586,7 +1586,7 @@ public class Game implements Runnable {
             o.setDX(dX);
             o.setDY(dY);
 
-            int rnd = variables.get_5BA5();
+            int rnd = variables.get_5BA5(); // TODO: replace this with random number!
             int a = rnd & 0x03;
             if(a==0) a++;
             a+=0x82;
@@ -1848,13 +1848,13 @@ public class Game implements Runnable {
 
     private void move_player_C9A1(GraphicObject player) {
         if(variables.get_5BC4()!=0) player.setDZ(2);
-        boolean forward = variables.data.isSet(2, 0x5BB5);
+        boolean forward = variables.isSet_5BB5(2);
         if(player.isJumping() || player.enteringScreen() || forward) calc_plyr_dXY_C9FB(player);
 
         int dz = player.getDZ();
         if(dz < 0) dz -= 2;
         else {
-            boolean jumpingKey = variables.data.isSet(3, 0x5BB5);
+            boolean jumpingKey = variables.isSet_5BB5(3);
             if (jumpingKey) dz -= 1; else dz -= 2;
         }
         player.setDZ(dz);
@@ -1867,7 +1867,7 @@ public class Game implements Runnable {
         if(!exitingScreen) {
             add_dXYZ_C706(player);
             if (player.isOobZ()) {
-                int tmpDz = variables.data.getS(0x5BC1);
+                int tmpDz = variables.get_5BC1();
                 if (tmpDz < 0) player.resetJumping();
             }
             player.setDX(0);
