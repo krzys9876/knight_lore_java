@@ -5,7 +5,6 @@ import org.kr.DataBlock;
 public class Variables {
     private final DataBlock data = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);
 
-    public void set_5BA5(int value) { data.set(0x5BA5, value); }
     public void set_5BA4(int value) { data.set(0x5BA4, value); }
     public void set_5BB8(int value) { data.set(0x5BB8, value); }
     public void set_5BA6(int value) { data.set(0x5BA6, value); }
@@ -40,7 +39,6 @@ public class Variables {
     public void setBit_5BB2(int bit) { data.setBit(bit, 0x5BB2); }
     public boolean isSet_5BB5(int bit) { return data.isSet(bit, 0x5BB5); }
 
-    public int get_5BA5() { return data.getU(0x5BA5); }
     public int get_5BA4() { return data.getU(0x5BA4); }
     public int get_5BB8() { return data.getU(0x5BB8); }
     public int get_5BA6() { return data.getU(0x5BA6); }
