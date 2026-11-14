@@ -248,7 +248,7 @@ public class Game implements Runnable {
             }*/
 
         debugPanel2.append("START THE GAME");
-        debugPanel2.append("Input method: " + variables.get_5BA4());
+        debugPanel2.append("Input method: " + variables.getUserInputMethod_5BA4());
 
         // LD DE,$B20E   ; }
         // CALL $B2CF    ; play tune // ignore audio
@@ -325,7 +325,7 @@ public class Game implements Runnable {
         debugPanel1.append("do_menu_selection_BD0C");
         // XOR A         ;
         // LD ($5BB8),A  ;
-        variables.set_5BB8(0);
+        variables.setSuppressBorder_5BB8(0);
         // LD HL,$BDA2   ;
         // LD B,$08      ; # menu entries
 
@@ -365,9 +365,9 @@ public class Game implements Runnable {
             hl2 += 2;
             de2 = print_text_single_colour_BE31(menu_text_BDBA, x, y, de2);
         }
-        int a = variables.get_5BB8(); // suppress border
+        int a = variables.getSuppressBorder_5BB8(); // suppress border
         if(a == 0) {
-            variables.set_5BB8(1);
+            variables.setSuppressBorder_5BB8(1);
             print_border_D296();
             update_screen_D56F(true);
         }
@@ -449,14 +449,14 @@ public class Game implements Runnable {
     private void flash_menu_BD89() {
         debugPanel1.append("flash_menu_BD89");
         int hl = 0xBDA3; // first menu entry
-        int a = variables.get_5BA4(); // input method
+        int a = variables.getUserInputMethod_5BA4(); // input method
         a = (a >> 1) & 0x3; // joystick / keyboard flag
         // CALL $BEA3
         for(int i = 0; i < 4; i++) {
             if(a == i) menu_colours_BDA2.set(hl+i, menu_colours_BDA2.getU(hl+i) | 0x80 );
             else menu_colours_BDA2.set(hl+i, menu_colours_BDA2.getU(hl+i) & 0x7F );
         }
-        if((variables.get_5BA4() & 0x08)>0) menu_colours_BDA2.set(hl+4, menu_colours_BDA2.getU(hl+4) | 0x80 );
+        if((variables.getUserInputMethod_5BA4() & 0x08)>0) menu_colours_BDA2.set(hl+4, menu_colours_BDA2.getU(hl+4) | 0x80 );
         else menu_colours_BDA2.set(hl+5, menu_colours_BDA2.getU(hl+5) & 0x7F );
     }
 
@@ -578,8 +578,8 @@ public class Game implements Runnable {
         if(skip) keyQueue.add(KeyEvent.VK_0);
         while(!startGame) {
             if (!keyQueue.isEmpty()) {
-                int a = variables.get_5BA4();
-                variables.set_5BA6(a);
+                int a = variables.getUserInputMethod_5BA4();
+                variables.setOldInputMethod_5BA6(a);
                 Integer key = keyQueue.first();
                 keyQueue.remove(key);
                 //IO.println("Key: " + key);
@@ -596,7 +596,7 @@ public class Game implements Runnable {
                 if (key == KeyEvent.VK_4) a |= 6;
                 //variables.data.set(0x5BA4, a);
                 if (key == KeyEvent.VK_5) a ^= 0x08; //; toggle directional
-                variables.set_5BA4(a);
+                variables.setUserInputMethod(a);
                 // CALL NZ,$B4A3 ; yes // ignore audio
                 do_menu_selection_BD0C();
                 if (key == KeyEvent.VK_0) startGame = true;
@@ -686,7 +686,7 @@ public class Game implements Runnable {
     private void lose_life_D12A() {
         graphicObjects.playerBottom().copyFrom(plyr_spr_1_scratchpad_D161);
         graphicObjects.playerTop().copyFrom(plyr_spr_2_scratchpad_D181);
-        variables.set_5BB1(0);
+        variables.setTransformFlag_5BB1(0);
         int livesLeft = variables.get_5BBA();
         if(livesLeft < 1) {
             variables.set_5BBA(-1);
@@ -712,7 +712,7 @@ public class Game implements Runnable {
         clear_scrn_buffer_D567();
         clear_scrn_D55F();
 
-        if(variables.get_5BC3() != 0)  game_complete_msg_BAAB(); // all objects in cauldron
+        if(variables.getAllObjectsInCauldron_5BC3() != 0)  game_complete_msg_BAAB(); // all objects in cauldron
 
         clear_scrn_buffer_D567();
         clear_scrn_D55F();
@@ -722,23 +722,23 @@ public class Game implements Runnable {
     }
 
     private void gameOverScreen() {
-        variables.set_5BB8(0);
+        variables.setSuppressBorder_5BB8(0);
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
-        int days = variables.get_5BB9();
+        int days = variables.getDays_5BB9();
         if(days > byteToBCD(params.getMaxDays())) days --; // game over due to timeout
         int daysAddr = 0xE8E2;
         if(days < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, days);
         else print_BCD_number_BCAE(daysAddr, new int[] { days });
         calc_and_display_percent_BC10();
 
-        int objectsInCauldron = variables.get_5BBB();
+        int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int objBCD = byteToBCD(objectsInCauldron);
         int objAddr = 0xE2EA;
         if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
         else print_BCD_number_BCAE(objAddr, new int[] { objBCD });
 
-        int screens = variables.get_5BC6();
-        int allObjInCauldron = variables.get_5BC3();
+        int screens = variables.getNumScreensVisited_5BC6();
+        int allObjInCauldron = variables.getAllObjectsInCauldron_5BC3();
 
         int a = screens;
         int c = ((a << 1) & 0xFF) | ((a >> 7) & 1);
@@ -774,10 +774,10 @@ public class Game implements Runnable {
     private void calc_and_display_percent_BC10() {
         int screens = calcScreensVisited();
         //IO.println("screens = " + screens);
-        int objInCauldron = variables.get_5BBB();
+        int objInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
         screens --; // don't count first room
-        variables.set_5BC6(screens);
+        variables.setNumScreensVisited_5BC6(screens);
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 0xE4E6;
         int percentBCD = byteToBCD(percent);
@@ -810,7 +810,7 @@ public class Game implements Runnable {
     }
 
     private void game_complete_msg_BAAB() {
-        variables.set_5BB8(0);
+        variables.setSuppressBorder_5BB8(0);
         display_text_list_BEBF(complete_colours_BAD2, complete_xy_BAD8, the_potion_casts_BAE4);
         // $BAC4 LD DE,$B239   ;
         // $BAC7 CALL $B2CF    ; // ignore audio
@@ -852,9 +852,9 @@ public class Game implements Runnable {
             int y = xy.getU(xy.start + i*2+1);
             de = print_text_single_colour_BE31(text, x, y, de);
         }
-        int a = variables.get_5BB8(); // suppress border
+        int a = variables.getSuppressBorder_5BB8(); // suppress border
         if(a == 0) {
-            variables.set_5BB8(1);
+            variables.setSuppressBorder_5BB8(1);
             print_border_D296();
         }
         // update_screen_D56F(true); // called after the routine
@@ -875,7 +875,7 @@ public class Game implements Runnable {
 
                 debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.getCopy());
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphicObjects.playerBottom().getScreen()));
-                debugPanel1.append(String.format("Objects collected: %d of %d", variables.get_5BBB(), params.getCauldronRequiredObjects()));
+                debugPanel1.append(String.format("Objects collected: %d of %d", variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects()));
                 int hl = ret_next_obj_required_C274();
                 if(hl < objects_required_C27D.endExcl()) {
                     int required = objects_required_C27D.getU(hl) | 0x60;
@@ -952,7 +952,6 @@ public class Game implements Runnable {
         update_screen_D56F(false);
 
         // @label=loc_B074
-        variables.set_5BC5(0);
         if(graphicObjects.playerBottom().getGrNo()==0 && graphicObjects.playerTop().getGrNo()==0) {
             player_dies_AFB7();
             variables.setExitingScreen();
@@ -973,7 +972,7 @@ public class Game implements Runnable {
         // NOTE: first special object is cauldron bubbles
         GraphicObject secondSpecObj = graphicObjects.firstSpecObj().next(); // ; special_objs_here[1]
         if(secondSpecObj.getGrNo() != 0) return;
-        if(variables.get_5BC3() != 0) return;
+        if(variables.getAllObjectsInCauldron_5BC3() != 0) return;
 
         secondSpecObj.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, 0x12); // 18 bytes to copy
         secondSpecObj.setXYAdj(-12, -4);
@@ -1077,7 +1076,7 @@ public class Game implements Runnable {
 
     private void print_days_BC66() {
         int videoAddress = 0xD9E2; // (120, 7)
-        print_BCD_number_BCAE(videoAddress, new int[] {variables.get_5BB9()});
+        print_BCD_number_BCAE(videoAddress, new int[] {variables.getDays_5BB9()});
     }
 
     private void print_BCD_number_BCAE(int bc, int[] values) {
@@ -1270,7 +1269,7 @@ public class Game implements Runnable {
     }
 
     private void display_sun_moon_frame_C3A4() {
-        if(variables.get_5BC3()!=0) return;
+        if(variables.getAllObjectsInCauldron_5BC3()!=0) return;
 
         int x = sun_moon_scratchpad_C44D.getPixelX();
         if (x == 0xE1 - 1) toggle_day_night_C3FF();
@@ -1307,12 +1306,12 @@ public class Game implements Runnable {
         int nextSprite = currentSprite ^ 1; // flip last bit
         sun_moon_scratchpad_C44D.setGrNo(nextSprite);
         sun_moon_scratchpad_C44D.setPixelX(0xB0); // ; pixel X
-        variables.set_5BB1(1); // transform flag
+        variables.setTransformFlag_5BB1(1); // transform flag
         if((nextSprite & 1) == 0) {
             // DAA - number must be in BCD
-            int currDays = variables.get_5BB9();
+            int currDays = variables.getDays_5BB9();
             int incDays = params.isDisableIncDays() ? currDays : incBCD(currDays) % 0xA0; // wrap days at 99
-            variables.set_5BB9(incDays);
+            variables.setDays_5BB9(incDays);
             if(incDays == byteToBCD(params.getMaxDays())+1) {
                 game_over_BA22();
                 return;
@@ -1605,7 +1604,6 @@ public class Game implements Runnable {
             o.setDZ(1); // ; dZ=1
             move_towards_plyr_B965(o, 4, 4);
         }
-        variables.set_5BC5(o.getZ());
         dec_dZ_and_update_XYZ_C700(o);
         o.setWipeAndDraw();
     }
@@ -1618,7 +1616,7 @@ public class Game implements Runnable {
 
     private void upd_player_bottom_C82B(GraphicObject o) {
         if(o.isDead()) {
-            if (variables.get_5BC3() == 0) {
+            if (variables.getAllObjectsInCauldron_5BC3() == 0) {
                 o.next().setDead(); // SET 6,(IX+$2D)
                 init_death_sparkles_BF21(o);
                 return;
@@ -1708,7 +1706,7 @@ public class Game implements Runnable {
                     int z = player.getZ();
                     if(z >= 0x98) {
                         toDrop.setBitGrNo(3);
-                        variables.set_5BC4(1);
+                        variables.setObjectDroppingIntoCauldron_5BC4(1);
                     }
                 }
                 toDrop.setX(player.getX());
@@ -1816,7 +1814,7 @@ public class Game implements Runnable {
     }
 
     private boolean chk_pickup_drop_BFFB() {
-        int keys = variables.get_5BB5();
+        int keys = variables.getUserInput_5BB5();
         return (keys & 0x10) > 0; // only standard keyboard input
     }
 
@@ -1842,7 +1840,7 @@ public class Game implements Runnable {
     }
 
     private void move_player_C9A1(GraphicObject player) {
-        if(variables.get_5BC4()!=0) player.setDZ(2);
+        if(variables.getObjectDroppingIntoCauldron_5BC4()!=0) player.setDZ(2);
         boolean forward = variables.isSet_5BB5(2);
         if(player.isJumping() || player.enteringScreen() || forward) calc_plyr_dXY_C9FB(player);
 
@@ -1853,7 +1851,7 @@ public class Game implements Runnable {
             if (jumpingKey) dz -= 1; else dz -= 2;
         }
         player.setDZ(dz);
-        variables.set_5BC1(dz);
+        int tmpDz = dz;
         //$C9D6 CALL M,$B451   ; ignore audio
 
         adj_for_out_of_bounds_CB45(player);
@@ -1862,7 +1860,6 @@ public class Game implements Runnable {
         if(!variables.isExitingScreen()) {
             add_dXYZ_C706(player);
             if (player.isOobZ()) {
-                int tmpDz = variables.get_5BC1();
                 if (tmpDz < 0) player.resetJumping();
             }
             player.setDX(0);
@@ -2094,10 +2091,10 @@ public class Game implements Runnable {
     }
 
     private boolean chk_and_init_transform_C306(GraphicObject o) {
-        boolean transforming = variables.get_5BB1() > 0;
+        boolean transforming = variables.getTransformFlag_5BB1() > 0;
         if(!transforming || o.getEnterCounter() > 0 || o.isJumping()) return false;
 
-        variables.set_5BB1(o.getGrNo());
+        variables.setTransformFlag_5BB1(o.getGrNo());
         o.setTemp10(8); // transform counter
 
         o.next().setGrNo(1); // update player top
@@ -2138,7 +2135,7 @@ public class Game implements Runnable {
             saveKeySequence();
             System.exit(0);
         }
-        int prevC = variables.get_5BB5();
+        int prevC = variables.getUserInput_5BB5();
         if(c != prevC) {
             boolean leftCurr = (c & 0b00001) > 0;
             boolean leftPrev = (prevC & 0b00001) > 0;
@@ -2161,7 +2158,7 @@ public class Game implements Runnable {
             if(pickupDropCurr && !pickupDropPrev) keySequence.putPressed(tickNo, KeyEvent.VK_1);
             if(!pickupDropCurr && pickupDropPrev) keySequence.putReleased(tickNo, KeyEvent.VK_1);
 
-            variables.set_5BB5(c);
+            variables.setUserInput_5BB5(c);
             //IO.println("Pressed: "+Integer.toBinaryString(c));
         }
     }
@@ -2177,7 +2174,7 @@ public class Game implements Runnable {
             o.decTurnCounter();
             return;
         }
-        int keys = variables.get_5BB5();
+        int keys = variables.getUserInput_5BB5();
         if((keys & 3) == 0) return; // ; left or right?
 
         if(o.getTurnCounter() > 0 || o.isJumping()) return; // ; already jumping?
@@ -2193,7 +2190,7 @@ public class Game implements Runnable {
     }
 
     private void handle_jump_C948(GraphicObject o) {
-        boolean jump = DataBlock.isSetS(3, variables.get_5BB5());
+        boolean jump = DataBlock.isSetS(3, variables.getUserInput_5BB5());
         if(!jump || o.enteringScreen() || o.isJumping()) return;
         if(o.getDZ() < -1) return;
         o.setJumping();
@@ -2201,7 +2198,7 @@ public class Game implements Runnable {
     }
 
     private void handle_forward_C969(GraphicObject o) {
-        boolean forward = DataBlock.isSetS(2, variables.get_5BB5());
+        boolean forward = DataBlock.isSetS(2, variables.getUserInput_5BB5());
         // ignore audio: @label=loc_C97A
         if(!o.enteringScreen() && !o.isJumping() & !forward) {
             //@label=loc_C994
@@ -2293,7 +2290,7 @@ public class Game implements Runnable {
     }
 
     private void upd_player_top_CDE2(GraphicObject o) {
-        if(o.isDead() && variables.get_5BC3()==0) {
+        if(o.isDead() && variables.getAllObjectsInCauldron_5BC3()==0) {
             init_death_sparkles_BF21(o);
             return;
         }
@@ -2498,7 +2495,7 @@ public class Game implements Runnable {
         // NOTE: this applies only to player sprite
         o.setXYAdj(-12, -2);
         if(o.isDead()) {
-            if (variables.get_5BC3() == 0) {
+            if (variables.getAllObjectsInCauldron_5BC3() == 0) {
                 init_death_sparkles_BF21(o);
                 return;
             }
@@ -2511,11 +2508,11 @@ public class Game implements Runnable {
 
         if(counter == 0) {
             // End transformation
-            int a = variables.get_5BB1() ^ 0x20;
+            int a = variables.getTransformFlag_5BB1() ^ 0x20;
             o.setGrNo(a);
             a += 0x10;
             graphicObjects.playerTop().setGrNo(a);
-            variables.set_5BB1(0);
+            variables.setTransformFlag_5BB1(0);
             o.setXYAdj(-12, -6);
             boolean spriteFlag = o.isBitSetGrNo(5);
             if (spriteFlag) o.setYAdj(o.getYAdj() - 1);
@@ -2613,12 +2610,12 @@ public class Game implements Runnable {
         int grNo = o.getGrNo();
         boolean sameAsRequired = objects_required_C27D.getU(hl) == (grNo & 0x07);
         if(sameAsRequired) {
-            variables.set_5BBB(variables.get_5BBB() + 1);
+            variables.setObjectsPutInCauldron_5BBB(variables.getObjectsPutInCauldron_5BBB() + 1);
             cycle_colours_with_sound_C2A5();
-            boolean gotAllObjects = variables.get_5BBB() == params.getCauldronRequiredObjects();
+            boolean gotAllObjects = variables.getObjectsPutInCauldron_5BBB() == params.getCauldronRequiredObjects();
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
-        variables.set_5BC4(0);
+        variables.setObjectDroppingIntoCauldron_5BC4(0);
         int l = o.getTemp10();
         int h = o.getTemp11();
         int ptr = h * 256 + l;
@@ -2630,7 +2627,7 @@ public class Game implements Runnable {
     private void prepare_final_animation_C2CC() {
         IO.println("prepare_final_animation_C2CC");
 
-        variables.set_5BC3(1);
+        variables.setAllObjectsInCauldron_5BC3(1);
         int objIx = graphicObjects.specialObjStartIx + 1;
         for(int i=0; i< 0x0B; i++) { // ; wipe 11 objects in the room (1 special, 7 bg, 3 fg)
             graphicObjects.o(objIx).setGrNo(1); // ; set graphic no. = INVALID
@@ -2795,7 +2792,7 @@ public class Game implements Runnable {
     }
 
     private int ret_next_obj_required_C274() {
-        int objsInCauldron = variables.get_5BBB();
+        int objsInCauldron = variables.getObjectsPutInCauldron_5BBB();
         return objects_required_C27D.start + objsInCauldron;
     }
 
@@ -2876,9 +2873,7 @@ public class Game implements Runnable {
 
         int dx = o.getDXu();
         int dy = o.getDYu();
-        int dz = o.getDZu();
 
-        variables.set_5BC2(dz); // ; {tmp store
         dec_dZ_and_update_XYZ_C700(o);
 
         o.setDX(dx); // ; preserve old dX
