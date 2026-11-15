@@ -38,9 +38,9 @@ public class Variables {
     public void resetSpikeBallDropping_5BBF() { data.set(0x5BBF, 0); }
     public void setBallBounceHeight_5BBD(int value) { data.set(0x5BBD, value); }
     public void setCurrRoomAttrib_5BAD(int value) { data.set(0x5BAD, value); }
-    public void set_5BAB(int value) { data.set(0x5BAB, value); }
-    public void set_5BAC(int value) { data.set(0x5BAC, value); }
-    public void set_5BAE(int value) { data.set(0x5BAE, value); }
+    public void setRoomSizeX_5BAB(int value) { data.set(0x5BAB, value); }
+    public void setRoomSizeY_5BAC(int value) { data.set(0x5BAC, value); }
+    public void setRoomSizeZ_5BAE(int value) { data.set(0x5BAE, value); }
 
     public boolean isSet_5BB5(int bit) { return data.isSet(bit, 0x5BB5); }
 
@@ -65,9 +65,9 @@ public class Variables {
     public boolean isSpikeBallDropping_5BBF() { return data.getU(0x5BBF) == 1; }
     public int getBallBounceHeight_5BBD() { return data.getU(0x5BBD); }
     public int getCurrRoomAttrib_5BAD() { return data.getU(0x5BAD); }
-    public int get_5BAB() { return data.getU(0x5BAB); }
-    public int get_5BAC() { return data.getU(0x5BAC); }
-    public int get_5BAE() { return data.getU(0x5BAE); }
+    public int getRoomSizeX_5BAB() { return data.getU(0x5BAB); }
+    public int getRoomSizeY_5BAC() { return data.getU(0x5BAC); }
+    public int getRoomSizeZ_5BAE() { return data.getU(0x5BAE); }
 
 
     public void init() {

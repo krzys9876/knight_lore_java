@@ -1488,7 +1488,7 @@ public class Game implements Runnable {
 
         boolean moving = variables.isPortcullisMoving_5BAF();
         if(moving) return;
-        int roomSizeZ = variables.get_5BAE();
+        int roomSizeZ = variables.getRoomSizeZ_5BAE();
         int z = o.getZ();
         if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
             // @label=init_portcullis_up
@@ -1525,7 +1525,7 @@ public class Game implements Runnable {
             o.setDZ(2);
             // $C6EE CALL $B467      ; // ignore audio
             dec_dZ_and_update_XYZ_C700(o);
-            int roomSizeZ = variables.get_5BAE();
+            int roomSizeZ = variables.getRoomSizeZ_5BAE();
             int z = o.getZ();
             if(z > roomSizeZ + 0x1F) stop_portcullis_C6E0(o);
             o.setWipeAndDraw();
@@ -1812,8 +1812,8 @@ public class Game implements Runnable {
     }
 
     private boolean chk_plyr_OOB_C87A(GraphicObject p) {
-        int roomSizeX = variables.get_5BAB();
-        int roomSizeY = variables.get_5BAC();
+        int roomSizeX = variables.getRoomSizeX_5BAB();
+        int roomSizeY = variables.getRoomSizeY_5BAC();
         int xMax = roomSizeX - p.getW();
         int yMax = roomSizeY - p.getD();
 
@@ -1889,8 +1889,8 @@ public class Game implements Runnable {
         if(player.enteringScreen() || !player.isNearArch()) return;
 
         player.resetNearArch();
-        int oldRoomSizeX = variables.get_5BAB(); // L
-        int oldRoomSizeY = variables.get_5BAC(); // H
+        int oldRoomSizeX = variables.getRoomSizeX_5BAB(); // L
+        int oldRoomSizeY = variables.getRoomSizeY_5BAC(); // H
 
         int currentScreen = player.getScreen();
         int newScreen = switch(player.getSpriteDir()) {
@@ -2010,7 +2010,7 @@ public class Game implements Runnable {
     }
 
     private int adj_dZ_for_out_of_bounds_CA5A(GraphicObject o) {
-        int roomSize = variables.get_5BAE();
+        int roomSize = variables.getRoomSizeZ_5BAE();
         int dz = o.getDZ();
         int z = o.getZ();
         while(true) {
@@ -2026,7 +2026,7 @@ public class Game implements Runnable {
         if(o.enteringScreen()) return dx;
         if(o.isNearArch()) return dx;
 
-        int roomSizeX = variables.get_5BAB();
+        int roomSizeX = variables.getRoomSizeX_5BAB();
 
         int x = o.getX();
         while(true) {
@@ -2043,7 +2043,7 @@ public class Game implements Runnable {
         if(o.enteringScreen()) return dy;
         if(o.isNearArch()) return dy;
 
-        int roomSizeY = variables.get_5BAC();
+        int roomSizeY = variables.getRoomSizeY_5BAC();
 
         int y = o.getY();
         while(true) {
@@ -2985,10 +2985,10 @@ public class Game implements Runnable {
         int attr = (attrOrig & 0x07) | 0x40;
         variables.setCurrRoomAttrib_5BAD(attr); // current room attributes (color)
         int roomSize = ((attrOrig >> 3) & 0x1F);
-        variables.set_5BAB(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3)); // room size X
-        variables.set_5BAC(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
-        variables.set_5BAE(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 2)); // room size Z
-        debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.get_5BAB()+" Y:"+variables.get_5BAC()+" Z:"+variables.get_5BAE());
+        variables.setRoomSizeX_5BAB(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3));
+        variables.setRoomSizeY_5BAC(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1));
+        variables.setRoomSizeZ_5BAE(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 2));
+        debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.getRoomSizeX_5BAB()+" Y:"+variables.getRoomSizeY_5BAC()+" Z:"+variables.getRoomSizeZ_5BAE());
         hl++; // background objects start
 
         // @label=next_bg_obj
@@ -3040,7 +3040,7 @@ public class Game implements Runnable {
                     int y1 = ((offsets << 2) & 8);
                     graphicObjects.setX(targetAddr, x1 + x * 16 + 0x48); // X
                     graphicObjects.setY(targetAddr, y1 + y * 16 + 0x48); // Y
-                    graphicObjects.setZ(targetAddr, ((z * 12 + offsets) & 0xFC) + variables.get_5BAE()); // Y, variable stores room size Z
+                    graphicObjects.setZ(targetAddr, ((z * 12 + offsets) & 0xFC) + variables.getRoomSizeZ_5BAE()); // Y, variable stores room size Z
                     targetAddr += 0x20;
                     templateDone = blockDef.getU(blockDef.start + templatePart * 6 + 6) == 0; // some templates consists of two objects (guards)
                     templatePart++;
@@ -3089,8 +3089,8 @@ public class Game implements Runnable {
 
     private void adjust_plyr_xyz_for_room_size_D320() {
         debugTable2("Graphic objects table:", 0x5C08, graphicObjects.getCopy());
-        int roomSizeX = variables.get_5BAB() - 2;
-        int roomSizeY = variables.get_5BAC() - 2;
+        int roomSizeX = variables.getRoomSizeX_5BAB() - 2;
+        int roomSizeY = variables.getRoomSizeY_5BAC() - 2;
         GraphicObject player = graphicObjects.playerBottom();
         int x = player.getX();
         int y = player.getY();
