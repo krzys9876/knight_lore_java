@@ -40,7 +40,7 @@ public class GraphicObject {
 
     public void initFrom(BackgroundSprite sprite, int screenNo) {
         reset();
-        setGrNo(sprite.sprite());
+        setGrNo(sprite.grNo());
         setX(sprite.x());
         setY(sprite.y());
         setZ(sprite.z());
@@ -53,7 +53,7 @@ public class GraphicObject {
 
     public void initFrom(ForegroundSprite sprite, int screenNo, int x, int y, int z, int roomSize) {
         reset();
-        setGrNo(sprite.sprite());
+        setGrNo(sprite.grNo());
         setW(sprite.w());
         setD(sprite.d());
         setH(sprite.h());

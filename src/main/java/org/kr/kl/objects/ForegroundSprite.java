@@ -12,5 +12,4 @@ package org.kr.kl.objects;
 ; { +4 | flags (see code) }
 ; { +5 | offsets (see code) }
  */
-public record ForegroundSprite(int sprite, int w, int d, int h, int flags, int offsets) {
-}
+public record ForegroundSprite(int grNo, int w, int d, int h, int flags, int offsets) {}

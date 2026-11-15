@@ -2907,7 +2907,6 @@ public class Game implements Runnable {
             graphicObjects.reset();
             return;
         }
-        // @label=found_screen
         // HL points to start of the location in location table
         int roomId = location_tbl_6251.getU(hl);
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
@@ -2925,7 +2924,6 @@ public class Game implements Runnable {
         debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.getRoomSizeX_5BAB()+" Y:"+variables.getRoomSizeY_5BAC()+" Z:"+variables.getRoomSizeZ_5BAE());
         hl++; // background objects start
 
-        // @label=next_bg_obj
         // decode all background objects
         // hl - iterates over room background objects (until end of room data or 0xFF separator)
         int targetPos = graphicObjects.firstBackgroundObject;
@@ -2937,7 +2935,7 @@ public class Game implements Runnable {
                 BackgroundSprite s = bkgObj.sprites[spriteNum];
                 o.reset();
                 o.initFrom(s, currLocId);
-                debugPanel2.append("Retrieved sprite: %02x".formatted(s.sprite()));
+                debugPanel2.append("Retrieved sprite: %02x".formatted(s.grNo()));
                 targetPos++;
             }
             hl++;
@@ -2948,16 +2946,16 @@ public class Game implements Runnable {
             int blockCtrl = location_tbl_6251.getU(hl);
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
-            ForegroundObject blockDef = foregroundObjects.get(blockType);
+            ForegroundObject fgrObj = foregroundObjects.get(blockType);
             hl++;
             for(int i=0; i<blockCnt; i++) {
-                for(int templatePart = 0; templatePart < blockDef.sprites.length; templatePart ++) {
+                for(int templatePart = 0; templatePart < fgrObj.sprites.length; templatePart ++) {
                     int locByte = location_tbl_6251.getU(hl + i);
                     int x = (locByte & 0b00000111);
                     int y = (locByte & 0b00111000) >> 3;
                     int z = (locByte & 0b11000000) >> 6;
                     GraphicObject o = graphicObjects.o(targetPos);
-                    ForegroundSprite s = blockDef.sprites[templatePart];
+                    ForegroundSprite s = fgrObj.sprites[templatePart];
                     o.initFrom(s, currLocId, x, y, z, variables.getRoomSizeZ_5BAE());
                     targetPos ++;
                 }
