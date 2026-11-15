@@ -5,10 +5,9 @@ import org.kr.InitialData;
 
 public class ForegroundObject {
     public final ForegroundSprite[] sprites;
-    public DataBlock block;
 
     public ForegroundObject(String resource) {
-        block = InitialData.block(resource);
+        DataBlock block = InitialData.block(resource);
         // each object consists of 6-byte sprite(s) info terminated by 0
         sprites = new ForegroundSprite[(block.size - 1) / 6];
         for(int i=0; i<sprites.length; i++) {
