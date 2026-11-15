@@ -31,7 +31,9 @@ public class Variables {
     public void setPortcullisMoveCnt_5BB0(int value) { data.set(0x5BB0, value); }
     public void setPortcullisMoving_5BAF() { data.set(0x5BAF, 1); }
     public void resetPortcullisMoving_5BAF() { data.set(0x5BAF, 0); }
-    public void set_5BC0(int value) { data.set(0x5BC0, value); }
+    public void setDisableSpikeBallDrop_5BC0(boolean value) { data.set(0x5BC0, value ? 1 : 0); }
+    public void setDisableSpikeBallDrop_5BC0() { data.set(0x5BC0, 1); }
+    public void resetDisableSpikeBallDrop_5BC0() { data.set(0x5BC0, 0); }
     public void set_5BBF(int value) { data.set(0x5BBF, value); }
     public void set_5BBD(int value) { data.set(0x5BBD, value); }
     public void set_5BAD(int value) { data.set(0x5BAD, value); }
@@ -58,7 +60,7 @@ public class Variables {
     public int getLives_5BBA() { return data.getU(0x5BBA); }
     public int getPortcullisMoveCnt_5BB0() { return data.getU(0x5BB0); }
     public boolean isPortcullisMoving_5BAF() { return data.getU(0x5BAF) == 1; }
-    public int get_5BC0() { return data.getU(0x5BC0); }
+    public boolean isDisableSpikeBallDrop_5BC0() { return data.getU(0x5BC0) == 1; }
     public int get_5BBF() { return data.getU(0x5BBF); }
     public int get_5BBD() { return data.getU(0x5BBD); }
     public int get_5BAD() { return data.getU(0x5BAD); }

@@ -1714,7 +1714,7 @@ public class Game implements Runnable {
     }
 
     private void pickup_object_C141(GraphicObject o, GraphicObject obj) {
-        variables.set_5BC0(0);
+        variables.resetDisableSpikeBallDrop_5BC0();
         int grNo = obj.getGrNo();
         int hl = inventory_5BD8.start;
         inventory_5BD8.set(hl, grNo);
@@ -2362,7 +2362,7 @@ public class Game implements Runnable {
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
-        boolean disableSpikeBallDrop = variables.get_5BC0() != 0;
+        boolean disableSpikeBallDrop = variables.isDisableSpikeBallDrop_5BC0();
         if(disableSpikeBallDrop) return;
         if(o.isDropping()) {
             dec_dZ_and_update_XYZ_C700(o);
@@ -2552,7 +2552,7 @@ public class Game implements Runnable {
             specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
             int lives = variables.getLives_5BBA();
             variables.setLives_5BBA(incBCD(lives));
-            variables.set_5BC0(0);
+            variables.setDisableSpikeBallDrop_5BC0();
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
         }
@@ -2924,7 +2924,7 @@ public class Game implements Runnable {
         // NOTE: this means that in odd rooms spike balls do not drop until an object is picked up.
         // This is not straightforward but these are the traps - a player may be killed when picking up an object
         // and these traps are only in odd rooms
-        variables.set_5BC0(graphicObjects.getScreen(graphicObjects.start()) & 1);
+        variables.setDisableSpikeBallDrop_5BC0(graphicObjects.playerBottom().isOddRoom());
 
         flag_room_visited_D219();
     }
