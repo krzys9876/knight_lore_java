@@ -4,7 +4,7 @@ import org.kr.DataBlock;
 import org.kr.InitialData;
 
 public class BackgroundObject {
-    public final BackgroundSprite[] sprites;
+    private final BackgroundSprite[] sprites;
 
     public BackgroundObject(String resource) {
         DataBlock block = InitialData.block(resource);
@@ -17,4 +17,8 @@ public class BackgroundObject {
                     block.getU(base+5), block.getU(base+6), block.getU(base+7));
         }
     }
+
+    public int size() { return sprites.length; }
+
+    public BackgroundSprite s(int index) { return sprites[index]; }
 }

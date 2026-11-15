@@ -2930,12 +2930,9 @@ public class Game implements Runnable {
         while(location_tbl_6251.getU(hl) != 0xFF && hl<=roomEnd) {
             BackgroundObject bkgObj = backgroundObjects.get(location_tbl_6251.getU(hl));
             debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.getU(hl)));
-            for (int spriteNum = 0; spriteNum < bkgObj.sprites.length; spriteNum++) {
-                GraphicObject o = graphicObjects.o(targetPos);
-                BackgroundSprite s = bkgObj.sprites[spriteNum];
-                o.reset();
-                o.initFrom(s, currLocId);
-                debugPanel2.append("Retrieved sprite: %02x".formatted(s.grNo()));
+            for (int spriteNum = 0; spriteNum < bkgObj.size(); spriteNum++) {
+                graphicObjects.o(targetPos).initFrom(bkgObj.s(spriteNum), currLocId);
+                debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.s(spriteNum).grNo()));
                 targetPos++;
             }
             hl++;
@@ -2949,14 +2946,12 @@ public class Game implements Runnable {
             ForegroundObject fgrObj = foregroundObjects.get(blockType);
             hl++;
             for(int i=0; i<blockCnt; i++) {
-                for(int templatePart = 0; templatePart < fgrObj.sprites.length; templatePart ++) {
+                for(int templatePart = 0; templatePart < fgrObj.size(); templatePart ++) {
                     int locByte = location_tbl_6251.getU(hl + i);
                     int x = (locByte & 0b00000111);
                     int y = (locByte & 0b00111000) >> 3;
                     int z = (locByte & 0b11000000) >> 6;
-                    GraphicObject o = graphicObjects.o(targetPos);
-                    ForegroundSprite s = fgrObj.sprites[templatePart];
-                    o.initFrom(s, currLocId, x, y, z, variables.getRoomSizeZ_5BAE());
+                    graphicObjects.o(targetPos).initFrom(fgrObj.s(templatePart), currLocId, x, y, z, variables.getRoomSizeZ_5BAE());
                     targetPos ++;
                 }
             }

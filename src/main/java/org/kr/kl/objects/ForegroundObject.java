@@ -4,7 +4,7 @@ import org.kr.DataBlock;
 import org.kr.InitialData;
 
 public class ForegroundObject {
-    public final ForegroundSprite[] sprites;
+    private final ForegroundSprite[] sprites;
 
     public ForegroundObject(String resource) {
         DataBlock block = InitialData.block(resource);
@@ -17,4 +17,8 @@ public class ForegroundObject {
                     block.getU(base+5));
         }
     }
+
+    public int size() { return sprites.length; }
+
+    public ForegroundSprite s(int index) { return sprites[index]; }
 }
