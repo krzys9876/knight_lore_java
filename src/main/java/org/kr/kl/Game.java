@@ -2886,22 +2886,15 @@ public class Game implements Runnable {
     }
 
     private void retrieve_screen_D3C6() {
-        int bc = locations.data.endExcl()-1; // location table end
-        int hl = locations.data.start; // location table start
         int locPos = 0;
         boolean found = false;
         int currLocId = graphicObjects.playerBottom().getScreen();
 
         Location loc = null;
-        while(hl < bc && !found) {
+        while(locPos < locations.locations.length) {
             loc = locations.locations[locPos];
             found = loc.id == currLocId;
-            if(!found) {
-                hl++;
-                int size = locations.data.getU(hl);
-                hl+=size;
-                locPos++;
-            }
+            locPos++;
         }
         if(!found) {
             // This should be unreachable
@@ -2912,17 +2905,12 @@ public class Game implements Runnable {
         // HL points to start of the location in location table
         int roomId = loc.id;
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
-        hl++;
-        int size = loc.sizeBytes;
-        int roomEnd = hl + size - 1;
-        hl++;
         int attr = loc.getAttr();
         variables.setCurrRoomAttrib_5BAD(attr); // current room attributes (color)
         variables.setRoomSizeX_5BAB(loc.getRoomSizeX());
         variables.setRoomSizeY_5BAC(loc.getRoomSizeY());
         variables.setRoomSizeZ_5BAE(loc.getRoomSizeZ());
         debugPanel2.append("Retrieved room size: "+loc.getRoomSize()+" X:"+variables.getRoomSizeX_5BAB()+" Y:"+variables.getRoomSizeY_5BAC()+" Z:"+variables.getRoomSizeZ_5BAE());
-        hl++; // background objects start
 
         // decode all background objects
         // hl - iterates over room background objects (until end of room data or 0xFF separator)
@@ -2936,28 +2924,23 @@ public class Game implements Runnable {
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.s(spriteNum).grNo()));
                 targetPos++;
             }
-            hl++;
             bkObjPos++;
         }
 
-        hl ++;
-        while(hl < roomEnd) {
-            int blockCtrl = locations.data.getU(hl);
-            int blockCnt = (blockCtrl & 0x07) + 1;
-            int blockType = (blockCtrl >> 3) & 0x1F;
+        int fgnObjPos = 0;
+        while(fgnObjPos < loc.foregroundObjects.length) {
+            LocationForegroundObject fo = loc.foregroundObjects[fgnObjPos];
+            int blockCnt = fo.cnt();
+            int blockType = fo.grNo();
             ForegroundObject fgrObj = foregroundObjects.get(blockType);
-            hl++;
             for(int i=0; i<blockCnt; i++) {
+                // more than 1 template applies to guards and wizard
                 for(int templatePart = 0; templatePart < fgrObj.size(); templatePart ++) {
-                    int locByte = locations.data.getU(hl + i);
-                    int x = (locByte & 0b00000111);
-                    int y = (locByte & 0b00111000) >> 3;
-                    int z = (locByte & 0b11000000) >> 6;
-                    graphicObjects.o(targetPos).initFrom(fgrObj.s(templatePart), currLocId, x, y, z, variables.getRoomSizeZ_5BAE());
+                    graphicObjects.o(targetPos).initFrom(fgrObj.s(templatePart), currLocId, fo.x(i), fo.y(i), fo.z(i), variables.getRoomSizeZ_5BAE());
                     targetPos ++;
                 }
             }
-            hl+=blockCnt;
+            fgnObjPos++;
         }
 
         for(int i = targetPos; i<graphicObjects.size; i++) graphicObjects.o(i).reset();
