@@ -2895,7 +2895,7 @@ public class Game implements Runnable {
         Location loc = null;
         while(hl < bc && !found) {
             loc = locations.locations[locPos];
-            found = loc.getLocId() == currLocId;
+            found = loc.id == currLocId;
             if(!found) {
                 hl++;
                 int size = locations.data.getU(hl);
@@ -2910,10 +2910,10 @@ public class Game implements Runnable {
             return;
         }
         // HL points to start of the location in location table
-        int roomId = loc.getLocId();
+        int roomId = loc.id;
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
         hl++;
-        int size = loc.sizeBytes();
+        int size = loc.sizeBytes;
         int roomEnd = hl + size - 1;
         hl++;
         int attr = loc.getAttr();
@@ -2927,15 +2927,17 @@ public class Game implements Runnable {
         // decode all background objects
         // hl - iterates over room background objects (until end of room data or 0xFF separator)
         int targetPos = graphicObjects.firstBackgroundObject;
-        while(locations.data.getU(hl) != 0xFF && hl<=roomEnd) {
-            BackgroundObject bkgObj = backgroundObjects.get(locations.data.getU(hl));
-            debugPanel2.append("Retrieved background object: %02x".formatted(locations.data.getU(hl)));
+        int bkObjPos = 0;
+        while(bkObjPos < loc.backgroundObjectId.length) {
+            BackgroundObject bkgObj = backgroundObjects.get(loc.backgroundObjectId[bkObjPos]);
+            debugPanel2.append("Retrieved background object: %02x".formatted(loc.backgroundObjectId[bkObjPos]));
             for (int spriteNum = 0; spriteNum < bkgObj.size(); spriteNum++) {
                 graphicObjects.o(targetPos).initFrom(bkgObj.s(spriteNum), currLocId);
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.s(spriteNum).grNo()));
                 targetPos++;
             }
             hl++;
+            bkObjPos++;
         }
 
         hl ++;
