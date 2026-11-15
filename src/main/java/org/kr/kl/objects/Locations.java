@@ -5,9 +5,8 @@ import org.kr.InitialData;
 
 public class Locations {
     public final DataBlock data = InitialData.block("location_tbl_6251");
-    public final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
 
-    public final DataBlock[] locations;
+    public final Location[] locations;
 
     public Locations() {
         int hl = data.start;
@@ -17,11 +16,11 @@ public class Locations {
             int sizeBytes = data.getU(hl+1);
             hl += 1 + sizeBytes;
         }
-        locations = new DataBlock[roomCnt];
+        locations = new Location[roomCnt];
         hl = data.start;
         for(int i=0; i < roomCnt; i++) {
             int size = data.getU(hl + 1) + 1;
-            locations[i] = data.slice(hl, size);
+            locations[i] = new Location(data.slice(hl, size));
             hl+=size;
         }
     }

@@ -181,7 +181,7 @@ public class Game implements Runnable {
         if(gameCounter==0) shuffle_objects_required_B544();
         // CALL $D1B1    ; {randomise player start location
 
-        int a = locations.data.start;
+        //int a = locations.data.start;
         boolean specialObjectsInitialized = false;
         //while(a < location_tbl_6251.endExcl())
         {
@@ -2888,16 +2888,19 @@ public class Game implements Runnable {
     private void retrieve_screen_D3C6() {
         int bc = locations.data.endExcl()-1; // location table end
         int hl = locations.data.start; // location table start
+        int locPos = 0;
         boolean found = false;
         int currLocId = graphicObjects.playerBottom().getScreen();
 
+        Location loc = null;
         while(hl < bc && !found) {
-            int tableLocId = locations.data.getU(hl);
-            found = tableLocId == currLocId;
+            loc = locations.locations[locPos];
+            found = loc.getLocId() == currLocId;
             if(!found) {
                 hl++;
                 int size = locations.data.getU(hl);
                 hl+=size;
+                locPos++;
             }
         }
         if(!found) {
@@ -2907,20 +2910,18 @@ public class Game implements Runnable {
             return;
         }
         // HL points to start of the location in location table
-        int roomId = locations.data.getU(hl);
+        int roomId = loc.getLocId();
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
         hl++;
-        int size = locations.data.getU(hl);
+        int size = loc.sizeBytes();
         int roomEnd = hl + size - 1;
         hl++;
-        int attrOrig = locations.data.getU(hl);
-        int attr = (attrOrig & 0x07) | 0x40;
+        int attr = loc.getAttr();
         variables.setCurrRoomAttrib_5BAD(attr); // current room attributes (color)
-        int roomSize = ((attrOrig >> 3) & 0x1F);
-        variables.setRoomSizeX_5BAB(locations.room_size_tbl_6248.getU(locations.room_size_tbl_6248.start + roomSize*3));
-        variables.setRoomSizeY_5BAC(locations.room_size_tbl_6248.getU(locations.room_size_tbl_6248.start + roomSize*3 + 1));
-        variables.setRoomSizeZ_5BAE(locations.room_size_tbl_6248.getU(locations.room_size_tbl_6248.start + roomSize*3 + 2));
-        debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.getRoomSizeX_5BAB()+" Y:"+variables.getRoomSizeY_5BAC()+" Z:"+variables.getRoomSizeZ_5BAE());
+        variables.setRoomSizeX_5BAB(loc.getRoomSizeX());
+        variables.setRoomSizeY_5BAC(loc.getRoomSizeY());
+        variables.setRoomSizeZ_5BAE(loc.getRoomSizeZ());
+        debugPanel2.append("Retrieved room size: "+loc.getRoomSize()+" X:"+variables.getRoomSizeX_5BAB()+" Y:"+variables.getRoomSizeY_5BAC()+" Z:"+variables.getRoomSizeZ_5BAE());
         hl++; // background objects start
 
         // decode all background objects
