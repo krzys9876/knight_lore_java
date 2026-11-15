@@ -25,11 +25,9 @@ public class Variables {
     public void setNumScreensVisited_5BC6(int value) { data.set(0x5BC6, value); }
     public void setPickupPressed_5BB3() { data.set(0x5BB3, 1); }
     public void resetPickupPressed_5BB3() { data.set(0x5BB3, 0); }
-    public void set_5BB2(int value) { data.set(0x5BB2, value); }
-    public void set_5BBA(int value) { data.set(0x5BBA, value); }
-    public void set_5BB6(int value) { data.set(0x5BB6, value); }
-    public void set_5BB7(int value) { data.set(0x5BB7, value); }
-    public void set_5BBE(int value) { data.set(0x5BBE, value); }
+    public void setGameStart_5BB2() { data.set(0x5BB2, 1); }
+    public void resetGameStart_5BB2() { data.set(0x5BB2, 0); }
+    public void setLives_5BBA(int value) { data.set(0x5BBA, value); }
     public void set_5BB0(int value) { data.set(0x5BB0, value); }
     public void set_5BAF(int value) { data.set(0x5BAF, value); }
     public void set_5BC0(int value) { data.set(0x5BC0, value); }
@@ -40,7 +38,6 @@ public class Variables {
     public void set_5BAC(int value) { data.set(0x5BAC, value); }
     public void set_5BAE(int value) { data.set(0x5BAE, value); }
 
-    public void setBit_5BB2(int bit) { data.setBit(bit, 0x5BB2); }
     public boolean isSet_5BB5(int bit) { return data.isSet(bit, 0x5BB5); }
 
     public int getUserInputMethod_5BA4() { return data.getU(0x5BA4); }
@@ -56,11 +53,8 @@ public class Variables {
     public int getObjectsPutInCauldron_5BBB() { return data.getU(0x5BBB); }
     public int getNumScreensVisited_5BC6() { return data.getU(0x5BC6); }
     public boolean isPickupPressed_5BB3() { return data.getU(0x5BB3) == 1; }
-    public int get_5BB2() { return data.getU(0x5BB2); }
-    public int get_5BBA() { return data.getU(0x5BBA); }
-    public int get_5BB6() { return data.getU(0x5BB6); }
-    public int get_5BB7() { return data.getU(0x5BB7); }
-    public int get_5BBE() { return data.getU(0x5BBE); }
+    public boolean isGameStart_5BB2() { return data.getU(0x5BB2) == 1; }
+    public int getLives_5BBA() { return data.getU(0x5BBA); }
     public int get_5BB0() { return data.getU(0x5BB0); }
     public int get_5BAF() { return data.getU(0x5BAF); }
     public int get_5BC0() { return data.getU(0x5BC0); }

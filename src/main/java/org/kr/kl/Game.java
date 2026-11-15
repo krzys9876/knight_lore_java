@@ -222,12 +222,12 @@ public class Game implements Runnable {
 
         // XOR A
         // LD ($5BB2),A
-        variables.set_5BB2(0);
+        variables.setGameStart_5BB2();
         // LD ($D16D),A  ; plyr_spr_1_scratchpad
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
         // LD A,$05      ; 5 lives to start
         // LD ($5BBA),A  ;
-        variables.set_5BBA(byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
+        variables.setLives_5BBA(byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
         // LD HL,$5BA0   ;
         // LD A,($5BA2)  ;
         // ADD A,(HL)    ; seed_1 += seed_2
@@ -358,12 +358,11 @@ public class Game implements Runnable {
         int hl2 = 0xBDAA; // menu xy
         int de2 = 0xBDBA; // menu text
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
-            variables.set_5BB6(menu_colours_BDA2.getU(de1));
             //debugPanel2.append("menu attrib: %02x".formatted(variables.get(0x5BB6))) ;
             int x = menu_xy_BDAA.getU(hl2); // x - menu position
             int y = menu_xy_BDAA.getU(hl2+1); // y
             hl2 += 2;
-            de2 = print_text_single_colour_BE31(menu_text_BDBA, x, y, de2);
+            de2 = print_text_single_colour_BE31(menu_text_BDBA, x, y, de2, menu_colours_BDA2.getU(de1));
         }
         int a = variables.getSuppressBorder_5BB8(); // suppress border
         if(a == 0) {
@@ -373,7 +372,7 @@ public class Game implements Runnable {
         }
     }
 
-    private int print_text_single_colour_BE31(DataBlock text, int x, int y, int de) {
+    private int print_text_single_colour_BE31(DataBlock text, int x, int y, int de, int color) {
         // h: y, l: x, de2: text address (first)
         debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de));
         int bc = calc_vidbuf_addr_D811(y, x);
@@ -389,7 +388,7 @@ public class Game implements Runnable {
         // for testing only
         //mainMemory.setByteAt(hl, Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
 
-        de = printText(text, de, bc, hl, variables.get_5BB6());
+        de = printText(text, de, bc, hl, color);
         return de;
     }
 
@@ -687,14 +686,14 @@ public class Game implements Runnable {
         graphicObjects.playerBottom().copyFrom(plyr_spr_1_scratchpad_D161);
         graphicObjects.playerTop().copyFrom(plyr_spr_2_scratchpad_D181);
         variables.resetTransformFlag_5BB1();
-        int livesLeft = variables.get_5BBA();
+        int livesLeft = variables.getLives_5BBA();
         if(livesLeft < 1) {
-            variables.set_5BBA(-1);
+            variables.setLives_5BBA(-1);
             game_over_BA22();
             return;
         }
         int newLivesLeft = params.isDisableLoseLife() ? livesLeft : decBCD(livesLeft);
-        variables.set_5BBA(newLivesLeft);
+        variables.setLives_5BBA(newLivesLeft);
         int scratch = sun_moon_scratchpad_C44D.getGrNo();
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
         int playerGraphicsNo = graphicObjects.playerBottom().getTemp10();
@@ -847,10 +846,9 @@ public class Game implements Runnable {
     private void display_text_list_BEBF(DataBlock colors, DataBlock xy, DataBlock text) {
         int de = text.start;
         for(int i = 0; i < colors.size; i++) {
-            variables.set_5BB6(colors.getU(colors.start + i));
             int x = xy.getU(xy.start + i*2);
             int y = xy.getU(xy.start + i*2+1);
-            de = print_text_single_colour_BE31(text, x, y, de);
+            de = print_text_single_colour_BE31(text, x, y, de, colors.start + i);
         }
         int a = variables.getSuppressBorder_5BB8(); // suppress border
         if(a == 0) {
@@ -903,14 +901,11 @@ public class Game implements Runnable {
     }
 
     private boolean onscreen_loop_AFBD() {
-        // @label=onscreen_loop
-        //IO.println("Onscreen loop AFBD");
         params.getRnd().updateSeed2();
         update_sprite_loop_AFC7();
 
         if(variables.isExitingScreen()) return false;
-        // loc_B000
-        variables.setBit_5BB2(0); // ; update special objects table next time
+        variables.resetGameStart_5BB2(); // ; update special objects table next time
         init_cauldron_bubbles_B8A9();
         list_objects_to_draw_CE62();
         //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
@@ -922,9 +917,6 @@ public class Game implements Runnable {
         calc_display_order_and_render_CEBB();
 
         //@label=no_delay
-        //TODO: implement checking if first render ($B042 AND A         ; rendered before?)
-
-        variables.set_5BB7(0);
         int a = variables.get_5BAD(); // screen attribute
         for(int addr = 0x5800; addr<0x5800+0x0300; addr++) {
             mainMemory.setByteAt(addr, a);
@@ -1109,7 +1101,7 @@ public class Game implements Runnable {
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(0xDDD7, new int[] {variables.get_5BBA()});
+        print_BCD_number_BCAE(0xDDD7, new int[] {variables.getLives_5BBA()});
     }
 
     private void list_objects_to_draw_CE62() {
@@ -1125,20 +1117,21 @@ public class Game implements Runnable {
     }
 
     private void calc_display_order_and_render_CEBB() {
-        variables.set_5BBE(0); // rendered objects cnt
+        int renderedCnt = 0; // rendered objects cnt
         int de1 = objects_to_draw_CE8B.start;
         int i = de1;
         while(objects_to_draw_CE8B.getU(i) !=0xFF) i++;
         int cntToRender = i - de1;
         RenderStack renderList = new RenderStack();
-        while(variables.get_5BBE() < cntToRender) {
+        while(renderedCnt < cntToRender) {
             boolean rendered1 = (objects_to_draw_CE8B.getU(de1) & 0x80) > 0;
             if(!rendered1) {
-                boolean isLast = variables.get_5BBE() >= cntToRender-1;
+                boolean isLast = renderedCnt >= cntToRender-1;
                 // if only one object remains, we should render it and exit
-                if(isLast)
+                if(isLast) {
                     renderOne(de1, renderList);
-                else {
+                    renderedCnt++;
+                } else {
                     int de2 = objects_to_draw_CE8B.start;
                     boolean doneInnerLoop = false;
                     boolean rendered = false;
@@ -1170,6 +1163,7 @@ public class Game implements Runnable {
                             if (is2behind1) {
                                 if (renderList.contains(objects_to_draw_CE8B.getU(de2))) {
                                     renderOne(de2, renderList);
+                                    renderedCnt++;
                                     rendered = true;
                                 } else {
                                     renderList.add(objects_to_draw_CE8B.getU(de2));
@@ -1187,8 +1181,10 @@ public class Game implements Runnable {
                         de1 = objects_to_draw_CE8B.start; // restart the loop after rendering (the rendered object will be ignored)
                     else {
                         // render if nothing changed since last iteration (either stack is empty or last added object is the analyzed object
-                        if (renderList.isEmpty() || renderList.isLast(objects_to_draw_CE8B.getU(de1)))
+                        if (renderList.isEmpty() || renderList.isLast(objects_to_draw_CE8B.getU(de1))) {
                             renderOne(de1, renderList);
+                            renderedCnt++;
+                        }
                         de1++;
                     }
                 }
@@ -1202,7 +1198,6 @@ public class Game implements Runnable {
         GraphicObject o = graphicObjects.o(objects_to_draw_CE8B.getU(de));
         if(calc_pixel_XY_D6C9(o)) print_sprite_D718(o);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
-        variables.set_5BBE(variables.get_5BBE() + 1);
         renderList.reset();
     }
 
@@ -2555,8 +2550,8 @@ public class Game implements Runnable {
             int ptr = h * 256 + l;
             int spi = specialObjects.getIndex(ptr);
             specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
-            int lives = variables.get_5BBA();
-            variables.set_5BBA(incBCD(lives));
+            int lives = variables.getLives_5BBA();
+            variables.setLives_5BBA(incBCD(lives));
             variables.set_5BC0(0);
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
@@ -2914,13 +2909,11 @@ public class Game implements Runnable {
     }
 
     private void build_screen_objects_D1E6() {
-        if(variables.get_5BB2() != 0) {
-            // update special objects if not the first screen of the game
+        // update special objects if not the first screen of the game
+        if(!variables.isGameStart_5BB2())
             update_special_objs_C591();
-        }
         clear_scrn_buffer_D567();
         retrieve_screen_D3C6();
-        // TODO: implement
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();
 
@@ -2928,7 +2921,6 @@ public class Game implements Runnable {
         variables.set_5BB0(0);
         variables.set_5BBD(0);
         variables.set_5BBF(0);
-        variables.set_5BB7(1);
         // NOTE: this means that in odd rooms spike balls do not drop until an object is picked up.
         // This is not straightforward but these are the traps - a player may be killed when picking up an object
         // and these traps are only in odd rooms
