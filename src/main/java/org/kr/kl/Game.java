@@ -2943,40 +2943,23 @@ public class Game implements Runnable {
             hl++;
         }
 
-        //int targetAddr = targetPos * 0x20 + graphicObjects.start();
-
         hl ++;
         while(hl < roomEnd) {
             int blockCtrl = location_tbl_6251.getU(hl);
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
-            DataBlock blockDef = foregroundObjects.get(blockType).block;
+            ForegroundObject blockDef = foregroundObjects.get(blockType);
             hl++;
             for(int i=0; i<blockCnt; i++) {
-                int templatePart = 0;
-                boolean templateDone = false;
-                while(!templateDone) {
+                for(int templatePart = 0; templatePart < blockDef.sprites.length; templatePart ++) {
                     int locByte = location_tbl_6251.getU(hl + i);
                     int x = (locByte & 0b00000111);
                     int y = (locByte & 0b00111000) >> 3;
                     int z = (locByte & 0b11000000) >> 6;
                     GraphicObject o = graphicObjects.o(targetPos);
-                    o.reset();
-                    o.setGrNo(blockDef.getU(blockDef.start + templatePart * 6)); // object ID
-                    o.setW(blockDef.getU(blockDef.start + templatePart * 6 + 1)); // width
-                    o.setD(blockDef.getU(blockDef.start + templatePart * 6 + 2)); // depth
-                    o.setH(blockDef.getU(blockDef.start + templatePart * 6 + 3)); // height
-                    o.setFlags7(blockDef.getU(blockDef.start + templatePart * 6 + 4)); // flags
-                    o.setScreen(currLocId); // screen
-                    int offsets = blockDef.getU(blockDef.start + templatePart * 6 + 5);
-                    int x1 = ((offsets << 3) & 8);
-                    int y1 = ((offsets << 2) & 8);
-                    o.setX(x1 + x * 16 + 0x48); // X
-                    o.setY(y1 + y * 16 + 0x48); // Y
-                    o.setZ(((z * 12 + offsets) & 0xFC) + variables.getRoomSizeZ_5BAE()); // Y, variable stores room size Z
+                    ForegroundSprite s = blockDef.sprites[templatePart];
+                    o.initFrom(s, currLocId, x, y, z, variables.getRoomSizeZ_5BAE());
                     targetPos ++;
-                    templateDone = blockDef.getU(blockDef.start + templatePart * 6 + 6) == 0; // some templates consists of two objects (guards)
-                    templatePart++;
                 }
             }
             hl+=blockCnt;

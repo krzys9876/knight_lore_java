@@ -51,6 +51,22 @@ public class GraphicObject {
         setScreen(screenNo);
     }
 
+    public void initFrom(ForegroundSprite sprite, int screenNo, int x, int y, int z, int roomSize) {
+        reset();
+        setGrNo(sprite.sprite());
+        setW(sprite.w());
+        setD(sprite.d());
+        setH(sprite.h());
+        setFlags7(sprite.flags());
+        setScreen(screenNo);
+        int offsets = sprite.offsets();
+        int x1 = ((offsets << 3) & 8);
+        int y1 = ((offsets << 2) & 8);
+        setX(x1 + x * 16 + 0x48); // X
+        setY(y1 + y * 16 + 0x48); // Y
+        setZ(((z * 12 + offsets) & 0xFC) + roomSize); // Y, variable stores room size Z
+    }
+
 
     public int getGrNo() { return parent.getGrNo(ix); }
     public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }
