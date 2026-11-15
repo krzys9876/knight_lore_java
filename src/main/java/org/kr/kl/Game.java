@@ -57,8 +57,7 @@ public class Game implements Runnable {
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
     private final GraphicObjects graphicObjects = new GraphicObjects(0x5C08, 40);
     private final DataBlock objects_to_draw_CE8B = new DataBlock(0xCE8B, 0x2E); // 46, but there should be not more than 40 objects to draw
-    private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
-    private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
+    private final Locations locations = new Locations();
     private final BackgroundObjects backgroundObjects = new BackgroundObjects();
     private final ForegroundObjects foregroundObjects = new ForegroundObjects();
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
@@ -182,7 +181,7 @@ public class Game implements Runnable {
         if(gameCounter==0) shuffle_objects_required_B544();
         // CALL $D1B1    ; {randomise player start location
 
-        int a = location_tbl_6251.start;
+        int a = locations.data.start;
         boolean specialObjectsInitialized = false;
         //while(a < location_tbl_6251.endExcl())
         {
@@ -2887,17 +2886,17 @@ public class Game implements Runnable {
     }
 
     private void retrieve_screen_D3C6() {
-        int bc = location_tbl_6251.endExcl()-1; // location table end
-        int hl = location_tbl_6251.start; // location table start
+        int bc = locations.data.endExcl()-1; // location table end
+        int hl = locations.data.start; // location table start
         boolean found = false;
         int currLocId = graphicObjects.playerBottom().getScreen();
 
         while(hl < bc && !found) {
-            int tableLocId = location_tbl_6251.getU(hl);
+            int tableLocId = locations.data.getU(hl);
             found = tableLocId == currLocId;
             if(!found) {
                 hl++;
-                int size = location_tbl_6251.getU(hl);
+                int size = locations.data.getU(hl);
                 hl+=size;
             }
         }
@@ -2908,28 +2907,28 @@ public class Game implements Runnable {
             return;
         }
         // HL points to start of the location in location table
-        int roomId = location_tbl_6251.getU(hl);
+        int roomId = locations.data.getU(hl);
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
         hl++;
-        int size = location_tbl_6251.getU(hl);
+        int size = locations.data.getU(hl);
         int roomEnd = hl + size - 1;
         hl++;
-        int attrOrig = location_tbl_6251.getU(hl);
+        int attrOrig = locations.data.getU(hl);
         int attr = (attrOrig & 0x07) | 0x40;
         variables.setCurrRoomAttrib_5BAD(attr); // current room attributes (color)
         int roomSize = ((attrOrig >> 3) & 0x1F);
-        variables.setRoomSizeX_5BAB(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3));
-        variables.setRoomSizeY_5BAC(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1));
-        variables.setRoomSizeZ_5BAE(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 2));
+        variables.setRoomSizeX_5BAB(locations.room_size_tbl_6248.getU(locations.room_size_tbl_6248.start + roomSize*3));
+        variables.setRoomSizeY_5BAC(locations.room_size_tbl_6248.getU(locations.room_size_tbl_6248.start + roomSize*3 + 1));
+        variables.setRoomSizeZ_5BAE(locations.room_size_tbl_6248.getU(locations.room_size_tbl_6248.start + roomSize*3 + 2));
         debugPanel2.append("Retrieved room size: "+roomSize+" X:"+variables.getRoomSizeX_5BAB()+" Y:"+variables.getRoomSizeY_5BAC()+" Z:"+variables.getRoomSizeZ_5BAE());
         hl++; // background objects start
 
         // decode all background objects
         // hl - iterates over room background objects (until end of room data or 0xFF separator)
         int targetPos = graphicObjects.firstBackgroundObject;
-        while(location_tbl_6251.getU(hl) != 0xFF && hl<=roomEnd) {
-            BackgroundObject bkgObj = backgroundObjects.get(location_tbl_6251.getU(hl));
-            debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.getU(hl)));
+        while(locations.data.getU(hl) != 0xFF && hl<=roomEnd) {
+            BackgroundObject bkgObj = backgroundObjects.get(locations.data.getU(hl));
+            debugPanel2.append("Retrieved background object: %02x".formatted(locations.data.getU(hl)));
             for (int spriteNum = 0; spriteNum < bkgObj.size(); spriteNum++) {
                 graphicObjects.o(targetPos).initFrom(bkgObj.s(spriteNum), currLocId);
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.s(spriteNum).grNo()));
@@ -2940,14 +2939,14 @@ public class Game implements Runnable {
 
         hl ++;
         while(hl < roomEnd) {
-            int blockCtrl = location_tbl_6251.getU(hl);
+            int blockCtrl = locations.data.getU(hl);
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
             ForegroundObject fgrObj = foregroundObjects.get(blockType);
             hl++;
             for(int i=0; i<blockCnt; i++) {
                 for(int templatePart = 0; templatePart < fgrObj.size(); templatePart ++) {
-                    int locByte = location_tbl_6251.getU(hl + i);
+                    int locByte = locations.data.getU(hl + i);
                     int x = (locByte & 0b00000111);
                     int y = (locByte & 0b00111000) >> 3;
                     int z = (locByte & 0b11000000) >> 6;
