@@ -60,37 +60,7 @@ public class Game implements Runnable {
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
     private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
     private final BackgroundObjects backgroundObjects = new BackgroundObjects();
-    private final DataBlock[] foregroundObjects = new DataBlock[]{
-            InitialData.block("block_6C0B"),
-            InitialData.block("fire_6C3C"),
-            InitialData.block("ball_ud_y_6C43"),
-            InitialData.block("rock_6C66"),
-            InitialData.block("gargoyle_6C6D"),
-            InitialData.block("spike_6C74"),
-            InitialData.block("chest_6C90"),
-            InitialData.block("table_6C97"),
-            InitialData.block("guard_ew_6C9E"),
-            InitialData.block("ghost_6CB8"),
-            InitialData.block("fire_ns_6CBF"),
-            InitialData.block("block_high_6C12"),
-            InitialData.block("ball_ud_xy_6C4A"),
-            InitialData.block("guard_square_6CAB"),
-            InitialData.block("block_ew_6C19"),
-            InitialData.block("block_ns_6C20"),
-            InitialData.block("moveable_block_6C27"),
-            InitialData.block("spike_high_6C7B"),
-            InitialData.block("spike_ball_fall_6C82"),
-            InitialData.block("spike_ball_high_fall_6C89"),
-            InitialData.block("fire_ew_6CC6"),
-            InitialData.block("dropping_block_6C2E"),
-            InitialData.block("collapsing_block_6C35"),
-            InitialData.block("ball_bounce_6C5F"),
-            InitialData.block("ball_ud_6C51"),
-            InitialData.block("repel_spell_6CCD"),
-            InitialData.block("gate_ud_1_6CD4"),
-            InitialData.block("gate_ud_2_6CDB"),
-            InitialData.block("ball_ud_x_6C58")
-    };
+    private final ForegroundObjects foregroundObjects = new ForegroundObjects();
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
@@ -2930,7 +2900,6 @@ public class Game implements Runnable {
                 int size = location_tbl_6251.getU(hl);
                 hl+=size;
             }
-
         }
         if(!found) {
             // This should be unreachable
@@ -2974,15 +2943,14 @@ public class Game implements Runnable {
             hl++;
         }
 
-        int targetAddr = targetPos * 0x20 + graphicObjects.start();
+        //int targetAddr = targetPos * 0x20 + graphicObjects.start();
 
         hl ++;
         while(hl < roomEnd) {
-            // @label=find_fg_objs
             int blockCtrl = location_tbl_6251.getU(hl);
             int blockCnt = (blockCtrl & 0x07) + 1;
             int blockType = (blockCtrl >> 3) & 0x1F;
-            DataBlock blockDef = foregroundObjects[blockType];
+            DataBlock blockDef = foregroundObjects.get(blockType).block;
             hl++;
             for(int i=0; i<blockCnt; i++) {
                 int templatePart = 0;
@@ -2992,20 +2960,21 @@ public class Game implements Runnable {
                     int x = (locByte & 0b00000111);
                     int y = (locByte & 0b00111000) >> 3;
                     int z = (locByte & 0b11000000) >> 6;
-                    graphicObjects.resetObject(targetAddr);
-                    graphicObjects.setGrNo(targetAddr, blockDef.getU(blockDef.start + templatePart * 6)); // object ID
-                    graphicObjects.setW(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 1)); // width
-                    graphicObjects.setD(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 2)); // depth
-                    graphicObjects.setH(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 3)); // height
-                    graphicObjects.setFlags7(targetAddr, blockDef.getU(blockDef.start + templatePart * 6 + 4)); // flags
-                    graphicObjects.setScreen(targetAddr, currLocId); // screen
+                    GraphicObject o = graphicObjects.o(targetPos);
+                    o.reset();
+                    o.setGrNo(blockDef.getU(blockDef.start + templatePart * 6)); // object ID
+                    o.setW(blockDef.getU(blockDef.start + templatePart * 6 + 1)); // width
+                    o.setD(blockDef.getU(blockDef.start + templatePart * 6 + 2)); // depth
+                    o.setH(blockDef.getU(blockDef.start + templatePart * 6 + 3)); // height
+                    o.setFlags7(blockDef.getU(blockDef.start + templatePart * 6 + 4)); // flags
+                    o.setScreen(currLocId); // screen
                     int offsets = blockDef.getU(blockDef.start + templatePart * 6 + 5);
                     int x1 = ((offsets << 3) & 8);
                     int y1 = ((offsets << 2) & 8);
-                    graphicObjects.setX(targetAddr, x1 + x * 16 + 0x48); // X
-                    graphicObjects.setY(targetAddr, y1 + y * 16 + 0x48); // Y
-                    graphicObjects.setZ(targetAddr, ((z * 12 + offsets) & 0xFC) + variables.getRoomSizeZ_5BAE()); // Y, variable stores room size Z
-                    targetAddr += 0x20;
+                    o.setX(x1 + x * 16 + 0x48); // X
+                    o.setY(y1 + y * 16 + 0x48); // Y
+                    o.setZ(((z * 12 + offsets) & 0xFC) + variables.getRoomSizeZ_5BAE()); // Y, variable stores room size Z
+                    targetPos ++;
                     templateDone = blockDef.getU(blockDef.start + templatePart * 6 + 6) == 0; // some templates consists of two objects (guards)
                     templatePart++;
                 }
@@ -3013,10 +2982,7 @@ public class Game implements Runnable {
             hl+=blockCnt;
         }
 
-
-        // @label=zero_end_of_graphic_objs_tbl
-        // clear rest of graphics objects table
-        for(int i = targetAddr; i<graphicObjects.endExcl(); i+=0x20) graphicObjects.resetObject(i);
+        for(int i = targetPos; i<graphicObjects.size; i++) graphicObjects.o(i).reset();
 
         debugTable2("Other objects data:", graphicObjects.start(), graphicObjects.getCopy());
     }

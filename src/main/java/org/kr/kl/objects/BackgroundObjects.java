@@ -1,8 +1,5 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
-import org.kr.InitialData;
-
 public class BackgroundObjects {
     private final BackgroundObject[] data = new BackgroundObject[] {
             new BackgroundObject("arch_n_6D12"),

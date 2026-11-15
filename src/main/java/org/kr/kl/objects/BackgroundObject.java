@@ -5,10 +5,9 @@ import org.kr.InitialData;
 
 public class BackgroundObject {
     public final BackgroundSprite[] sprites;
-    public DataBlock block;
 
     public BackgroundObject(String resource) {
-        block = InitialData.block(resource);
+        DataBlock block = InitialData.block(resource);
         // each object consists of 8-byte sprite info terminated by 0
         sprites = new BackgroundSprite[(block.size - 1) / 8];
         for(int i=0; i<sprites.length; i++) {
