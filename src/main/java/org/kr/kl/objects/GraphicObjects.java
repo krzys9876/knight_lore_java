@@ -62,7 +62,7 @@ public class GraphicObjects {
     public int start() { return data.start; }
     public int endExcl() { return data.endExcl(); }
 
-    public int[] getCopy() { return data.getCopy(); }
+    public int[] getCopy() { return data.rawCopy(); }
 
     public void reset() { data.reset(); }
 

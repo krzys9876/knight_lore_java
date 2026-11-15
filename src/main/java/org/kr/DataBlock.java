@@ -19,8 +19,14 @@ public class DataBlock {
         this.data = Arrays.copyOf(data, data.length);
     }
 
-    public DataBlock copy() {
+    public DataBlock getCopy() {
         return new DataBlock(start, Arrays.copyOf(data, data.length));
+    }
+
+    public DataBlock slice(int from, int bytes) {
+        int[] rawSlice = new int[bytes];
+        for(int i=0; i< bytes; i++) rawSlice[i] = getU(from + i);
+        return new DataBlock(from, rawSlice);
     }
 
     public int last() { return start + size - 1; }
@@ -42,7 +48,7 @@ public class DataBlock {
         if(value < 0) value = 256 + value;
         return value;
     }
-    public int[] getCopy() { return Arrays.copyOf(data, data.length); }
+    public int[] rawCopy() { return Arrays.copyOf(data, data.length); }
 
     public void reset() {
         for (int i = start; i < start+size-1; i++) { set(i, 0);}

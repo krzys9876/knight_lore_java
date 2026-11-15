@@ -32,7 +32,7 @@ public class InitialData {
         if (b == null) {
             throw new IllegalStateException("missing data block: " + name);
         }
-        return b.copy();
+        return b.getCopy();
     }
 
     private static Map<String, DataBlock> loadBlocks() {

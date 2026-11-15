@@ -14,7 +14,7 @@ public class SpriteData {
         DataBlock sprite_tbl_7112 = InitialData.block("sprite_tbl_7112"); // pointers to sprites in sprite graphic data table
         int size = sprite_tbl_7112.size / 2; // 2 bytes per object
         sprites = new Sprite[size];
-        int[] spriteDataRaw = sprite_graphics_data_728A.getCopy();
+        int[] spriteDataRaw = sprite_graphics_data_728A.rawCopy();
         for(int grNo = 0; grNo< size; grNo++) {
             int hl = grNo * 2 + sprite_tbl_7112.start; // sprite data index (index x 2 + start, 2 bytes per address) // sprite address location
             int startAddress = sprite_tbl_7112.getU(hl) + sprite_tbl_7112.getU(hl+1)*256 - sprite_graphics_data_728A.start; // sprite actual address

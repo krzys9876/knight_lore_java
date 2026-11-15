@@ -18,5 +18,11 @@ public class Locations {
             hl += 1 + sizeBytes;
         }
         locations = new DataBlock[roomCnt];
+        hl = data.start;
+        for(int i=0; i < roomCnt; i++) {
+            int size = data.getU(hl + 1) + 1;
+            locations[i] = data.slice(hl, size);
+            hl+=size;
+        }
     }
 }

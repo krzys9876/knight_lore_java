@@ -20,7 +20,7 @@ import org.kr.InitialData;
 public class SpecialObjects {
     private final DataBlock special_objs_tbl_6FF2;
     public int start() { return special_objs_tbl_6FF2.start; }
-    public int[] getCopy() { return special_objs_tbl_6FF2.getCopy(); }
+    public int[] getCopy() { return special_objs_tbl_6FF2.rawCopy(); }
 
     public final int size;
 
