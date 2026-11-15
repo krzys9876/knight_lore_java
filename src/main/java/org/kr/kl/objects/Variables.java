@@ -28,8 +28,9 @@ public class Variables {
     public void setGameStart_5BB2() { data.set(0x5BB2, 1); }
     public void resetGameStart_5BB2() { data.set(0x5BB2, 0); }
     public void setLives_5BBA(int value) { data.set(0x5BBA, value); }
-    public void set_5BB0(int value) { data.set(0x5BB0, value); }
-    public void set_5BAF(int value) { data.set(0x5BAF, value); }
+    public void setPortcullisMoveCnt_5BB0(int value) { data.set(0x5BB0, value); }
+    public void setPortcullisMoving_5BAF() { data.set(0x5BAF, 1); }
+    public void resetPortcullisMoving_5BAF() { data.set(0x5BAF, 0); }
     public void set_5BC0(int value) { data.set(0x5BC0, value); }
     public void set_5BBF(int value) { data.set(0x5BBF, value); }
     public void set_5BBD(int value) { data.set(0x5BBD, value); }
@@ -55,8 +56,8 @@ public class Variables {
     public boolean isPickupPressed_5BB3() { return data.getU(0x5BB3) == 1; }
     public boolean isGameStart_5BB2() { return data.getU(0x5BB2) == 1; }
     public int getLives_5BBA() { return data.getU(0x5BBA); }
-    public int get_5BB0() { return data.getU(0x5BB0); }
-    public int get_5BAF() { return data.getU(0x5BAF); }
+    public int getPortcullisMoveCnt_5BB0() { return data.getU(0x5BB0); }
+    public boolean isPortcullisMoving_5BAF() { return data.getU(0x5BAF) == 1; }
     public int get_5BC0() { return data.getU(0x5BC0); }
     public int get_5BBF() { return data.getU(0x5BBF); }
     public int get_5BBD() { return data.getU(0x5BBD); }

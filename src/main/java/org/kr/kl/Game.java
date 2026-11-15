@@ -1486,7 +1486,7 @@ public class Game implements Runnable {
         // c$C4DD LD HL,$FAF4   ; -6, -12
         o.setXYAdj(-12, -6); //FA
 
-        boolean moving = variables.get_5BAF() > 0;
+        boolean moving = variables.isPortcullisMoving_5BAF();
         if(moving) return;
         int roomSizeZ = variables.get_5BAE();
         int z = o.getZ();
@@ -1498,17 +1498,17 @@ public class Game implements Runnable {
             o.setBitGrNo(0); // ; graphic_no=9
             o.setDZ(1); // ; dZ=1 (up)
         } else {
-            int moveCnt = variables.get_5BB0();
+            int moveCnt = variables.getPortcullisMoveCnt_5BB0();
             if(moveCnt >= 4) {
                 if((params.getRnd().getSeed3() & 0x1F) != 0) return;
                 moveCnt = 0x80; // ; arbitrarily large count
             }
             // @label=init_portcullis_down
-            variables.set_5BB0(moveCnt + 1);
+            variables.setPortcullisMoveCnt_5BB0(moveCnt + 1);
             o.setBitGrNo(0); // ; graphic_no=9
             o.setDZ(-1); // ; dZ=-1 (down)
         }
-        variables.set_5BAF(variables.get_5BAF() + 1);
+        variables.setPortcullisMoving_5BAF();
         o.setWipeAndDraw();
     }
 
@@ -1540,7 +1540,7 @@ public class Game implements Runnable {
 
     private void stop_portcullis_C6E0(GraphicObject o) {
         // @label=stop_portcullis
-        variables.set_5BAF(0);
+        variables.resetPortcullisMoving_5BAF();
         o.resetBitGrNo(0); // graphic_no=8
     }
 
@@ -2917,8 +2917,8 @@ public class Game implements Runnable {
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();
 
-        variables.set_5BAF(0);
-        variables.set_5BB0(0);
+        variables.resetPortcullisMoving_5BAF();
+        variables.setPortcullisMoveCnt_5BB0(0);
         variables.set_5BBD(0);
         variables.set_5BBF(0);
         // NOTE: this means that in odd rooms spike balls do not drop until an object is picked up.
