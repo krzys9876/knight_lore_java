@@ -917,7 +917,7 @@ public class Game implements Runnable {
         calc_display_order_and_render_CEBB();
 
         //@label=no_delay
-        int a = variables.get_5BAD(); // screen attribute
+        int a = variables.getCurrRoomAttrib_5BAD(); // screen attribute
         for(int addr = 0x5800; addr<0x5800+0x0300; addr++) {
             mainMemory.setByteAt(addr, a);
             //shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
@@ -1022,7 +1022,7 @@ public class Game implements Runnable {
     public long getTickNo() { return tickNo; }
 
     private void display_day_BCCA() {
-        int attr = variables.get_5BAD(); // room attribute
+        int attr = variables.getCurrRoomAttrib_5BAD(); // room attribute
         attr = (((attr ^ 0xFF) + 2) & 0x07) | 0x40;
         day_txt_BCE7.set(day_txt_BCE7.start, attr);
         int de = day_txt_BCE7.start;
@@ -2368,16 +2368,16 @@ public class Game implements Runnable {
             dec_dZ_and_update_XYZ_C700(o);
             if(o.isOobZ()) { //; Z OOB? (hit the floor?)
                 o.setRising();
-                variables.set_5BBF(0); // ; flag no spiked balls dropping
+                variables.resetSpikeBallDropping_5BBF();
             }
             // $B7D6 CALL $B451     ; } // ignore audio
         } else {
-            boolean isOtherDropping = variables.get_5BBF() != 0;
+            boolean isOtherDropping = variables.isSpikeBallDropping_5BBF();
             if(!isOtherDropping) {
                 // ; 1-in-16 chance
                 if((params.getRnd().getSeed3() & 0xF0) > 0) {
                     o.setDropping(); // ; flag this one as dropping
-                    variables.set_5BBF(1); // ; flag a spike ball dropping
+                    variables.setSpikeBallDropping_5BBF();
                 }
             }
         }
@@ -2832,14 +2832,14 @@ public class Game implements Runnable {
     private void upd_178_179_B865(GraphicObject o) {
         o.setXYAdj(-8, -4);
 
-        int bouncingHeight = variables.get_5BBD();
-        if(bouncingHeight == 0) variables.set_5BBD(o.getZ() + 0x20); // ; calc bounce height
+        int bouncingHeight = variables.getBallBounceHeight_5BBD();
+        if(bouncingHeight == 0) variables.setBallBounceHeight_5BBD(o.getZ() + 0x20); // ; calc bounce height
         o.toggleNextPrevSprite();
         // $B879 CALL $B451     ; // ignore audio
         if(o.isDirUp()) {
             o.setDZ(3);
             dec_dZ_and_update_XYZ_C700(o);
-            if(o.getZ() > variables.get_5BBD())
+            if(o.getZ() > variables.getBallBounceHeight_5BBD())
                 o.setDirDown();
         } else {
             dec_dZ_and_update_XYZ_C700(o);
@@ -2919,8 +2919,8 @@ public class Game implements Runnable {
 
         variables.resetPortcullisMoving_5BAF();
         variables.setPortcullisMoveCnt_5BB0(0);
-        variables.set_5BBD(0);
-        variables.set_5BBF(0);
+        variables.setBallBounceHeight_5BBD(0);
+        variables.resetSpikeBallDropping_5BBF();
         // NOTE: this means that in odd rooms spike balls do not drop until an object is picked up.
         // This is not straightforward but these are the traps - a player may be killed when picking up an object
         // and these traps are only in odd rooms
@@ -2983,7 +2983,7 @@ public class Game implements Runnable {
         hl++;
         int attrOrig = location_tbl_6251.getU(hl);
         int attr = (attrOrig & 0x07) | 0x40;
-        variables.set_5BAD(attr); // current room attributes (color)
+        variables.setCurrRoomAttrib_5BAD(attr); // current room attributes (color)
         int roomSize = ((attrOrig >> 3) & 0x1F);
         variables.set_5BAB(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3)); // room size X
         variables.set_5BAC(room_size_tbl_6248.getU(room_size_tbl_6248.start + roomSize*3 + 1)); // room size Y
