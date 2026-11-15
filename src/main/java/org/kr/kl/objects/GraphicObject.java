@@ -1,6 +1,7 @@
 package org.kr.kl.objects;
 
 import org.kr.DataBlock;
+import org.kr.InitialData;
 
 public class GraphicObject {
     private final GraphicObjects parent;
@@ -15,21 +16,39 @@ public class GraphicObject {
         this(new GraphicObjects(0, 1), 0);
     }
 
-    public GraphicObjects getParent() { return parent; }
     public GraphicObject next() { return parent.next(this);}
     public GraphicObject prev() { return parent.prev(this);}
 
-    public void reset() { parent.reset(); }
-    public void resetObject() { parent.resetObject(ix); }
+    public void reset() { parent.resetObject(ix); }
 
     public void copyFrom(DataBlock other, int otherIx, int bytes) {
         for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.getU(otherIx + i));
     }
 
+    private static final DataBlock cauldron_bubbles_B8C8 =  InitialData.block("cauldron_bubbles_B8C8");
+
+    public void makeCauldronBubbles() {
+        for(int i = 0; i < 0x12; i++) parent.data.set(ix + i, cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + i)); // 18 bytes to copy
+    }
+
+
     public void copyFrom(GraphicObject other) { copyFrom(other, 0x20);  }
 
     public void copyFrom(GraphicObject other, int bytes) {
         for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.parent.data.getU(other.parent.start() + i));
+    }
+
+    public void initFrom(BackgroundSprite sprite, int screenNo) {
+        reset();
+        setGrNo(sprite.sprite());
+        setX(sprite.x());
+        setY(sprite.y());
+        setZ(sprite.z());
+        setW(sprite.w());
+        setD(sprite.d());
+        setH(sprite.h());
+        setFlags7(sprite.flags());
+        setScreen(screenNo);
     }
 
 

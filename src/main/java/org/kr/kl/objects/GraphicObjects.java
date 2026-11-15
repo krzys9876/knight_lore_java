@@ -86,6 +86,7 @@ public class GraphicObjects {
         return o(nextIndex);
     }
     public final int firstArchIx = 4;
+    public final int firstBackgroundObject = 4;
     public GraphicObject firstArch() { return o(firstArchIx); }
 
 

@@ -42,66 +42,24 @@ public class Game implements Runnable {
     private String gameId = "";
     private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
-    private final DataBlock cant_drop_5BD3 = new DataBlock(0x5BD3, 5);
-    //private final DataBlock objects_carried_5BDC = new DataBlock(0x5BD8, 12); // contains unk and objects_carried_2
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
-    private final LookupTable lookupTable = new LookupTable();
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
-    private final DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
-    private final DataBlock menu_text_BDBA = InitialData.block("menu_text_BDBA");
     private final DataBlock font_6108 = InitialData.block("font_6108");
     private final GraphicObject sprite_scratchpad_BFDB = new GraphicObject();
-    private final DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
-    //private final DataBlock special_objs_tbl_6FF2 = InitialData.block("special_objs_tbl_6FF2");
     private final SpecialObjects specialObjects = new SpecialObjects();
     private final SpriteData spriteData = new SpriteData();
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
     private final GraphicObject plyr_spr_1_scratchpad_D161 =  new GraphicObject();
     private final GraphicObject plyr_spr_2_scratchpad_D181 =  new GraphicObject();
     private final DataBlock plyr_spr_init_data_D1A1 =  InitialData.block("plyr_spr_init_data_D1A1");
-    private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
     private final DataBlock sun_moon_yoff_C440 = InitialData.block("sun_moon_yoff_C440");
     private final GraphicObject sun_moon_scratchpad_C44D = new GraphicObjects(0xC44D, 1).o(0);
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
     private final GraphicObjects graphicObjects = new GraphicObjects(0x5C08, 40);
-    //private final DataBlock graphic_objs_tbl_5C08 = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
     private final DataBlock objects_to_draw_CE8B = new DataBlock(0xCE8B, 0x2E); // 46, but there should be not more than 40 objects to draw
     private final DataBlock location_tbl_6251 = InitialData.block("location_tbl_6251");
     private final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
-    private final DataBlock cauldron_bubbles_B8C8 =  InitialData.block("cauldron_bubbles_B8C8");
-    private final DataBlock complete_colours_BAD2 = InitialData.block("complete_colours_BAD2");
-    private final DataBlock complete_xy_BAD8 = InitialData.block("complete_xy_BAD8");
-    private final DataBlock the_potion_casts_BAE4 = InitialData.block("the_potion_casts_BAE4");
-    private final DataBlock gameover_colours_BB4C = InitialData.block("gameover_colours_BB4C");
-    private final DataBlock gameover_xy_BB52 = InitialData.block("gameover_xy_BB52");
-    private final DataBlock a_GAME_OVER_BB5E = InitialData.block("a_GAME_OVER_BB5E");
-    private final DataBlock rating_tbl_BBB7 = InitialData.block("rating_tbl_BBB7");
-    private final DataBlock[] backgroundObjects = new DataBlock[]{
-            InitialData.block("arch_n_6D12"),
-            InitialData.block("arch_e_6D23"),
-            InitialData.block("arch_s_6D45"),
-            InitialData.block("arch_w_6D67"),
-            InitialData.block("tree_arch_n_6D78"),
-            InitialData.block("tree_arch_e_6D89"),
-            InitialData.block("tree_arch_s_6D9A"),
-            InitialData.block("tree_arch_w_6DAB"),
-            InitialData.block("gate_n_6DBC"),
-            InitialData.block("gate_e_6DC5"),
-            InitialData.block("gate_s_6DCE"),
-            InitialData.block("gate_w_6DD7"),
-            InitialData.block("wall_size_1_6DE0"),
-            InitialData.block("wall_size_2_6E49"),
-            InitialData.block("wall_size_3_6EBA"),
-            InitialData.block("tree_room_size_1_6F2B"),
-            InitialData.block("tree_filler_w_6F8C"),
-            InitialData.block("tree_filler_n_6F9D"),
-            InitialData.block("wizard_6FAE"),
-            InitialData.block("cauldron_6FBF"),
-            InitialData.block("high_arch_e_6D34"),
-            InitialData.block("high_arch_s_6D56"),
-            InitialData.block("high_arch_e_base_6FD0"),
-            InitialData.block("high_arch_s_base_6FE1")
-    };
+    private final BackgroundObjects backgroundObjects = new BackgroundObjects();
     private final DataBlock[] foregroundObjects = new DataBlock[]{
             InitialData.block("block_6C0B"),
             InitialData.block("fire_6C3C"),
@@ -188,8 +146,6 @@ public class Game implements Runnable {
             // POP AF        ;
             scrn_visited_5BE8.reset();
             inventory_5BD8.reset();
-            cant_drop_5BD3.reset();
-            //objects_carried_5BDC.reset();
             // For testing only
 
             // 65 14 F2 6F - bottle
@@ -355,6 +311,8 @@ public class Game implements Runnable {
 
     private void display_menu_BEB3() {
         debugPanel1.append("display_menu_BEB3");
+        DataBlock menu_xy_BDAA = InitialData.block("menu_xy_BDAA");
+        DataBlock menu_text_BDBA = InitialData.block("menu_text_BDBA");
         int hl2 = 0xBDAA; // menu xy
         int de2 = 0xBDBA; // menu text
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
@@ -461,6 +419,7 @@ public class Game implements Runnable {
 
     private void print_border_D296() {
         debugPanel1.append("print_border_D296");
+        DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
         int hl = 0xD2CF;
         // CALL $D24C x4
         hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, hl, border_data_D2CF); // corners
@@ -652,6 +611,7 @@ public class Game implements Runnable {
         // LD ($D191),A  ; {plyr_spr_2_scratchpad (byte 16)
         plyr_spr_2_scratchpad_D181.setTemp10(0x22);
         int a = params.getRnd().getSeed1() & 0x3; // random
+        DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
         int randomLoc = start_locations_D1E2.getU(0xD1E2 + a);
         // For testing only
         if(override != -1) randomLoc = override;
@@ -722,6 +682,9 @@ public class Game implements Runnable {
 
     private void gameOverScreen() {
         variables.setSuppressBorder_5BB8(0);
+        DataBlock gameover_colours_BB4C = InitialData.block("gameover_colours_BB4C");
+        DataBlock gameover_xy_BB52 = InitialData.block("gameover_xy_BB52");
+        DataBlock a_GAME_OVER_BB5E = InitialData.block("a_GAME_OVER_BB5E");
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
         int days = variables.getDays_5BB9();
         if(days > byteToBCD(params.getMaxDays())) days --; // game over due to timeout
@@ -748,8 +711,8 @@ public class Game implements Runnable {
         a = ((a << 3) & 0xFF) | ((a >> 5) & 7);
         a = a & 0x0E;
         IO.println("rating "+a);
+        DataBlock rating_tbl_BBB7 = InitialData.block("rating_tbl_BBB7");
         int rating = a;
-
         int ratingAddrL = rating_tbl_BBB7.getU(rating_tbl_BBB7.start + rating);
         int ratingAddrH = rating_tbl_BBB7.getU(rating_tbl_BBB7.start + rating + 1);
         int ratingAddr = ratingAddrH * 256 + ratingAddrL;
@@ -810,8 +773,10 @@ public class Game implements Runnable {
 
     private void game_complete_msg_BAAB() {
         variables.setSuppressBorder_5BB8(0);
+        DataBlock complete_xy_BAD8 = InitialData.block("complete_xy_BAD8");
+        DataBlock complete_colours_BAD2 = InitialData.block("complete_colours_BAD2");
+        DataBlock the_potion_casts_BAE4 = InitialData.block("the_potion_casts_BAE4");
         display_text_list_BEBF(complete_colours_BAD2, complete_xy_BAD8, the_potion_casts_BAE4);
-        // $BAC4 LD DE,$B239   ;
         // $BAC7 CALL $B2CF    ; // ignore audio
         update_screen_D56F(true);
         if(keySequence.isSaving()) saveKeySequence();
@@ -966,7 +931,7 @@ public class Game implements Runnable {
         if(secondSpecObj.getGrNo() != 0) return;
         if(variables.getAllObjectsInCauldron_5BC3() != 0) return;
 
-        secondSpecObj.copyFrom(cauldron_bubbles_B8C8, cauldron_bubbles_B8C8.start, 0x12); // 18 bytes to copy
+        secondSpecObj.makeCauldronBubbles();
         secondSpecObj.setXYAdj(-12, -4);
     }
 
@@ -1636,12 +1601,12 @@ public class Game implements Runnable {
     private void handle_pickup_drop_C00E(GraphicObject o) {
         if(!variables.isPickupPressed_5BB3()) {
             if(!chk_pickup_drop_BFFB() || chk_plyr_OOB_C87A(o) || o.isJumping() || !o.isOobZ()) return;
-            cant_drop_5BD3.set(0x5BD3, 0);
+            boolean cantDrop=false;
             int zOrig = o.getZ();
             o.setZ(zOrig + 12); // ; Z+12
             boolean intersects = do_any_objs_intersect_B4FD(o);
             o.setZ(zOrig); // ; restore original Z
-            if(intersects) cant_drop_5BD3.set(0x5BD3, 1); //; we can't drop anything
+            if(intersects) cantDrop = true; //; we can't drop anything
             // @label=loc_C041
             variables.setPickupPressed_5BB3();
             int origW = o.getW();
@@ -1674,7 +1639,7 @@ public class Game implements Runnable {
                             slotD = slotD.next();
                         }
                     }
-                    if(foundPlace) room_to_drop_C0B2(o, slotD);
+                    if(foundPlace) room_to_drop_C0B2(o, slotD, cantDrop);
                 };
             }
             o.setW(origW);
@@ -1687,12 +1652,12 @@ public class Game implements Runnable {
         }
     }
 
-    private void room_to_drop_C0B2(GraphicObject player, GraphicObject toDrop) {
+    private void room_to_drop_C0B2(GraphicObject player, GraphicObject toDrop, boolean cantDrop) {
         int hl = inventory_5BD8.start + 0x0C;
         if(inventory_5BD8.getU(hl) == 0) {
             adjust_carried_C12B();
         } else {
-            if(cant_drop_5BD3.getU(cant_drop_5BD3.start) == 0) {
+            if(!cantDrop) {
                 int grNo = inventory_5BD8.getU(hl);
                 toDrop.setGrNo(grNo);
                 if(player.isCauldronRoom()) {
@@ -2994,23 +2959,22 @@ public class Game implements Runnable {
         // @label=next_bg_obj
         // decode all background objects
         // hl - iterates over room background objects (until end of room data or 0xFF separator)
-        int targetAddr = 0x5C88;
+        int targetPos = graphicObjects.firstBackgroundObject;
         while(location_tbl_6251.getU(hl) != 0xFF && hl<=roomEnd) {
-            DataBlock bkgObj = backgroundObjects[location_tbl_6251.getU(hl)];
+            BackgroundObject bkgObj = backgroundObjects.get(location_tbl_6251.getU(hl));
             debugPanel2.append("Retrieved background object: %02x".formatted(location_tbl_6251.getU(hl)));
-            int bkgAddr =  bkgObj.start;
-            while(bkgObj.getU(bkgAddr) != 0) { // each object consists of 8-byte sprite info terminated by 0
-                graphicObjects.resetObject(targetAddr);
-                // 8 - byte sprite info
-                debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.getU(bkgAddr)));
-                graphicObjects.copyFrom(bkgObj, bkgAddr, targetAddr, 8);
-                bkgAddr+=8;
-                // 9th byte
-                graphicObjects.setScreen(targetAddr, currLocId);
-                targetAddr+=0x20;
+            for (int spriteNum = 0; spriteNum < bkgObj.sprites.length; spriteNum++) {
+                GraphicObject o = graphicObjects.o(targetPos);
+                BackgroundSprite s = bkgObj.sprites[spriteNum];
+                o.reset();
+                o.initFrom(s, currLocId);
+                debugPanel2.append("Retrieved sprite: %02x".formatted(s.sprite()));
+                targetPos++;
             }
             hl++;
         }
+
+        int targetAddr = targetPos * 0x20 + graphicObjects.start();
 
         hl ++;
         while(hl < roomEnd) {
@@ -3068,7 +3032,7 @@ public class Game implements Runnable {
                 GraphicObject o = graphicObjects.o(i);
                 int screenObjGrNo = o.getGrNo();
                 if (screenObjGrNo == 0 && specialObjGrNo != 0 && currLocId == specialObjects.getScreen(spi)) {
-                    o.resetObject();
+                    o.reset();
                     o.setGrNo(specialObjGrNo);
                     o.setX(specialObjects.getCurrentX(spi));
                     o.setY(specialObjects.getCurrentY(spi));
