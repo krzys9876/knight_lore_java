@@ -66,6 +66,8 @@ public class GraphicObjects {
 
     public void reset() { data.reset(); }
 
+    public final int[] ghostDeltaTbl = { 0xFF, 1, 0xFE, 2, 0xFD, 3, 0xFC, 4, 0xFB, 5, 0xFA, 6, 0xF9, 7, 0xF8, 8};
+
     private final GraphicObject[] objects;
 
     public GraphicObject o(int i) { return objects[i]; }

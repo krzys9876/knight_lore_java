@@ -1414,33 +1414,33 @@ public class Game implements Runnable {
         }
     }
 
-    private void handle_pickup_drop_C00E(GraphicObject o) {
+    private void handle_pickup_drop_C00E(GraphicObject player) {
         if(!variables.isPickupPressed_5BB3()) {
-            if(!chk_pickup_drop_BFFB() || chk_plyr_OOB_C87A(o) || o.isJumping() || !o.isOobZ()) return;
+            if(!chk_pickup_drop_BFFB() || chk_plyr_OOB_C87A(player) || player.isJumping() || !player.isOobZ()) return;
             boolean cantDrop=false;
-            int zOrig = o.getZ();
-            o.setZ(zOrig + 12); // ; Z+12
-            boolean intersects = do_any_objs_intersect_B4FD(o);
-            o.setZ(zOrig); // ; restore original Z
+            int zOrig = player.getZ();
+            player.setZ(zOrig + 12); // ; Z+12
+            boolean intersects = do_any_objs_intersect_B4FD(player);
+            player.setZ(zOrig); // ; restore original Z
             if(intersects) cantDrop = true;
             variables.setPickupPressed_5BB3();
-            int origW = o.getW();
-            int origD = o.getD();
-            int origH = o.getH();
-            o.setW(origW + 4); // ; width+4
-            o.setD(origD + 4); // ; depth+4
-            o.setH(origH + 4); // ; height+4
+            int origW = player.getW();
+            int origD = player.getD();
+            int origH = player.getH();
+            player.setW(origW + 4); // ; width+4
+            player.setD(origD + 4); // ; depth+4
+            player.setH(origH + 4); // ; height+4
             GraphicObject specObjP = graphicObjects.firstSpecObj();
             boolean canPickup = false;
             int b=2;
             while(b>0 && !canPickup) {
-                canPickup = can_pickup_spec_obj_C172(o, specObjP);
+                canPickup = specObjP.isSpecialObject() && is_on_or_near_obj_C17A(player, specObjP);
                 if(!canPickup) {
                     b--;
                     specObjP = specObjP.next();
                 }
             }
-            if(canPickup) pickup_object_C141(o, specObjP);
+            if(canPickup) pickup_object_C141(player, specObjP);
             else {
                 if(chk_pickup_drop_BFFB()) {
                     b=2;
@@ -1454,12 +1454,12 @@ public class Game implements Runnable {
                             slotD = slotD.next();
                         }
                     }
-                    if(foundPlace) room_to_drop_C0B2(o, slotD, cantDrop);
+                    if(foundPlace) room_to_drop_C0B2(player, slotD, cantDrop);
                 };
             }
-            o.setW(origW);
-            o.setD(origD);
-            o.setH(origH);
+            player.setW(origW);
+            player.setD(origD);
+            player.setH(origH);
         } else {
             if(chk_pickup_drop_BFFB()) return;
             variables.resetPickupPressed_5BB3();
@@ -1527,11 +1527,6 @@ public class Game implements Runnable {
         inventory.adjustCarried();
     }
 
-    private boolean can_pickup_spec_obj_C172(GraphicObject player, GraphicObject obj) {
-        if (!obj.isSpecialObject()) return false; // special objects base no.
-        return is_on_or_near_obj_C17A(player, obj);
-    }
-
     private boolean is_on_or_near_obj_C17A(GraphicObject player, GraphicObject obj) {
         if(!player.intersectOnX(obj, 0)) return false;
         if(!player.intersectOnY(obj, 0)) return false;
@@ -1559,8 +1554,7 @@ public class Game implements Runnable {
     }
 
     private boolean chk_pickup_drop_BFFB() {
-        int keys = variables.getUserInput_5BB5();
-        return (keys & 0x10) > 0; // only standard keyboard input
+        return (variables.getUserInput_5BB5() & 0x10) > 0; // only standard keyboard input
     }
 
     private boolean chk_plyr_OOB_C87A(GraphicObject p) {
@@ -1604,9 +1598,7 @@ public class Game implements Runnable {
         // NOTE: values 0xFF in X and Y are flags indicating which arch user exited the room
         if(!variables.isExitingScreen()) {
             add_dXYZ_C706(player);
-            if (player.isOobZ()) {
-                if (tmpDz < 0) player.resetJumping();
-            }
+            if (player.isOobZ() && tmpDz < 0) player.resetJumping();
             player.setDX(0);
             player.setDY(0);
         }
@@ -1957,7 +1949,7 @@ public class Game implements Runnable {
     }
 
     private void init_death_sparkles_BF21(GraphicObject o) {
-        o.setGrNo(0x70);
+        o.setDeathSparkles();
         o.setIgnore3D();
         // c$BF31 CALL $B403    ; // ignore audio
         o.setWipeAndDraw();
@@ -2145,10 +2137,10 @@ public class Game implements Runnable {
         if(!o.isMovingXY() || o.isOobXY()) {
             // @label=loc_C5DD
             int rnd3 = (params.getRnd().getSeed3() & 0x03) + 4;
-            int dx = get_delta_from_tbl_C645(rnd3);
+            int dx = graphicObjects.ghostDeltaTbl[rnd3];
             o.setDX(dx);
             int rnd2 = (params.getRnd().getSeed2() & 0x03) + 4;
-            int dy = get_delta_from_tbl_C645(rnd2);
+            int dy = graphicObjects.ghostDeltaTbl[rnd2];;
             o.setDY(dy);
             calc_ghost_sprite_C603(o);
             // $C5FA CALL $B467    ; // ignore audio
@@ -2170,11 +2162,6 @@ public class Game implements Runnable {
             else o.resetBitGrNo(1);
             o.resetHFlip();
         }
-    }
-
-    private int get_delta_from_tbl_C645(int a) {
-        final int[] delta_tbl = { 0xFF, 1, 0xFE, 2, 0xFD, 3, 0xFC, 4, 0xFB, 5, 0xFA, 6, 0xF9, 7, 0xF8, 8};
-        return delta_tbl[a];
     }
 
     private void upd_84_C4C3(GraphicObject o) {
@@ -2317,15 +2304,13 @@ public class Game implements Runnable {
         o.setXYAdj(-12, -4);
 
         int x = o.getX();
-        int dX = o.getX() - 0x80;
-        if(dX < 0) dX = 1;
-        else if(dX > 0) dX = -1;
+        int dX = x - 0x80;
+        if(dX < 0) dX = 1; else if(dX > 0) dX = -1;
         o.setDX(dX);
 
         int y = o.getY();
         int dY = y - 0x80;
-        if(dY < 0) dY = 1;
-        else if(dY > 0) dY = -1;
+        if(dY < 0) dY = 1; else if(dY > 0) dY = -1;
         o.setDY(dY);
 
         boolean center = x == 0x80 && y == 0x80;
@@ -2428,7 +2413,6 @@ public class Game implements Runnable {
     }
 
     private void upd_127_BF11(GraphicObject o) {
-        //c$C4D8 LD HL,$FCF4   ; -4, -12
         o.setXYAdj(-12, -4); //FC
         o.resetDead();
         o.setGrNo(o.getTemp10());
@@ -2821,7 +2805,6 @@ public class Game implements Runnable {
 
     private void adjust_plyr_Z_for_arch_D38C(GraphicObject player, int c) {
         GraphicObject arch = graphicObjects.firstArch();
-        int de = 0x40;
         for(int b=0; b<4; b++) {
             if(arch.getGrNo() < 0x06) { // is arch
                 // Arches are recognized by sum of their coordinates (8-bit unsigned, meaning & 0xFF or module 256)
