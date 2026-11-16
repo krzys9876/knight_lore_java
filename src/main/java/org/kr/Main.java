@@ -28,23 +28,24 @@ public class Main {
         ScreenDebugPanel panel4 = new ScreenDebugPanel();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1800, 900);
+        frame.setSize(1400, 900);
         frame.setTitle("Knight Lore recreated");
         //frame.setLayout(new GridLayout(1, 3));
-        frame.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.weighty = 1.0;
-        c.gridy = 0;
+        //frame.setLayout(new GridBagLayout());
+        frame.add(panel1, BorderLayout.CENTER);
+        //GridBagConstraints c = new GridBagConstraints();
+        //c.fill = GridBagConstraints.BOTH;
+        //c.weighty = 1.0;
+        //c.gridy = 0;
 
-        c.gridx = 0; c.weightx = 4.0;
-        frame.add(panel1, c);
+        //c.gridx = 0; c.weightx = 4.0;
+        //frame.add(panel1, c);
 
-        c.gridx = 1; c.weightx = 1.0;
-        frame.add(panel3, c);
+        //c.gridx = 1; c.weightx = 1.0;
+        //frame.add(panel3, c);
 
-        c.gridx = 2; c.weightx = 1.0;
-        frame.add(panel4, c);
+        //c.gridx = 2; c.weightx = 1.0;
+        //frame.add(panel4, c);
 
         //frame.add(panel2);
         frame.setVisible(true);
