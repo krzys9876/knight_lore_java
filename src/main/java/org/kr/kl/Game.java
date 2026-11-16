@@ -782,7 +782,7 @@ public class Game implements Runnable {
         for(int i = 0; i < colors.size; i++) {
             int x = xy.getU(xy.start + i*2);
             int y = xy.getU(xy.start + i*2+1);
-            de = print_text_single_colour_BE31(text, x, y, de, colors.start + i);
+            de = print_text_single_colour_BE31(text, x, y, de, colors.getU(colors.start + i));
         }
         int a = variables.getSuppressBorder_5BB8(); // suppress border
         if(a == 0) {
