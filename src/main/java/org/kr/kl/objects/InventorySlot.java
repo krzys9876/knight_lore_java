@@ -21,6 +21,13 @@ public class InventorySlot {
     public int getPointerL() { return parent.data.getU(ix + 2); }
     public int getPointerH() { return parent.data.getU(ix + 3); }
 
+    public void set(int grNo, int f, int l, int h) {
+        setGrNo(grNo);
+        setFlags(f);
+        setPointerL(l);
+        setPointerH(h);
+    }
+
     public void copyFrom(InventorySlot other) {
         this.setGrNo(other.getGrNo());
         this.setFlags(other.getFlags());

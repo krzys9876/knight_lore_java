@@ -107,30 +107,15 @@ public class Game implements Runnable {
         gameCounter = 0;
         while(!variables.shouldQuit()) {
             variables.init();
-
-            // PUSH AF       ;
-            // CALL $D53A    ;
-            // POP AF        ;
             locations.resetVisited();
             inventory.reset();
-            // For testing only
 
+            // For testing only
             // 65 14 F2 6F - bottle
             // 66 14 FB 6F - bottle
-            /*inventory_5BD8.set(inventory_5BD8.start + 12, 0x65);
-            inventory_5BD8.set(inventory_5BD8.start + 12 + 1, 0x14);
-            inventory_5BD8.set(inventory_5BD8.start + 12 + 2, 0xF2);
-            inventory_5BD8.set(inventory_5BD8.start + 12 + 3, 0x6F);
-            inventory_5BD8.set(inventory_5BD8.start + 8, 0x66);
-            inventory_5BD8.set(inventory_5BD8.start + 8 + 1, 0x14);
-            inventory_5BD8.set(inventory_5BD8.start + 8 + 2, 0xFB);
-            inventory_5BD8.set(inventory_5BD8.start + 8 + 3, 0x6F);*/
+            // inventory.slots[3].set(0x65, 0x14, 0xF2, 0x6F);
+            // inventory.slots[2].set(0x66, 0x14, 0xF8, 0x6F);
 
-            //graphic_objs_tbl_5C08.reset();
-            //special_objs_here_5C48.reset();
-            //other_objs_here_5C88.reset();
-
-            //variables.data.set(0x5BA0, v5C78);
             variables.resetGameOver();;
             gameId = nowAsString();
             if(!keySequence.isInactive()) new File("saves/"+gameId).mkdir();
