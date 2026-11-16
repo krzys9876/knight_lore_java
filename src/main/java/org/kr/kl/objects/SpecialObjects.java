@@ -21,6 +21,7 @@ public class SpecialObjects {
     private final DataBlock special_objs_tbl_6FF2;
     public int start() { return special_objs_tbl_6FF2.start; }
     public int[] getCopy() { return special_objs_tbl_6FF2.rawCopy(); }
+    private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
 
     public final int size;
 
@@ -82,6 +83,8 @@ public class SpecialObjects {
         setCurrentZ(index, getStartZ(index));
         setScreen(index, getStartScreen(index));
     }
+
+    public int getAttr(int grNo) { return  object_attributes_BFD3.getU(object_attributes_BFD3.start + (grNo & 0x0F)); }
 }
 
 class SpecialObjectLocation {

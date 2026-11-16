@@ -41,9 +41,9 @@ public class Game implements Runnable {
     private int gameCounter = 0;
     private String gameId = "";
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
-    private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
     private final DataBlock font_6108 = InitialData.block("font_6108");
+    private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
     private final GraphicObject sprite_scratchpad_BFDB = new GraphicObject();
     private final SpecialObjects specialObjects = new SpecialObjects();
     private final SpriteData spriteData = new SpriteData();
@@ -61,7 +61,6 @@ public class Game implements Runnable {
     private final ForegroundObjects foregroundObjects = new ForegroundObjects();
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
     private final DataBlock day_txt_BCE7 = InitialData.block("day_txt_BCE7");
-    private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
 
     private final KeySequence keySequence;
     private Runnable tickCallback = () -> {};
@@ -979,11 +978,8 @@ public class Game implements Runnable {
                 int spriteIndex = inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4);
                 sprite_scratchpad_BFDB.setGrNo(spriteIndex);
                 print_sprite_D718(sprite_scratchpad_BFDB);
-                // TODO: implement blit_to_screen
-                // $BFA2 CALL $D67C    ;
-                int attr = object_attributes_BFD3.getU(object_attributes_BFD3.start + (spriteIndex & 0x0F));
                 hl = calc_attrib_addr_D848(y + 0x17, x);
-                fill_window_C515(mainMemory, hl, 3, 3, attr);
+                fill_window_C515(mainMemory, hl, 3, 3, specialObjects.getAttr(spriteIndex));
             }
         }
     }
