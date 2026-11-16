@@ -141,43 +141,20 @@ public class Game implements Runnable {
 
     private void main_AF88() {
         debugPanel1.append("main_AF88");
-        //build_lookup_tables_D69E();
 
-        // XOR A
-        // LD ($5BB2),A
         variables.setGameStart_5BB2();
-        // LD ($D16D),A  ; plyr_spr_1_scratchpad
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
-        // LD A,$05      ; 5 lives to start
-        // LD ($5BBA),A  ;
         variables.setLives_5BBA(byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
-        // LD HL,$5BA0   ;
-        // LD A,($5BA2)  ;
-        // ADD A,(HL)    ; seed_1 += seed_2
-        // LD (HL),A     ; update seed
         params.getRnd().updateSeed1();
-        // CALL $D55F    ; {colour is bright yellow on black
         clear_scrn_D55F();
-        // CALL $BD0C    ;
         do_menu_selection_BD0C();
         menu_loop_BD23(params.isSkipMenu()); // returns when game starts
-
-            /*try {
-                updateShadowMemory();
-                updateMainMemory();
-                mainPanel.saveImage("images/menu.png");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
 
         debugPanel2.append("START THE GAME");
         debugPanel2.append("Input method: " + variables.getUserInputMethod_5BA4());
 
-        // LD DE,$B20E   ; }
         // CALL $B2CF    ; play tune // ignore audio
-        // CALL $B544    ; randomise order of required objects
         if(gameCounter==0) shuffle_objects_required_B544();
-        // CALL $D1B1    ; {randomise player start location
 
         //int a = locations.data.start;
         boolean specialObjectsInitialized = false;
@@ -193,15 +170,11 @@ public class Game implements Runnable {
             int overrideZ = 0; // + only : 60 is a little above upper entrance
 
             init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
-            // CALL $C46D    ; }
             init_sun_C46D();
-            // CALL $C47E    ; randomise special object locations
             if (!specialObjectsInitialized) {
                 init_special_objects_C47E();
                 specialObjectsInitialized = true;
             }
-            // @label=player_dies
-            // CALL $D12A    ;
             player_dies_AFB7();
             game_loop_AFBA();
 
@@ -229,15 +202,10 @@ public class Game implements Runnable {
         // OUT ($FE),A   ; ULA
         // CALL $D54C    ;
 
-        // LD HL,$5800   ; colour data
-        // LD BC,$0300   ; # bytes to clear
-        // LD E,$46      ; bright yellow on black
-        // JR $D53C      ;
         for(int hl = 0x5800; hl < 0x5800+0x0300; hl++) {
             mainMemory.setByteAt(hl, 0x46);
             shadowMemory.setByteAt(hl - mainMemory.start + shadowMemory.start, 0x46);
         }
-        // JR $D544      ;
         for(int hl = 0x4000; hl < 0x4000+0x1800; hl++) {
             mainMemory.setByteAt(hl, 0);
             shadowMemory.setByteAt(hl - mainMemory.start + shadowMemory.start, 0);
@@ -246,29 +214,14 @@ public class Game implements Runnable {
 
     private void do_menu_selection_BD0C() {
         debugPanel1.append("do_menu_selection_BD0C");
-        // XOR A         ;
-        // LD ($5BB8),A  ;
         variables.setSuppressBorder_5BB8(0);
-        // LD HL,$BDA2   ;
-        // LD B,$08      ; # menu entries
 
-        //; reset flashing attribute
-        //@label=loc_BD15
-        // RES 7,(HL)    ;
-        // INC HL        ; next menu colour entry
-        // DJNZ $BD15    ; {loop until done
         for (int hl = 0xBDA2; hl < 0xBDA2 + 8; hl++) { menu_colours_BDA2.set(hl, menu_colours_BDA2.getU(hl) & 0x7F); }
-        //CALL $D567    ;
         clear_scrn_buffer_D567();
-        // CALL $BEB3    ;
         display_menu_BEB3();
-        // CALL $BD89
         flash_menu_BD89();
 
-        //@label=menu_loop
-        // CALL $BEB3    ;
         display_menu_BEB3();
-        // LD DE,$B253   ;
         // CALL $B2B6    ; ignore audio
     }
 
@@ -303,16 +256,7 @@ public class Game implements Runnable {
         int bc = calc_vidbuf_addr_D811(y, x);
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
-        // for testing only
-        //shadowMemory.setByteAt(bc, 255);
-        //for(int i=0; i < 32*192; i++) mainMemory.setByteAt(i + mainMemory.start, 0xFF);
-        //for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
-
         int hl = calc_attrib_addr_D848(y, x);
-
-        // for testing only
-        //mainMemory.setByteAt(hl, Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
-
         de = printText(text, de, bc, hl, color);
         return de;
     }
@@ -341,7 +285,6 @@ public class Game implements Runnable {
         int hl = calc_attrib_addr_D848(y, x);
 
         de = printText(text, de+1, bc, hl, attr);
-
         return de;
     }
 
@@ -535,7 +478,6 @@ public class Game implements Runnable {
     }
 
     private void shuffle_objects_required_B544() {
-        //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
         int a = params.getRnd().getSeed1();
         a = (a & 3) | 4; // random number (assuming seed is random)
         for(int c = a; c>0; c--) {
@@ -547,8 +489,6 @@ public class Game implements Runnable {
                 iy++;
             }
         }
-        //debugTableConsole("Required: ", objects_required_C27D.start, objects_required_C27D.getCopy());
-        //debugTable("Required objects:", objects_required_C27D.start, objects_required_C27D.getCopy());
     }
 
     private void init_start_location_D1B1(int override, int overrideWE, int overrideNS, int overrideZ) {
@@ -569,17 +509,10 @@ public class Game implements Runnable {
 
         plyr_spr_1_scratchpad_D161.copyFrom(plyr_spr_init_data_D1A1, plyr_spr_init_data_D1A1.start, 8);
         plyr_spr_2_scratchpad_D181.copyFrom(plyr_spr_init_data_D1A1, plyr_spr_init_data_D1A1.start+8, 8);
-
-        // LD A,$12      ; graphic_no (player top half)
-        // LD ($D171),A  ; plyr_spr_1_scratchpad (byte 16)
         plyr_spr_1_scratchpad_D161.setTemp10(0x12);
-        //byte_D171.set(0xD171, 0x12);
-        // LD A,$22      ; graphic_no (player bottom half)
-        // LD ($D191),A  ; {plyr_spr_2_scratchpad (byte 16)
         plyr_spr_2_scratchpad_D181.setTemp10(0x22);
-        int a = params.getRnd().getSeed1() & 0x3; // random
-        DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
-        int randomLoc = start_locations_D1E2.getU(0xD1E2 + a);
+
+        int randomLoc = locations.getStartLocation(params.getRnd().getSeed1() & 0x3);
         // For testing only
         if(override != -1) randomLoc = override;
 
@@ -719,14 +652,6 @@ public class Game implements Runnable {
 
     }
 
-    private int calcBits(int toCalc) {
-        int res = 0;
-        for(int i=0; i<8; i++) {
-            if((toCalc & (1 << i))>0) res++;
-        }
-        return res;
-    }
-
     private void game_complete_msg_BAAB() {
         variables.setSuppressBorder_5BB8(0);
         DataBlock complete_xy_BAD8 = InitialData.block("complete_xy_BAD8");
@@ -846,11 +771,9 @@ public class Game implements Runnable {
 
         display_objects_BF4E();
 
-        //@label=colour_panel
         fill_window_C515(mainMemory, 0x5AB6, 1, 3, 0);
         fill_window_C515(mainMemory, 0x5ABD, 1, 3, 0);
         fill_window_C515(mainMemory, 0x5A97, 6, 4, 0x42);
-        // @label=colour_sun_moon
         boolean isSun = ((sun_moon_scratchpad_C44D.getGrNo()) & 1) == 0;
         int attr = isSun ? 0x46 : 0x47;
         fill_window_C515(mainMemory, 0x5AB8, 4, 2, attr);
@@ -864,7 +787,6 @@ public class Game implements Runnable {
         if(variables.isGameOver()) return true;
         update_screen_D56F(false);
 
-        // @label=loc_B074
         if(graphicObjects.playerBottom().getGrNo()==0 && graphicObjects.playerTop().getGrNo()==0) {
             player_dies_AFB7();
             variables.setExitingScreen();
@@ -874,7 +796,7 @@ public class Game implements Runnable {
         // @label=reset_objs_wipe_flag
         // Mot used - all objects are redrawn
         for(int addr = graphicObjects.start(); addr<graphicObjects.endExcl(); addr+=0x20)
-            graphicObjects.resetWipe(addr); // c$B090 RES 5,(HL)    ;
+            graphicObjects.resetWipe(addr);
 
         return variables.isGameOver();
     }
@@ -947,7 +869,6 @@ public class Game implements Runnable {
         attr = (((attr ^ 0xFF) + 2) & 0x07) | 0x40;
         day_txt_BCE7.set(day_txt_BCE7.start, attr);
         int de = day_txt_BCE7.start;
-        //@label=print_text
         int x = 0x70;
         int y = 0x0F;
         int videoAddr = calc_vidbuf_addr_D811(y, x);
@@ -997,8 +918,6 @@ public class Game implements Runnable {
             print_8x8_BE7F(digitH, bc, font_6108);
             print_8x8_BE7F(digitL, bc+1, font_6108);
         }
-        //mainMemory.setByteAt(0x5AEF, 0x47);
-        //mainMemory.setByteAt(0x5AEF+1, 0x47);
     }
 
     private void print_BCD_lsd_BCC0(int bc, int value) {
@@ -1123,40 +1042,19 @@ public class Game implements Runnable {
     private int analyzeRelativePosition(int de1, int de2) {
         if(de1==de2) return 0;
 
-        int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 0x20 + graphicObjects.start();
-        int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 0x20 + graphicObjects.start();
+        GraphicObject o1 = graphicObjects.o(objects_to_draw_CE8B.getU(de1));
+        GraphicObject o2 = graphicObjects.o(objects_to_draw_CE8B.getU(de2));
+        boolean overlap1 = o1.getZ() >= (o2.getZ()+o2.getH());             // $CF05 JR NC,$CF16    ; no overlap (C+=0)
+        boolean overlap2 = o2.getZ() >= (o1.getZ()+o1.getH());             // $CF12 JR C,$CF15     ; overlap (C+=1)
+        boolean overlap3 = (o1.getY()-o1.getD()) >= (o2.getY()+o2.getD()); // $CF23 SUB L          ; Y1-D1-(Y2+d2)
+        boolean overlap4 = (o2.getY()-o2.getD()) >= (o1.getY()+o1.getD()); // $CF33 SUB L          ; Y2-D2-(Y1+D1)
+        boolean overlap5 = (o1.getX()-o1.getW()) >= (o2.getX()+o2.getW()); // $CF49 SUB L          ; X1-W1-(X2+W2)
+        boolean overlap6 = (o2.getX()-o2.getW()) >= (o1.getX()+o1.getW()); // $CF59 SUB L          ; X2-W2-(X1+W1)
 
-        int x1 = graphicObjects.getX(objectLoc1);
-        int y1 = graphicObjects.getY(objectLoc1);
-        int z1 = graphicObjects.getZ(objectLoc1);
-        int w1 = graphicObjects.getW(objectLoc1);
-        int d1 = graphicObjects.getD(objectLoc1);
-        int h1 = graphicObjects.getH(objectLoc1);
-
-        int x2 = graphicObjects.getX(objectLoc2);
-        int y2 = graphicObjects.getY(objectLoc2);
-        int z2 = graphicObjects.getZ(objectLoc2);
-        int w2 = graphicObjects.getW(objectLoc2);
-        int d2 = graphicObjects.getD(objectLoc2);
-        int h2 = graphicObjects.getH(objectLoc2);
-
-        boolean overlap1 = z1 >= (z2+h2); // $CF05 JR NC,$CF16    ; no overlap (C+=0)
-        boolean overlap2 = z2 >= (z1+h1); // $CF12 JR C,$CF15     ; overlap (C+=1)
-        boolean overlap3 = (y1-d1) >= (y2+d2); // $CF23 SUB L          ; Y1-D1-(Y2+d2)
-        boolean overlap4 = (y2-d2) >= (y1+d1); // $CF33 SUB L          ; Y2-D2-(Y1+D1)
-        boolean overlap5 = (x1-w1) >= (x2+w2); // $CF49 SUB L          ; X1-W1-(X2+W2)
-        boolean overlap6 = (x2-w2) >= (x1+w1); // $CF59 SUB L          ; X2-W2-(X1+W1)
         int c=0;
-
-        if(!overlap1)
-            if(!overlap2) c+=1;
-            else c+=2;
-        if(!overlap3)
-            if(!overlap4) c+=3;
-            else c+=6;
-        if(!overlap5)
-            if(!overlap6) c+=9;
-            else c+=18;
+        if(!overlap1) c += overlap2 ? 2 : 1;
+        if(!overlap3) c += overlap4 ? 6 : 3;
+        if(!overlap5) c += overlap6 ? 18 : 9;
 
         return c;
     }
@@ -1256,7 +1154,6 @@ public class Game implements Runnable {
 
     private void updateOneSprite(GraphicObject o) {
         o.save2DInfo();
-        // @label=upd_sprite_jmp_tbl
         switch(o.getGrNo()) {
             case 0x00, 0x01, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0xBA: break;
             case 0x02, 0x04: upd_2_4_C73C(o); break;
@@ -1316,13 +1213,11 @@ public class Game implements Runnable {
     private void upd_2_4_C73C(GraphicObject o) {
         int centreX, centreY;
         if (o.isHFlip()) {
-            // LD HL,$FEEF
             o.setXYAdj(-17, -2);
             int x = o.getX() - 0x0D;
             o.setDX(x); // dX
             int y = o.getY();
             o.setDY(y); // dY=Y
-            // LD HL,$0F06   ; +15, +6
             centreY = 15;
             centreX = 6;
         } else {
@@ -1332,14 +1227,12 @@ public class Game implements Runnable {
             o.setDY(y); // dY
             int x = o.getX();
             o.setDX(x); // dX
-            // LD HL,$060F   ; +6, +15
             centreY = 6;
             centreX = 15;
         }
         o.setDZ(o.getZ());
         chk_plyr_spec_near_arch_C7DB(o, centreY, centreX);
 
-        // @label=loc_C785
         for (int posToCheck = 0; posToCheck < 2; posToCheck++) {
             GraphicObject checkPlayer = graphicObjects.o(posToCheck);
             if (checkPlayer.isAutoAdjust() && is_near_to_C7FE(o, checkPlayer, 0x0F, 0x0F)) {
@@ -1377,7 +1270,6 @@ public class Game implements Runnable {
     }
 
     private boolean is_near_to_C7FE(GraphicObject o, GraphicObject objToCheck, int centreY, int centreX) {
-        //@label=is_near_to
         // ix - arch, iy - object (player), centreY - H, centreX - L
         // NOTE: we compare unsigned values - the dX, dY and dZ values are set as temporary variables and contain x, y and z
         int archCentreX = o.getDXu();
@@ -1401,7 +1293,6 @@ public class Game implements Runnable {
     }
 
     private void upd_8_C65E(GraphicObject o) {
-        // c$C4DD LD HL,$FAF4   ; -6, -12
         o.setXYAdj(-12, -6); //FA
 
         boolean moving = variables.isPortcullisMoving_5BAF();
@@ -1409,8 +1300,6 @@ public class Game implements Runnable {
         int roomSizeZ = variables.getRoomSizeZ_5BAE();
         int z = o.getZ();
         if(z == roomSizeZ || z <= (roomSizeZ + 0x1F)) {
-            // @label=init_portcullis_up
-            //int seed3 = variables.get_5BA5);
             if((params.getRnd().getSeed3() & 0x1F) != 0) return; // ; 1in32 chance?
 
             o.setBitGrNo(0); // ; graphic_no=9
@@ -1421,7 +1310,6 @@ public class Game implements Runnable {
                 if((params.getRnd().getSeed3() & 0x1F) != 0) return;
                 moveCnt = 0x80; // ; arbitrarily large count
             }
-            // @label=init_portcullis_down
             variables.setPortcullisMoveCnt_5BB0(moveCnt + 1);
             o.setBitGrNo(0); // ; graphic_no=9
             o.setDZ(-1); // ; dZ=-1 (down)
@@ -1431,7 +1319,6 @@ public class Game implements Runnable {
     }
 
     private void upd_9_C6BD(GraphicObject o) {
-        // c$C4DD LD HL,$FAF4   ; -6, -12
         o.setXYAdj(-12, -6);
 
         o.setDeadlyIfObjectHitsPlayer();
@@ -1439,7 +1326,6 @@ public class Game implements Runnable {
         if(enteringRoom) return;
         int dZ =  o.getDZ();
         if(dZ >= 0) {
-            // @label=move_portcullis_up
             o.setDZ(2);
             // $C6EE CALL $B467      ; // ignore audio
             dec_dZ_and_update_XYZ_C700(o);
@@ -1457,7 +1343,6 @@ public class Game implements Runnable {
     }
 
     private void stop_portcullis_C6E0(GraphicObject o) {
-        // @label=stop_portcullis
         variables.resetPortcullisMoving_5BAF();
         o.resetBitGrNo(0); // graphic_no=8
     }
@@ -1483,23 +1368,20 @@ public class Game implements Runnable {
             int xy = xBit1 | yBit0;
             int dX = 0;
             int dY = 0;
-            // @label=dX_dY_tbl
             switch(xy) {
                 case 0: dY = 4; dX = -4; break;
                 case 1: dY = 4; dX = 4; break;
                 case 2: dY = -4; dX = -4; break;
                 case 3: dY = -4; dX = 4; break;
             }
-            // @label=save_dX_dY
             o.setDX(dX);
             o.setDY(dY);
 
             int a = params.getRnd().getSeed3() & 0x03;
             if(a==0) a++;
             a+=0x82;
-            o.setGrNo(a); // ; set graphic no.
+            o.setGrNo(a);
         } else {
-            // @label=loc_B5C4
             int playerX = graphicObjects.playerBottom().getX();
             int x = o.getX();
             int deltaX = Math.abs(playerX - x);
@@ -1513,8 +1395,8 @@ public class Game implements Runnable {
                 }
             }
             o.setDeadlyIfObjectHitsPlayer();
-            o.setIgnore3D(); // ; ignore object in 3D calculations
-            o.setDZ(1); // ; dZ=1
+            o.setIgnore3D();
+            o.setDZ(1);
             move_towards_plyr_B965(o, 4, 4);
         }
         dec_dZ_and_update_XYZ_C700(o);
@@ -1522,7 +1404,6 @@ public class Game implements Runnable {
     }
 
     private void upd_16_to_21_24_to_29_C823(GraphicObject o) {
-        // c$C4DD LD HL,$FAF4   ; -6, -12
         o.setXYAdj(-12, -6);
         upd_player_bottom_C82B(o);
     }
@@ -1535,9 +1416,7 @@ public class Game implements Runnable {
                 return;
             }
         }
-        // @label=loc_C83E
-            // c$C83E CALL $C306    ;
-        // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317
+        // Note: this behavior comes from increasing SP twice when transformation starts ($C316-$C317)
         boolean transformStarted = chk_and_init_transform_C306(o);
         if(!transformStarted) {
             check_user_input_D022(); // NOTE: keys are in variable 0x5BB5
@@ -1559,8 +1438,7 @@ public class Game implements Runnable {
             o.setZ(zOrig + 12); // ; Z+12
             boolean intersects = do_any_objs_intersect_B4FD(o);
             o.setZ(zOrig); // ; restore original Z
-            if(intersects) cantDrop = true; //; we can't drop anything
-            // @label=loc_C041
+            if(intersects) cantDrop = true;
             variables.setPickupPressed_5BB3();
             int origW = o.getW();
             int origD = o.getD();
@@ -1599,7 +1477,6 @@ public class Game implements Runnable {
             o.setD(origD);
             o.setH(origH);
         } else {
-            // @label=loc_C0A9
             if(chk_pickup_drop_BFFB()) return;
             variables.resetPickupPressed_5BB3();
         }
@@ -1666,14 +1543,14 @@ public class Game implements Runnable {
         int flags = inventory_5BD8.getU(hl + 1);
         int d = inventory_5BD8.getU(hl + 3); // 2-byte pointer to special objects table
         int e = inventory_5BD8.getU(hl + 2);
-        obj.setW(5); // width=5
-        obj.setD(5); // depth=5
-        obj.setH(0x0C); // height=12
-        obj.setFlags7(flags); //flags7
-        obj.setScreen(player.getScreen()); // ; scrn
+        obj.setW(5);
+        obj.setD(5);
+        obj.setH(0x0C);
+        obj.setFlags7(flags);
+        obj.setScreen(player.getScreen());
         obj.setTemp10(e); // set ptr to obj_tbl entry
         obj.setTemp11(d);
-        obj.setJustDropped(); // flag just dropped
+        obj.setJustDropped();
         adjust_carried_C12B();
     }
 
@@ -1709,18 +1586,18 @@ public class Game implements Runnable {
     }
 
     private boolean do_any_objs_intersect_B4FD(GraphicObject o) {
-        o.setIgnore3D(); // ; ignore this object
+        o.setIgnore3D();
         for(int b = 0; b<graphicObjects.size; b++) {
             GraphicObject objToCheck = graphicObjects.o(b);
             if(objToCheck.isNotIgnored() &&
                     o.intersectOnX(objToCheck, 0) &&
                     o.intersectOnY(objToCheck, 0) &&
                     o.intersectOnZ(objToCheck, 0)) {
-                o.resetIgnore3D(); // ; ignore this object
+                o.resetIgnore3D();
                 return true;
             }
         }
-        o.resetIgnore3D(); // ; ignore this object
+        o.resetIgnore3D();
         return false;
     }
 
@@ -2009,7 +1886,6 @@ public class Game implements Runnable {
 
         o.next().setGrNo(1); // update player top
         //set_wipe_and_draw_flags_C692(o.ix + 0x20);
-        //@label=rand_legs_sprite
         int newSprite = (params.getRnd().getSeed3() & 0x03) | 0x5C;
         if(o.getGrNo() == newSprite) newSprite^=1; // change if same as current
         o.setGrNo(newSprite);
@@ -2090,7 +1966,6 @@ public class Game implements Runnable {
         if(o.getTurnCounter() > 0 || o.isJumping()) return; // ; already jumping?
         // $C911 CALL $B4C1     ;
         // ignore audio
-        // @label=loc_C915
         o.initTurnCounter();
         boolean right = (keys & 1)>0;
         boolean left = (keys & 2)>0;
@@ -2275,7 +2150,6 @@ public class Game implements Runnable {
 
     private void upd_63_B7A9(GraphicObject o) {
         o.setBothDeadlyFlags();
-        // c$C4E3 LD HL,$F8F0   ; -8, -16
         o.setXYAdj(-16, -8);
 
         // This flag is set in every odd room and is cleared after user picks up an object -

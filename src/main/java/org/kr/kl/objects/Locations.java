@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class Locations {
     public final DataBlock data = InitialData.block("location_tbl_6251");
+    private final DataBlock start_locations_D1E2 =  InitialData.block("start_locations_D1E2");
 
     public final Location[] locations;
 
@@ -41,4 +42,6 @@ public class Locations {
     }
 
     public void resetVisited() { for(Location l : locations) l.resetVisited(); }
+
+    public int getStartLocation(int index) { return start_locations_D1E2.getU(start_locations_D1E2.start + index); }
 }
