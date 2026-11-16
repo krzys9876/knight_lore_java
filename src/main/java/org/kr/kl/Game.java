@@ -973,7 +973,6 @@ public class Game implements Runnable {
                             boolean objCoincide = overlaps(relativePosition);
                             boolean is2behind1 = false;
                             if(objCoincide) {
-                                // @label=objs_coincide
                                 int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphicObjects.start();
                                 int grNo1 = graphicObjects.getGrNo(objectLoc1);
                                 boolean isSpecial1 = grNo1 >= 0x60 && grNo1 <= 0x66;
