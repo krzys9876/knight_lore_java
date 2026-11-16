@@ -13,6 +13,8 @@ public class DataBlock {
         data = new int[size];
     }
 
+    public DataBlock(int size) { this(0, size); }
+
     public DataBlock(int start, int[] data) {
         this.start = start;
         this.size = data.length;

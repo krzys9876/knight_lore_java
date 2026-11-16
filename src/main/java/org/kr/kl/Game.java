@@ -55,7 +55,7 @@ public class Game implements Runnable {
     private final GraphicObject sun_moon_scratchpad_C44D = new GraphicObjects(0xC44D, 1).o(0);
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
     private final GraphicObjects graphicObjects = new GraphicObjects(0x5C08, 40);
-    private final DataBlock objects_to_draw_CE8B = new DataBlock(0xCE8B, 0x2E); // 46, but there should be not more than 40 objects to draw
+    private final DataBlock objects_to_draw_CE8B = new DataBlock(0x2E); // 46, but there should be not more than 40 objects to draw
     private final Locations locations = new Locations();
     private final BackgroundObjects backgroundObjects = new BackgroundObjects();
     private final ForegroundObjects foregroundObjects = new ForegroundObjects();
@@ -217,16 +217,12 @@ public class Game implements Runnable {
         variables.setSuppressBorder_5BB8(0);
 
         for (int hl = 0xBDA2; hl < 0xBDA2 + 8; hl++) { menu_colours_BDA2.set(hl, menu_colours_BDA2.getU(hl) & 0x7F); }
-        clear_scrn_buffer_D567();
+        shadowMemory.clear();
         display_menu_BEB3();
         flash_menu_BD89();
 
         display_menu_BEB3();
         // CALL $B2B6    ; ignore audio
-    }
-
-    private void clear_scrn_buffer_D567() {
-        for (int hl = 0xD8F3; hl < 0xD8F3 + 0x1800; hl++) { shadowMemory.setByteAt(hl, 0); }
     }
 
     private void display_menu_BEB3() {
@@ -568,19 +564,16 @@ public class Game implements Runnable {
         debugPanel2.append("Game over BA22\n");
         IO.println("Game over BA22\n");
 
-        clear_scrn_buffer_D567();
-        clear_scrn_D55F();
-
-        if(variables.getAllObjectsInCauldron_5BC3() != 0)  game_complete_msg_BAAB(); // all objects in cauldron
-
-        clear_scrn_buffer_D567();
-        clear_scrn_D55F();
+        if(variables.getAllObjectsInCauldron_5BC3() != 0) game_complete_msg_BAAB(); // all objects in cauldron
 
         gameOverScreen();
         variables.setGameOver();
     }
 
     private void gameOverScreen() {
+        shadowMemory.clear();
+        clear_scrn_D55F();
+
         variables.setSuppressBorder_5BB8(0);
         DataBlock gameover_colours_BB4C = InitialData.block("gameover_colours_BB4C");
         DataBlock gameover_xy_BB52 = InitialData.block("gameover_xy_BB52");
@@ -653,6 +646,9 @@ public class Game implements Runnable {
     }
 
     private void game_complete_msg_BAAB() {
+        shadowMemory.clear();
+        clear_scrn_D55F();
+
         variables.setSuppressBorder_5BB8(0);
         DataBlock complete_xy_BAD8 = InitialData.block("complete_xy_BAD8");
         DataBlock complete_colours_BAD2 = InitialData.block("complete_colours_BAD2");
@@ -759,7 +755,7 @@ public class Game implements Runnable {
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
-        clear_scrn_buffer_D567(); // For testing
+        shadowMemory.clear(); // For testing
         calc_display_order_and_render_CEBB();
 
         //@label=no_delay
@@ -944,14 +940,14 @@ public class Game implements Runnable {
 
     private void list_objects_to_draw_CE62() {
         objects_to_draw_CE8B.reset();
-        int hl = objects_to_draw_CE8B.start;
+        int toDrawPos = 0;
         for(int i = 0; i < graphicObjects.size; i++) {
             if(graphicObjects.o(i).getGrNo() != 0/* && (!graphicObjects.isWipe(ix + i*0x20))*/) {
-                objects_to_draw_CE8B.set(hl, i);
-                hl++;
+                objects_to_draw_CE8B.set(toDrawPos, i);
+                toDrawPos++;
             }
         }
-        objects_to_draw_CE8B.set(hl, 0xFF); //flag end of list
+        objects_to_draw_CE8B.set(toDrawPos, 0xFF); //flag end of list
     }
 
     private void calc_display_order_and_render_CEBB() {
@@ -2677,9 +2673,8 @@ public class Game implements Runnable {
 
     private void build_screen_objects_D1E6() {
         // update special objects if not the first screen of the game
-        if(!variables.isGameStart_5BB2())
-            update_special_objs_C591();
-        clear_scrn_buffer_D567();
+        if(!variables.isGameStart_5BB2()) update_special_objs_C591();
+        shadowMemory.clear();
         retrieve_screen_D3C6();
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();

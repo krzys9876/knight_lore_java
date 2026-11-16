@@ -18,6 +18,7 @@ public abstract class VideoMemory {
 
     public int[] getCopy() { return Arrays.copyOf(memory, memory.length); }
     public void setByteAt(int address, int value) { memory[address - start] = value ; }
+    public void clear() { Arrays.fill(memory, 0);}
     public int getByteAt(int address) { return memory[address - start]; }
 
     public int[] toPixels(long tick) {
