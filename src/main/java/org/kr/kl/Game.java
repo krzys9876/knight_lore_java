@@ -40,7 +40,6 @@ public class Game implements Runnable {
     private final Variables variables = new Variables();
     private int gameCounter = 0;
     private String gameId = "";
-    private final DataBlock scrn_visited_5BE8 = new DataBlock(0x5BE8, 0x20);
     private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
     private final DataBlock object_attributes_BFD3 = InitialData.block("object_attributes_BFD3");
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
@@ -113,7 +112,7 @@ public class Game implements Runnable {
             // PUSH AF       ;
             // CALL $D53A    ;
             // POP AF        ;
-            scrn_visited_5BE8.reset();
+            locations.resetVisited();
             inventory_5BD8.reset();
             // For testing only
 
@@ -668,7 +667,7 @@ public class Game implements Runnable {
         if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
         else print_BCD_number_BCAE(objAddr, new int[] { objBCD });
 
-        int screens = variables.getNumScreensVisited_5BC6();
+        int screens = locations.countVisited();
         int allObjInCauldron = variables.getAllObjectsInCauldron_5BC3();
 
         int a = screens;
@@ -694,21 +693,10 @@ public class Game implements Runnable {
         waitForKey();
     }
 
-    private int calcScreensVisited() {
-        int screens = 0;
-        for(int i=0; i<scrn_visited_5BE8.size; i++) {
-            screens += calcBits(scrn_visited_5BE8.getU(scrn_visited_5BE8.start+i));
-        }
-        return screens;
-    }
-
     private void calc_and_display_percent_BC10() {
-        int screens = calcScreensVisited();
-        //IO.println("screens = " + screens);
+        int screens = locations.countVisited();
         int objInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
-        screens --; // don't count first room
-        variables.setNumScreensVisited_5BC6(screens);
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 0xE4E6;
         int percentBCD = byteToBCD(percent);
@@ -813,7 +801,7 @@ public class Game implements Runnable {
                     int required = objects_required_C27D.getU(hl) | 0x60;
                     debugPanel1.append(String.format("Next required object: %s", DataBlock.GRAPHIC_NAMES[required]));
                 }
-                debugPanel1.append(String.format("Rooms visited: %d", calcScreensVisited()));
+                debugPanel1.append(String.format("Rooms visited: %d", locations.countVisited()));
                 debugPanel1.append(String.format("Max days: %d", params.getMaxDays()));
                 debugPanel1.append("Special objects (name / location):");
                 for(int i = 0; i < specialObjects.size; i++) {
@@ -2860,7 +2848,7 @@ public class Game implements Runnable {
         // and these traps are only in odd rooms
         variables.setDisableSpikeBallDrop_5BC0(graphicObjects.playerBottom().isOddRoom());
 
-        flag_room_visited_D219();
+        locations.get(graphicObjects.playerBottom().getScreen()).setVisited();
     }
 
     private void update_special_objs_C591() {
@@ -2886,23 +2874,9 @@ public class Game implements Runnable {
     }
 
     private void retrieve_screen_D3C6() {
-        int locPos = 0;
-        boolean found = false;
         int currLocId = graphicObjects.playerBottom().getScreen();
 
-        Location loc = null;
-        while(locPos < locations.locations.length) {
-            loc = locations.locations[locPos];
-            found = loc.id == currLocId;
-            locPos++;
-        }
-        if(!found) {
-            // This should be unreachable
-            debugPanel2.append("Location not found: ERROR");
-            graphicObjects.reset();
-            return;
-        }
-        // HL points to start of the location in location table
+        Location loc = locations.get(currLocId);
         int roomId = loc.id;
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
         int attr = loc.getAttr();
@@ -3035,13 +3009,6 @@ public class Game implements Runnable {
             }
             arch = arch.next().next(); // each arch is defined as two objects, max 4 arches - always in the same position in graphic object table
         }
-    }
-
-    private void flag_room_visited_D219() {
-        int screenOrig = graphicObjects.getScreen(graphicObjects.start()); // plyr_spr_1 screen
-        int offsetByte = screenOrig / 8;
-        int offsetBit = screenOrig % 8;
-        scrn_visited_5BE8.setBit(offsetBit, scrn_visited_5BE8.start + offsetByte);
     }
 
     private boolean calc_pixel_XY_D6C9(GraphicObject o) {

@@ -9,6 +9,7 @@ public class Location {
     public final int id;
     public final int sizeBytes;
     private final int attrOrig;
+    private boolean visited = false;
 
     public final DataBlock data;
 
@@ -58,4 +59,8 @@ public class Location {
     public int getRoomSizeX() { return Location.room_size_tbl_6248.getU(getRoomSizeBase()); }
     public int getRoomSizeY() { return Location.room_size_tbl_6248.getU(getRoomSizeBase() + 1); }
     public int getRoomSizeZ() { return Location.room_size_tbl_6248.getU(getRoomSizeBase() + 2); }
+
+    public void setVisited() { visited = true; }
+    public void resetVisited() { visited = false; }
+    public boolean isVisited() { return visited; }
 }

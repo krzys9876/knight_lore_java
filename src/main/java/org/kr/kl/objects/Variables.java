@@ -22,7 +22,6 @@ public class Variables {
     public void setUserInput_5BB5(int value) { data.set(0x5BB5, value); }
     public void setObjectDroppingIntoCauldron_5BC4(int value) { data.set(0x5BC4, value); }
     public void setObjectsPutInCauldron_5BBB(int value) { data.set(0x5BBB, value); }
-    public void setNumScreensVisited_5BC6(int value) { data.set(0x5BC6, value); }
     public void setPickupPressed_5BB3() { data.set(0x5BB3, 1); }
     public void resetPickupPressed_5BB3() { data.set(0x5BB3, 0); }
     public void setGameStart_5BB2() { data.set(0x5BB2, 1); }
@@ -55,7 +54,6 @@ public class Variables {
     public int getUserInput_5BB5() { return data.getU(0x5BB5); }
     public int getObjectDroppingIntoCauldron_5BC4() { return data.getU(0x5BC4); }
     public int getObjectsPutInCauldron_5BBB() { return data.getU(0x5BBB); }
-    public int getNumScreensVisited_5BC6() { return data.getU(0x5BC6); }
     public boolean isPickupPressed_5BB3() { return data.getU(0x5BB3) == 1; }
     public boolean isGameStart_5BB2() { return data.getU(0x5BB2) == 1; }
     public int getLives_5BBA() { return data.getU(0x5BBA); }
