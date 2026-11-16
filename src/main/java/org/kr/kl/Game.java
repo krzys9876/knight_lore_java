@@ -1051,14 +1051,9 @@ public class Game implements Runnable {
         return c;
     }
 
-    private boolean is2behind1(int c) {
-        boolean isBehind = c==3 || c==4 || c==6 || c==7 || c==12 || c==15 || c==16;
-        return isBehind;
-    }
+    private boolean is2behind1(int c) { return c==3 || c==4 || c==6 || c==7 || c==12 || c==15 || c==16; }
 
-    private boolean overlaps(int c) {
-        return c == 13;
-    }
+    private boolean overlaps(int c) { return c == 13; }
 
     private void display_panel_D255() {
         sprite_scratchpad_BFDB.reset();
@@ -1097,11 +1092,8 @@ public class Game implements Runnable {
 
     // ; Input:HL starting location B  width (bytes) C  height (lines), A - value
     private void fill_window_C515(VideoMemory memory, int hl, int b, int c, int a) {
-        for(int y = 0; y<c; y++) {
-            for(int x = 0; x<b; x++) {
-                memory.setByteAt(hl + x + y*0x20, a);
-            }
-        }
+        for(int y = 0; y<c; y++)
+            for(int x = 0; x<b; x++) memory.setByteAt(hl + x + y*0x20, a);
     }
 
     private void toggle_day_night_C3FF() {
@@ -1536,8 +1528,7 @@ public class Game implements Runnable {
     }
 
     private boolean can_pickup_spec_obj_C172(GraphicObject player, GraphicObject obj) {
-        int grNo = obj.getGrNo();
-        if (((grNo - 0x60) & 0xFF) >= 0x07) return false; // special objects base no.
+        if (!obj.isSpecialObject()) return false; // special objects base no.
         return is_on_or_near_obj_C17A(player, obj);
     }
 
