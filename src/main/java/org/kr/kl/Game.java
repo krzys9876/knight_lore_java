@@ -40,7 +40,7 @@ public class Game implements Runnable {
     private final Variables variables = new Variables();
     private int gameCounter = 0;
     private String gameId = "";
-    private final DataBlock inventory_5BD8 = new DataBlock(0x5BD8, 16);
+    private final Inventory inventory = new Inventory();
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
     private final DataBlock font_6108 = InitialData.block("font_6108");
     private final DataBlock day_font_BCEC = InitialData.block("day_font_BCEC"); // NOTE: this font looks the same but is shifted by half of byte
@@ -112,7 +112,7 @@ public class Game implements Runnable {
             // CALL $D53A    ;
             // POP AF        ;
             locations.resetVisited();
-            inventory_5BD8.reset();
+            inventory.reset();
             // For testing only
 
             // 65 14 F2 6F - bottle
@@ -717,7 +717,7 @@ public class Game implements Runnable {
                 for(int i = 0; i < graphicObjects.size; i++)
                     if(graphicObjects.o(i).getGrNo() !=0) debugPanel2.append(graphicObjects.objectInfo(i, graphicObjects.o(i).ix));
 
-                debugTable2("Inventory", inventory_5BD8.start, inventory_5BD8.rawCopy());
+                debugTable2("Inventory", inventory.data.start, inventory.data.rawCopy());
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphicObjects.playerBottom().getScreen()));
                 debugPanel1.append(String.format("Objects collected: %d of %d", variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects()));
                 int hl = ret_next_obj_required_C274();
@@ -889,14 +889,15 @@ public class Game implements Runnable {
 
     private void display_objects_BF4E() {
         for(int b=0; b<3; b++) {
-            if(inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4)!=0) {
+            InventorySlot slot = inventory.slots[b+1]; // first slot is not a visible inventory
+            if(slot.getGrNo() != 0) {
                 int x = (2-b)*24+16;
                 int y = 0;
                 sprite_scratchpad_BFDB.setPixelX(x);
                 sprite_scratchpad_BFDB.setPixelY(y);
                 int hl = calc_vidbuf_addr_D811(y, x);
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
-                int spriteIndex = inventory_5BD8.getU(inventory_5BD8.start + 4 + b*4);
+                int spriteIndex = slot.getGrNo();
                 sprite_scratchpad_BFDB.setGrNo(spriteIndex);
                 print_sprite_D718(sprite_scratchpad_BFDB);
                 hl = calc_attrib_addr_D848(y + 0x17, x);
@@ -1483,12 +1484,11 @@ public class Game implements Runnable {
     }
 
     private void room_to_drop_C0B2(GraphicObject player, GraphicObject toDrop, boolean cantDrop) {
-        int hl = inventory_5BD8.start + 0x0C;
-        if(inventory_5BD8.getU(hl) == 0) {
-            adjust_carried_C12B();
-        } else {
+        InventorySlot slot = inventory.currentSlot();
+        if(slot.getGrNo() == 0) inventory.adjustCarried();
+        else {
             if(!cantDrop) {
-                int grNo = inventory_5BD8.getU(hl);
+                int grNo = slot.getGrNo();
                 toDrop.setGrNo(grNo);
                 if(player.isCauldronRoom()) {
                     int z = player.getZ();
@@ -1510,63 +1510,38 @@ public class Game implements Runnable {
 
     private void pickup_object_C141(GraphicObject o, GraphicObject obj) {
         variables.resetDisableSpikeBallDrop_5BC0();
-        int grNo = obj.getGrNo();
-        int hl = inventory_5BD8.start;
-        inventory_5BD8.set(hl, grNo);
-        hl++;
-        int flags = obj.getFlags7();
-        inventory_5BD8.set(hl, flags);
-        hl++;
+        InventorySlot slot = inventory.firstSlot();
+        slot.setGrNo(obj.getGrNo());
+        slot.setFlags(obj.getFlags7());
         int e = obj.getTemp10();
         int d = obj.getTemp11();
         int ptr =  d * 256 + e; // ; ptr graphic object
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
-        inventory_5BD8.set(hl, e);
-        hl++;
-        inventory_5BD8.set(hl, d);
+        slot.setPointerL(e);
+        slot.setPointerH(d);
         obj.setWipeAndDraw();
         obj.setGrNo(1);
 
-        hl = inventory_5BD8.start + 0x0C;
-        int a = inventory_5BD8.getU(hl);
-        if(a == 0) {
-            adjust_carried_C12B();
-        } else {
-            obj.setGrNo(a);
+        InventorySlot currentSlot = inventory.currentSlot();
+        if(currentSlot.getGrNo() == 0) inventory.adjustCarried();
+        else {
+            obj.setGrNo(currentSlot.getGrNo());
             drop_object_C106(o, obj);
         }
     }
 
     private void drop_object_C106(GraphicObject player, GraphicObject obj) {
-        int hl = inventory_5BD8.start + 0x0C; // current slot
-        int flags = inventory_5BD8.getU(hl + 1);
-        int d = inventory_5BD8.getU(hl + 3); // 2-byte pointer to special objects table
-        int e = inventory_5BD8.getU(hl + 2);
+        InventorySlot currentSlot = inventory.currentSlot();
         obj.setW(5);
         obj.setD(5);
         obj.setH(0x0C);
-        obj.setFlags7(flags);
+        obj.setFlags7(currentSlot.getFlags());
         obj.setScreen(player.getScreen());
-        obj.setTemp10(e); // set ptr to obj_tbl entry
-        obj.setTemp11(d);
+        obj.setTemp10(currentSlot.getPointerL()); // set ptr to obj_tbl entry
+        obj.setTemp11(currentSlot.getPointerH()); // 2-byte pointer to special objects table
         obj.setJustDropped();
-        adjust_carried_C12B();
-    }
-
-    private void adjust_carried_C12B() {
-        int hl = inventory_5BD8.start + 0x0B; // unk
-        int de = inventory_5BD8.last();
-        for(int bc = 0; bc<0x0c; bc++) { // LDDR
-            inventory_5BD8.set(de, inventory_5BD8.getU(hl));
-            hl--;
-            de--;
-        }
-        de = inventory_5BD8.start;
-        for(int b = 0; b<4; b++) {
-            inventory_5BD8.set(de, 0);
-            de++;
-        }
+        inventory.adjustCarried();
     }
 
     private boolean can_pickup_spec_obj_C172(GraphicObject player, GraphicObject obj) {
