@@ -749,21 +749,17 @@ public class Game implements Runnable {
         if(variables.isExitingScreen()) return false;
         variables.resetGameStart_5BB2(); // ; update special objects table next time
         init_cauldron_bubbles_B8A9();
-        list_objects_to_draw_CE62();
         //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
 
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
         shadowMemory.clear(); // For testing
+        list_objects_to_draw_CE62();
         calc_display_order_and_render_CEBB();
 
-        //@label=no_delay
-        int a = variables.getCurrRoomAttrib_5BAD(); // screen attribute
-        for(int addr = 0x5800; addr<0x5800+0x0300; addr++) {
-            mainMemory.setByteAt(addr, a);
-            //shadowMemory.setByteAt(addr - mainMemory.start + shadowMemory.start, a);
-        }
+        // screen attribute (only main screen)
+        for(int addr = 0x5800; addr<0x5800+0x0300; addr++) mainMemory.setByteAt(addr, variables.getCurrRoomAttrib_5BAD());
 
         display_objects_BF4E();
 
