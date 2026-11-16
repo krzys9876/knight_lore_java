@@ -67,6 +67,9 @@ The plan is to refactor the game so the code looks like proper Java.
 
 ## Version history ##
 
+### 0.4 ###
+Significant internal refactor, preparation for future development
+
 ### 0.3 ###
 Further improve debug information, enable optional game play (key sequence) save and replay
 
