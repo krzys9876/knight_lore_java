@@ -2494,7 +2494,7 @@ public class Game implements Runnable {
                     o.setGrNo(objects_required_C27D.getU(hl) | 0xA8);
                 }
             } else {
-                o.setBitGrNo(3);
+                o.setBitGrNo(2); // make the spell deadly for wulf
                 o.resetIgnore3D();
             }
         }
