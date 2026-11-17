@@ -11,13 +11,15 @@ public class SeedGeneratorRandom implements SeedGenerator {
     private final Random rnd;
 
     public SeedGeneratorRandom() {
-        seed1 = 0x65; // originally taken from 5C78 (LSB of FRAMES 3-byte system variable)
-        seed2 = 0;
-        seed3 = 0;
         rnd = new Random();
+        seed1 = next();
+        seed2 = next();
+        seed3 = next();
 
         updateSeed3();
     }
+
+    private int next() { return rnd.nextInt() & 0xFF;}
 
     @Override
     public int getSeed1() {

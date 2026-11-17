@@ -7,10 +7,7 @@ import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.ScreenDebugPanel;
 import org.kr.kl.ui.ScreenPanel;
 import org.kr.kl.ui.ToolWindow;
-import org.kr.kl.utils.KeySequence;
-import org.kr.kl.utils.KeySequenceMode;
-import org.kr.kl.utils.SeedGenerator;
-import org.kr.kl.utils.SeedGeneratorSequential;
+import org.kr.kl.utils.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,7 +61,8 @@ public class Main {
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
         KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
         //KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY); // set SAVE to enable saving or REPLAY to replay the complete gameplay, REPLAY_SAVE to replay and save each frame
-        SeedGenerator rnd = new SeedGeneratorSequential();
+        SeedGenerator rnd = new SeedGeneratorRandom();
+        //SeedGenerator rnd = new SeedGeneratorSequential();
         //GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
         GameParams params = new GameParams(rnd, true, false, false, false, 99, 98, 14, 90, 0);
         Game game = new Game(gamePanel1, gamePanel2, panel3, panel4, keyQueue, params, keySequence);
