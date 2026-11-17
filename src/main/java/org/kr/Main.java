@@ -51,7 +51,7 @@ public class Main {
         menuBar.add(windowMenu);
         frame.setJMenuBar(menuBar);
 
-        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (1)", panel3, new Dimension(250, 600), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (1)", panel3, new Dimension(250, 750), null);
         ToolWindow.addToggleWindow(frame, windowMenu, "Debug (2)", panel4, new Dimension(350, 500), null);
         ToolWindow.addToggleWindow(frame, windowMenu, "Shadow memory view", panel2, new Dimension(400, 300), null);
 
