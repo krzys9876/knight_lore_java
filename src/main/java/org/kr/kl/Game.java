@@ -202,7 +202,7 @@ public class Game implements Runnable {
         variables.setSuppressBorder_5BB8(0);
 
         for (int hl = 0xBDA2; hl < 0xBDA2 + 8; hl++) { menu_colours_BDA2.set(hl, menu_colours_BDA2.getU(hl) & 0x7F); }
-        shadowMemory.clear();
+        shadowMemory.clearAndSetBackground();
         display_menu_BEB3();
         flash_menu_BD89();
 
@@ -556,7 +556,7 @@ public class Game implements Runnable {
     }
 
     private void gameOverScreen() {
-        shadowMemory.clear();
+        shadowMemory.clearAndSetBackground();
         clear_scrn_D55F();
 
         variables.setSuppressBorder_5BB8(0);
@@ -631,7 +631,7 @@ public class Game implements Runnable {
     }
 
     private void game_complete_msg_BAAB() {
-        shadowMemory.clear();
+        shadowMemory.clearAndSetBackground();
         clear_scrn_D55F();
 
         variables.setSuppressBorder_5BB8(0);
@@ -720,7 +720,7 @@ public class Game implements Runnable {
                 debugPanel1.append(String.format("Random seeds: %d %d %d",
                         params.getRnd().getSeed1(), params.getRnd().getSeed2(), params.getRnd().getSeed3()));
                 debugPanel1.append(String.format("Tick: %d", tickNo));
-                debugPanel1.append(String.format("Mode: %s", keySequence.isReplaying() ? "Replaying" : "Saving"));
+                debugPanel1.append(String.format("Mode: %s", keySequence.isReplaying() ? "Replay" : keySequence.isSaving() ? "Save" : "Play"));
 
                 delay();
             }
@@ -739,7 +739,7 @@ public class Game implements Runnable {
         // set attributes so the buffer contents are visible
         for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
-        shadowMemory.clear(); // For testing
+        shadowMemory.clearAndSetBackground(); // For testing
         list_objects_to_draw_CE62();
         calc_display_order_and_render_CEBB();
 
@@ -2629,7 +2629,7 @@ public class Game implements Runnable {
     private void build_screen_objects_D1E6() {
         // update special objects if not the first screen of the game
         if(!variables.isGameStart_5BB2()) update_special_objs_C591();
-        shadowMemory.clear();
+        shadowMemory.clearAndSetBackground();
         retrieve_screen_D3C6();
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();

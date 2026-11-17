@@ -6,6 +6,7 @@ import org.kr.kl.GameParams;
 import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.ScreenDebugPanel;
 import org.kr.kl.ui.ScreenPanel;
+import org.kr.kl.ui.ToolWindow;
 import org.kr.kl.utils.KeySequence;
 import org.kr.kl.utils.KeySequenceMode;
 import org.kr.kl.utils.SeedGenerator;
@@ -28,7 +29,7 @@ public class Main {
         ScreenDebugPanel panel4 = new ScreenDebugPanel();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1400, 900);
+        frame.setSize(256*4, 192*4);
         frame.setTitle("Knight Lore recreated");
         //frame.setLayout(new GridLayout(1, 3));
         //frame.setLayout(new GridBagLayout());
@@ -48,9 +49,18 @@ public class Main {
         //frame.add(panel4, c);
 
         //frame.add(panel2);
-        frame.setVisible(true);
+        JMenuBar menuBar = new JMenuBar();
+        JMenu windowMenu = new JMenu("Windows");
+        menuBar.add(windowMenu);
+        frame.setJMenuBar(menuBar);
 
+        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (1)", panel3, new Dimension(250, 600), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (2)", panel4, new Dimension(350, 500), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Shadow memory view", panel2, new Dimension(400, 300), null);
+
+        frame.setVisible(true);
         panel1.requestFocus();
+
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
         KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
         //KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY); // set SAVE to enable saving or REPLAY to replay the complete gameplay, REPLAY_SAVE to replay and save each frame

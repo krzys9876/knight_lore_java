@@ -1,6 +1,5 @@
 package org.kr;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 public abstract class VideoMemory {
@@ -18,7 +17,14 @@ public abstract class VideoMemory {
 
     public int[] getCopy() { return Arrays.copyOf(memory, memory.length); }
     public void setByteAt(int address, int value) { memory[address - start] = value ; }
-    public void clear() { Arrays.fill(memory, 0);}
+    public void clear() { Arrays.fill(memory, 0); }
+    public void clearAndSetBackground() {
+        clear();
+        setVisibleBackground(Color.getAttribute(Color.WHITE, Color.BLUE, true, false));
+    }
+    public void setVisibleBackground(int attr) {
+        for(int hl = start + PIXEL_MEM_SIZE; hl < start + PIXEL_MEM_SIZE + 0x0300; hl++) setByteAt(hl, attr);
+    }
     public int getByteAt(int address) { return memory[address - start]; }
 
     public int[] toPixels(long tick) {
