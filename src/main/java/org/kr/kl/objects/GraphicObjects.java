@@ -54,7 +54,7 @@ package org.kr.kl.objects;
 1F        ; { +31    | old pixel Y }
 */
 
-import org.kr.DataBlock;
+import org.kr.kl.data.DataBlock;
 
 public class GraphicObjects {
     public final DataBlock data;

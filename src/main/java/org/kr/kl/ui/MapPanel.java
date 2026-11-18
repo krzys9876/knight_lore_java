@@ -1,17 +1,8 @@
 package org.kr.kl.ui;
 
-import org.kr.Color;
 import org.kr.kl.objects.Location;
 import org.kr.kl.objects.Locations;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 public class MapPanel extends GamePanel {

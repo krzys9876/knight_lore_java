@@ -1,4 +1,4 @@
-package org.kr;
+package org.kr.kl.ui;
 
 public class Color {
     public static final int BLACK = 0;

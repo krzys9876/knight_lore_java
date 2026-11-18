@@ -1,6 +1,6 @@
 package org.kr.kl.utils;
 
-import org.kr.InitialData;
+import org.kr.kl.data.InitialData;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

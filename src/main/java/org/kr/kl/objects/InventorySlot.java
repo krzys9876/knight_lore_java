@@ -1,7 +1,5 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
-
 public class InventorySlot {
     private final Inventory parent;
     private final int ix;

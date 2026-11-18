@@ -1,4 +1,4 @@
-package org.kr;
+package org.kr.kl.data;
 
 import java.util.Arrays;
 

@@ -1,7 +1,7 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
-import org.kr.InitialData;
+import org.kr.kl.data.DataBlock;
+import org.kr.kl.data.InitialData;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,6 +1,6 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
+import org.kr.kl.data.DataBlock;
 
 public class Inventory {
     public final DataBlock data = new DataBlock(0x5BD8, 16);

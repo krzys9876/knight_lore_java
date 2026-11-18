@@ -1,6 +1,6 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
+import org.kr.kl.data.DataBlock;
 
 public class Variables {
     private final DataBlock data = new DataBlock(0x5BA0, 0x5BE8 - 0x5BA0 + 1);

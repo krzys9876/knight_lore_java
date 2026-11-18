@@ -1,4 +1,4 @@
-package org.kr;
+package org.kr.kl.ui;
 
 /**
  * Follows ZX Spectrum screen layout

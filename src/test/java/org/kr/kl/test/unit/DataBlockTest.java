@@ -2,7 +2,7 @@ package org.kr.kl.test.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kr.DataBlock;
+import org.kr.kl.data.DataBlock;
 
 public class DataBlockTest {
     @Test

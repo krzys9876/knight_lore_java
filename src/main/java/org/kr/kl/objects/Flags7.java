@@ -1,6 +1,6 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
+import org.kr.kl.data.DataBlock;
 
 /*
 07        ; { +7     | flags }

@@ -3,12 +3,10 @@ package org.kr.kl.test.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kr.Color;
+import org.kr.kl.ui.Color;
 import org.kr.kl.ui.GamePanel;
-import org.kr.kl.ui.ScreenPanel;
-import org.kr.VideoMemoryScreen;
+import org.kr.kl.ui.VideoMemoryScreen;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

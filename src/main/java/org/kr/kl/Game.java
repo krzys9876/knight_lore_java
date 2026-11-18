@@ -1,10 +1,9 @@
 package org.kr.kl;
 
-import org.kr.*;
+import org.kr.kl.data.DataBlock;
+import org.kr.kl.data.InitialData;
 import org.kr.kl.objects.*;
-import org.kr.kl.ui.GamePanel;
-import org.kr.kl.ui.DebugPanel;
-import org.kr.kl.ui.MapPanel;
+import org.kr.kl.ui.*;
 import org.kr.kl.utils.*;
 
 import java.awt.event.KeyEvent;

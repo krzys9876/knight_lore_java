@@ -1,7 +1,7 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
-import org.kr.InitialData;
+import org.kr.kl.data.DataBlock;
+import org.kr.kl.data.InitialData;
 
 public class Location {
     public static final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");

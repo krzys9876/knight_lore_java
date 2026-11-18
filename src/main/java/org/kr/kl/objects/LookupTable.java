@@ -1,6 +1,6 @@
 package org.kr.kl.objects;
 
-import org.kr.DataBlock;
+import org.kr.kl.data.DataBlock;
 
 public class LookupTable {
     private final DataBlock reverse = new DataBlock(0, 256);
