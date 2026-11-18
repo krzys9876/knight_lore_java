@@ -35,6 +35,8 @@ public class Locations {
 
     public Location get(int id) { return locMap.get(id); }
 
+    public boolean exists(int id) { return locMap.containsKey(id); }
+
     public int countVisited() {
         int visitedCnt = 0;
         for(Location l : locations) if(l.isVisited()) visitedCnt ++;

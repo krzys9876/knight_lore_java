@@ -3,10 +3,7 @@ package org.kr;
 import com.formdev.flatlaf.FlatLightLaf;
 import org.kr.kl.Game;
 import org.kr.kl.GameParams;
-import org.kr.kl.ui.GamePanel;
-import org.kr.kl.ui.ScreenDebugPanel;
-import org.kr.kl.ui.ScreenPanel;
-import org.kr.kl.ui.ToolWindow;
+import org.kr.kl.ui.*;
 import org.kr.kl.utils.*;
 
 import javax.swing.*;
@@ -18,19 +15,21 @@ public class Main {
     static void main() {
         FlatLightLaf.setup();
 
-        GamePanel gamePanel1 = new GamePanel();
-        ScreenPanel panel1 = new ScreenPanel(gamePanel1);
-        GamePanel gamePanel2 = new GamePanel();
-        ScreenPanel panel2 = new ScreenPanel(gamePanel2);
-        ScreenDebugPanel panel3 = new ScreenDebugPanel();
-        ScreenDebugPanel panel4 = new ScreenDebugPanel();
+        GamePanel gamePanel = new GamePanel();
+        ScreenPanel screenGamePanel = new ScreenPanel(gamePanel);
+        GamePanel shadowPanel = new GamePanel();
+        ScreenPanel screenShadowPanel = new ScreenPanel(shadowPanel);
+        MapPanel mapPanel = new MapPanel();
+        ScreenPanel screenMapPanel = new ScreenPanel(mapPanel);
+        ScreenDebugPanel debugPanel1 = new ScreenDebugPanel();
+        ScreenDebugPanel debugPanel2 = new ScreenDebugPanel();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(256*4, 192*4);
         frame.setTitle("Knight Lore recreated");
         //frame.setLayout(new GridLayout(1, 3));
         //frame.setLayout(new GridBagLayout());
-        frame.add(panel1, BorderLayout.CENTER);
+        frame.add(screenGamePanel, BorderLayout.CENTER);
         //GridBagConstraints c = new GridBagConstraints();
         //c.fill = GridBagConstraints.BOTH;
         //c.weighty = 1.0;
@@ -51,12 +50,13 @@ public class Main {
         menuBar.add(windowMenu);
         frame.setJMenuBar(menuBar);
 
-        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (1)", panel3, new Dimension(250, 750), null);
-        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (2)", panel4, new Dimension(350, 500), null);
-        ToolWindow.addToggleWindow(frame, windowMenu, "Shadow memory view", panel2, new Dimension(400, 300), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Map", screenMapPanel, new Dimension(256, 256), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (1)", debugPanel1, new Dimension(250, 750), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (2)", debugPanel2, new Dimension(350, 500), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Shadow memory view", screenShadowPanel, new Dimension(400, 300), null);
 
         frame.setVisible(true);
-        panel1.requestFocus();
+        screenGamePanel.requestFocus();
 
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
         KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
@@ -65,7 +65,7 @@ public class Main {
         //SeedGenerator rnd = new SeedGeneratorSequential();
         //GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
         GameParams params = new GameParams(rnd, true, false, false, false, 99, 98, 14, 90, 0);
-        Game game = new Game(gamePanel1, gamePanel2, panel3, panel4, keyQueue, params, keySequence);
+        Game game = new Game(gamePanel, shadowPanel, mapPanel, debugPanel1, debugPanel2, keyQueue, params, keySequence);
         Thread gameThread = new Thread(game);
         gameThread.start();
 

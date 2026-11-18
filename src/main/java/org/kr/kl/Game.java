@@ -4,6 +4,7 @@ import org.kr.*;
 import org.kr.kl.objects.*;
 import org.kr.kl.ui.GamePanel;
 import org.kr.kl.ui.DebugPanel;
+import org.kr.kl.ui.MapPanel;
 import org.kr.kl.utils.*;
 
 import java.awt.event.KeyEvent;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class Game implements Runnable {
     private final GamePanel mainPanel;
     private final GamePanel shadowPanel;
+    private final MapPanel mapPanel;
     private final DebugPanel debugPanel1;
     private final DebugPanel debugPanel2;
     private final ConcurrentSkipListSet<Integer> keyQueue;
@@ -72,10 +74,11 @@ public class Game implements Runnable {
         updateShadowMemory();
     }
 
-    public Game(GamePanel mainPanel, GamePanel shadowPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
+    public Game(GamePanel mainPanel, GamePanel shadowPanel, MapPanel mapPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
                 ConcurrentSkipListSet<Integer> keyQueue, GameParams params, KeySequence keySequence) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
+        this.mapPanel = mapPanel;
         this.debugPanel1 = debugPanel1;
         this.debugPanel2 = debugPanel2;
         this.keyQueue = keyQueue;
@@ -2631,6 +2634,7 @@ public class Game implements Runnable {
         if(!variables.isGameStart_5BB2()) update_special_objs_C591();
         shadowMemory.clearAndSetBackground();
         retrieve_screen_D3C6();
+        mapPanel.drawMap(locations, graphicObjects.playerBottom().getScreen());
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();
 
@@ -2718,7 +2722,7 @@ public class Game implements Runnable {
     }
 
     private void find_special_objs_here_C525() {
-        int currLocId = graphicObjects.getScreen(graphicObjects.start());
+        int currLocId = graphicObjects.playerBottom().getScreen();
         for(int i=graphicObjects.start() + 2*0x20; i<graphicObjects.start() + 4*0x20; i+=0x20) graphicObjects.resetObject(i);
         for(int spi = 0; spi < specialObjects.size;  spi++) {
             int specialObjGrNo = specialObjects.getGraphicNo(spi);

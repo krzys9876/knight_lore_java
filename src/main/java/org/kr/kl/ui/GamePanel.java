@@ -18,7 +18,7 @@ public class GamePanel {
     final int BASE_HEIGHT;
     protected int[] pixelData;
     BufferedImage image;
-    private Runnable repaintAction = () -> {};
+    protected Runnable repaintAction = () -> {};
 
     public GamePanel(int w, int h) {
         BASE_WIDTH = w;
@@ -55,7 +55,7 @@ public class GamePanel {
 
     public void setPixelData(int[] pixelData) {
         this.pixelData = pixelData;
-        preparePixels();
+        //preparePixels();
         repaintAction.run();
     }
 
