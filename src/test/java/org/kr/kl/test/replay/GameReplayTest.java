@@ -6,6 +6,7 @@ import org.kr.kl.Game;
 import org.kr.kl.GameParams;
 import org.kr.kl.ui.DebugPanel;
 import org.kr.kl.ui.GamePanel;
+import org.kr.kl.ui.MapPanel;
 import org.kr.kl.utils.KeySequence;
 import org.kr.kl.utils.KeySequenceMode;
 import org.kr.kl.utils.SeedGeneratorSequential;
@@ -35,10 +36,11 @@ public class GameReplayTest {
         KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY);
         GamePanel panel1 = new GamePanel();
         GamePanel panel2 = new GamePanel();
+        MapPanel panel3 = new MapPanel();
         DebugPanel debugPanel1 = new TestDebugPanel();
         DebugPanel debugPanel2 = new TestDebugPanel();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
-        Game game = new Game(panel1, panel2, debugPanel1, debugPanel2, keyQueue, params, keySequence);
+        Game game = new Game(panel1, panel2, panel3, debugPanel1, debugPanel2, keyQueue, params, keySequence);
 
         Map<String, Long> hashes = new HashMap<>();
         try(var lines = Files.lines(Path.of(referencePath, "hashes.txt"))) {

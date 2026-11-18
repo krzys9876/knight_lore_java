@@ -5,9 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,10 +38,6 @@ public class GamePanel {
         return image;
     }
 
-    public int[] getPixelData() {
-        return pixelData;
-    }
-
     public long screenHash() {
         long h = 0xcbf29ce484222325L;            // FNV offset basis
         for (int v : pixelData) {
@@ -55,7 +49,7 @@ public class GamePanel {
 
     public void setPixelData(int[] pixelData) {
         this.pixelData = pixelData;
-        //preparePixels();
+        preparePixels();
         repaintAction.run();
     }
 
