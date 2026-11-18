@@ -67,6 +67,10 @@ The plan is to refactor the game so the code looks like proper Java.
 
 ## Version history ##
 
+### 0.5 ###
+
+Add floating windows with game map, debug info and shadow memory (if you are interested in it) 
+
 ### 0.4 ###
 Significant internal refactor, preparation for future development
 
