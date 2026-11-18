@@ -14,17 +14,26 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 public class GamePanel {
-    final int BASE_WIDTH = 256;
-    final int BASE_HEIGHT = 192;
-    protected int[] pixelData = new int[BASE_WIDTH * BASE_HEIGHT];
-    BufferedImage image = new BufferedImage(BASE_WIDTH, BASE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+    final int BASE_WIDTH;
+    final int BASE_HEIGHT;
+    protected int[] pixelData;
+    BufferedImage image;
     private Runnable repaintAction = () -> {};
 
-    public GamePanel() {
+    public GamePanel(int w, int h) {
+        BASE_WIDTH = w;
+        BASE_HEIGHT = h;
+        pixelData = new int[BASE_WIDTH * BASE_HEIGHT];
+        image = new BufferedImage(BASE_WIDTH, BASE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+
         for(int i=0; i<pixelData.length; i++){
             pixelData[i] = (int)(Math.random()*256*256*256);
         }
         preparePixels();
+    }
+
+    public GamePanel() {
+        this(256, 192);
     }
 
     public BufferedImage getImage() {
