@@ -6,26 +6,31 @@ public abstract class VideoMemory {
     public static final int WIDTH = 256;
     public static final int HEIGHT = 192;
     public static final int PIXEL_MEM_SIZE = WIDTH / 8 * HEIGHT;
+    public static final int ATTR_MEM_SIZE = WIDTH / 8 * HEIGHT / 8;
 
     // pixel memory: 32 bytes * 192 lines
     // attribute memory: 32 x 24 attribute "cells" (8x8 pixels each)
     // NOTE: using int instead of byte because there is no unsigned byte type in java
     protected final int[] memory = new int[PIXEL_MEM_SIZE + WIDTH / 8 * HEIGHT / 8];
-    public final int start;
+    public final int attrStart;
+    public final int endExcl;
 
-    public VideoMemory(int start) { this.start = start ; }
+    public VideoMemory(int start) {
+        this.attrStart = PIXEL_MEM_SIZE;
+        this.endExcl = this.attrStart + ATTR_MEM_SIZE;
+    }
 
     public int[] getCopy() { return Arrays.copyOf(memory, memory.length); }
-    public void setByteAt(int address, int value) { memory[address - start] = value ; }
+    public void setByteAt(int address, int value) { memory[address] = value ; }
     public void clear() { Arrays.fill(memory, 0); }
     public void clearAndSetBackground() {
         clear();
         setVisibleBackground(Color.getAttribute(Color.WHITE, Color.BLUE, true, false));
     }
     public void setVisibleBackground(int attr) {
-        for(int hl = start + PIXEL_MEM_SIZE; hl < start + PIXEL_MEM_SIZE + 0x0300; hl++) setByteAt(hl, attr);
+        for(int hl = PIXEL_MEM_SIZE; hl < PIXEL_MEM_SIZE + 0x0300; hl++) setByteAt(hl, attr);
     }
-    public int getByteAt(int address) { return memory[address - start]; }
+    public int getByteAt(int address) { return memory[address]; }
 
     public int[] toPixels(long tick) {
         return toPixels(tick == -1 || ((tick / 5) % 2) == 0);

@@ -87,8 +87,8 @@ public class Game implements Runnable {
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
 
-        mainMemory = new VideoMemoryScreen(0x4000);
-        shadowMemory = new VideoMemoryLinear(0xD8F3);
+        mainMemory = new VideoMemoryScreen(0);
+        shadowMemory = new VideoMemoryLinear(0);
     }
 
     public void updateMainMemory() {
@@ -189,13 +189,13 @@ public class Game implements Runnable {
         // OUT ($FE),A   ; ULA
         // CALL $D54C    ;
 
-        for(int hl = 0x5800; hl < 0x5800+0x0300; hl++) {
+        for(int hl = mainMemory.attrStart; hl < mainMemory.endExcl; hl++) {
             mainMemory.setByteAt(hl, 0x46);
-            shadowMemory.setByteAt(hl - mainMemory.start + shadowMemory.start, 0x46);
+            shadowMemory.setByteAt(hl, 0x46);
         }
-        for(int hl = 0x4000; hl < 0x4000+0x1800; hl++) {
+        for(int hl = 0; hl < mainMemory.attrStart; hl++) {
             mainMemory.setByteAt(hl, 0);
-            shadowMemory.setByteAt(hl - mainMemory.start + shadowMemory.start, 0);
+            shadowMemory.setByteAt(hl, 0);
         }
     }
 
@@ -249,7 +249,7 @@ public class Game implements Runnable {
         while(!textDone) {
             print_8x8_BE7F(text.getU(de), bc, font_6108);
             mainMemory.setByteAt(hl, attr); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
-            shadowMemory.setByteAt(hl -mainMemory.start+shadowMemory.start, attr);
+            shadowMemory.setByteAt(hl, attr);
             textDone = (text.getU(de) & 0x80) > 0;
             hl++;
             de++;
@@ -272,15 +272,14 @@ public class Game implements Runnable {
     }
 
     private int calc_vidbuf_addr_D811(int y, int x) {
-        int xy = (x + y*256) >> 3;
-        return xy + 0xD8F3;
+        return (x >> 3) + y * 0x20;
     }
 
     private int calc_attrib_addr_D848(int h, int l) {
         // h: y, l: x
         int y = (h ^ 0xFF) >> 3;
-        int xy = (y * 256 + l) >> 3;
-        return xy + 0x5700;
+        int xy = ((y - 8) * 0x20) + (l >> 3);
+        return VideoMemory.PIXEL_MEM_SIZE + xy;
     }
 
     private void print_8x8_BE7F(int a, int bc, DataBlock font) {
@@ -377,7 +376,7 @@ public class Game implements Runnable {
                     int bufByteLeft = shadowMemory.getByteAt(bc+i);
                     int bufByteRight = shadowMemory.getByteAt(bc+i+1);
                     shadowMemory.setByteAt(bc+i, sprite.applyToByteLeft(bufByteLeft, de+i, xOffset));
-                    if(((bc - shadowMemory.start) & 0x001F)!=0x001F)
+                    if((bc & 0x001F)!=0x001F)
                         shadowMemory.setByteAt(bc+i+1, sprite.applyToByteRight(bufByteRight, de+i, xOffset));
                 }
                 bc += 0x20;
@@ -404,8 +403,8 @@ public class Game implements Runnable {
         int bytesX = VideoMemory.WIDTH / 8;
         for(int bufferY = 0; bufferY<VideoMemory.HEIGHT; bufferY++) {
             int screenY = ((bufferY & 0b111) <<3) + ((bufferY & 0b111000) >> 3) + (bufferY & 0b11000000);
-            int screenBase = screenY * bytesX + mainMemory.start;
-            int bufferBase = (VideoMemory.HEIGHT - bufferY -1) * bytesX + shadowMemory.start;
+            int screenBase = screenY * bytesX;
+            int bufferBase = (VideoMemory.HEIGHT - bufferY -1) * bytesX;
             for(int b = 0; b<VideoMemory.WIDTH / 8; b++) {
                 mainMemory.setByteAt(screenBase+b, shadowMemory.getByteAt(bufferBase+b));
                 if(clearBuffer) shadowMemory.setByteAt(bufferBase+b, 0); // wipe buffer
@@ -413,10 +412,8 @@ public class Game implements Runnable {
         }
         // wipe buffer attributes (non-existent in original game)
         if(clearBuffer) {
-            for (int attr = shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE;
-                 attr < shadowMemory.start + VideoMemory.PIXEL_MEM_SIZE + VideoMemory.HEIGHT / 8 * VideoMemory.WIDTH / 8; attr++) {
+            for (int attr = shadowMemory.attrStart; attr < shadowMemory.attrStart + VideoMemory.HEIGHT / 8 * VideoMemory.WIDTH / 8; attr++)
                 shadowMemory.setByteAt(attr, 0);
-            }
         }
     }
 
@@ -739,23 +736,23 @@ public class Game implements Runnable {
         //debugTable("Objects to draw: ", 0, objects_to_draw_CE8B.getCopy());
 
         // set attributes so the buffer contents are visible
-        for(int i=0; i < 768; i++) shadowMemory.setByteAt(i + shadowMemory.start + 0x1800, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
+        for(int i=0; i < VideoMemory.ATTR_MEM_SIZE; i++) shadowMemory.setByteAt(i + shadowMemory.attrStart, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
         shadowMemory.clearAndSetBackground(); // For testing
         list_objects_to_draw_CE62();
         calc_display_order_and_render_CEBB();
 
         // screen attribute (only main screen)
-        for(int addr = 0x5800; addr<0x5800+0x0300; addr++) mainMemory.setByteAt(addr, variables.getCurrRoomAttrib_5BAD());
+        for(int addr = mainMemory.attrStart; addr<mainMemory.endExcl; addr++) mainMemory.setByteAt(addr, variables.getCurrRoomAttrib_5BAD());
 
         display_objects_BF4E();
 
-        fill_window_C515(mainMemory, 0x5AB6, 1, 3, 0);
-        fill_window_C515(mainMemory, 0x5ABD, 1, 3, 0);
-        fill_window_C515(mainMemory, 0x5A97, 6, 4, 0x42);
+        fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 21 + 22, 1, 3, 0);
+        fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 21 + 29, 1, 3, 0);
+        fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 20 + 23, 6, 4, 0x42);
         boolean isSun = ((sun_moon_scratchpad_C44D.getGrNo()) & 1) == 0;
         int attr = isSun ? 0x46 : 0x47;
-        fill_window_C515(mainMemory, 0x5AB8, 4, 2, attr);
+        fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 21 + 24, 4, 2, attr);
 
         display_panel_D255();
         display_sun_moon_frame_C3A4();
@@ -886,7 +883,7 @@ public class Game implements Runnable {
     }
 
     private void print_days_BC66() {
-        int videoAddress = 0xD9E2; // (120, 7)
+        int videoAddress = 0x20 * 7 + 15; // (120, 7)
         print_BCD_number_BCAE(videoAddress, new int[] {variables.getDays_5BB9()});
     }
 
@@ -913,12 +910,12 @@ public class Game implements Runnable {
         sprite_scratchpad_BFDB.setPixelX(0x10);
         sprite_scratchpad_BFDB.setPixelY(0x20);
         print_sprite_D718(sprite_scratchpad_BFDB);
-        for(int i=0; i<2; i++) mainMemory.setByteAt(0x5A42+i, 0x47);
-        for(int i=0; i<4; i++) mainMemory.setByteAt(0x5A62+i, 0x47);
+        fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 18 + 2, 2, 1, 0x47);
+        fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 19 + 2, 4, 1, 0x47);
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(0xDDD7, new int[] {variables.getLives_5BBA()});
+        print_BCD_number_BCAE(0x20 * 39 + 4, new int[] {variables.getLives_5BBA()});
     }
 
     private void list_objects_to_draw_CE62() {
@@ -1064,7 +1061,7 @@ public class Game implements Runnable {
         sun_moon_scratchpad_C44D.setPixelY(sun_moon_yoff_C440.getU(hl));
         if (sunTick == 0) sun_moon_scratchpad_C44D.setPixelX(x + 1);
 
-        fill_window_C515(shadowMemory, 0xD90A, 6, 0x1F, 0);
+        fill_window_C515(shadowMemory, 23, 6, 0x1F, 0);
         print_sprite_D718(sun_moon_scratchpad_C44D);
 
         sprite_scratchpad_BFDB.setGrNo(0x5A);
@@ -2359,8 +2356,8 @@ public class Game implements Runnable {
         IO.println("cycle_colours_with_sound_C2A5");
 
         for(int d = 0; d<0x10; d++) {
-            int hl = 0x5800;
-            for (int i = 0; i < 0x0300; i++) {
+            int hl = mainMemory.attrStart;
+            for (int i = 0; i < VideoMemory.ATTR_MEM_SIZE; i++) {
                 int attr = mainMemory.getByteAt(hl);
                 int newAttr = (attr & 0xF8) + ((attr + 1) & 0x07);
                 mainMemory.setByteAt(hl, newAttr);
@@ -2824,11 +2821,11 @@ public class Game implements Runnable {
     }
 
     private void printVideoMemory() {
-        debugTable2("Video (main):", 0x4000, mainMemory.getCopy());
+        debugTable2("Video (main):", 0, mainMemory.getCopy());
     }
 
     private void printShadowMemory() {
-        debugTable2("Video (shadow):", 0x4000, shadowMemory.getCopy());
+        debugTable2("Video (shadow):", 0, shadowMemory.getCopy());
     }
 
     private void debugTable2(String title, int offset, int[] table) {

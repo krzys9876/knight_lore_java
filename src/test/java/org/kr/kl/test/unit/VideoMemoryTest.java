@@ -15,11 +15,11 @@ public class VideoMemoryTest {
     @DisplayName("Set the first bytes of pixel and attribute memory areas and test the outcome for the first 8 pixels")
     public void shouldPixelsReflectVideoMemoryLayoutWhenTopByteIsSet() {
         // given
-        VideoMemoryScreen mem = new VideoMemoryScreen(0x4000);
+        VideoMemoryScreen mem = new VideoMemoryScreen(0);
         // when
         // attribute - blue ink (001), red paper (010), brightness on, flash off
-        mem.setByteAt(mem.start+0x1800, 0b01010001);
-        mem.setByteAt(mem.start, 0b10101010);
+        mem.setByteAt(0x1800, 0b01010001);
+        mem.setByteAt(0, 0b10101010);
         int[] pixels = mem.toPixels(false);
         // then
         // testing first 8 bytes
@@ -34,16 +34,16 @@ public class VideoMemoryTest {
     @DisplayName("Set a byte somewhere in the middle of the screen (pixel and attribute memory areas) and test the outcome")
     public void shouldPixelsReflectVideoMemoryLayoutWhenMiddleByteIsSet() {
         // given
-        VideoMemoryScreen mem = new VideoMemoryScreen(0x8000);
+        VideoMemoryScreen mem = new VideoMemoryScreen(0);
         // when
         // we should set each of the three areas (8x8 pixels high each) of the screen to ensure proper logic
         // we set attribute "cells": (6,0), (8,7), (10,8), (13,15), (17,16), (31,23)
-        mem.setByteAt(mem.start+0x1800 + 6, Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
-        mem.setByteAt(mem.start+0x1800 + 8 + 7*32, Color.getAttribute(Color.MAGENTA, Color.GREEN, Color.BRIGHT, Color.NONE));
-        mem.setByteAt(mem.start+0x1800 + 10 + 8*32, Color.getAttribute(Color.CYAN, Color.YELLOW, Color.BRIGHT, Color.FLASH));
-        mem.setByteAt(mem.start+0x1800 + 13 + 15*32, Color.getAttribute(Color.WHITE, Color.BLACK, Color.BRIGHT, Color.FLASH));
-        mem.setByteAt(mem.start+0x1800 + 17 + 16*32, Color.getAttribute(Color.BLUE, Color.GREEN, Color.NONE, Color.NONE));
-        mem.setByteAt(mem.start+0x1800 + 31 + 23*32, Color.getAttribute(Color.WHITE, Color.RED, Color.NONE, Color.NONE));
+        mem.setByteAt(0x1800 + 6, Color.getAttribute(Color.BLUE, Color.RED, Color.BRIGHT, Color.NONE));
+        mem.setByteAt(0x1800 + 8 + 7*32, Color.getAttribute(Color.MAGENTA, Color.GREEN, Color.BRIGHT, Color.NONE));
+        mem.setByteAt(0x1800 + 10 + 8*32, Color.getAttribute(Color.CYAN, Color.YELLOW, Color.BRIGHT, Color.FLASH));
+        mem.setByteAt(0x1800 + 13 + 15*32, Color.getAttribute(Color.WHITE, Color.BLACK, Color.BRIGHT, Color.FLASH));
+        mem.setByteAt(0x1800 + 17 + 16*32, Color.getAttribute(Color.BLUE, Color.GREEN, Color.NONE, Color.NONE));
+        mem.setByteAt(0x1800 + 31 + 23*32, Color.getAttribute(Color.WHITE, Color.RED, Color.NONE, Color.NONE));
 
         fillOneCell(mem, 6,0);
         fillOneCell(mem, 8,7);
@@ -79,7 +79,7 @@ public class VideoMemoryTest {
     private void fillOneCell(VideoMemoryScreen mem, int x, int y) {
         // Note: the screen is divided into 3 areas, each is 8 cells high
         for(int i=0; i<8; i++) {
-            mem.setByteAt(mem.start+x + 32*8*8*(y/8) + 32*(y & 7) + 32*8 * i, (i & 1)==0 ? 0b01010101 : 0b10101010);
+            mem.setByteAt(x + 32*8*8*(y/8) + 32*(y & 7) + 32*8 * i, (i & 1)==0 ? 0b01010101 : 0b10101010);
         }
     }
 
