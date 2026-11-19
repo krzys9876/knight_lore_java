@@ -31,12 +31,8 @@ public class Game implements Runnable {
     private int sunTick = 0;
     private long tickNo = 0;
 
-    // $4000-$57FF - spectrum video memory
-    // $5800-$5AFF - spectrum attribute memory
     private final VideoMemoryScreen mainMemory;
-    // $D8F3-$F0F2 - video buffer
     private final VideoMemoryLinear shadowMemory;
-    // $5BA0-$6107 - variables
     // NOTE: variables and other memory locations are treated as ints, not bytes due to lack of unsigned byte type in java
     private final Variables variables = new Variables();
     private int gameCounter = 0;
@@ -91,12 +87,8 @@ public class Game implements Runnable {
         shadowMemory = new VideoMemoryLinear(0);
     }
 
-    public void updateMainMemory() {
-        mainPanel.setPixelData(mainMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo));
-    }
-    public void updateShadowMemory() {
-        shadowPanel.setPixelData(shadowMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo));
-    }
+    public void updateMainMemory() { mainPanel.setPixelData(mainMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo)); }
+    public void updateShadowMemory() { shadowPanel.setPixelData(shadowMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo)); }
 
     @Override
     public void run() {
@@ -219,7 +211,6 @@ public class Game implements Runnable {
         int hl2 = 0xBDAA; // menu xy
         int de2 = 0xBDBA; // menu text
         for(int de1 = 0xBDA2; de1 < 0xBDA2+8; de1++) {
-            //debugPanel2.append("menu attrib: %02x".formatted(variables.get(0x5BB6))) ;
             int x = menu_xy_BDAA.getU(hl2); // x - menu position
             int y = menu_xy_BDAA.getU(hl2+1); // y
             hl2 += 2;
@@ -258,7 +249,7 @@ public class Game implements Runnable {
         return de;
     }
 
-    private int print_text_std_font_BE45(DataBlock text, int x, int y, int de) {
+    private void print_text_std_font_BE45(DataBlock text, int x, int y, int de) {
         // h: y, l: x, de2: text address (first)
         debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de));
         int bc = calc_vidbuf_addr_D811(y, x);
@@ -267,13 +258,10 @@ public class Game implements Runnable {
         int attr = text.getU(de); // first byte is the attribute
         int hl = calc_attrib_addr_D848(y, x);
 
-        de = printText(text, de+1, bc, hl, attr);
-        return de;
+        printText(text, de+1, bc, hl, attr);
     }
 
-    private int calc_vidbuf_addr_D811(int y, int x) {
-        return (x >> 3) + y * 0x20;
-    }
+    private int calc_vidbuf_addr_D811(int y, int x) { return (x >> 3) + y * 0x20; }
 
     private int calc_attrib_addr_D848(int h, int l) {
         // h: y, l: x
@@ -285,14 +273,9 @@ public class Game implements Runnable {
     private void print_8x8_BE7F(int a, int bc, DataBlock font) {
         // a: character, bc: shadow memory address
         int ch = a & 0x7F;
-        //debugPanel1.append("print_8x8_BE7F");
         int baseChar = font.start;
-        int de2 = ch  * 8 + baseChar; // font address
-        for(int b = 8; b>0; b--) {
-            shadowMemory.setByteAt(bc, font.getU(de2));
-            de2++;
-            bc-=32;
-        }
+        int de = ch  * 8 + baseChar; // font address
+        for(int i = 0; i<8; i++) shadowMemory.setByteAt(bc - i*0x20, font.getU(de + i));
     }
 
     private void flash_menu_BD89() {
@@ -314,10 +297,7 @@ public class Game implements Runnable {
         DataBlock border_data_D2CF = InitialData.block("border_data_D2CF");
         int hl = 0xD2CF;
         // CALL $D24C x4
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, hl, border_data_D2CF); // corners
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, hl, border_data_D2CF);
-        hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, hl, border_data_D2CF);
+        for(int i=0; i<4; i++) hl = transfer_sprite_and_print_D24C(sprite_scratchpad_BFDB, hl, border_data_D2CF); // corners
         hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, hl, border_data_D2CF); // horizontal lines
         hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 8, 0, 0x18, hl, border_data_D2CF);
         hl = transfer_and_multiple_print_sprite(sprite_scratchpad_BFDB, 0, 1, 0x80, hl, border_data_D2CF); // vertical lines
@@ -334,10 +314,10 @@ public class Game implements Runnable {
     // Populate sprite metadata
     private void transfer_sprite_D237(GraphicObject o, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
-        o.setGrNo(source.getU(hl)); // sprite index
-        o.setFlags7(source.getU(hl+1)); // flags
-        o.setPixelX(source.getU(hl+2)); // pixel X
-        o.setPixelY(source.getU(hl+3)); // pixel Y
+        o.setGrNo(source.getU(hl));
+        o.setFlags7(source.getU(hl+1));
+        o.setPixelX(source.getU(hl+2));
+        o.setPixelY(source.getU(hl+3));
     }
 
     private void print_sprite_D718(GraphicObject o) {
@@ -361,7 +341,6 @@ public class Game implements Runnable {
         int bc = calc_vidbuf_addr_D811(y, x);
 
         if(xOffset == 0) {
-            //@label=loc_D76F
             o.setSpriteWidthB(sprite.width);
             for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
                 for (int i = 0; i < sprite.width; i++) shadowMemory.setByteAt(bc+i, sprite.applyToByte(shadowMemory.getByteAt(bc+i), de+i));
@@ -2858,4 +2837,3 @@ public class Game implements Runnable {
         IO.println(t.toString());
     }
 }
-
