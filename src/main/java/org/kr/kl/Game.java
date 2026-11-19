@@ -110,7 +110,7 @@ public class Game implements Runnable {
             // inventory.slots[3].set(0x65, 0x14, 0xF2, 0x6F);
             // inventory.slots[2].set(0x66, 0x14, 0xF8, 0x6F);
 
-            variables.resetGameOver();;
+            variables.resetGameOver();
             gameId = nowAsString();
             if(!keySequence.isInactive()) new File("saves/"+gameId).mkdir();
             main_AF88();
@@ -660,7 +660,6 @@ public class Game implements Runnable {
             variables.setSuppressBorder_5BB8(1);
             print_border_D296();
         }
-        // update_screen_D56F(true); // called after the routine
     }
 
     private void game_loop_AFBA() {
