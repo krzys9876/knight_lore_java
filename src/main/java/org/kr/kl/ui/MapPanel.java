@@ -27,12 +27,14 @@ public class MapPanel extends GamePanel {
             drawOne(loc.id & 0x0F, (loc.id & 0xF0) >> 4, loc.getAttr(), loc.isVisited());
             if(loc.id == currentLocId) {
                 markCurrent(currentLocId & 0x0F, (currentLocId & 0xF0) >> 4);
-                updatePreview(loc);
+                //updatePreview(loc);
             }
         }
     }
 
-    public void updatePreview(Location loc) {
+    public void updatePreview(int locId) {
+        if(locations == null || !locations.exists(locId)) return;
+        Location loc = locations.get(locId);
         int attr = loc.getAttr();
         VideoMemory memory = loc.getPreview();
         for(int a = memory.attrStart; a < memory.endExcl; a ++) memory.setByteAt(a, attr);
@@ -75,5 +77,15 @@ public class MapPanel extends GamePanel {
                 pixelData[(pixelX + j + CELL_WIDTH) + (BASE_HEIGHT - (pixelY + i)) * BASE_WIDTH] = color;
             }
         }
+    }
+
+    public void doClick(int x, int y) {
+        IO.println(String.format("Click: %d,%d", x, y));
+        if(x < MARGIN || x >= MARGIN + CELL_WIDTH * 0x10 || y < MARGIN || y >= MARGIN + CELL_HEIGHT * 0x10) return;
+        int gridX = (x - MARGIN) / CELL_WIDTH;
+        int gridY = 0x10 - 1 - (y - MARGIN) / CELL_HEIGHT;
+        IO.println(String.format("Grid:  %d,%d", gridX, gridY));
+        int locId = gridX + gridY * 0x10;
+        updatePreview(locId);
     }
 }

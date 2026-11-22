@@ -9,6 +9,8 @@ import org.kr.kl.utils.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Main {
@@ -47,6 +49,17 @@ public class Main {
         //frame.add(panel4, c);
 
         //frame.add(panel2);
+
+        screenMapPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (!SwingUtilities.isLeftMouseButton(e)) return;
+                int imgX = e.getX() * mapPanel.BASE_WIDTH  / screenMapPanel.getWidth();
+                int imgY = e.getY() * mapPanel.BASE_HEIGHT / screenMapPanel.getHeight();
+                mapPanel.doClick(imgX, imgY);
+            }
+        });
+
         JMenuBar menuBar = new JMenuBar();
         JMenu windowMenu = new JMenu("Windows");
         menuBar.add(windowMenu);

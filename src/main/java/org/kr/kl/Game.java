@@ -92,6 +92,7 @@ public class Game implements Runnable {
             update_sprite_loop_AFC7();
             displayObjects(l.getPreview());
         }
+        this.mapPanel.setLocations(locations);
         params.unfreezeSeed();
     }
 
