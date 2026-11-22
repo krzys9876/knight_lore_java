@@ -2679,8 +2679,8 @@ public class Game implements Runnable {
         }
 
         int fgnObjPos = 0;
-        while(fgnObjPos < loc.foregroundObjects.length) {
-            LocationForegroundObject fo = loc.foregroundObjects[fgnObjPos];
+        while(fgnObjPos < loc.getForegroundObjectCnt()) {
+            LocationForegroundObject fo = loc.getForegroundObject(fgnObjPos);
             int blockCnt = fo.cnt();
             int blockType = fo.grNo();
             ForegroundObject fgrObj = foregroundObjects.get(blockType);

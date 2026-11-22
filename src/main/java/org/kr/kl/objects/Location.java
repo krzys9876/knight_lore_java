@@ -2,6 +2,7 @@ package org.kr.kl.objects;
 
 import org.kr.kl.data.DataBlock;
 import org.kr.kl.data.InitialData;
+import org.kr.kl.ui.VideoMemoryLinear;
 
 public class Location {
     public static final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
@@ -10,12 +11,10 @@ public class Location {
     public final int sizeBytes;
     private final int attrOrig;
     private boolean visited = false;
-
     public final DataBlock data;
-
     private final int[] backgroundObjectId;
+    private final LocationForegroundObject[] foregroundObjects;
 
-    public LocationForegroundObject[] foregroundObjects;
 
     public Location(DataBlock data) {
         this.data = data;
@@ -66,4 +65,6 @@ public class Location {
 
     public int getBackgroundObjectId(int i) { return backgroundObjectId[i]; }
     public int getBackgroundObjectCnt() { return backgroundObjectId.length; }
+    public LocationForegroundObject getForegroundObject(int i) { return foregroundObjects[i]; }
+    public int getForegroundObjectCnt() { return foregroundObjects.length; }
 }
