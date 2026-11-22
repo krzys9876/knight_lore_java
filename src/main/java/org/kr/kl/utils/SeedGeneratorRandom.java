@@ -8,6 +8,8 @@ public class SeedGeneratorRandom implements SeedGenerator {
     private int seed2;
     private int seed3;
 
+    private boolean frozen = false;
+
     private final Random rnd;
 
     public SeedGeneratorRandom() {
@@ -37,17 +39,21 @@ public class SeedGeneratorRandom implements SeedGenerator {
     }
 
     @Override
-    public void updateSeed1() {
-        seed1 = (seed1 + seed2) & 0xFF;
-    }
+    public void updateSeed1() { if(!frozen) seed1 = (seed1 + seed2) & 0xFF; }
 
     @Override
     public void updateSeed2() {
-        seed2 = (seed2 + 1) & 0xFF;
+        if(!frozen) seed2 = (seed2 + 1) & 0xFF;
     }
 
     @Override
     public void updateSeed3() {
         seed3 = (seed3 + rnd.nextInt(0xFF+1)) & 0xFF;
     }
+
+    @Override
+    public void freeze() { frozen = true; }
+
+    @Override
+    public void unfreeze() { frozen = false; }
 }

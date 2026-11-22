@@ -6,6 +6,8 @@ public class SeedGeneratorSequential implements SeedGenerator {
     private int seed2;
     private int seed3;
 
+    private boolean frozen = false;
+
     private int seed3Index;
     private final int[] seed3Values = {
             129,71,117,255,193,59,134,168,101,193,32,12,176,119,217,7,62,30,179,90,5,56,175,254,204,214,247,15,25,56,195,
@@ -275,18 +277,22 @@ public class SeedGeneratorSequential implements SeedGenerator {
     }
 
     @Override
-    public void updateSeed1() {
-        seed1 = (seed1 + seed2) & 0xFF;
-    }
+    public void updateSeed1() { if(!frozen) seed1 = (seed1 + seed2) & 0xFF; }
 
     @Override
-    public void updateSeed2() {
-        seed2 = (seed2 + 1) & 0xFF;
-    }
+    public void updateSeed2() { if(!frozen) seed2 = (seed2 + 1) & 0xFF; }
 
     @Override
     public void updateSeed3() {
-        seed3 = seed3Values[seed3Index];
-        seed3Index = (seed3Index+1) % seed3Values.length;
+        if(!frozen) {
+            seed3 = seed3Values[seed3Index];
+            seed3Index = (seed3Index+1) % seed3Values.length;
+        }
     }
+
+    @Override
+    public void freeze() { frozen = true; }
+
+    @Override
+    public void unfreeze() { frozen = false; }
 }

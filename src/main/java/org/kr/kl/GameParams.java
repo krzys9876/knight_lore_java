@@ -52,4 +52,7 @@ public class GameParams {
 
     public long getTickLimit() { return tickLimit; }
     public void setTickLimit(long tickLinit) { this.tickLimit = tickLinit; }
+
+    public void freezeSeed() { rnd.freeze(); }
+    public void unfreezeSeed() { rnd.unfreeze(); }
 }

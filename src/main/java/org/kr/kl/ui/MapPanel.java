@@ -9,17 +9,35 @@ public class MapPanel extends GamePanel {
     private final int CELL_WIDTH = BASE_WIDTH / 0x10;
     private final int CELL_HEIGHT = BASE_HEIGHT / 0x10;
     private static final int MARGIN = 5;
+    private final GamePanel previewPanel;
+    private Locations locations;
 
-    public MapPanel() {
+    public MapPanel(GamePanel previewPanel) {
         super(256 + 2 * MARGIN, 256 + 2 * MARGIN);
+        this.previewPanel = previewPanel;
     }
+
+    public void setLocations(Locations locations) { this.locations = locations; }
 
     public void drawMap(Locations locations, int currentLocId) {
         clear();
+        if(locations == null) return;
+
         for(Location loc : locations.locations) {
             drawOne(loc.id & 0x0F, (loc.id & 0xF0) >> 4, loc.getAttr(), loc.isVisited());
+            if(loc.id == currentLocId) {
+                markCurrent(currentLocId & 0x0F, (currentLocId & 0xF0) >> 4);
+                updatePreview(loc);
+            }
         }
-        markCurrent(currentLocId & 0x0F, (currentLocId & 0xF0) >> 4);
+    }
+
+    public void updatePreview(Location loc) {
+        int attr = loc.getAttr();
+        VideoMemory memory = loc.getPreview();
+        for(int a = memory.attrStart; a < memory.endExcl; a ++) memory.setByteAt(a, attr);
+        int[] pixels = loc.getPreview().toPixels(false);
+        previewPanel.setPixelData(pixels);
     }
 
     public void clear() {

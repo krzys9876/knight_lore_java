@@ -12,8 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 public class GamePanel {
-    final int BASE_WIDTH;
-    final int BASE_HEIGHT;
+    public final int BASE_WIDTH;
+    public final int BASE_HEIGHT;
     protected int[] pixelData;
     BufferedImage image;
     protected Runnable repaintAction = () -> {};

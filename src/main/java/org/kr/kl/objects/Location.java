@@ -2,6 +2,7 @@ package org.kr.kl.objects;
 
 import org.kr.kl.data.DataBlock;
 import org.kr.kl.data.InitialData;
+import org.kr.kl.ui.VideoMemory;
 import org.kr.kl.ui.VideoMemoryLinear;
 
 public class Location {
@@ -14,6 +15,7 @@ public class Location {
     public final DataBlock data;
     private final int[] backgroundObjectId;
     private final LocationForegroundObject[] foregroundObjects;
+    private final VideoMemoryLinear preview = new VideoMemoryLinear();
 
 
     public Location(DataBlock data) {
@@ -67,4 +69,6 @@ public class Location {
     public int getBackgroundObjectCnt() { return backgroundObjectId.length; }
     public LocationForegroundObject getForegroundObject(int i) { return foregroundObjects[i]; }
     public int getForegroundObjectCnt() { return foregroundObjects.length; }
+
+    public VideoMemory getPreview() { return preview; }
 }

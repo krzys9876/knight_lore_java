@@ -36,7 +36,7 @@ public class GameReplayTest {
         KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY);
         GamePanel panel1 = new GamePanel();
         GamePanel panel2 = new GamePanel();
-        MapPanel panel3 = new MapPanel();
+        MapPanel panel3 = new MapPanel(new GamePanel());
         DebugPanel debugPanel1 = new TestDebugPanel();
         DebugPanel debugPanel2 = new TestDebugPanel();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();

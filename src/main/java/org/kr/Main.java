@@ -19,7 +19,9 @@ public class Main {
         ScreenPanel screenGamePanel = new ScreenPanel(gamePanel);
         GamePanel shadowPanel = new GamePanel();
         ScreenPanel screenShadowPanel = new ScreenPanel(shadowPanel);
-        MapPanel mapPanel = new MapPanel();
+        GamePanel previewPanel = new GamePanel();
+        ScreenPanel screenPreviewPanel = new ScreenPanel(previewPanel);
+        MapPanel mapPanel = new MapPanel(previewPanel);
         ScreenPanel screenMapPanel = new ScreenPanel(mapPanel);
         ScreenDebugPanel debugPanel1 = new ScreenDebugPanel();
         ScreenDebugPanel debugPanel2 = new ScreenDebugPanel();
@@ -50,7 +52,8 @@ public class Main {
         menuBar.add(windowMenu);
         frame.setJMenuBar(menuBar);
 
-        ToolWindow.addToggleWindow(frame, windowMenu, "Map", screenMapPanel, new Dimension(256, 256), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Map", screenMapPanel, new Dimension(mapPanel.BASE_WIDTH, mapPanel.BASE_HEIGHT), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Preview", screenPreviewPanel, new Dimension(previewPanel.BASE_WIDTH, previewPanel.BASE_HEIGHT), null);
         ToolWindow.addToggleWindow(frame, windowMenu, "Debug (1)", debugPanel1, new Dimension(250, 750), null);
         ToolWindow.addToggleWindow(frame, windowMenu, "Debug (2)", debugPanel2, new Dimension(350, 500), null);
         ToolWindow.addToggleWindow(frame, windowMenu, "Shadow memory view", screenShadowPanel, new Dimension(400, 300), null);

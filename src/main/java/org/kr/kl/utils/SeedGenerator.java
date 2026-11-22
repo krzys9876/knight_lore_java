@@ -8,4 +8,7 @@ public interface SeedGenerator {
     void updateSeed1();
     void updateSeed2();
     void updateSeed3();
+
+    void freeze();
+    void unfreeze();
 }

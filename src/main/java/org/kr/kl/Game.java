@@ -85,6 +85,14 @@ public class Game implements Runnable {
 
         mainMemory = new VideoMemoryScreen();
         shadowMemory = new VideoMemoryLinear();
+
+        params.freezeSeed();
+        for(Location l: locations.locations) {
+            retrieve_screen_D3C6(l.id);
+            update_sprite_loop_AFC7();
+            displayObjects(l.getPreview());
+        }
+        params.unfreezeSeed();
     }
 
     public void updateMainMemory() { mainPanel.setPixelData(mainMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo)); }
@@ -2611,7 +2619,7 @@ public class Game implements Runnable {
         // update special objects if not the first screen of the game
         if(!variables.isGameStart_5BB2()) update_special_objs_C591();
         shadowMemory.clearAndSetBackground();
-        retrieve_screen_D3C6();
+        retrieve_screen_D3C6(graphicObjects.playerBottom().getScreen());
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();
 
@@ -2650,9 +2658,7 @@ public class Game implements Runnable {
         }
     }
 
-    private void retrieve_screen_D3C6() {
-        int currLocId = graphicObjects.playerBottom().getScreen();
-
+    private void retrieve_screen_D3C6(int currLocId) {
         Location loc = locations.get(currLocId);
         int roomId = loc.id;
         debugPanel2.append("Retrieved room: %d / %02x".formatted(roomId,roomId));
