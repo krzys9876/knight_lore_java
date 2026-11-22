@@ -307,7 +307,7 @@ public class Game implements Runnable {
     private int transfer_sprite_and_print_D24C(GraphicObject o, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         transfer_sprite_D237(o, hl, source);
-        print_sprite_D718(o);
+        print_sprite_D718(shadowMemory, o);
         return hl+4;
     }
 
@@ -320,7 +320,7 @@ public class Game implements Runnable {
         o.setPixelY(source.getU(hl+3));
     }
 
-    private void print_sprite_D718(GraphicObject o) {
+    private void print_sprite_D718(VideoMemory v, GraphicObject o) {
         Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(o);
         if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
         Sprite sprite = spriteO.get();
@@ -343,7 +343,7 @@ public class Game implements Runnable {
         if(xOffset == 0) {
             o.setSpriteWidthB(sprite.width);
             for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
-                for (int i = 0; i < sprite.width; i++) shadowMemory.setByteAt(bc+i, sprite.applyToByte(shadowMemory.getByteAt(bc+i), de+i));
+                for (int i = 0; i < sprite.width; i++) v.setByteAt(bc+i, sprite.applyToByte(v.getByteAt(bc+i), de+i));
                 bc += 0x20;
                 de += sprite.width;
             }
@@ -352,11 +352,11 @@ public class Game implements Runnable {
             for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
                 // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
                 for (int i = 0; i < sprite.width; i++) {
-                    int bufByteLeft = shadowMemory.getByteAt(bc+i);
-                    int bufByteRight = shadowMemory.getByteAt(bc+i+1);
-                    shadowMemory.setByteAt(bc+i, sprite.applyToByteLeft(bufByteLeft, de+i, xOffset));
+                    int bufByteLeft = v.getByteAt(bc+i);
+                    int bufByteRight = v.getByteAt(bc+i+1);
+                    v.setByteAt(bc+i, sprite.applyToByteLeft(bufByteLeft, de+i, xOffset));
                     if((bc & 0x001F)!=0x001F)
-                        shadowMemory.setByteAt(bc+i+1, sprite.applyToByteRight(bufByteRight, de+i, xOffset));
+                        v.setByteAt(bc+i+1, sprite.applyToByteRight(bufByteRight, de+i, xOffset));
                 }
                 bc += 0x20;
                 de += sprite.width;
@@ -371,7 +371,7 @@ public class Game implements Runnable {
 
     private int multiple_print_sprite_BEE4(GraphicObject o, int dx, int dy, int times, int hl) {
         for(int i=0; i<times; i++) {
-            print_sprite_D718(o);
+            print_sprite_D718(shadowMemory, o);
             o.setPixelX(o.getPixelX() + dx);
             o.setPixelY(o.getPixelY() + dy);
         }
@@ -704,6 +704,12 @@ public class Game implements Runnable {
         }
     }
 
+    private void displayObjects(VideoMemory v) {
+        v.clearAndSetBackground(); // For testing
+        list_objects_to_draw_CE62();
+        calc_display_order_and_render_CEBB(v);
+    }
+
     private boolean onscreen_loop_AFBD() {
         params.getRnd().updateSeed2();
         update_sprite_loop_AFC7();
@@ -716,9 +722,7 @@ public class Game implements Runnable {
         // set attributes so the buffer contents are visible
         for(int i=0; i < VideoMemory.ATTR_MEM_SIZE; i++) shadowMemory.setByteAt(i + shadowMemory.attrStart, Color.getAttribute(Color.WHITE, Color.BLUE, Color.NONE, Color.NONE));
 
-        shadowMemory.clearAndSetBackground(); // For testing
-        list_objects_to_draw_CE62();
-        calc_display_order_and_render_CEBB();
+        displayObjects(shadowMemory);
 
         // screen attribute (only main screen)
         for(int addr = mainMemory.attrStart; addr<mainMemory.endExcl; addr++) mainMemory.setByteAt(addr, variables.getCurrRoomAttrib_5BAD());
@@ -853,7 +857,7 @@ public class Game implements Runnable {
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
                 int spriteIndex = slot.getGrNo();
                 sprite_scratchpad_BFDB.setGrNo(spriteIndex);
-                print_sprite_D718(sprite_scratchpad_BFDB);
+                print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
                 hl = calc_attrib_addr_D848(y + 0x17, x);
                 fill_window_C515(mainMemory, hl, 3, 3, specialObjects.getAttr(spriteIndex));
             }
@@ -887,7 +891,7 @@ public class Game implements Runnable {
         sprite_scratchpad_BFDB.setFlags7(0);
         sprite_scratchpad_BFDB.setPixelX(0x10);
         sprite_scratchpad_BFDB.setPixelY(0x20);
-        print_sprite_D718(sprite_scratchpad_BFDB);
+        print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
         fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 18 + 2, 2, 1, 0x47);
         fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 19 + 2, 4, 1, 0x47);
     }
@@ -908,7 +912,7 @@ public class Game implements Runnable {
         objects_to_draw_CE8B.set(toDrawPos, 0xFF); //flag end of list
     }
 
-    private void calc_display_order_and_render_CEBB() {
+    private void calc_display_order_and_render_CEBB(VideoMemory v) {
         int renderedCnt = 0; // rendered objects cnt
         int de1 = objects_to_draw_CE8B.start;
         int i = de1;
@@ -921,7 +925,7 @@ public class Game implements Runnable {
                 boolean isLast = renderedCnt >= cntToRender-1;
                 // if only one object remains, we should render it and exit
                 if(isLast) {
-                    renderOne(de1, renderList);
+                    renderOne(v, de1, renderList);
                     renderedCnt++;
                 } else {
                     int de2 = objects_to_draw_CE8B.start;
@@ -953,7 +957,7 @@ public class Game implements Runnable {
                             is2behind1 |= is2behind1(relativePosition);
                             if (is2behind1) {
                                 if (renderList.contains(objects_to_draw_CE8B.getU(de2))) {
-                                    renderOne(de2, renderList);
+                                    renderOne(v, de2, renderList);
                                     renderedCnt++;
                                     rendered = true;
                                 } else {
@@ -973,7 +977,7 @@ public class Game implements Runnable {
                     else {
                         // render if nothing changed since last iteration (either stack is empty or last added object is the analyzed object
                         if (renderList.isEmpty() || renderList.isLast(objects_to_draw_CE8B.getU(de1))) {
-                            renderOne(de1, renderList);
+                            renderOne(v, de1, renderList);
                             renderedCnt++;
                         }
                         de1++;
@@ -985,9 +989,9 @@ public class Game implements Runnable {
         }
     }
 
-    private void renderOne(int de, RenderStack renderList) {
+    private void renderOne(VideoMemory v, int de, RenderStack renderList) {
         GraphicObject o = graphicObjects.o(objects_to_draw_CE8B.getU(de));
-        if(calc_pixel_XY_D6C9(o)) print_sprite_D718(o);
+        if(calc_pixel_XY_D6C9(o)) print_sprite_D718(v, o);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
         renderList.reset();
     }
@@ -1040,16 +1044,16 @@ public class Game implements Runnable {
         if (sunTick == 0) sun_moon_scratchpad_C44D.setPixelX(x + 1);
 
         fill_window_C515(shadowMemory, 23, 6, 0x1F, 0);
-        print_sprite_D718(sun_moon_scratchpad_C44D);
+        print_sprite_D718(shadowMemory, sun_moon_scratchpad_C44D);
 
         sprite_scratchpad_BFDB.setGrNo(0x5A);
         sprite_scratchpad_BFDB.setFlags7(0);
         sprite_scratchpad_BFDB.setPixelX(0xB8);
         sprite_scratchpad_BFDB.setPixelY(0);
-        print_sprite_D718(sprite_scratchpad_BFDB);
+        print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
         sprite_scratchpad_BFDB.setPixelX(0xD0);
         sprite_scratchpad_BFDB.setGrNo(0xBA);
-        print_sprite_D718(sprite_scratchpad_BFDB);
+        print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
     }
 
     // ; Input:HL starting location B  width (bytes) C  height (lines), A - value
