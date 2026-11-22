@@ -2612,7 +2612,6 @@ public class Game implements Runnable {
         if(!variables.isGameStart_5BB2()) update_special_objs_C591();
         shadowMemory.clearAndSetBackground();
         retrieve_screen_D3C6();
-        mapPanel.drawMap(locations, graphicObjects.playerBottom().getScreen());
         find_special_objs_here_C525();
         adjust_plyr_xyz_for_room_size_D320();
 
@@ -2626,6 +2625,7 @@ public class Game implements Runnable {
         variables.setDisableSpikeBallDrop_5BC0(graphicObjects.playerBottom().isOddRoom());
 
         locations.get(graphicObjects.playerBottom().getScreen()).setVisited();
+        mapPanel.drawMap(locations, graphicObjects.playerBottom().getScreen());
     }
 
     private void update_special_objs_C591() {

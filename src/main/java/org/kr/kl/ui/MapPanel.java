@@ -17,7 +17,7 @@ public class MapPanel extends GamePanel {
     public void drawMap(Locations locations, int currentLocId) {
         clear();
         for(Location loc : locations.locations) {
-            drawOne(loc.id & 0x0F, (loc.id & 0xF0) >> 4, loc.getAttr());
+            drawOne(loc.id & 0x0F, (loc.id & 0xF0) >> 4, loc.getAttr(), loc.isVisited());
         }
         markCurrent(currentLocId & 0x0F, (currentLocId & 0xF0) >> 4);
     }
@@ -28,10 +28,10 @@ public class MapPanel extends GamePanel {
         repaintAction.run();
     }
 
-    private void drawOne(int cellX, int cellY, int color) {
+    private void drawOne(int cellX, int cellY, int color, boolean isVisited) {
         int pixelX = cellX * CELL_WIDTH + MARGIN;
         int pixelY = cellY * CELL_HEIGHT + MARGIN;
-        int screenColor = Color.getScreenColor(color, true);
+        int screenColor = Color.getScreenColor(color, !isVisited);
         for(int x = 1; x < CELL_WIDTH - 1; x++) {
             for(int y = 1; y < CELL_HEIGHT - 1; y++) {
                 pixelData[(pixelX + x) + (BASE_HEIGHT - (pixelY + y)) * BASE_WIDTH] = screenColor;
