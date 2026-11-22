@@ -2667,9 +2667,9 @@ public class Game implements Runnable {
         // hl - iterates over room background objects (until end of room data or 0xFF separator)
         int targetPos = graphicObjects.firstBackgroundObject;
         int bkObjPos = 0;
-        while(bkObjPos < loc.backgroundObjectId.length) {
-            BackgroundObject bkgObj = backgroundObjects.get(loc.backgroundObjectId[bkObjPos]);
-            debugPanel2.append("Retrieved background object: %02x".formatted(loc.backgroundObjectId[bkObjPos]));
+        while(bkObjPos < loc.getBackgroundObjectCnt()) {
+            BackgroundObject bkgObj = backgroundObjects.get(loc.getBackgroundObjectId(bkObjPos));
+            debugPanel2.append("Retrieved background object: %02x".formatted(loc.getBackgroundObjectId(bkObjPos)));
             for (int spriteNum = 0; spriteNum < bkgObj.size(); spriteNum++) {
                 graphicObjects.o(targetPos).initFrom(bkgObj.s(spriteNum), currLocId);
                 debugPanel2.append("Retrieved sprite: %02x".formatted(bkgObj.s(spriteNum).grNo()));

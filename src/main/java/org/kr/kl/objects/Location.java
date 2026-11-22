@@ -13,7 +13,7 @@ public class Location {
 
     public final DataBlock data;
 
-    public int[] backgroundObjectId;
+    private int[] backgroundObjectId;
 
     public LocationForegroundObject[] foregroundObjects;
 
@@ -63,4 +63,7 @@ public class Location {
     public void setVisited() { visited = true; }
     public void resetVisited() { visited = false; }
     public boolean isVisited() { return visited; }
+
+    public int getBackgroundObjectId(int i) { return backgroundObjectId[i]; }
+    public int getBackgroundObjectCnt() { return backgroundObjectId.length; }
 }
