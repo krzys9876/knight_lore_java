@@ -5,8 +5,8 @@ package org.kr.kl.ui;
  */
 
 public class VideoMemoryLinear extends VideoMemory {
-    public VideoMemoryLinear(int start) {
-        super(start);
+    public VideoMemoryLinear() {
+        super();
     }
 
     @Override

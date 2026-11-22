@@ -15,7 +15,7 @@ public abstract class VideoMemory {
     public final int attrStart;
     public final int endExcl;
 
-    public VideoMemory(int start) {
+    public VideoMemory() {
         this.attrStart = PIXEL_MEM_SIZE;
         this.endExcl = this.attrStart + ATTR_MEM_SIZE;
     }

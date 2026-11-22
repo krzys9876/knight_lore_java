@@ -4,8 +4,8 @@ package org.kr.kl.ui;
  * Follows ZX Spectrum screen layout
  */
 public class VideoMemoryScreen extends VideoMemory {
-    public VideoMemoryScreen(int start) {
-        super(start);
+    public VideoMemoryScreen() {
+        super();
     }
 
     @Override

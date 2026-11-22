@@ -83,8 +83,8 @@ public class Game implements Runnable {
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
 
-        mainMemory = new VideoMemoryScreen(0);
-        shadowMemory = new VideoMemoryLinear(0);
+        mainMemory = new VideoMemoryScreen();
+        shadowMemory = new VideoMemoryLinear();
     }
 
     public void updateMainMemory() { mainPanel.setPixelData(mainMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo)); }
