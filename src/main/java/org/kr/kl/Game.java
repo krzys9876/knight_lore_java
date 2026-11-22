@@ -132,7 +132,7 @@ public class Game implements Runnable {
 
         variables.setGameStart_5BB2();
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
-        variables.setLives_5BBA(byteToBCD(params.getInitialLives()+1)); // NOTE: the game starts with lose life
+        variables.setLives_5BBA(params.getInitialLives()+1); // NOTE: the game starts with lose life
         params.getRnd().updateSeed1();
         clear_scrn_D55F();
         do_menu_selection_BD0C();
@@ -553,14 +553,14 @@ public class Game implements Runnable {
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
         int days = variables.getDays_5BB9();
         if(days > byteToBCD(params.getMaxDays())) days --; // game over due to timeout
-        int daysAddr = 0xE8E2;
+        int daysAddr = 15 + 127 * 0x20; // (x,y)=(120, 127)
         if(days < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, days);
         else print_BCD_number_BCAE(daysAddr, new int[] { days });
         calc_and_display_percent_BC10();
 
         int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int objBCD = byteToBCD(objectsInCauldron);
-        int objAddr = 0xE2EA;
+        int objAddr = 23 + 79 * 0x20; // (x,y)=(184, 79)
         if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
         else print_BCD_number_BCAE(objAddr, new int[] { objBCD });
 
@@ -595,7 +595,7 @@ public class Game implements Runnable {
         int objInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
-        int percentAddr = 0xE4E6;
+        int percentAddr = 19 + 95 * 0x20; // (x,y)=(152, 95)
         int percentBCD = byteToBCD(percent);
         if(percentBCD < 0x10) {
             print_BCD_lsd_BCC0(percentAddr + 1, percentBCD);
@@ -906,7 +906,7 @@ public class Game implements Runnable {
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(0x20 * 39 + 4, new int[] {variables.getLives_5BBA()});
+        print_BCD_number_BCAE(0x20 * 39 + 4, new int[] { byteToBCD(variables.getLives_5BBA()) });
     }
 
     private void list_objects_to_draw_CE62() {
