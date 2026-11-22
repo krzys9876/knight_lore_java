@@ -13,7 +13,7 @@ public class Location {
 
     public final DataBlock data;
 
-    private int[] backgroundObjectId;
+    private final int[] backgroundObjectId;
 
     public LocationForegroundObject[] foregroundObjects;
 
