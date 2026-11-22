@@ -9,6 +9,8 @@ public class Location {
     public static final DataBlock room_size_tbl_6248 = InitialData.block("room_size_tbl_6248");
 
     public final int id;
+    public final int x;
+    public final int y;
     public final int sizeBytes;
     private final int attrOrig;
     private boolean visited = false;
@@ -22,6 +24,8 @@ public class Location {
         this.data = data;
 
         id = this.data.getU(this.data.start);
+        x = xFromId(id);
+        y = yFromId(id);
         sizeBytes = this.data.getU(this.data.start+1);
         attrOrig = this.data.getU(this.data.start+2);
         int bkObjStart = this.data.start + 3;
@@ -50,6 +54,10 @@ public class Location {
             fgnObjPos+= blockCnt + 1;
         }
     }
+
+    public static int xFromId(int id) { return id & 0x0F; }
+    public static int yFromId(int id) { return (id & 0xF0) >> 4; }
+    public static int xyToId(int x, int y) { return x + (y << 4); }
 
     private static int getBlockCnt(int blockCtrl) { return (blockCtrl & 0x07) + 1; }
     private static int getBlockType(int blockCtrl) { return (blockCtrl >> 3) & 0x1F; }

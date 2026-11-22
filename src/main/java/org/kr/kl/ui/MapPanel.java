@@ -6,14 +6,17 @@ import org.kr.kl.objects.Locations;
 import java.util.Arrays;
 
 public class MapPanel extends GamePanel {
-    private final int CELL_WIDTH = BASE_WIDTH / 0x10;
-    private final int CELL_HEIGHT = BASE_HEIGHT / 0x10;
-    private static final int MARGIN = 5;
+    private static final int ROW_COL = 0x10;
+    private static final int CELL_WIDTH = 25;
+    private static final int CELL_HEIGHT = 20;
+    private static final int MARGIN = 15;
     private final GamePanel previewPanel;
     private Locations locations;
+    private int selectedId = -1;
+    private int currentId = -1;
 
     public MapPanel(GamePanel previewPanel) {
-        super(256 + 2 * MARGIN, 256 + 2 * MARGIN);
+        super(ROW_COL * CELL_WIDTH + 2 * MARGIN, ROW_COL * CELL_HEIGHT + 2 * MARGIN);
         this.previewPanel = previewPanel;
     }
 
@@ -21,18 +24,18 @@ public class MapPanel extends GamePanel {
 
     public void drawMap(Locations locations, int currentLocId) {
         clear();
+        currentId = currentLocId;
         if(locations == null) return;
 
-        for(Location loc : locations.locations) {
-            drawOne(loc.id & 0x0F, (loc.id & 0xF0) >> 4, loc.getAttr(), loc.isVisited());
-            if(loc.id == currentLocId) {
-                markCurrent(currentLocId & 0x0F, (currentLocId & 0xF0) >> 4);
-                //updatePreview(loc);
-            }
-        }
+        for(Location loc : locations.locations) drawOne(loc.x, loc.y, loc.getAttr(), loc.isVisited());
+        if(selectedId == -1) updatePreview(currentLocId);
+        markSelected();
+        markCurrent();
+        repaint();
     }
 
     public void updatePreview(int locId) {
+        selectedId = locId;
         if(locations == null || !locations.exists(locId)) return;
         Location loc = locations.get(locId);
         int attr = loc.getAttr();
@@ -42,10 +45,14 @@ public class MapPanel extends GamePanel {
         previewPanel.setPixelData(pixels);
     }
 
-    public void clear() {
-        Arrays.fill(pixelData, 0);
+    private void repaint() {
         preparePixels();
         repaintAction.run();
+    }
+
+    public void clear() {
+        Arrays.fill(pixelData, 0);
+        repaint();
     }
 
     private void drawOne(int cellX, int cellY, int color, boolean isVisited) {
@@ -57,14 +64,29 @@ public class MapPanel extends GamePanel {
                 pixelData[(pixelX + x) + (BASE_HEIGHT - (pixelY + y)) * BASE_WIDTH] = screenColor;
             }
         }
-        preparePixels();
-        repaintAction.run();
+        repaint();
     }
 
-    private void markCurrent(int cellX, int cellY) {
+    private void markCurrent() {
+        if(currentId == -1) return;
+        mark(currentId, Color.getScreenColor(Color.WHITE, true));
+    }
+
+    private void markSelected() {
+        if(selectedId == -1) return;
+        mark(selectedId, Color.getScreenColor(Color.RED, true));
+    }
+
+    private void unmarkSelected() {
+        if(selectedId == -1) return;
+        mark(selectedId, Color.getScreenColor(Color.BLACK, false));
+    }
+
+    private void mark(int id, int color) {
+        int cellX = Location.xFromId(id);
+        int cellY = Location.yFromId(id);
         int pixelX = cellX * CELL_WIDTH + MARGIN;
         int pixelY = cellY * CELL_HEIGHT + MARGIN;
-        int color = Color.getScreenColor(Color.WHITE, true);
         for(int i=-1; i<CELL_WIDTH+1; i++) {
             for(int j=-1; j<1; j++) {
                 pixelData[(pixelX + i) + (BASE_HEIGHT - (pixelY + j)) * BASE_WIDTH] = color;
@@ -81,11 +103,15 @@ public class MapPanel extends GamePanel {
 
     public void doClick(int x, int y) {
         IO.println(String.format("Click: %d,%d", x, y));
-        if(x < MARGIN || x >= MARGIN + CELL_WIDTH * 0x10 || y < MARGIN || y >= MARGIN + CELL_HEIGHT * 0x10) return;
+        if(x < MARGIN || x >= MARGIN + CELL_WIDTH * ROW_COL || y < MARGIN || y >= MARGIN + CELL_HEIGHT * ROW_COL) return;
         int gridX = (x - MARGIN) / CELL_WIDTH;
-        int gridY = 0x10 - 1 - (y - MARGIN) / CELL_HEIGHT;
+        int gridY = ROW_COL - 1 - (y - MARGIN) / CELL_HEIGHT;
         IO.println(String.format("Grid:  %d,%d", gridX, gridY));
-        int locId = gridX + gridY * 0x10;
+        int locId = Location.xyToId(gridX, gridY);
+        unmarkSelected();
         updatePreview(locId);
+        markSelected();
+        markCurrent();
+        repaint();
     }
 }
