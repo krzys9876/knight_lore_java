@@ -67,6 +67,10 @@ The plan is to refactor the game so the code looks like proper Java.
 
 ## Version history ##
 
+### 0.6 ###
+
+Add floating windows with room preview after clicking on the map
+
 ### 0.5 ###
 
 Add floating windows with game map, debug info and shadow memory (if you are interested in it) 
