@@ -247,7 +247,7 @@ public class Game implements Runnable {
     private int printText(DataBlock text, int de, int bc, int hl, int attr) {
         boolean textDone = false;
         while(!textDone) {
-            print_8x8_BE7F(text.getU(de), bc, font_6108);
+            shadowMemory.printCharacter(text.getU(de), bc, font_6108);
             mainMemory.setByteAt(hl, attr); // Color.getAttribute(Color.WHITE, Color.GREEN, Color.NONE, Color.NONE));
             shadowMemory.setByteAt(hl, attr);
             textDone = (text.getU(de) & 0x80) > 0;
@@ -277,14 +277,6 @@ public class Game implements Runnable {
         int y = (h ^ 0xFF) >> 3;
         int xy = ((y - 8) * 0x20) + (l >> 3);
         return VideoMemory.PIXEL_MEM_SIZE + xy;
-    }
-
-    private void print_8x8_BE7F(int a, int bc, DataBlock font) {
-        // a: character, bc: shadow memory address
-        int ch = a & 0x7F;
-        int baseChar = font.start;
-        int de = ch  * 8 + baseChar; // font address
-        for(int i = 0; i<8; i++) shadowMemory.setByteAt(bc - i*0x20, font.getU(de + i));
     }
 
     private void flash_menu_BD89() {
@@ -555,15 +547,15 @@ public class Game implements Runnable {
         if(days > params.getMaxDays()) days --; // game over due to timeout
         int daysAddr = 15 + 127 * 0x20; // (x,y)=(120, 127)
         int daysBCD = byteToBCD(days);
-        if(daysBCD < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, daysBCD);
-        else print_BCD_number_BCAE(daysAddr, daysBCD);
+        if(daysBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, + 1, daysBCD);
+        else print_BCD_number_BCAE(shadowMemory, daysAddr, daysBCD);
         calc_and_display_percent_BC10();
 
         int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int objAddr = 23 + 79 * 0x20; // (x,y)=(184, 79)
         int objBCD = byteToBCD(objectsInCauldron);
-        if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
-        else print_BCD_number_BCAE(objAddr, objBCD);
+        if(objBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, + 1, objBCD);
+        else print_BCD_number_BCAE(shadowMemory, objAddr, objBCD);
 
         int screens = locations.countVisited();
         int allObjInCauldron = variables.getAllObjectsInCauldron_5BC3();
@@ -599,11 +591,11 @@ public class Game implements Runnable {
         int percentAddr = 19 + 95 * 0x20; // (x,y)=(152, 95)
         int percentBCD = byteToBCD(percent);
         if(percentBCD < 0x10) {
-            print_BCD_lsd_BCC0(percentAddr + 1, percentBCD);
+            print_BCD_lsd_BCC0(shadowMemory, + 1, percentBCD);
         } else {
-            print_BCD_number_BCAE(percentAddr, percentBCD);
+            print_BCD_number_BCAE(shadowMemory, percentAddr, percentBCD);
             if(percentBCD >= 0x100) {
-                print_BCD_lsd_BCC0(percentAddr - 1, (percentBCD >> 8) & 0x0F);
+                print_BCD_lsd_BCC0(shadowMemory, - 1, (percentBCD >> 8) & 0x0F);
             }
         }
     }
@@ -845,7 +837,7 @@ public class Game implements Runnable {
 
         boolean textDone = false;
         while(!textDone) {
-            print_8x8_BE7F(day_txt_BCE7.getU(de), videoAddr, day_font_BCEC);
+            shadowMemory.printCharacter(day_txt_BCE7.getU(de), videoAddr, day_font_BCEC);
             mainMemory.setByteAt(attrAddr, attr);
             //shadowMemory.setByteAt(attrAddr-mainMemory.start+shadowMemory.start, attr);
             textDone = (day_txt_BCE7.getU(de) & 0x80) > 0;
@@ -876,21 +868,20 @@ public class Game implements Runnable {
 
     private void print_days_BC66() {
         int videoAddress = 0x20 * 7 + 15; // (120, 7)
-        print_BCD_number_BCAE(videoAddress, byteToBCD(variables.getDays_5BB9()));
+        print_BCD_number_BCAE(shadowMemory, videoAddress, byteToBCD(variables.getDays_5BB9()));
     }
 
-    private void print_BCD_number_BCAE(int bc, int value) {
+    private void print_BCD_number_BCAE(VideoMemory v, int bc, int value) {
         // NOTE: we assume that the number is already in BCD
         int digitH = (value >> 4) & 0x0F;
         int digitL = value & 0x0F;
-        print_8x8_BE7F(digitH, bc, font_6108);
-        print_8x8_BE7F(digitL, bc+1, font_6108);
+        v.printCharacter(digitH, bc, font_6108);
+        v.printCharacter(digitL, bc+1, font_6108);
     }
 
-    private void print_BCD_lsd_BCC0(int bc, int value) {
+    private void print_BCD_lsd_BCC0(VideoMemory v, int bc, int value) {
         int digitL = value & 0x0F;
-        print_8x8_BE7F(digitL, bc, font_6108);
-        //mainMemory.setByteAt(0x5AEF, 0x47);
+        v.printCharacter(digitL, bc, font_6108);
     }
 
     private void print_lives_gfx_BC7A() {
@@ -905,7 +896,7 @@ public class Game implements Runnable {
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(0x20 * 39 + 4, byteToBCD(variables.getLives_5BBA()));
+        print_BCD_number_BCAE(shadowMemory, 0x20 * 39 + 4, byteToBCD(variables.getLives_5BBA()));
     }
 
     private void list_objects_to_draw_CE62() {
