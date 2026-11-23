@@ -1,14 +1,19 @@
 package org.kr.kl.ui;
 
 import org.kr.kl.data.DataBlock;
+import org.kr.kl.objects.GraphicObject;
+import org.kr.kl.objects.Sprite;
+import org.kr.kl.objects.SpriteData;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public abstract class VideoMemory {
     public static final int WIDTH = 256;
     public static final int HEIGHT = 192;
     public static final int PIXEL_MEM_SIZE = WIDTH / 8 * HEIGHT;
     public static final int ATTR_MEM_SIZE = WIDTH / 8 * HEIGHT / 8;
+    private final SpriteData spriteData;
 
     // pixel memory: 32 bytes * 192 lines
     // attribute memory: 32 x 24 attribute "cells" (8x8 pixels each)
@@ -17,10 +22,12 @@ public abstract class VideoMemory {
     public final int attrStart;
     public final int endExcl;
 
-    public VideoMemory() {
+    public VideoMemory(SpriteData spriteData) {
         this.attrStart = PIXEL_MEM_SIZE;
         this.endExcl = this.attrStart + ATTR_MEM_SIZE;
+        this.spriteData = spriteData;
     }
+
 
     public int[] getCopy() { return Arrays.copyOf(memory, memory.length); }
     public void setByteAt(int address, int value) { memory[address] = value ; }
@@ -81,6 +88,50 @@ public abstract class VideoMemory {
         int y = (h ^ 0xFF) >> 3;
         int xy = ((y - 8) * 0x20) + (l >> 3);
         return PIXEL_MEM_SIZE + xy;
+    }
+
+    public void printSprite(GraphicObject o) {
+        Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(o);
+        if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
+        Sprite sprite = spriteO.get();
+
+        int x = o.getPixelX();
+        int y = o.getPixelY();
+        int xOffset = (x & 7);
+
+        // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
+        // we skip this part entirely, using inner for loop instead
+        o.setSpriteHeight(sprite.lines);
+        // off bottom of screen?
+        if(y + o.getSpriteHeight()>0xC0) o.setSpriteHeight(0xC0 - y);
+
+        int de = 0;
+
+        if(y > 191 || x > 255) return; // do not attempt do draw out of screen
+        int bc = VideoMemory.calcVideoAddr(y, x);
+
+        if(xOffset == 0) {
+            o.setSpriteWidthB(sprite.width);
+            for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
+                for (int i = 0; i < sprite.width; i++) setByteAt(bc+i, sprite.applyToByte(getByteAt(bc+i), de+i));
+                bc += 0x20;
+                de += sprite.width;
+            }
+        } else {
+            o.setSpriteWidthB(sprite.width + 1);
+            for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
+                // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
+                for (int i = 0; i < sprite.width; i++) {
+                    int bufByteLeft = getByteAt(bc+i);
+                    int bufByteRight = getByteAt(bc+i+1);
+                    setByteAt(bc+i, sprite.applyToByteLeft(bufByteLeft, de+i, xOffset));
+                    if((bc & 0x001F)!=0x001F)
+                        setByteAt(bc+i+1, sprite.applyToByteRight(bufByteRight, de+i, xOffset));
+                }
+                bc += 0x20;
+                de += sprite.width;
+            }
+        }
     }
 
 }

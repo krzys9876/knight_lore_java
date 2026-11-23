@@ -14,7 +14,7 @@ public class Locations {
 
     private final Map<Integer, Location> locMap;
 
-    public Locations() {
+    public Locations(SpriteData spriteData) {
         int hl = data.start;
         int roomCnt = 0;
         while(hl < data.endExcl()-1) {
@@ -27,7 +27,7 @@ public class Locations {
         hl = data.start;
         for(int i=0; i < roomCnt; i++) {
             int size = data.getU(hl + 1) + 1;
-            locations[i] = new Location(data.slice(hl, size));
+            locations[i] = new Location(data.slice(hl, size), spriteData);
             locMap.put(locations[i].id, locations[i]);
             hl+=size;
         }

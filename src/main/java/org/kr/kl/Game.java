@@ -54,7 +54,7 @@ public class Game implements Runnable {
     // Includes special_objs_here and other_objs_here, 40 32-byte slots
     private final GraphicObjects graphicObjects = new GraphicObjects(0x5C08, 40);
     private final DataBlock objects_to_draw_CE8B = new DataBlock(0x2E); // 46, but there should be not more than 40 objects to draw
-    private final Locations locations = new Locations();
+    private final Locations locations;
     private final BackgroundObjects backgroundObjects = new BackgroundObjects();
     private final ForegroundObjects foregroundObjects = new ForegroundObjects();
     private final DataBlock panel_data_D27E = InitialData.block("panel_data_D27E");
@@ -86,8 +86,10 @@ public class Game implements Runnable {
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
 
-        mainMemory = new VideoMemoryScreen();
-        shadowMemory = new VideoMemoryLinear();
+        this.locations = new Locations(spriteData);
+
+        mainMemory = new VideoMemoryScreen(spriteData);
+        shadowMemory = new VideoMemoryLinear(spriteData);
 
         params.freezeSeed();
         for(Location l: locations.locations) {
@@ -98,6 +100,7 @@ public class Game implements Runnable {
         this.mapPanel.setLocations(locations);
         this.mapPanel.setFont(font_6108);
         this.objectsPanel.setFont(font_6108);
+        this.objectsPanel.initVideoMemory(spriteData);
         params.unfreezeSeed();
     }
 
@@ -305,7 +308,7 @@ public class Game implements Runnable {
     private int transfer_sprite_and_print_D24C(GraphicObject o, int hl, DataBlock source) {
         // hl: sprite index, ix: scratchpad address
         transfer_sprite_D237(o, hl, source);
-        print_sprite_D718(shadowMemory, o);
+        shadowMemory.printSprite(o);
         return hl+4;
     }
 
@@ -318,49 +321,6 @@ public class Game implements Runnable {
         o.setPixelY(source.getU(hl+3));
     }
 
-    private void print_sprite_D718(VideoMemory v, GraphicObject o) {
-        Optional<Sprite> spriteO = spriteData.flip_sprite_D6EF(o);
-        if(spriteO.isEmpty()) return; // spr_null used as a flag to return from routine
-        Sprite sprite = spriteO.get();
-
-        int x = o.getPixelX();
-        int y = o.getPixelY();
-        int xOffset = (x & 7);
-
-        // LD ($D7AD),A   ; - self modifying relative address to unrolled loop depending on a (width in bytes)
-        // we skip this part entirely, using inner for loop instead
-        o.setSpriteHeight(sprite.lines);
-        // off bottom of screen?
-        if(y + o.getSpriteHeight()>0xC0) o.setSpriteHeight(0xC0 - y);
-
-        int de = 0;
-
-        if(y > 191 || x > 255) return; // do not attempt do draw out of screen
-        int bc = VideoMemory.calcVideoAddr(y, x);
-
-        if(xOffset == 0) {
-            o.setSpriteWidthB(sprite.width);
-            for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
-                for (int i = 0; i < sprite.width; i++) v.setByteAt(bc+i, sprite.applyToByte(v.getByteAt(bc+i), de+i));
-                bc += 0x20;
-                de += sprite.width;
-            }
-        } else {
-            o.setSpriteWidthB(sprite.width + 1);
-            for(int lineNo = 0; lineNo<o.getSpriteHeight(); lineNo++) {
-                // Shift each byte across two buffer bytes (left and right), use lookup tables to reflect the original logic
-                for (int i = 0; i < sprite.width; i++) {
-                    int bufByteLeft = v.getByteAt(bc+i);
-                    int bufByteRight = v.getByteAt(bc+i+1);
-                    v.setByteAt(bc+i, sprite.applyToByteLeft(bufByteLeft, de+i, xOffset));
-                    if((bc & 0x001F)!=0x001F)
-                        v.setByteAt(bc+i+1, sprite.applyToByteRight(bufByteRight, de+i, xOffset));
-                }
-                bc += 0x20;
-                de += sprite.width;
-            }
-        }
-    }
 
     private int transfer_and_multiple_print_sprite(GraphicObject o, int dx, int dy, int times, int hl, DataBlock dataBlock) {
         transfer_sprite_D237(o, hl, dataBlock);
@@ -369,7 +329,7 @@ public class Game implements Runnable {
 
     private int multiple_print_sprite_BEE4(GraphicObject o, int dx, int dy, int times, int hl) {
         for(int i=0; i<times; i++) {
-            print_sprite_D718(shadowMemory, o);
+            shadowMemory.printSprite(o);
             o.setPixelX(o.getPixelX() + dx);
             o.setPixelY(o.getPixelY() + dy);
         }
@@ -846,7 +806,7 @@ public class Game implements Runnable {
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
                 int spriteIndex = slot.getGrNo();
                 sprite_scratchpad_BFDB.setGrNo(spriteIndex);
-                print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
+                shadowMemory.printSprite(sprite_scratchpad_BFDB);
                 hl = VideoMemory.calcAttribAddr(y + 0x17, x);
                 fill_window_C515(mainMemory, hl, 3, 3, specialObjects.getAttr(spriteIndex));
             }
@@ -877,7 +837,7 @@ public class Game implements Runnable {
         sprite_scratchpad_BFDB.setFlags7(0);
         sprite_scratchpad_BFDB.setPixelX(0x10);
         sprite_scratchpad_BFDB.setPixelY(0x20);
-        print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
+        shadowMemory.printSprite(sprite_scratchpad_BFDB);
         fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 18 + 2, 2, 1, 0x47);
         fill_window_C515(mainMemory, mainMemory.attrStart + 0x20 * 19 + 2, 4, 1, 0x47);
     }
@@ -977,7 +937,7 @@ public class Game implements Runnable {
 
     private void renderOne(VideoMemory v, int de, RenderStack renderList) {
         GraphicObject o = graphicObjects.o(objects_to_draw_CE8B.getU(de));
-        if(calc_pixel_XY_D6C9(o)) print_sprite_D718(v, o);
+        if(calc_pixel_XY_D6C9(o)) v.printSprite(o);
         objects_to_draw_CE8B.set(de, objects_to_draw_CE8B.getU(de) | 0x80);
         renderList.reset();
     }
@@ -1030,16 +990,16 @@ public class Game implements Runnable {
         if (sunTick == 0) sun_moon_scratchpad_C44D.setPixelX(x + 1);
 
         fill_window_C515(shadowMemory, 23, 6, 0x1F, 0);
-        print_sprite_D718(shadowMemory, sun_moon_scratchpad_C44D);
+        shadowMemory.printSprite(sun_moon_scratchpad_C44D);
 
         sprite_scratchpad_BFDB.setGrNo(0x5A);
         sprite_scratchpad_BFDB.setFlags7(0);
         sprite_scratchpad_BFDB.setPixelX(0xB8);
         sprite_scratchpad_BFDB.setPixelY(0);
-        print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
+        shadowMemory.printSprite(sprite_scratchpad_BFDB);
         sprite_scratchpad_BFDB.setPixelX(0xD0);
         sprite_scratchpad_BFDB.setGrNo(0xBA);
-        print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
+        shadowMemory.printSprite(sprite_scratchpad_BFDB);
     }
 
     // ; Input:HL starting location B  width (bytes) C  height (lines), A - value

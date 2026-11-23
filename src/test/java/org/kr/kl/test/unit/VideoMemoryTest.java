@@ -15,7 +15,7 @@ public class VideoMemoryTest {
     @DisplayName("Set the first bytes of pixel and attribute memory areas and test the outcome for the first 8 pixels")
     public void shouldPixelsReflectVideoMemoryLayoutWhenTopByteIsSet() {
         // given
-        VideoMemoryScreen mem = new VideoMemoryScreen();
+        VideoMemoryScreen mem = new VideoMemoryScreen(null);
         // when
         // attribute - blue ink (001), red paper (010), brightness on, flash off
         mem.setByteAt(0x1800, 0b01010001);
@@ -34,7 +34,7 @@ public class VideoMemoryTest {
     @DisplayName("Set a byte somewhere in the middle of the screen (pixel and attribute memory areas) and test the outcome")
     public void shouldPixelsReflectVideoMemoryLayoutWhenMiddleByteIsSet() {
         // given
-        VideoMemoryScreen mem = new VideoMemoryScreen();
+        VideoMemoryScreen mem = new VideoMemoryScreen(null);
         // when
         // we should set each of the three areas (8x8 pixels high each) of the screen to ensure proper logic
         // we set attribute "cells": (6,0), (8,7), (10,8), (13,15), (17,16), (31,23)

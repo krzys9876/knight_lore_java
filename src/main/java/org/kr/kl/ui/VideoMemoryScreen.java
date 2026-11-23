@@ -1,11 +1,13 @@
 package org.kr.kl.ui;
 
+import org.kr.kl.objects.SpriteData;
+
 /**
  * Follows ZX Spectrum screen layout
  */
 public class VideoMemoryScreen extends VideoMemory {
-    public VideoMemoryScreen() {
-        super();
+    public VideoMemoryScreen(SpriteData spriteData) {
+        super(spriteData);
     }
 
     @Override

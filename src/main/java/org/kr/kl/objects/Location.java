@@ -17,11 +17,13 @@ public class Location {
     public final DataBlock data;
     private final int[] backgroundObjectId;
     private final LocationForegroundObject[] foregroundObjects;
-    private final VideoMemoryLinear preview = new VideoMemoryLinear();
+    private final VideoMemoryLinear preview;
 
 
-    public Location(DataBlock data) {
+    public Location(DataBlock data, SpriteData spriteData) {
         this.data = data;
+
+        preview = new VideoMemoryLinear(spriteData);
 
         id = this.data.getU(this.data.start);
         x = xFromId(id);

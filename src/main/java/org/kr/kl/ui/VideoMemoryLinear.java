@@ -1,12 +1,14 @@
 package org.kr.kl.ui;
 
+import org.kr.kl.objects.SpriteData;
+
 /**
  * Linear screen layout
  */
 
 public class VideoMemoryLinear extends VideoMemory {
-    public VideoMemoryLinear() {
-        super();
+    public VideoMemoryLinear(SpriteData spriteData) {
+        super(spriteData);
     }
 
     @Override

@@ -1,14 +1,19 @@
 package org.kr.kl.ui;
 
 import org.kr.kl.data.DataBlock;
+import org.kr.kl.objects.SpriteData;
 import org.kr.kl.utils.MathUtils;
 
 public class ObjectsPanel extends GamePanel {
-    private final VideoMemoryLinear memory = new VideoMemoryLinear();
+    private VideoMemoryLinear memory;
     private DataBlock font;
     private final int[] requiredText = new int[] {27, 14, 26, 30, 18, 27, 14, 13};
 
     public void setFont(DataBlock font) { this.font = font; }
+
+    public void initVideoMemory(SpriteData spriteData) {
+        memory = new VideoMemoryLinear(spriteData);
+    }
 
     public void update(DataBlock requiredObjects, int requiredPos, int required) {
         for(int i=memory.attrStart; i<memory.endExcl; i++) memory.setByteAt(i, Color.getAttribute(Color.WHITE, Color.BLACK, true, false));
