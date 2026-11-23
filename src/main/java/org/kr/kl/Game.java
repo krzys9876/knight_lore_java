@@ -520,7 +520,7 @@ public class Game implements Runnable {
             game_over_BA22();
             return;
         }
-        int newLivesLeft = params.isDisableLoseLife() ? livesLeft : decBCD(livesLeft);
+        int newLivesLeft = params.isDisableLoseLife() ? livesLeft : livesLeft - 1;
         variables.setLives_5BBA(newLivesLeft);
         int scratch = sun_moon_scratchpad_C44D.getGrNo();
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
@@ -1088,18 +1088,6 @@ public class Game implements Runnable {
             }
             print_days_BC66();
         }
-    }
-
-    private int incBCD(int num) {
-        int incNum = num+1;
-        if((incNum & 0x0F) == 10) incNum = (incNum & 0xF0) + 0x10;
-        return incNum;
-    }
-
-    private int decBCD(int num) {
-        int decNum = num-1;
-        if((decNum & 0x0F) == 15) decNum = decNum - 6;
-        return decNum;
     }
 
     private void update_sprite_loop_AFC7() {
@@ -2262,7 +2250,7 @@ public class Game implements Runnable {
             int spi = specialObjects.getIndex(ptr);
             specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
             int lives = variables.getLives_5BBA();
-            variables.setLives_5BBA(incBCD(lives));
+            variables.setLives_5BBA(lives+1);
             variables.setDisableSpikeBallDrop_5BC0();
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
