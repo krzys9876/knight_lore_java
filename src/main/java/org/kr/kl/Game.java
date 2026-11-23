@@ -18,6 +18,7 @@ public class Game implements Runnable {
     private final GamePanel mainPanel;
     private final GamePanel shadowPanel;
     private final MapPanel mapPanel;
+    private final ObjectsPanel objectsPanel;
     private final DebugPanel debugPanel1;
     private final DebugPanel debugPanel2;
     private final ConcurrentSkipListSet<Integer> keyQueue;
@@ -69,11 +70,13 @@ public class Game implements Runnable {
         updateShadowMemory();
     }
 
-    public Game(GamePanel mainPanel, GamePanel shadowPanel, MapPanel mapPanel, DebugPanel debugPanel1, DebugPanel debugPanel2,
+    public Game(GamePanel mainPanel, GamePanel shadowPanel, MapPanel mapPanel, ObjectsPanel objectsPanel,
+                DebugPanel debugPanel1, DebugPanel debugPanel2,
                 ConcurrentSkipListSet<Integer> keyQueue, GameParams params, KeySequence keySequence) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
         this.mapPanel = mapPanel;
+        this.objectsPanel = objectsPanel;
         this.debugPanel1 = debugPanel1;
         this.debugPanel2 = debugPanel2;
         this.keyQueue = keyQueue;
@@ -93,6 +96,8 @@ public class Game implements Runnable {
             displayObjects(l.getPreview());
         }
         this.mapPanel.setLocations(locations);
+        this.mapPanel.setFont(font_6108);
+        this.objectsPanel.setFont(font_6108);
         params.unfreezeSeed();
     }
 
@@ -143,6 +148,7 @@ public class Game implements Runnable {
 
         // CALL $B2CF    ; play tune // ignore audio
         if(gameCounter==0) shuffle_objects_required_B544();
+        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects());
 
         //int a = locations.data.start;
         boolean specialObjectsInitialized = false;
@@ -546,14 +552,14 @@ public class Game implements Runnable {
         int days = variables.getDays_5BB9();
         if(days > params.getMaxDays()) days --; // game over due to timeout
         int daysAddr = 15 + 127 * 0x20; // (x,y)=(120, 127)
-        int daysBCD = byteToBCD(days);
+        int daysBCD = MathUtils.byteToBCD(days);
         if(daysBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, + 1, daysBCD);
         else print_BCD_number_BCAE(shadowMemory, daysAddr, daysBCD);
         calc_and_display_percent_BC10();
 
         int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int objAddr = 23 + 79 * 0x20; // (x,y)=(184, 79)
-        int objBCD = byteToBCD(objectsInCauldron);
+        int objBCD = MathUtils.byteToBCD(objectsInCauldron);
         if(objBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, + 1, objBCD);
         else print_BCD_number_BCAE(shadowMemory, objAddr, objBCD);
 
@@ -589,7 +595,7 @@ public class Game implements Runnable {
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 19 + 95 * 0x20; // (x,y)=(152, 95)
-        int percentBCD = byteToBCD(percent);
+        int percentBCD = MathUtils.byteToBCD(percent);
         if(percentBCD < 0x10) {
             print_BCD_lsd_BCC0(shadowMemory, + 1, percentBCD);
         } else {
@@ -598,16 +604,6 @@ public class Game implements Runnable {
                 print_BCD_lsd_BCC0(shadowMemory, - 1, (percentBCD >> 8) & 0x0F);
             }
         }
-    }
-
-    private int byteToBCD(int value) {
-        int bcd3 = (value / 100) % 10;
-        value -= bcd3 * 100;
-        int bcd2 = (value / 10) % 10;
-        value -= bcd2 * 10;
-        int bcd1 = value;
-        return bcd1 + bcd2 * 16 + bcd3 * 256;
-
     }
 
     private void game_complete_msg_BAAB() {
@@ -868,7 +864,7 @@ public class Game implements Runnable {
 
     private void print_days_BC66() {
         int videoAddress = 0x20 * 7 + 15; // (120, 7)
-        print_BCD_number_BCAE(shadowMemory, videoAddress, byteToBCD(variables.getDays_5BB9()));
+        print_BCD_number_BCAE(shadowMemory, videoAddress, MathUtils.byteToBCD(variables.getDays_5BB9()));
     }
 
     private void print_BCD_number_BCAE(VideoMemory v, int bc, int value) {
@@ -896,7 +892,7 @@ public class Game implements Runnable {
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(shadowMemory, 0x20 * 39 + 4, byteToBCD(variables.getLives_5BBA()));
+        print_BCD_number_BCAE(shadowMemory, 0x20 * 39 + 4, MathUtils.byteToBCD(variables.getLives_5BBA()));
     }
 
     private void list_objects_to_draw_CE62() {
@@ -2299,6 +2295,7 @@ public class Game implements Runnable {
         int ptr = h * 256 + l;
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
+        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects());
         upd_111_B95E(o);
     }
 

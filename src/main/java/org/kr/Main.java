@@ -25,6 +25,8 @@ public class Main {
         ScreenPanel screenPreviewPanel = new ScreenPanel(previewPanel);
         MapPanel mapPanel = new MapPanel(previewPanel);
         ScreenPanel screenMapPanel = new ScreenPanel(mapPanel);
+        ObjectsPanel objectsPanel = new ObjectsPanel();
+        ScreenPanel screenObjectsPanel = new ScreenPanel(objectsPanel);
         ScreenDebugPanel debugPanel1 = new ScreenDebugPanel();
         ScreenDebugPanel debugPanel2 = new ScreenDebugPanel();
         JFrame frame = new JFrame();
@@ -45,14 +47,17 @@ public class Main {
 
         JMenuBar menuBar = new JMenuBar();
         JMenu windowMenu = new JMenu("Windows");
+        JMenu debugMenu = new JMenu("Debug");
         menuBar.add(windowMenu);
+        menuBar.add(debugMenu);
         frame.setJMenuBar(menuBar);
 
         ToolWindow.addToggleWindow(frame, windowMenu, "Map", screenMapPanel, new Dimension(mapPanel.BASE_WIDTH, mapPanel.BASE_HEIGHT), null);
         ToolWindow.addToggleWindow(frame, windowMenu, "Preview", screenPreviewPanel, new Dimension(previewPanel.BASE_WIDTH, previewPanel.BASE_HEIGHT), null);
-        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (1)", debugPanel1, new Dimension(250, 750), null);
-        ToolWindow.addToggleWindow(frame, windowMenu, "Debug (2)", debugPanel2, new Dimension(350, 500), null);
-        ToolWindow.addToggleWindow(frame, windowMenu, "Shadow memory view", screenShadowPanel, new Dimension(400, 300), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Objects", screenObjectsPanel, new Dimension(objectsPanel.BASE_WIDTH, objectsPanel.BASE_HEIGHT), null);
+        ToolWindow.addToggleWindow(frame, debugMenu, "Debug (1)", debugPanel1, new Dimension(250, 750), null);
+        ToolWindow.addToggleWindow(frame, debugMenu, "Debug (2)", debugPanel2, new Dimension(350, 500), null);
+        ToolWindow.addToggleWindow(frame, debugMenu, "Shadow memory view", screenShadowPanel, new Dimension(400, 300), null);
 
         frame.setVisible(true);
         screenGamePanel.requestFocus();
@@ -64,7 +69,7 @@ public class Main {
         //SeedGenerator rnd = new SeedGeneratorSequential();
         //GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
         GameParams params = new GameParams(rnd, true, false, false, false, 99, 99, 14, 90, 0);
-        Game game = new Game(gamePanel, shadowPanel, mapPanel, debugPanel1, debugPanel2, keyQueue, params, keySequence);
+        Game game = new Game(gamePanel, shadowPanel, mapPanel, objectsPanel, debugPanel1, debugPanel2, keyQueue, params, keySequence);
         Thread gameThread = new Thread(game);
         gameThread.start();
 
