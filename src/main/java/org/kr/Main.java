@@ -31,24 +31,7 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(256*4, 192*4);
         frame.setTitle("Knight Lore recreated");
-        //frame.setLayout(new GridLayout(1, 3));
-        //frame.setLayout(new GridBagLayout());
         frame.add(screenGamePanel, BorderLayout.CENTER);
-        //GridBagConstraints c = new GridBagConstraints();
-        //c.fill = GridBagConstraints.BOTH;
-        //c.weighty = 1.0;
-        //c.gridy = 0;
-
-        //c.gridx = 0; c.weightx = 4.0;
-        //frame.add(panel1, c);
-
-        //c.gridx = 1; c.weightx = 1.0;
-        //frame.add(panel3, c);
-
-        //c.gridx = 2; c.weightx = 1.0;
-        //frame.add(panel4, c);
-
-        //frame.add(panel2);
 
         screenMapPanel.addMouseListener(new MouseAdapter() {
             @Override
