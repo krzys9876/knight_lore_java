@@ -552,15 +552,16 @@ public class Game implements Runnable {
         DataBlock a_GAME_OVER_BB5E = InitialData.block("a_GAME_OVER_BB5E");
         display_text_list_BEBF(gameover_colours_BB4C, gameover_xy_BB52, a_GAME_OVER_BB5E);
         int days = variables.getDays_5BB9();
-        if(days > byteToBCD(params.getMaxDays())) days --; // game over due to timeout
+        if(days > params.getMaxDays()) days --; // game over due to timeout
         int daysAddr = 15 + 127 * 0x20; // (x,y)=(120, 127)
-        if(days < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, days);
-        else print_BCD_number_BCAE(daysAddr, new int[] { days });
+        int daysBCD = byteToBCD(days);
+        if(daysBCD < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, daysBCD);
+        else print_BCD_number_BCAE(daysAddr, new int[] { daysBCD });
         calc_and_display_percent_BC10();
 
         int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
-        int objBCD = byteToBCD(objectsInCauldron);
         int objAddr = 23 + 79 * 0x20; // (x,y)=(184, 79)
+        int objBCD = byteToBCD(objectsInCauldron);
         if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
         else print_BCD_number_BCAE(objAddr, new int[] { objBCD });
 
@@ -875,7 +876,7 @@ public class Game implements Runnable {
 
     private void print_days_BC66() {
         int videoAddress = 0x20 * 7 + 15; // (120, 7)
-        print_BCD_number_BCAE(videoAddress, new int[] {variables.getDays_5BB9()});
+        print_BCD_number_BCAE(videoAddress, new int[] {byteToBCD(variables.getDays_5BB9())});
     }
 
     private void print_BCD_number_BCAE(int bc, int[] values) {
@@ -1078,11 +1079,10 @@ public class Game implements Runnable {
         sun_moon_scratchpad_C44D.setPixelX(0xB0); // ; pixel X
         variables.setTransformFlag_5BB1(); // transform flag
         if((nextSprite & 1) == 0) {
-            // DAA - number must be in BCD
             int currDays = variables.getDays_5BB9();
-            int incDays = params.isDisableIncDays() ? currDays : incBCD(currDays) % 0xA0; // wrap days at 99
+            int incDays = params.isDisableIncDays() ? currDays : (currDays + 1); // NOTE: we display only 2 digits
             variables.setDays_5BB9(incDays);
-            if(incDays == byteToBCD(params.getMaxDays())+1) {
+            if(incDays == params.getMaxDays()+1) {
                 game_over_BA22();
                 return;
             }

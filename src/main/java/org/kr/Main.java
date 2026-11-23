@@ -80,7 +80,7 @@ public class Main {
         SeedGenerator rnd = new SeedGeneratorRandom();
         //SeedGenerator rnd = new SeedGeneratorSequential();
         //GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
-        GameParams params = new GameParams(rnd, true, false, false, false, 98, 99, 14, 90, 0);
+        GameParams params = new GameParams(rnd, true, false, false, false, 99, 99, 14, 0, 0);
         Game game = new Game(gamePanel, shadowPanel, mapPanel, debugPanel1, debugPanel2, keyQueue, params, keySequence);
         Thread gameThread = new Thread(game);
         gameThread.start();
