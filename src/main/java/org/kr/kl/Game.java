@@ -556,14 +556,14 @@ public class Game implements Runnable {
         int daysAddr = 15 + 127 * 0x20; // (x,y)=(120, 127)
         int daysBCD = byteToBCD(days);
         if(daysBCD < 0x10) print_BCD_lsd_BCC0(daysAddr + 1, daysBCD);
-        else print_BCD_number_BCAE(daysAddr, new int[] { daysBCD });
+        else print_BCD_number_BCAE(daysAddr, daysBCD);
         calc_and_display_percent_BC10();
 
         int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int objAddr = 23 + 79 * 0x20; // (x,y)=(184, 79)
         int objBCD = byteToBCD(objectsInCauldron);
         if(objBCD < 0x10) print_BCD_lsd_BCC0(objAddr + 1, objBCD);
-        else print_BCD_number_BCAE(objAddr, new int[] { objBCD });
+        else print_BCD_number_BCAE(objAddr, objBCD);
 
         int screens = locations.countVisited();
         int allObjInCauldron = variables.getAllObjectsInCauldron_5BC3();
@@ -601,7 +601,7 @@ public class Game implements Runnable {
         if(percentBCD < 0x10) {
             print_BCD_lsd_BCC0(percentAddr + 1, percentBCD);
         } else {
-            print_BCD_number_BCAE(percentAddr, new int[] {percentBCD});
+            print_BCD_number_BCAE(percentAddr, percentBCD);
             if(percentBCD >= 0x100) {
                 print_BCD_lsd_BCC0(percentAddr - 1, (percentBCD >> 8) & 0x0F);
             }
@@ -876,17 +876,15 @@ public class Game implements Runnable {
 
     private void print_days_BC66() {
         int videoAddress = 0x20 * 7 + 15; // (120, 7)
-        print_BCD_number_BCAE(videoAddress, new int[] {byteToBCD(variables.getDays_5BB9())});
+        print_BCD_number_BCAE(videoAddress, byteToBCD(variables.getDays_5BB9()));
     }
 
-    private void print_BCD_number_BCAE(int bc, int[] values) {
+    private void print_BCD_number_BCAE(int bc, int value) {
         // NOTE: we assume that the number is already in BCD
-        for(int i = 0; i<values.length; i++) {
-            int digitH = (values[i] >> 4) & 0x0F;
-            int digitL = values[i] & 0x0F;
-            print_8x8_BE7F(digitH, bc, font_6108);
-            print_8x8_BE7F(digitL, bc+1, font_6108);
-        }
+        int digitH = (value >> 4) & 0x0F;
+        int digitL = value & 0x0F;
+        print_8x8_BE7F(digitH, bc, font_6108);
+        print_8x8_BE7F(digitL, bc+1, font_6108);
     }
 
     private void print_BCD_lsd_BCC0(int bc, int value) {
@@ -907,7 +905,7 @@ public class Game implements Runnable {
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(0x20 * 39 + 4, new int[] { byteToBCD(variables.getLives_5BBA()) });
+        print_BCD_number_BCAE(0x20 * 39 + 4, byteToBCD(variables.getLives_5BBA()));
     }
 
     private void list_objects_to_draw_CE62() {
