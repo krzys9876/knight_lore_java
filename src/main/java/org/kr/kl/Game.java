@@ -242,10 +242,10 @@ public class Game implements Runnable {
     private int print_text_single_colour_BE31(DataBlock text, int x, int y, int de, int color) {
         // h: y, l: x, de2: text address (first)
         debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de));
-        int bc = calc_vidbuf_addr_D811(y, x);
+        int bc = VideoMemory.calcVideoAddr(y, x);
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
-        int hl = calc_attrib_addr_D848(y, x);
+        int hl = VideoMemory.calcAttribAddr(y, x);
         de = printText(text, de, bc, hl, color);
         return de;
     }
@@ -267,22 +267,13 @@ public class Game implements Runnable {
     private void print_text_std_font_BE45(DataBlock text, int x, int y, int de) {
         // h: y, l: x, de2: text address (first)
         debugPanel1.append(String.format("print_text_single_colour_BE31 ( x: %02x, y: %02x, text_addr: %04x)", x, y, de));
-        int bc = calc_vidbuf_addr_D811(y, x);
+        int bc = VideoMemory.calcVideoAddr(y, x);
         debugPanel1.append(String.format("Video addr: %04x", bc));
 
         int attr = text.getU(de); // first byte is the attribute
-        int hl = calc_attrib_addr_D848(y, x);
+        int hl = VideoMemory.calcAttribAddr(y, x);
 
         printText(text, de+1, bc, hl, attr);
-    }
-
-    private int calc_vidbuf_addr_D811(int y, int x) { return (x >> 3) + y * 0x20; }
-
-    private int calc_attrib_addr_D848(int h, int l) {
-        // h: y, l: x
-        int y = (h ^ 0xFF) >> 3;
-        int xy = ((y - 8) * 0x20) + (l >> 3);
-        return VideoMemory.PIXEL_MEM_SIZE + xy;
     }
 
     private void flash_menu_BD89() {
@@ -345,7 +336,7 @@ public class Game implements Runnable {
         int de = 0;
 
         if(y > 191 || x > 255) return; // do not attempt do draw out of screen
-        int bc = calc_vidbuf_addr_D811(y, x);
+        int bc = VideoMemory.calcVideoAddr(y, x);
 
         if(xOffset == 0) {
             o.setSpriteWidthB(sprite.width);
@@ -827,8 +818,8 @@ public class Game implements Runnable {
         int de = day_txt_BCE7.start;
         int x = 0x70;
         int y = 0x0F;
-        int videoAddr = calc_vidbuf_addr_D811(y, x);
-        int attrAddr = calc_attrib_addr_D848(y, x);
+        int videoAddr = VideoMemory.calcVideoAddr(y, x);
+        int attrAddr = VideoMemory.calcAttribAddr(y, x);
         de++;
 
         boolean textDone = false;
@@ -851,12 +842,12 @@ public class Game implements Runnable {
                 int y = 0;
                 sprite_scratchpad_BFDB.setPixelX(x);
                 sprite_scratchpad_BFDB.setPixelY(y);
-                int hl = calc_vidbuf_addr_D811(y, x);
+                int hl = VideoMemory.calcVideoAddr(y, x);
                 fill_window_C515(shadowMemory, hl, 3, 24, 0);
                 int spriteIndex = slot.getGrNo();
                 sprite_scratchpad_BFDB.setGrNo(spriteIndex);
                 print_sprite_D718(shadowMemory, sprite_scratchpad_BFDB);
-                hl = calc_attrib_addr_D848(y + 0x17, x);
+                hl = VideoMemory.calcAttribAddr(y + 0x17, x);
                 fill_window_C515(mainMemory, hl, 3, 3, specialObjects.getAttr(spriteIndex));
             }
         }

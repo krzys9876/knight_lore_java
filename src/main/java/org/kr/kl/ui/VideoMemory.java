@@ -74,4 +74,13 @@ public abstract class VideoMemory {
         for(int i = 0; i<8; i++) setByteAt(address - i*0x20, font.getU(charPointer + i));
     }
 
+    public static int calcVideoAddr(int y, int x) { return (x >> 3) + y * 0x20; }
+
+    public static int calcAttribAddr(int h, int l) {
+        // h: y, l: x
+        int y = (h ^ 0xFF) >> 3;
+        int xy = ((y - 8) * 0x20) + (l >> 3);
+        return PIXEL_MEM_SIZE + xy;
+    }
+
 }

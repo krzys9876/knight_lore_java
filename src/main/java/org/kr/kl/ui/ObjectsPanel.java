@@ -6,7 +6,7 @@ import org.kr.kl.utils.MathUtils;
 public class ObjectsPanel extends GamePanel {
     private final VideoMemoryLinear memory = new VideoMemoryLinear();
     private DataBlock font;
-    private int[] requiredText = new int[] {27, 14, 26, 30, 18, 27, 14, 13};
+    private final int[] requiredText = new int[] {27, 14, 26, 30, 18, 27, 14, 13};
 
     public void setFont(DataBlock font) { this.font = font; }
 
