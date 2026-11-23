@@ -1,5 +1,6 @@
 package org.kr.kl.ui;
 
+import org.kr.kl.data.DataBlock;
 import org.kr.kl.objects.Location;
 import org.kr.kl.objects.Locations;
 
@@ -7,11 +8,12 @@ import java.util.Arrays;
 
 public class MapPanel extends GamePanel {
     private static final int ROW_COL = 0x10;
-    private static final int CELL_WIDTH = 25;
-    private static final int CELL_HEIGHT = 20;
+    private static final int CELL_WIDTH = 35;
+    private static final int CELL_HEIGHT = 30;
     private static final int MARGIN = 15;
     private final GamePanel previewPanel;
     private Locations locations;
+    private DataBlock font;
     private int selectedId = -1;
     private int currentId = -1;
 
@@ -21,9 +23,11 @@ public class MapPanel extends GamePanel {
     }
 
     public void setLocations(Locations locations) { this.locations = locations; }
+    public void setFont(DataBlock font) { this.font = font; }
 
     public void drawMap(Locations locations, int currentLocId) {
         clear();
+        printLegend();
         currentId = currentLocId;
         if(locations == null) return;
 
@@ -34,6 +38,27 @@ public class MapPanel extends GamePanel {
         repaint();
     }
 
+    private void printLegend() {
+        int screenColor = Color.getScreenColor(Color.WHITE, true);
+        for(int i=0; i<ROW_COL; i++) {
+            int x = MARGIN + i * CELL_WIDTH + CELL_WIDTH/2-4;
+            int x1 = MARGIN/2-4;
+            int x2 = ROW_COL * CELL_WIDTH + MARGIN + MARGIN/2-4;
+            for(int b = 0; b<8; b++) {
+                int y1 = (b + MARGIN/2-4) * BASE_WIDTH;
+                int y2 = (b + MARGIN/2-4) * BASE_WIDTH + (ROW_COL * CELL_HEIGHT + MARGIN) * BASE_WIDTH;
+                int y = (b + MARGIN + (ROW_COL - 1 - i) * CELL_HEIGHT + CELL_HEIGHT/2-4) * BASE_WIDTH;
+                int fontByte = font.getU(font.start + i*8 + b);
+                for(int bit = 0; bit<8; bit++) {
+                    pixelData[x + y1 + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
+                    pixelData[x + y2 + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
+                    pixelData[x1 + y + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
+                    pixelData[x2 + y + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
+                }
+            }
+        }
+    }
+
     public void updatePreview(int locId) {
         selectedId = locId;
         if(locations == null || !locations.exists(locId)) return;
@@ -41,7 +66,14 @@ public class MapPanel extends GamePanel {
         int attr = loc.getAttr();
         VideoMemory memory = loc.getPreview();
         for(int a = memory.attrStart; a < memory.endExcl; a ++) memory.setByteAt(a, attr);
-        int[] pixels = loc.getPreview().toPixels(false);
+        int[] pixels = memory.toPixels(false);
+        /*VideoMemory memory = new VideoMemoryLinear();
+        for(int a = memory.attrStart; a < memory.endExcl; a ++) memory.setByteAt(a, Color.getAttribute(Color.WHITE, Color.BLACK, false, false));
+        for(int i=0; i<16; i++){
+            memory.printCharacter(i, i + 8 * 0x20, font);
+        }
+        int[] pixels = memory.toPixels(false);*/
+
         previewPanel.setPixelData(pixels);
     }
 
@@ -73,7 +105,7 @@ public class MapPanel extends GamePanel {
     }
 
     private void markSelected() {
-        if(selectedId == -1) return;
+        if(selectedId == -1 || !locations.exists(selectedId)) return;
         mark(selectedId, Color.getScreenColor(Color.RED, true));
     }
 
@@ -102,16 +134,16 @@ public class MapPanel extends GamePanel {
     }
 
     public void doClick(int x, int y) {
-        IO.println(String.format("Click: %d,%d", x, y));
         if(x < MARGIN || x >= MARGIN + CELL_WIDTH * ROW_COL || y < MARGIN || y >= MARGIN + CELL_HEIGHT * ROW_COL) return;
         int gridX = (x - MARGIN) / CELL_WIDTH;
         int gridY = ROW_COL - 1 - (y - MARGIN) / CELL_HEIGHT;
-        IO.println(String.format("Grid:  %d,%d", gridX, gridY));
         int locId = Location.xyToId(gridX, gridY);
-        unmarkSelected();
-        updatePreview(locId);
-        markSelected();
-        markCurrent();
-        repaint();
+        if(locations.exists(locId)) {
+            unmarkSelected();
+            updatePreview(locId);
+            markSelected();
+            markCurrent();
+            repaint();
+        }
     }
 }
