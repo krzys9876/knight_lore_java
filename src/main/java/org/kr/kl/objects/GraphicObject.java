@@ -2,14 +2,18 @@ package org.kr.kl.objects;
 
 import org.kr.kl.data.DataBlock;
 import org.kr.kl.data.InitialData;
+import org.kr.kl.utils.MathUtils;
 
 public class GraphicObject {
     private final GraphicObjects parent;
     public final int ix;
 
+    private int grNo;
+
     public GraphicObject(GraphicObjects parent, int ix) {
         this.parent = parent;
         this.ix = ix;
+        grNo = parent.getGrNo(ix);
     }
 
     public GraphicObject() {
@@ -19,7 +23,38 @@ public class GraphicObject {
     public GraphicObject next() { return parent.next(this);}
     public GraphicObject prev() { return parent.prev(this);}
 
-    public void reset() { parent.resetObject(ix); }
+    public void reset() {
+        setGrNo(0);
+        setX(0);
+        setY(0);
+        setZ(0);
+        setW(0);
+        setD(0);
+        setH(0);
+        setFlags7(0);
+        setScreen(0);
+        setDX(0);
+        setDY(0);
+        setDZ(0);
+        setFlagsC(0);
+        setFlagsD(0);
+        setDXAdj(0);
+        setDYAdj(0);
+        setTemp10(0);
+        setTemp11(0);
+        setXAdj(0);
+        setYAdj(0);
+        setSpriteWidthB(0);
+        setSpriteHeight(0);
+        setPixelX(0);
+        setPixelY(0);
+        setOldSpriteWidthB(0);
+        setOldSpriteHeight(0);
+        setOldPixelX(0);
+        setOldPixelY(0);
+
+        parent.resetObject(ix);
+    }
 
     private static final DataBlock cauldron_bubbles_B8C8 =  InitialData.block("cauldron_bubbles_B8C8");
 
@@ -115,13 +150,13 @@ public class GraphicObject {
     }
 
 
-    public int getGrNo() { return parent.getGrNo(ix); }
-    public void setGrNo(int grNo) { parent.setGrNo(ix, grNo); }
+    public int getGrNo() { return this.grNo; }
+    public void setGrNo(int grNo) { this.grNo = grNo; }
     public void setDeathSparkles() { setGrNo(0x70); }
-    public void setBitGrNo(int bit) { parent.setBitGrNo(ix, bit); }
-    public void resetBitGrNo(int bit) { parent.resetBitGrNo(ix, bit); }
-    public void toggleBitGrNo(int bit) { parent.toggleBitGrNo(ix, bit); }
-    public boolean isBitSetGrNo(int bit) { return parent.isBitSetGrNo(ix, bit); }
+    public void setBitGrNo(int bit) { setGrNo(DataBlock.getWithBitSetS(bit, getGrNo())); }
+    public void resetBitGrNo(int bit) { setGrNo(DataBlock.getWithBitResetS(bit, getGrNo())); }
+    public void toggleBitGrNo(int bit) { setGrNo(DataBlock.getWithBitToggledS(bit, getGrNo())); }
+    public boolean isBitSetGrNo(int bit) { return DataBlock.isSetS(bit, getGrNo()); }
     public boolean isSparkles() { return ((getGrNo() - 0x10) & 0xFF) >= 0x40; }
     public boolean isSpecialObject() { return ((getGrNo() - 0x60) & 0xFF) < 0x07; }
     public boolean isWulf() { return ((getGrNo() - 0x10) & 0xFF) >= 0x20; }
@@ -132,7 +167,7 @@ public class GraphicObject {
         grNo = (grNo >> 3) & 3;
         return grNo;
     }
-    public void toggleNextPrevSprite() { parent.toggleNextPrevSprite(ix); }
+    public void toggleNextPrevSprite() { setGrNo(getGrNo() ^ 0x01); }
 
     public void nextGrNoMod4() {
         int grNo = getGrNo();

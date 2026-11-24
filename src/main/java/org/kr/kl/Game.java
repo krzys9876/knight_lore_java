@@ -2631,7 +2631,7 @@ public class Game implements Runnable {
 
     private void find_special_objs_here_C525() {
         int currLocId = graphicObjects.playerBottom().getScreen();
-        for(int i=graphicObjects.start() + 2*0x20; i<graphicObjects.start() + 4*0x20; i+=0x20) graphicObjects.resetObject(i);
+        for(int i=graphicObjects.start() + 2*0x20; i<graphicObjects.start() + 4*0x20; i+=0x20) graphicObjects.i2o(i).reset();
         for(int spi = 0; spi < specialObjects.size;  spi++) {
             int specialObjGrNo = specialObjects.getGraphicNo(spi);
             int i = graphicObjects.specialObjStartIx;
