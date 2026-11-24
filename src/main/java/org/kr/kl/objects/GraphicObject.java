@@ -66,9 +66,10 @@ public class GraphicObject {
     private int w, d, h;
     private int flags7;
     private int screen;
+    private int dx, dy, dz;
 
     public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
-                         int flags7, int screen) {
+                         int flags7, int screen, int dx, int dy, int dz) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -80,10 +81,13 @@ public class GraphicObject {
         this.h = h;
         this.flags7 = flags7;
         this.screen = screen;
+        this.dx = dx;
+        this.dy = dy;
+        this.dz = dz;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -272,12 +276,12 @@ public class GraphicObject {
     public int getW() { return DataBlock.getUS(w); }
     public int getD() { return DataBlock.getUS(d); }
     public int getH() { return DataBlock.getUS(h); }
-    public int getDX() { return parent.getDX(ix); }
-    public int getDXu() { return parent.getDXu(ix); }
-    public int getDY() { return parent.getDY(ix); }
-    public int getDYu() { return parent.getDYu(ix); }
-    public int getDZ() { return parent.getDZ(ix); }
-    public int getDZu() { return parent.getDZu(ix); }
+    public int getDX() { return DataBlock.getSS(dx); }
+    public int getDXu() { return DataBlock.getUS(dx); }
+    public int getDY() { return DataBlock.getSS(dy); }
+    public int getDYu() { return DataBlock.getUS(dy); }
+    public int getDZ() { return DataBlock.getSS(dz); }
+    public int getDZu() { return DataBlock.getUS(dz); }
     public int getXAdj() { return parent.getXAdj(ix); }
     public int getYAdj() { return parent.getYAdj(ix); }
     public int getDXAdj() { return parent.getDXAdj(ix); }
@@ -307,9 +311,9 @@ public class GraphicObject {
     public void setW(int w) { this.w = w; }
     public void setD(int d) { this.d = d; }
     public void setH(int h) { this.h = h; }
-    public void setDX(int dx) { parent.setDX(ix, dx); }
-    public void setDY(int dy) { parent.setDY(ix, dy); }
-    public void setDZ(int dz) { parent.setDZ(ix, dz); }
+    public void setDX(int dx) { this.dx = dx; }
+    public void setDY(int dy) { this.dy = dy; }
+    public void setDZ(int dz) { this.dz = dz; }
     public void setDXAdj(int dxAdj) { parent.setDXAdj(ix, dxAdj); }
     public void setDYAdj(int dyAdj) { parent.setDYAdj(ix, dyAdj); }
     public void setXAdj(int xAdj) { parent.setXAdj(ix, xAdj); }

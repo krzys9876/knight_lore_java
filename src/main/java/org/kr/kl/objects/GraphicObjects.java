@@ -105,7 +105,8 @@ public class GraphicObjects {
             objects[i] = new GraphicObject(this, ix, data.getU(ix),
                     data.getU(ix + 1), data.getU(ix + 2), data.getU(ix + 3),
                     data.getU(ix + 4), data.getU(ix + 5), data.getU(ix + 6),
-                    data.getU(ix + 7), data.getU(ix + 8));
+                    data.getU(ix + 7), data.getU(ix + 8),
+                    data.getU(ix + 9), data.getU(ix + 0x0A), data.getU(ix + 0x0B));
         }
     }
 
@@ -115,19 +116,12 @@ public class GraphicObjects {
 
     public String objectInfo(int num, int ix) { return data.objectInfo(num, ix); }
 
-    public int getDX(int ix) { return data.getS(ix + 0x09); }
-    public int getDXu(int ix) { return data.getU(ix + 0x09); }
-    public int getDY(int ix) { return data.getS(ix + 0x0A); }
-    public int getDYu(int ix) { return data.getU(ix + 0x0A); }
-    public int getDZ(int ix) { return data.getS(ix + 0x0B); }
-    public int getDZu(int ix) { return data.getU(ix + 0x0B); }
     public int getDXAdj(int ix) { return data.getS(ix + 0x0E); }
     public int getDYAdj(int ix) { return data.getS(ix + 0x0F); }
     public int getTemp10(int ix) { return data.getU(ix + 0x10); }
     public int getTemp11(int ix) { return data.getU(ix + 0x11); }
     public int getXAdj(int ix) { return data.getS(ix + 0x12); }
     public int getYAdj(int ix) { return data.getS(ix + 0x13); }
-    public int getScreen(int ix) { return data.getU(ix + 0x08); }
     public int getPixelX(int ix) { return data.getU(ix + 0x1A); }
     public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
@@ -140,10 +134,6 @@ public class GraphicObjects {
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
 
-    public void setScreen(int ix, int h) { data.set(ix + 8, h); }
-    public void setDX(int ix, int dx) { data.set(ix + 0x09, dx); }
-    public void setDY(int ix, int dy) { data.set(ix + 0x0A, dy); }
-    public void setDZ(int ix, int dz) { data.set(ix + 0x0B, dz); }
     public void setDXAdj(int ix, int dxAdj) { data.set(ix + 0x0E, dxAdj); }
     public void setDYAdj(int ix, int dyAdj) { data.set(ix + 0x0F, dyAdj); }
     public void setXAdj(int ix, int xAdj) { data.set(ix + 0x12, xAdj); }
