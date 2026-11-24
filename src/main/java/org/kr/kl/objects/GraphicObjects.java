@@ -101,7 +101,8 @@ public class GraphicObjects {
 
         objects = new GraphicObject[size];
         for(int i=0; i < this.size; i++) {
-            objects[i] = new GraphicObject(this, start() + i * 0x20);
+            int ix = start() + i * 0x20;
+            objects[i] = new GraphicObject(this, ix, data.getU(ix), data.getU(ix + 1), data.getU(ix + 2), data.getU(ix + 3));
         }
     }
 
@@ -111,10 +112,6 @@ public class GraphicObjects {
 
     public String objectInfo(int num, int ix) { return data.objectInfo(num, ix); }
 
-    public int getGrNo(int ix) { return data.getU(ix); }
-    public int getX(int ix) { return data.getU(ix + 1); }
-    public int getY(int ix) { return data.getU(ix + 2); }
-    public int getZ(int ix) { return data.getU(ix + 3); }
     public int getW(int ix) { return data.getU(ix + 4); }
     public int getD(int ix) { return data.getU(ix + 5); }
     public int getH(int ix) { return data.getU(ix + 6); }
@@ -142,15 +139,7 @@ public class GraphicObjects {
     public boolean isJumping(int ix) { return data.isSet(3, ix + 0x0C); }
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
-    public boolean isMoving(int ix) { return getDX(ix)!=0 || getDY(ix)!=0 || getDZ(ix)!=0; }
-    public boolean isMovingXY(int ix) { return getDX(ix)!=0 || getDY(ix)!=0; }
-    public boolean isBitSetGrNo(int ix, int bit) { return data.isSet(bit, ix); }
 
-
-    public void setGrNo(int ix, int grNo) { data.set(ix, grNo); }
-    public void setX(int ix, int x) { data.set(ix + 1, x); }
-    public void setY(int ix, int y) { data.set(ix + 2, y); }
-    public void setZ(int ix, int z) { data.set(ix + 3, z); }
     public void setW(int ix, int w) { data.set(ix + 4, w); }
     public void setD(int ix, int d) { data.set(ix + 5, d); }
     public void setH(int ix, int h) { data.set(ix + 6, h); }
@@ -179,7 +168,6 @@ public class GraphicObjects {
     public void setDropping(int ix) { data.setBit(2, ix + 0x0D); }
     public void setDirUp(int ix) { data.setBit(2, ix + 0x0D); }
     public void setDirDown(int ix) { data.resetBit(2, ix + 0x0D); }
-    public void toggleNextPrevSprite(int ix) { setGrNo(ix, getGrNo(ix) ^ 0x01); }
     public void setTriggered(int ix) { data.setBit(3, ix + 0x0D); }
     public void resetTriggered(int ix) { data.resetBit(3, ix + 0x0D); }
     public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
@@ -193,10 +181,6 @@ public class GraphicObjects {
     public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
     public void setJumping(int ix) { data.setBit(3, ix + 0x0C); }
     public void resetJumping(int ix) { data.resetBit(3, ix + 0x0C); }
-
-    public void setBitGrNo(int ix, int bit) { data.setBit(bit, ix); }
-    public void resetBitGrNo(int ix, int bit) { data.resetBit(bit, ix); }
-    public void toggleBitGrNo(int ix, int bit) { data.toggleBit(bit, ix); }
 
     // Flag 7
     public int getFlags7(int ix) { return data.getS(ix + 7); }

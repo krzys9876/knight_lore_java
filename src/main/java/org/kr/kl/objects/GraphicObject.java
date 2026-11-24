@@ -9,11 +9,19 @@ public class GraphicObject {
     public final int ix;
 
     private int grNo;
+    private int x, y, z;
 
-    public GraphicObject(GraphicObjects parent, int ix) {
+    public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z) {
         this.parent = parent;
         this.ix = ix;
-        grNo = parent.getGrNo(ix);
+        this.grNo = grNo;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public GraphicObject(GraphicObjects parent, int ix) {
+        this(parent, ix, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -196,9 +204,9 @@ public class GraphicObject {
 
     public boolean isNotIgnored() { return getGrNo() != 0 && !ignore3D(); }
 
-    public int getX() { return parent.getX(ix); }
-    public int getY() { return parent.getY(ix); }
-    public int getZ() { return parent.getZ(ix); }
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public int getZ() { return z; }
     public int getW() { return parent.getW(ix); }
     public int getD() { return parent.getD(ix); }
     public int getH() { return parent.getH(ix); }
@@ -231,9 +239,9 @@ public class GraphicObject {
     public boolean isCauldronRoom() { return getScreen() == 0x88; }
     public boolean isOddRoom() { return (getScreen() & 1) == 1; }
 
-    public void setX(int x) { parent.setX(ix, x); }
-    public void setY(int y) { parent.setY(ix, y); }
-    public void setZ(int z) { parent.setZ(ix, z); }
+    public void setX(int x) { this.x = x; }
+    public void setY(int y) { this.y = y; }
+    public void setZ(int z) { this.z = z; }
     public void setW(int w) { parent.setW(ix, w); }
     public void setD(int d) { parent.setD(ix, d); }
     public void setH(int h) { parent.setH(ix, h); }

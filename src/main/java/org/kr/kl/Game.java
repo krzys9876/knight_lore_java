@@ -2563,18 +2563,19 @@ public class Game implements Runnable {
     private void update_special_objs_C591() {
         int iy = 0x5C48;
         for(int i=0; i<2; i++) {
-            int grNo = graphicObjects.i2o(iy).getGrNo();
+            GraphicObject o = graphicObjects.i2o(iy);
+            int grNo = o.getGrNo();
             if(grNo != 0) {
-                int e = graphicObjects.i2o(iy).getTemp10();
-                int d = graphicObjects.i2o(iy).getTemp11();
+                int e = o.getTemp10();
+                int d = o.getTemp11();
                 int ptr = d*256 + e; // ptr can be 0 for cauldron bubbles
                 if(ptr != 0) {
                     int spi = specialObjects.getIndex(ptr);
                     specialObjects.setGraphicNo(spi, grNo);
-                    specialObjects.setCurrentX(spi, graphicObjects.getX(iy));
-                    specialObjects.setCurrentY(spi, graphicObjects.getY(iy));
-                    specialObjects.setCurrentZ(spi, graphicObjects.getZ(iy));
-                    int screen = graphicObjects.getScreen(iy);
+                    specialObjects.setCurrentX(spi, o.getX());
+                    specialObjects.setCurrentY(spi, o.getY());
+                    specialObjects.setCurrentZ(spi, o.getZ());
+                    int screen = o.getScreen();
                     specialObjects.setScreen(spi, screen);
                 }
             }
