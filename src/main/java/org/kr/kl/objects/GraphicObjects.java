@@ -104,7 +104,8 @@ public class GraphicObjects {
             int ix = start() + i * 0x20;
             objects[i] = new GraphicObject(this, ix, data.getU(ix),
                     data.getU(ix + 1), data.getU(ix + 2), data.getU(ix + 3),
-                    data.getU(ix + 4), data.getU(ix + 5), data.getU(ix + 6));
+                    data.getU(ix + 4), data.getU(ix + 5), data.getU(ix + 6),
+                    data.getU(ix + 7), data.getU(ix + 8));
         }
     }
 
@@ -177,34 +178,6 @@ public class GraphicObjects {
     public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
     public void setJumping(int ix) { data.setBit(3, ix + 0x0C); }
     public void resetJumping(int ix) { data.resetBit(3, ix + 0x0C); }
-
-    // Flag 7
-    public int getFlags7(int ix) { return data.getS(ix + 7); }
-    public void setFlags7(int ix, int f) { data.set(ix + 7, f); }
-
-    public boolean isNearArch(int ix) { return Flags7.isNearArch(getFlags7(ix)); }
-    public void setNearArch(int ix) { setFlags7(ix, Flags7.setNearArch(getFlags7(ix))); }
-    public void resetNearArch(int ix) { setFlags7(ix, Flags7.resetNearArch(getFlags7(ix))); }
-
-    public boolean ignore3D(int ix) { return Flags7.ignore3D(getFlags7(ix)); }
-    public void setIgnore3D(int ix) { setFlags7(ix, Flags7.setIgnore3D(getFlags7(ix))); }
-    public void resetIgnore3D(int ix) { setFlags7(ix, Flags7.resetIgnore3D(getFlags7(ix))); }
-
-    public boolean isMoveable(int ix) { return Flags7.isMoveable(getFlags7(ix)); }
-
-    public boolean isAutoAdjust(int ix) { return Flags7.isAutoAdjust(getFlags7(ix)); }
-
-    public void setDraw(int ix) { setFlags7(ix, Flags7.setDraw(getFlags7(ix))); }
-
-    public void setWipe(int ix) { setFlags7(ix, Flags7.setWipe(getFlags7(ix))); }
-    public void resetWipe(int ix) { setFlags7(ix, Flags7.resetWipe(getFlags7(ix))); }
-
-    public boolean isHFlip(int ix) { return Flags7.isHFlip(getFlags7(ix)); }
-    public void setHFlip(int ix) { setFlags7(ix, Flags7.setHFlip(getFlags7(ix))); }
-    public void resetHFlip(int ix) { setFlags7(ix, Flags7.resetHFlip(getFlags7(ix))); }
-    public void toggleHFlip(int ix) { setFlags7(ix, Flags7.toggleHFlip(getFlags7(ix))); }
-
-    public boolean isVFlip(int ix) { return Flags7.isVFlip(getFlags7(ix)); }
 
     // Flags C
     public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }

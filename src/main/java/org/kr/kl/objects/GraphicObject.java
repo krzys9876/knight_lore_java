@@ -2,7 +2,60 @@ package org.kr.kl.objects;
 
 import org.kr.kl.data.DataBlock;
 import org.kr.kl.data.InitialData;
-import org.kr.kl.utils.MathUtils;
+
+/*; #TABLE(default,centre,:w)
+          ; { =h Byte(n) | =h Description }
+00        ; { +0     | graphic_no. }
+01        ; { +1     | x (center) }
+02        ; { +2     | y (center) }
+03        ; { +3     | z (bottom) }
+04        ; { +4     | width (X radius) }
+05        ; { +5     | depth (Y radius) }
+06        ; { +6     | height }
+07        ; { +7     | flags }
+          ; {        | - 7=vflip sprite }
+          ; {        | - 6=hflip sprite }
+          ; {        | - 5=wipe }
+          ; {        | - 4=draw }
+          ; {        | - 3=auto-adjust near arches (player only) }
+          ; {        | - 2=moveable }
+          ; {        | - 1=ignore in 3D calculations }
+          ; {        | - 0=is near arch (player only) }
+08        ; { +8     | screen }
+09        ; { +9     | dX }
+0A        ; { +10    | dY }
+0B        ; { +11    | dZ }
+0C        ; { +12    | counter and flags }
+          ; {        | - 7-4=counter when entering screen }
+          ; {        | - 3=jumping }
+          ; {        | - 2=Z out-of-bounds }
+          ; {        | - 1=Y out-of-bounds }
+          ; {        | - 0=X out-of-bounds }
+0D        ; { +13    | per-object info/flags }
+          ; {        | - direction and counters for looking, turning }
+          ; {        | - 7=deadly if object hits player }
+          ; {        | - 6=dead }
+          ; {        | - 5=deadly if player hits object }
+          ; {        | - 4=(not used) }
+          ; {        | - 3=triggered (dropping, collapsing blocks) }
+          ; {        | - 2=up (bouncing ball), dropping (spiked ball) }
+          ; {        | - 1=north (NS fire) }
+          ; {        | - 0=east (WE fire, EW guard), just dropped (spec objs) }
+0E        ; { +14    | d_x_adj }
+0F        ; { +15    | d_y_adj }
+10-11     ; { +16-17 | ptr object table entry or tmp player graphic_no }
+12        ; { +18    | pixel X adjustment }
+13        ; { +19    | pixel Y adjustment }
+14-17     ; { +20-23 | unused }
+18        ; { +24    | sprite data width (bytes) }
+19        ; { +25    | sprite data height (lines) }
+1A        ; { +26    | pixel X }
+1B        ; { +27    | pixel Y }
+1C        ; { +28    | old sprite data width (bytes) }
+1D        ; { +29    | old sprite data height (lines) }
+1E        ; { +30    | old pixel X }
+1F        ; { +31    | old pixel Y }
+*/
 
 public class GraphicObject {
     private final GraphicObjects parent;
@@ -11,8 +64,11 @@ public class GraphicObject {
     private int grNo;
     private int x, y, z;
     private int w, d, h;
+    private int flags7;
+    private int screen;
 
-    public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h) {
+    public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
+                         int flags7, int screen) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -22,10 +78,12 @@ public class GraphicObject {
         this.w = w;
         this.d = d;
         this.h = h;
+        this.flags7 = flags7;
+        this.screen = screen;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -238,8 +296,8 @@ public class GraphicObject {
     public void setTemp10(int temp10) { parent.setTemp10(ix, temp10); }
     public void setTemp11(int temp11) { parent.setTemp11(ix, temp11); }
 
-    public int getScreen() { return parent.getScreen(ix); }
-    public void setScreen(int screen) { parent.setScreen(ix, screen); }
+    public int getScreen() { return screen; }
+    public void setScreen(int screen) { this.screen = screen; }
     public boolean isCauldronRoom() { return getScreen() == 0x88; }
     public boolean isOddRoom() { return (getScreen() & 1) == 1; }
 
@@ -290,36 +348,37 @@ public class GraphicObject {
 
 
     // Flag 7
-    public int getFlags7() { return parent.getFlags7(ix); }
-    public void setFlags7(int f) { parent.setFlags7(ix, f); }
+    public int getFlags7() { return flags7; }
+    public void setFlags7(int f) { this.flags7 = f; }
 
-    public boolean isNearArch() { return parent.isNearArch(ix); }
-    public void setNearArch() { parent.setNearArch(ix); }
-    public void resetNearArch() { parent.resetNearArch(ix); }
+    public boolean isNearArch() { return Flags7.isNearArch(getFlags7()); }
+    public void setNearArch() { setFlags7(Flags7.setNearArch(getFlags7())); }
+    public void resetNearArch() { setFlags7(Flags7.resetNearArch(getFlags7())); }
 
-    public boolean ignore3D() { return parent.ignore3D(ix); }
-    public void setIgnore3D() { parent.setIgnore3D(ix); }
-    public void resetIgnore3D() { parent.resetIgnore3D(ix); }
+    public boolean ignore3D() { return Flags7.ignore3D(getFlags7()); }
+    public void setIgnore3D() { setFlags7(Flags7.setIgnore3D(getFlags7())); }
+    public void resetIgnore3D() { setFlags7(Flags7.resetIgnore3D(getFlags7())); }
 
-    public boolean isMoveable() { return parent.isMoveable(ix); }
+    public boolean isMoveable() { return Flags7.isMoveable(getFlags7()); }
 
-    public boolean isAutoAdjust() { return parent.isAutoAdjust(ix); }
+    public boolean isAutoAdjust() { return Flags7.isAutoAdjust(getFlags7()); }
 
-    public void setDraw() { parent.setDraw(ix); }
-    public void setWipe() { parent.setWipe(ix); }
-    public void resetWipe() { parent.resetWipe(ix); }
+    public void setDraw() { setFlags7(Flags7.setDraw(getFlags7())); }
+
+    public void setWipe() { setFlags7(Flags7.setWipe(getFlags7())); }
+    public void resetWipe() { setFlags7(Flags7.resetWipe(getFlags7())); }
     public void setWipeAndDraw() {
         // Not used - al objects are redrawn every tick
         setWipe();
         setDraw();
     }
 
-    public boolean isHFlip() { return parent.isHFlip(ix); }
-    public void setHFlip() { parent.setHFlip(ix); }
-    public void resetHFlip() { parent.resetHFlip(ix); }
-    public void toggleHFlip() { parent.toggleHFlip(ix); }
+    public boolean isHFlip() { return Flags7.isHFlip(getFlags7()); }
+    public void setHFlip() { setFlags7(Flags7.setHFlip(getFlags7())); }
+    public void resetHFlip() { setFlags7(Flags7.resetHFlip(getFlags7())); }
+    public void toggleHFlip() { setFlags7(Flags7.toggleHFlip(getFlags7())); }
 
-    public boolean isVFlip() { return parent.isVFlip(ix); }
+    public boolean isVFlip() { return Flags7.isVFlip(getFlags7()); }
 
     // Flags C
     public int getFlagsC() { return parent.getFlagsC(ix); }
