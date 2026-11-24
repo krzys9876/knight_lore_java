@@ -105,16 +105,6 @@ public class GraphicObjects {
         }
     }
 
-    public void copyFrom(GraphicObjects other, int otherIx, int ix) { copyFrom(other, otherIx, ix, 0x20); }
-
-    public void copyFrom(GraphicObjects other, int otherIx, int ix, int bytes) {
-        for(int i = 0; i < bytes; i++) data.set(ix + i, other.data.getU(otherIx + i));
-    }
-
-    public void copyFrom(DataBlock other, int otherIx, int ix, int bytes) {
-        for(int i = 0; i < bytes; i++) data.set(ix + i, other.getU(otherIx + i));
-    }
-
     public void resetObject(int ix) {
         for(int i = 0; i < 0x20; i++) data.set(ix + i, 0);
     }
@@ -145,6 +135,10 @@ public class GraphicObjects {
     public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
     public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
+    public int getOldSpriteWidthB(int ix) { return data.getU(ix + 0x1C); }
+    public int getOldSpriteHeight(int ix) { return data.getU(ix + 0x1D); }
+    public int getOldPixelX(int ix) { return data.getU(ix + 0x1E); }
+    public int getOldPixelY(int ix) { return data.getU(ix + 0x1F); }
     public boolean isJumping(int ix) { return data.isSet(3, ix + 0x0C); }
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
@@ -176,7 +170,6 @@ public class GraphicObjects {
     public void setSpriteHeight(int ix, int h) { data.set(ix + 0x19, h); }
 
     public void setDeadlyIfObjectHitsPlayer(int ix) { data.setBit(7, ix + 0x0D); }
-    //public void setDeadlyIfPlayerHitsObject(int ix) { data.setBit(5, ix + 0x0D); }
     public void setBothDeadlyFlags(int ix) { data.set(ix + 0x0D, data.getU(ix + 0x0D) | 0xA0); }
     public void setDead(int ix) { data.setBit(6, ix + 0x0D); }
     public void resetDead(int ix) { data.resetBit(6, ix + 0x0D); }

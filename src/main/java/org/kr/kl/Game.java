@@ -86,8 +86,8 @@ public class Game implements Runnable {
         this.debugPanel1.append("Start");
         this.debugPanel2.append("Start");
 
+        SpriteData spriteData = new SpriteData();
         this.locations = new Locations(spriteData);
-
         mainMemory = new VideoMemoryScreen(spriteData);
         shadowMemory = new VideoMemoryLinear(spriteData);
 
@@ -424,8 +424,8 @@ public class Game implements Runnable {
             plyr_spr_init_data_D1A1.set(plyr_spr_init_data_D1A1.start + 3 + 8, 12 + (128+overrideZ) & 0xFF); // negative convention
         }
 
-        plyr_spr_1_scratchpad_D161.copyFrom(plyr_spr_init_data_D1A1, plyr_spr_init_data_D1A1.start, 8);
-        plyr_spr_2_scratchpad_D181.copyFrom(plyr_spr_init_data_D1A1, plyr_spr_init_data_D1A1.start+8, 8);
+        plyr_spr_1_scratchpad_D161.copyFromInit(plyr_spr_init_data_D1A1, 0);
+        plyr_spr_2_scratchpad_D181.copyFromInit(plyr_spr_init_data_D1A1, 8);
         plyr_spr_1_scratchpad_D161.setTemp10(0x12);
         plyr_spr_2_scratchpad_D181.setTemp10(0x22);
 
@@ -702,8 +702,7 @@ public class Game implements Runnable {
 
         // @label=reset_objs_wipe_flag
         // Mot used - all objects are redrawn
-        for(int addr = graphicObjects.start(); addr<graphicObjects.endExcl(); addr+=0x20)
-            graphicObjects.resetWipe(addr);
+        for(int addr = graphicObjects.start(); addr<graphicObjects.endExcl(); addr+=0x20) graphicObjects.i2o(addr).resetWipe();
 
         return variables.isGameOver();
     }
@@ -886,14 +885,14 @@ public class Game implements Runnable {
                             boolean is2behind1 = false;
                             if(objCoincide) {
                                 int objectLoc1 = objects_to_draw_CE8B.getU(de1) * 32 + graphicObjects.start();
-                                int grNo1 = graphicObjects.getGrNo(objectLoc1);
+                                int grNo1 = graphicObjects.i2o(objectLoc1).getGrNo();
                                 boolean isSpecial1 = grNo1 >= 0x60 && grNo1 <= 0x66;
                                 int objectLoc2 = objects_to_draw_CE8B.getU(de2) * 32 + graphicObjects.start();
-                                int grNo2 = graphicObjects.getGrNo(objectLoc2);
+                                int grNo2 = graphicObjects.i2o(objectLoc2).getGrNo();
                                 boolean isSpecial2 = grNo2 >= 0x60 && grNo2 <= 0x66;
-                                if(isSpecial1) graphicObjects.setGrNo(objectLoc1, 0xBB); //; set to twinkle sprite
+                                if(isSpecial1) graphicObjects.i2o(objectLoc1).setGrNo(0xBB); //; set to twinkle sprite
                                 else {
-                                    if(isSpecial2) graphicObjects.setGrNo(objectLoc2, 0xBB); //; set to twinkle sprite
+                                    if(isSpecial2) graphicObjects.i2o(objectLoc2).setGrNo(0xBB); //; set to twinkle sprite
                                     // The first object on the list is behind the second
                                     // (e.g. spell is behind cauldron, so it is invisible when inside).
                                     // This makes rendering of coinciding object deterministic.
@@ -1587,8 +1586,8 @@ public class Game implements Runnable {
     private void setDestroyedFlags(int objectIx, int playerIx) {
         if(params.isDisableDeath()) return;
 
-        if(graphicObjects.getDeadlyIfObjectHitsPlayer(objectIx)) graphicObjects.setDead(playerIx); // bit 7->6
-        if(graphicObjects.getDeadlyIfPlayerHitsObject(playerIx)) graphicObjects.setDead(objectIx); // bit 5->6
+        if(graphicObjects.i2o(objectIx).getDeadlyIfObjectHitsPlayer()) graphicObjects.i2o(playerIx).setDead(); // bit 7->6
+        if(graphicObjects.i2o(playerIx).getDeadlyIfPlayerHitsObject()) graphicObjects.i2o(objectIx).setDead(); // bit 5->6
     }
 
     private int adj_dZ_for_obj_intersect_CC38(GraphicObject o, int dzAdj) {
@@ -1929,8 +1928,7 @@ public class Game implements Runnable {
         }
 
         // Player top is the second object, player bottom is at block start
-        // ; copy x,y,z,w,d,h,flags
-        graphicObjects.copyFrom(graphicObjects, o.prev().ix + 1, o.ix + 1, 7);
+        o.copyCoordsFrom(o.prev());
         o.setH(0);
         o.setIgnore3D();
         if(o.getLookAroundCounter() == 0) { // look around again
@@ -2565,10 +2563,10 @@ public class Game implements Runnable {
     private void update_special_objs_C591() {
         int iy = 0x5C48;
         for(int i=0; i<2; i++) {
-            int grNo = graphicObjects.getGrNo(iy);
+            int grNo = graphicObjects.i2o(iy).getGrNo();
             if(grNo != 0) {
-                int e = graphicObjects.getTemp10(iy);
-                int d = graphicObjects.getTemp11(iy);
+                int e = graphicObjects.i2o(iy).getTemp10();
+                int d = graphicObjects.i2o(iy).getTemp11();
                 int ptr = d*256 + e; // ptr can be 0 for cauldron bubbles
                 if(ptr != 0) {
                     int spi = specialObjects.getIndex(ptr);

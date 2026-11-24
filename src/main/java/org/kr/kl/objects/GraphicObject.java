@@ -21,21 +21,68 @@ public class GraphicObject {
 
     public void reset() { parent.resetObject(ix); }
 
-    public void copyFrom(DataBlock other, int otherIx, int bytes) {
-        for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.getU(otherIx + i));
-    }
-
     private static final DataBlock cauldron_bubbles_B8C8 =  InitialData.block("cauldron_bubbles_B8C8");
 
     public void makeCauldronBubbles() {
-        for(int i = 0; i < 0x12; i++) parent.data.set(ix + i, cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + i)); // 18 bytes to copy
+        copyFromInit(cauldron_bubbles_B8C8, 0);
+        setScreen(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 8));
+        setDX(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 9));
+        setDY(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x0A));
+        setDZ(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x0B));
+        setFlagsC(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x0C));
+        setFlagsD(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x0D));
+        setDXAdj(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x0E));
+        setDYAdj(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x0F));
+        setTemp10(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x10));
+        setTemp11(cauldron_bubbles_B8C8.getU(cauldron_bubbles_B8C8.start + 0x11));
     }
 
+    public void copyFromInit(DataBlock other, int offset) {
+        offset += other.start;
+        setGrNo(other.getU(offset));
+        setX(other.getU(offset + 1));
+        setY(other.getU(offset + 2));
+        setZ(other.getU(offset + 3));
+        setW(other.getU(offset + 4));
+        setD(other.getU(offset + 5));
+        setH(other.getU(offset + 6));
+        setFlags7(other.getU(offset + 7));
+    }
 
-    public void copyFrom(GraphicObject other) { copyFrom(other, 0x20);  }
+    public void copyCoordsFrom(GraphicObject other) {
+        setX(other.getX());
+        setY(other.getY());
+        setZ(other.getZ());
+        setW(other.getW());
+        setD(other.getD());
+        setH(other.getH());
+        setFlags7(other.getFlags7());
+    }
 
-    public void copyFrom(GraphicObject other, int bytes) {
-        for(int i = 0; i < bytes; i++) parent.data.set(ix + i, other.parent.data.getU(other.parent.start() + i));
+    public void copyFrom(GraphicObject other) {
+        setGrNo(other.getGrNo());
+        copyCoordsFrom(other);
+        setScreen(other.getScreen());
+        setDX(other.getDX());
+        setDY(other.getDY());
+        setDZ(other.getDZ());
+        setFlagsC(other.getFlagsC());
+        setFlagsD(other.getFlagsD());
+        setDXAdj(other.getDXAdj());
+        setDYAdj(other.getDYAdj());
+        setTemp10(other.getTemp10());
+        setTemp11(other.getTemp11());
+        setXAdj(other.getXAdj());
+        setYAdj(other.getYAdj());
+        setSpriteWidthB(other.getSpriteWidthB());
+        setSpriteHeight(other.getSpriteHeight());
+        setPixelX(other.getPixelX());
+        setPixelY(other.getPixelY());
+        setOldSpriteWidthB(other.getOldSpriteWidthB());
+        setOldSpriteHeight(other.getOldSpriteHeight());
+        setOldPixelX(other.getOldPixelX());
+        setOldPixelY(other.getOldPixelY());
+
     }
 
     public void initFrom(BackgroundSprite sprite, int screenNo) {
@@ -170,14 +217,19 @@ public class GraphicObject {
     public void setDead() { parent.setDead(ix); }
     public void resetDead() { parent.resetDead(ix); }
     public void setDeadlyIfObjectHitsPlayer() { parent.setDeadlyIfObjectHitsPlayer(ix); }
-    //public void setDeadlyIfPlayerHitsObject(int ix) { data.setBit(5, ix + 0x0D); }
     public void setBothDeadlyFlags() { parent.setBothDeadlyFlags(ix); }
+    public boolean getDeadlyIfObjectHitsPlayer() { return parent.getDeadlyIfObjectHitsPlayer(ix); }
+    public boolean getDeadlyIfPlayerHitsObject() { return parent.getDeadlyIfPlayerHitsObject(ix); }
 
 
     public int getSpriteWidthB() { return parent.getSpriteWidthB(ix); }
     public int getSpriteHeight() { return parent.getSpriteHeight(ix); }
+    public int getOldSpriteWidthB() { return parent.getOldSpriteWidthB(ix); }
+    public int getOldSpriteHeight() { return parent.getOldSpriteHeight(ix); }
     public void setOldSpriteWidthB(int w) { parent.setOldSpriteWidthB(ix, w); }
     public void setOldSpriteHeight(int h) { parent.setOldSpriteHeight(ix, h); }
+    public int getOldPixelX() { return parent.getOldPixelX(ix); }
+    public int getOldPixelY() { return parent.getOldPixelY(ix); }
     public void setOldPixelX(int x) { parent.setOldPixelX(ix, x); }
     public void setOldPixelY(int y) { parent.setOldPixelY(ix, y); }
 
@@ -223,7 +275,7 @@ public class GraphicObject {
     public boolean isVFlip() { return parent.isVFlip(ix); }
 
     // Flags C
-    //public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
+    public int getFlagsC() { return parent.getFlagsC(ix); }
     public void setFlagsC(int f) { parent.setFlagsC(ix, f); }
 
     public int getEnterCounter() { return parent.getEnterCounter(ix); }
@@ -246,6 +298,8 @@ public class GraphicObject {
     public void resetJumping() { parent.resetJumping(ix); }
 
     // Flag D
+    public int getFlagsD() { return parent.getFlagsD(ix); }
+    public void setFlagsD(int f) { parent.setFlagsD(ix, f); }
 
     public boolean isDropping() { return parent.isDropping(ix); }
     public void setRising() { parent.setRising(ix); }
