@@ -67,9 +67,10 @@ public class GraphicObject {
     private int flags7;
     private int screen;
     private int dx, dy, dz;
+    private int flagsC;
 
     public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
-                         int flags7, int screen, int dx, int dy, int dz) {
+                         int flags7, int screen, int dx, int dy, int dz, int flagsC) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -84,10 +85,11 @@ public class GraphicObject {
         this.dx = dx;
         this.dy = dy;
         this.dz = dz;
+        this.flagsC = flagsC;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -385,23 +387,26 @@ public class GraphicObject {
     public boolean isVFlip() { return Flags7.isVFlip(getFlags7()); }
 
     // Flags C
-    public int getFlagsC() { return parent.getFlagsC(ix); }
-    public void setFlagsC(int f) { parent.setFlagsC(ix, f); }
+    public int getFlagsC() { return flagsC; }
+    public void setFlagsC(int f) { this.flagsC = f; }
 
-    public int getEnterCounter() { return parent.getEnterCounter(ix); }
-    public boolean enteringScreen() { return parent.enteringScreen(ix); }
-    public void initEnterCounter() { parent.initEnterCounter(ix); }
-    public void decEnterCounter() { parent.decEnterCounter(ix); }
+    public int getEnterCounter() { return getFlagsC() & 0xF0; }
+    public boolean enteringScreen() { return getEnterCounter() > 0; }
+    public void initEnterCounter() { setFlagsC(getFlagsC() | 0x30); }
+    public void decEnterCounter() {
+        int counter = getEnterCounter();
+        if(counter >= 0x10) setFlagsC((getFlagsC() & 0x0F) + counter - 0x10);
+    }
 
-    public boolean isOobX() { return parent.isOobX(ix); }
-    public boolean isOobY() { return parent.isOobY(ix); }
+    public boolean isOobX() { return DataBlock.isSetS(0, getFlagsC()); }
+    public boolean isOobY() { return DataBlock.isSetS(1, getFlagsC()); }
     public boolean isOobXY() { return isOobX() || isOobY(); }
-    public boolean isOobZ() { return parent.isOobZ(ix); }
+    public boolean isOobZ() { return DataBlock.isSetS(2, getFlagsC()); }
 
-    public void setOobX() { parent.setOobX(ix); }
-    public void setOobY() { parent.setOobY(ix); }
-    public void setOobZ() { parent.setOobZ(ix); }
-    public void clearOob() { parent.clearOob(ix); }
+    public void setOobX() { setFlagsC(DataBlock.getWithBitSetS(0, getFlagsC())); }
+    public void setOobY() { setFlagsC(DataBlock.getWithBitSetS(1, getFlagsC())); }
+    public void setOobZ() { setFlagsC(DataBlock.getWithBitSetS(2, getFlagsC())); }
+    public void clearOob() { setFlagsC(getFlagsC() & 0xF8); }
 
     public boolean isJumping() { return parent.isJumping(ix); }
     public void setJumping() { parent.setJumping(ix); }

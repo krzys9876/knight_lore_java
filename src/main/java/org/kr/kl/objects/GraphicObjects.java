@@ -106,7 +106,8 @@ public class GraphicObjects {
                     data.getU(ix + 1), data.getU(ix + 2), data.getU(ix + 3),
                     data.getU(ix + 4), data.getU(ix + 5), data.getU(ix + 6),
                     data.getU(ix + 7), data.getU(ix + 8),
-                    data.getU(ix + 9), data.getU(ix + 0x0A), data.getU(ix + 0x0B));
+                    data.getU(ix + 9), data.getU(ix + 0x0A), data.getU(ix + 0x0B),
+                    data.getU(ix + 0x0C));
         }
     }
 
@@ -157,7 +158,6 @@ public class GraphicObjects {
     public void setDirDown(int ix) { data.resetBit(2, ix + 0x0D); }
     public void setTriggered(int ix) { data.setBit(3, ix + 0x0D); }
     public void resetTriggered(int ix) { data.resetBit(3, ix + 0x0D); }
-    public void clearOob(int ix) { data.set(ix + 0x0C, getFlagsC(ix) & 0xF8); }
     public void setJustDropped(int ix) { data.setBit(0, ix + 0x0D); }
     public void resetJustDropped(int ix) { data.resetBit(0, ix + 0x0D); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
@@ -168,28 +168,6 @@ public class GraphicObjects {
     public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
     public void setJumping(int ix) { data.setBit(3, ix + 0x0C); }
     public void resetJumping(int ix) { data.resetBit(3, ix + 0x0C); }
-
-    // Flags C
-    public int getFlagsC(int ix) { return data.getS(ix + 0x0C); }
-    public void setFlagsC(int ix, int f) { data.set(ix + 0x0C, f); }
-
-    public int getEnterCounter(int ix) { return getFlagsC(ix) & 0xF0; }
-    public boolean enteringScreen(int ix) { return getEnterCounter(ix) > 0; }
-    public void initEnterCounter(int ix) { setFlagsC(ix, getFlagsC(ix) | 0x30); }
-    public void decEnterCounter(int ix) {
-        int counter = getEnterCounter(ix);
-        if(counter >= 0x10) setFlagsC(ix, (getFlagsC(ix) & 0x0F) + counter - 0x10);
-    }
-
-    public boolean isOobX(int ix) { return data.isSet(0, ix + 0x0C); }
-    public boolean isOobY(int ix) { return data.isSet(1, ix + 0x0C); }
-    public boolean isOobXY(int ix) { return isOobX(ix) || isOobY(ix); }
-    public boolean isOobZ(int ix) { return data.isSet(2, ix + 0x0C); }
-
-    public void setOobX(int ix) { data.setBit(0, ix + 0x0C); }
-    public void setOobY(int ix) { data.setBit(1, ix + 0x0C); }
-    public void setOobZ(int ix) { data.setBit(2, ix + 0x0C); }
-
 
     // Flags D
     public int getFlagsD(int ix) { return data.getS(ix + 0x0D); }
