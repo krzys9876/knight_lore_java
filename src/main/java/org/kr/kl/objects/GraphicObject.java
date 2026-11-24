@@ -208,12 +208,12 @@ public class GraphicObject {
 
     public boolean isNotIgnored() { return getGrNo() != 0 && !ignore3D(); }
 
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public int getZ() { return z; }
-    public int getW() { return w; }
-    public int getD() { return d; }
-    public int getH() { return h; }
+    public int getX() { return DataBlock.getUS(x); }
+    public int getY() { return DataBlock.getUS(y); }
+    public int getZ() { return DataBlock.getUS(z); }
+    public int getW() { return DataBlock.getUS(w); }
+    public int getD() { return DataBlock.getUS(d); }
+    public int getH() { return DataBlock.getUS(h); }
     public int getDX() { return parent.getDX(ix); }
     public int getDXu() { return parent.getDXu(ix); }
     public int getDY() { return parent.getDY(ix); }
