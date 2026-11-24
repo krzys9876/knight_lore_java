@@ -140,7 +140,7 @@ public class Game implements Runnable {
 
         variables.setGameStart_5BB2();
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
-        variables.setLives_5BBA(params.getInitialLives()+1); // NOTE: the game starts with lose life
+        variables.setLives_5BBA(params.getInitialLives() + 1); // NOTE: the game starts with lose life
         params.getRnd().updateSeed1();
         clear_scrn_D55F();
         do_menu_selection_BD0C();
@@ -150,36 +150,19 @@ public class Game implements Runnable {
         debugPanel2.append("Input method: " + variables.getUserInputMethod_5BA4());
 
         // CALL $B2CF    ; play tune // ignore audio
-        if(gameCounter==0) shuffle_objects_required_B544();
+        if (gameCounter == 0) shuffle_objects_required_B544();
         objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects());
 
-        //int a = locations.data.start;
-        boolean specialObjectsInitialized = false;
-        //while(a < location_tbl_6251.endExcl())
-        {
-            //variables.data.set(0x5BBA, 5); // important only when looping over rooms
-            //int id = location_tbl_6251.get(a);
-            //IO.println("Room id: "+id);
-            int overrideRoomId=-1;
-            //int overrideRoomId = 0xA8;
-            int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
-            int overrideNS = 0; // -S +N
-            int overrideZ = 0; // + only : 60 is a little above upper entrance
+        int overrideRoomId = -1;
+        int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+        int overrideNS = 0; // -S +N
+        int overrideZ = 0; // + only : 60 is a little above upper entrance
 
-            init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
-            init_sun_C46D();
-            if (!specialObjectsInitialized) {
-                init_special_objects_C47E();
-                specialObjectsInitialized = true;
-            }
-            player_dies_AFB7();
-            game_loop_AFBA();
-
-            //saveImage(mainPanel, "images/location_%03d_%02x.png".formatted(start_loc_1_D169.get(0xD169),start_loc_1_D169.get(0xD169)));
-
-            //int size = location_tbl_6251.getA(a+1);
-            //a+=size+1;
-        }
+        init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
+        init_sun_C46D();
+        init_special_objects_C47E();
+        player_dies_AFB7();
+        game_loop_AFBA();
     }
 
     private void saveImage(GamePanel panel, String filePath, String fileName) {
