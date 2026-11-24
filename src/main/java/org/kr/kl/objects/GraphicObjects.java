@@ -102,7 +102,9 @@ public class GraphicObjects {
         objects = new GraphicObject[size];
         for(int i=0; i < this.size; i++) {
             int ix = start() + i * 0x20;
-            objects[i] = new GraphicObject(this, ix, data.getU(ix), data.getU(ix + 1), data.getU(ix + 2), data.getU(ix + 3));
+            objects[i] = new GraphicObject(this, ix, data.getU(ix),
+                    data.getU(ix + 1), data.getU(ix + 2), data.getU(ix + 3),
+                    data.getU(ix + 4), data.getU(ix + 5), data.getU(ix + 6));
         }
     }
 
@@ -112,9 +114,6 @@ public class GraphicObjects {
 
     public String objectInfo(int num, int ix) { return data.objectInfo(num, ix); }
 
-    public int getW(int ix) { return data.getU(ix + 4); }
-    public int getD(int ix) { return data.getU(ix + 5); }
-    public int getH(int ix) { return data.getU(ix + 6); }
     public int getDX(int ix) { return data.getS(ix + 0x09); }
     public int getDXu(int ix) { return data.getU(ix + 0x09); }
     public int getDY(int ix) { return data.getS(ix + 0x0A); }
@@ -140,9 +139,6 @@ public class GraphicObjects {
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
 
-    public void setW(int ix, int w) { data.set(ix + 4, w); }
-    public void setD(int ix, int d) { data.set(ix + 5, d); }
-    public void setH(int ix, int h) { data.set(ix + 6, h); }
     public void setScreen(int ix, int h) { data.set(ix + 8, h); }
     public void setDX(int ix, int dx) { data.set(ix + 0x09, dx); }
     public void setDY(int ix, int dy) { data.set(ix + 0x0A, dy); }

@@ -10,18 +10,22 @@ public class GraphicObject {
 
     private int grNo;
     private int x, y, z;
+    private int w, d, h;
 
-    public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z) {
+    public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
         this.x = x;
         this.y = y;
         this.z = z;
+        this.w = w;
+        this.d = d;
+        this.h = h;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -207,9 +211,9 @@ public class GraphicObject {
     public int getX() { return x; }
     public int getY() { return y; }
     public int getZ() { return z; }
-    public int getW() { return parent.getW(ix); }
-    public int getD() { return parent.getD(ix); }
-    public int getH() { return parent.getH(ix); }
+    public int getW() { return w; }
+    public int getD() { return d; }
+    public int getH() { return h; }
     public int getDX() { return parent.getDX(ix); }
     public int getDXu() { return parent.getDXu(ix); }
     public int getDY() { return parent.getDY(ix); }
@@ -242,9 +246,9 @@ public class GraphicObject {
     public void setX(int x) { this.x = x; }
     public void setY(int y) { this.y = y; }
     public void setZ(int z) { this.z = z; }
-    public void setW(int w) { parent.setW(ix, w); }
-    public void setD(int d) { parent.setD(ix, d); }
-    public void setH(int h) { parent.setH(ix, h); }
+    public void setW(int w) { this.w = w; }
+    public void setD(int d) { this.d = d; }
+    public void setH(int h) { this.h = h; }
     public void setDX(int dx) { parent.setDX(ix, dx); }
     public void setDY(int dy) { parent.setDY(ix, dy); }
     public void setDZ(int dz) { parent.setDZ(ix, dz); }
