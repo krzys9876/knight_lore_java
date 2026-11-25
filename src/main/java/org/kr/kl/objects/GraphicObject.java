@@ -68,9 +68,10 @@ public class GraphicObject {
     private int screen;
     private int dx, dy, dz;
     private int flagsC;
+    private int flagsD;
 
     public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
-                         int flags7, int screen, int dx, int dy, int dz, int flagsC) {
+                         int flags7, int screen, int dx, int dy, int dz, int flagsC, int flagsD) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -86,10 +87,11 @@ public class GraphicObject {
         this.dy = dy;
         this.dz = dz;
         this.flagsC = flagsC;
+        this.flagsD = flagsD;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {

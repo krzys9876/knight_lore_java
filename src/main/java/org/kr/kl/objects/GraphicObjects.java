@@ -107,7 +107,7 @@ public class GraphicObjects {
                     data.getU(ix + 4), data.getU(ix + 5), data.getU(ix + 6),
                     data.getU(ix + 7), data.getU(ix + 8),
                     data.getU(ix + 9), data.getU(ix + 0x0A), data.getU(ix + 0x0B),
-                    data.getU(ix + 0x0C));
+                    data.getU(ix + 0x0C), data.getU(ix + 0x0D));
         }
     }
 
