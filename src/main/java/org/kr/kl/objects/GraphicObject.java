@@ -74,10 +74,10 @@ public class GraphicObject {
     private int pixelX, pixelY, pixelXAdj, pixelYAdj, oldPixelX, oldPixelY;
     private int spriteWidthB, spriteHeight, oldSpriteWidthB, oldSpriteHeight;
 
-
     public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
                          int flags7, int screen, int dx, int dy, int dz, int flagsC, int flagsD, int dxAdj, int dyAdj,
-                         int temp10, int temp11, int pixelXAdj, int pixelYAdj, int spriteWidthB, int spriteHeight) {
+                         int temp10, int temp11, int pixelXAdj, int pixelYAdj, int spriteWidthB, int spriteHeight,
+                         int pixelX, int pixelY, int oldSpriteWidthB, int oldSpriteHeight, int oldPixelX, int oldPixelY) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -102,10 +102,16 @@ public class GraphicObject {
         this.pixelYAdj = pixelYAdj;
         this.spriteWidthB = spriteWidthB;
         this.spriteHeight = spriteHeight;
+        this.pixelX = pixelX;
+        this.pixelY = pixelY;
+        this.oldSpriteWidthB = oldSpriteWidthB;
+        this.oldSpriteHeight = oldSpriteHeight;
+        this.oldPixelX = oldPixelX;
+        this.oldPixelY = oldPixelY;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -307,10 +313,10 @@ public class GraphicObject {
     public boolean isMoving() { return getDX()!=0 || getDY()!=0 || getDZ()!=0; }
     public boolean notMovingXY() { return getDX()==0 && getDY()==0; }
 
-    public int getPixelX() { return parent.getPixelX(ix); }
-    public int getPixelY() { return parent.getPixelY(ix); }
-    public void setPixelX(int x) { parent.setPixelX(ix, x); }
-    public void setPixelY(int y) { parent.setPixelY(ix, y); }
+    public int getPixelX() { return DataBlock.getUS(pixelX); }
+    public int getPixelY() { return DataBlock.getUS(pixelY); }
+    public void setPixelX(int x) { this.pixelX = x; }
+    public void setPixelY(int y) { this.pixelY = y; }
 
     public int getTemp10() { return DataBlock.getUS(temp10); }
     public int getTemp11() { return DataBlock.getUS(temp11); }
@@ -342,14 +348,14 @@ public class GraphicObject {
 
     public int getSpriteWidthB() { return DataBlock.getUS(spriteWidthB); }
     public int getSpriteHeight() { return DataBlock.getUS(spriteHeight); }
-    public int getOldSpriteWidthB() { return parent.getOldSpriteWidthB(ix); }
-    public int getOldSpriteHeight() { return parent.getOldSpriteHeight(ix); }
-    public void setOldSpriteWidthB(int w) { parent.setOldSpriteWidthB(ix, w); }
-    public void setOldSpriteHeight(int h) { parent.setOldSpriteHeight(ix, h); }
-    public int getOldPixelX() { return parent.getOldPixelX(ix); }
-    public int getOldPixelY() { return parent.getOldPixelY(ix); }
-    public void setOldPixelX(int x) { parent.setOldPixelX(ix, x); }
-    public void setOldPixelY(int y) { parent.setOldPixelY(ix, y); }
+    public int getOldSpriteWidthB() { return DataBlock.getUS(oldSpriteWidthB); }
+    public int getOldSpriteHeight() { return DataBlock.getUS(oldSpriteHeight); }
+    public void setOldSpriteWidthB(int w) { this.oldSpriteWidthB = w; }
+    public void setOldSpriteHeight(int h) { this.oldSpriteHeight = h; }
+    public int getOldPixelX() { return DataBlock.getUS(oldPixelX); }
+    public int getOldPixelY() { return DataBlock.getUS(oldPixelY); }
+    public void setOldPixelX(int x) { this.oldPixelX = x; }
+    public void setOldPixelY(int y) { this.oldPixelY = y; }
 
     public void save2DInfo() {
         setOldSpriteWidthB(getSpriteWidthB());
@@ -357,8 +363,6 @@ public class GraphicObject {
         setOldPixelX(getPixelX());
         setOldPixelY(getPixelY());
     }
-
-
 
     // Flag 7
     public int getFlags7() { return flags7; }
