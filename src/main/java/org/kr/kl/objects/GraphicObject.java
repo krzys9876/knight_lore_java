@@ -406,46 +406,42 @@ public class GraphicObject {
     public int getFlagsD() { return flagsD; }
     public void setFlagsD(int f) { this.flagsD = f; }
 
-    public boolean isDropping() { return DataBlock.isSetS(2, getFlagsD()); }
-    public void setRising() { setFlagsD(DataBlock.getWithBitResetS(2, getFlagsD())); }
-    public void setDropping() { setFlagsD(DataBlock.getWithBitSetS(2, getFlagsD())); }
-    public boolean isDirUp() { return DataBlock.isSetS(2, getFlagsD()); }
-    public void setDirUp() { setFlagsD(DataBlock.getWithBitSetS(2, getFlagsD())); }
-    public void setDirDown() { setFlagsD(DataBlock.getWithBitResetS(2, getFlagsD())); }
+    public boolean isDropping() { return FlagsD.isDropping(getFlagsD()); }
+    public void setRising() { setFlagsD(FlagsD.setRising(getFlagsD())); }
+    public void setDropping() { setFlagsD(FlagsD.setDropping(getFlagsD())); }
+    public boolean isDirUp() { return FlagsD.isDirUp(getFlagsD()); }
+    public void setDirUp() { setFlagsD(FlagsD.setDirUp(getFlagsD())); }
+    public void setDirDown() { setFlagsD(FlagsD.setDirDown(getFlagsD())); }
 
-    public boolean justDropped() { return DataBlock.isSetS(0, getFlagsD()); }
-    public void setJustDropped() { setFlagsD(DataBlock.getWithBitSetS(0, getFlagsD())); }
-    public void resetJustDropped() { setFlagsD(DataBlock.getWithBitResetS(0, getFlagsD())); }
+    public boolean justDropped() { return FlagsD.justDropped(getFlagsD()); }
+    public void setJustDropped() { setFlagsD(FlagsD.setJustDropped(getFlagsD())); }
+    public void resetJustDropped() { setFlagsD(FlagsD.resetJustDropped(getFlagsD())); }
 
-    public boolean isTriggered() { return DataBlock.isSetS(3, getFlagsD()); }
-    public void setTriggered() { setFlagsD(DataBlock.getWithBitSetS(3, getFlagsD())); }
-    public void resetTriggered() { setFlagsD(DataBlock.getWithBitResetS(3, getFlagsD())); }
+    public boolean isTriggered() { return FlagsD.isTriggered(getFlagsD()); }
+    public void setTriggered() { setFlagsD(FlagsD.setTriggered(getFlagsD())); }
+    public void resetTriggered() { setFlagsD(FlagsD.resetTriggered(getFlagsD())); }
 
-    public boolean isEast() { return DataBlock.isSetS(0, getFlagsD()); }
-    public boolean isNorth() { return DataBlock.isSetS(1, getFlagsD()); }
-    public int getDirection() { return getFlagsD() & 0x03; }
-    public void incDirection() { setFlagsD((getFlagsD() & 0xFC) | ((getDirection() + 1) & 0x03)); }
-    public void toggleEastWest() { setFlagsD(getFlagsD() ^ 1); }
-    public void toggleNorthSouth() { setFlagsD(getFlagsD() ^ 2); }
+    public boolean isEast() { return FlagsD.isEast(getFlagsD()); }
+    public boolean isNorth() { return FlagsD.isNorth(getFlagsD()); }
+    public int getDirection() { return FlagsD.getDirection(getFlagsD()); }
+    public void incDirection() { setFlagsD(FlagsD.incDirection(getFlagsD())); }
+    public void toggleEastWest() { setFlagsD(FlagsD.toggleEastWest(getFlagsD())); }
+    public void toggleNorthSouth() { setFlagsD(FlagsD.toggleNorthSouth(getFlagsD())); }
 
-    public int getLookAroundCounter() { return getFlagsD() & 0x0F; } // NOTE: multi-purpose bits
-    public void decLookAroundCounter() { setFlagsD((getFlagsD() & 0xF0) | ((getLookAroundCounter() - 1) & 0x0F)); }
-    public void initLookAroundCounter() { setFlagsD((getFlagsD() & 0xF0) | 8); }
+    public int getLookAroundCounter() { return FlagsD.getLookAroundCounter(getFlagsD()); } // NOTE: multi-purpose bits
+    public void decLookAroundCounter() { setFlagsD(FlagsD.decLookAroundCounter(getFlagsD())); }
+    public void initLookAroundCounter() { setFlagsD(FlagsD.initLookAroundCounter(getFlagsD())); }
 
-    public int getTurnCounter() { return getFlagsD() & 0x07; }
-    public void initTurnCounter() { setFlagsD(2); }
-    public void decTurnCounter() {
-        int counter = getTurnCounter();
-        if(counter >= 1) setFlagsD((getFlagsD() & 0xF8) + counter - 1);
-    }
+    public int getTurnCounter() { return FlagsD.getTurnCounter(getFlagsD()); }
+    public void initTurnCounter() { setFlagsD(FlagsD.initTurnCounter(getFlagsD())); }
+    public void decTurnCounter() { setFlagsD(FlagsD.decTurnCounter(getFlagsD()));}
 
-    public boolean isDead() { return DataBlock.isSetS(6, getFlagsD()); }
-    public void setDead() { setFlagsD(DataBlock.getWithBitSetS(6, getFlagsD())); }
-    public void resetDead() { setFlagsD(DataBlock.getWithBitResetS(6, getFlagsD())); }
+    public boolean isDead() { return FlagsD.isDead(getFlagsD()); }
+    public void setDead() { setFlagsD(FlagsD.setDead(getFlagsD())); }
+    public void resetDead() { setFlagsD(FlagsD.resetDead(getFlagsD())); }
 
-    public void setDeadlyIfObjectHitsPlayer() { setFlagsD(DataBlock.getWithBitSetS(7, getFlagsD())); }
-    public void setBothDeadlyFlags() { setFlagsD(getFlagsD() | 0xA0); }
-    public boolean getDeadlyIfObjectHitsPlayer() { return DataBlock.isSetS(7, getFlagsD()); }
-    public boolean getDeadlyIfPlayerHitsObject() { return DataBlock.isSetS(5, getFlagsD()); }
-
+    public void setDeadlyIfObjectHitsPlayer() { setFlagsD(FlagsD.setDeadlyIfObjectHitsPlayer(getFlagsD())); }
+    public void setBothDeadlyFlags() { setFlagsD(FlagsD.setBothDeadlyFlags(getFlagsD())); }
+    public boolean getDeadlyIfObjectHitsPlayer() { return FlagsD.getDeadlyIfObjectHitsPlayer(getFlagsD()); }
+    public boolean getDeadlyIfPlayerHitsObject() { return FlagsD.getDeadlyIfPlayerHitsObject(getFlagsD()); }
 }
