@@ -28,18 +28,18 @@ I can understand what was once a magic for me.
 
 ## State of the game ##
 
-The game is now in the first playable version. You may clone the repo and run it in IntelliJ 
+The game is now in the reasonably playable version with increased lives and time limits. You may clone the repo and run it in IntelliJ 
 
-or:
+or go:
 
 ```
     mvn package
     java -jar target/kl-0.1.jar
 ```
 
-or download _jar_ file and run it.
+or download _jar_ file and just run it.
 
-Note that you need Java 25.
+Note that you need **Java 25**.
 
 ## How to play ##
 
