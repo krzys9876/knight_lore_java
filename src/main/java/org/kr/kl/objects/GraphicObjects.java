@@ -1,59 +1,5 @@
 package org.kr.kl.objects;
 
-/*; #TABLE(default,centre,:w)
-          ; { =h Byte(n) | =h Description }
-00        ; { +0     | graphic_no. }
-01        ; { +1     | x (center) }
-02        ; { +2     | y (center) }
-03        ; { +3     | z (bottom) }
-04        ; { +4     | width (X radius) }
-05        ; { +5     | depth (Y radius) }
-06        ; { +6     | height }
-07        ; { +7     | flags }
-          ; {        | - 7=vflip sprite }
-          ; {        | - 6=hflip sprite }
-          ; {        | - 5=wipe }
-          ; {        | - 4=draw }
-          ; {        | - 3=auto-adjust near arches (player only) }
-          ; {        | - 2=moveable }
-          ; {        | - 1=ignore in 3D calculations }
-          ; {        | - 0=is near arch (player only) }
-08        ; { +8     | screen }
-09        ; { +9     | dX }
-0A        ; { +10    | dY }
-0B        ; { +11    | dZ }
-0C        ; { +12    | counter and flags }
-          ; {        | - 7-4=counter when entering screen }
-          ; {        | - 3=jumping }
-          ; {        | - 2=Z out-of-bounds }
-          ; {        | - 1=Y out-of-bounds }
-          ; {        | - 0=X out-of-bounds }
-0D        ; { +13    | per-object info/flags }
-          ; {        | - direction and counters for looking, turning }
-          ; {        | - 7=deadly if object hits player }
-          ; {        | - 6=dead }
-          ; {        | - 5=deadly if player hits object }
-          ; {        | - 4=(not used) }
-          ; {        | - 3=triggered (dropping, collapsing blocks) }
-          ; {        | - 2=up (bouncing ball), dropping (spiked ball) }
-          ; {        | - 1=north (NS fire) }
-          ; {        | - 0=east (WE fire, EW guard), just dropped (spec objs) }
-0E        ; { +14    | d_x_adj }
-0F        ; { +15    | d_y_adj }
-10-11     ; { +16-17 | ptr object table entry or tmp player graphic_no }
-12        ; { +18    | pixel X adjustment }
-13        ; { +19    | pixel Y adjustment }
-14-17     ; { +20-23 | unused }
-18        ; { +24    | sprite data width (bytes) }
-19        ; { +25    | sprite data height (lines) }
-1A        ; { +26    | pixel X }
-1B        ; { +27    | pixel Y }
-1C        ; { +28    | old sprite data width (bytes) }
-1D        ; { +29    | old sprite data height (lines) }
-1E        ; { +30    | old pixel X }
-1F        ; { +31    | old pixel Y }
-*/
-
 import org.kr.kl.data.DataBlock;
 
 public class GraphicObjects {
@@ -108,7 +54,9 @@ public class GraphicObjects {
                     data.getU(ix + 7), data.getU(ix + 8),
                     data.getU(ix + 9), data.getU(ix + 0x0A), data.getU(ix + 0x0B),
                     data.getU(ix + 0x0C), data.getU(ix + 0x0D),
-                    data.getU(ix + 0x0E), data.getU(ix + 0x0F));
+                    data.getU(ix + 0x0E), data.getU(ix + 0x0F),
+                    data.getU(ix + 0x10), data.getU(ix + 0x11),
+                    data.getU(ix + 0x12), data.getU(ix + 0x13));
         }
     }
 
@@ -118,10 +66,6 @@ public class GraphicObjects {
 
     public String objectInfo(int num, int ix) { return data.objectInfo(num, ix); }
 
-    public int getTemp10(int ix) { return data.getU(ix + 0x10); }
-    public int getTemp11(int ix) { return data.getU(ix + 0x11); }
-    public int getXAdj(int ix) { return data.getS(ix + 0x12); }
-    public int getYAdj(int ix) { return data.getS(ix + 0x13); }
     public int getPixelX(int ix) { return data.getU(ix + 0x1A); }
     public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
     public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
@@ -131,17 +75,9 @@ public class GraphicObjects {
     public int getOldPixelX(int ix) { return data.getU(ix + 0x1E); }
     public int getOldPixelY(int ix) { return data.getU(ix + 0x1F); }
 
-    public void setXAdj(int ix, int xAdj) { data.set(ix + 0x12, xAdj); }
-    public void setYAdj(int ix, int yAdj) { data.set(ix + 0x13, yAdj); }
-    public void setXYAdj(int ix, int xAdj, int yAdj) {
-        setXAdj(ix, xAdj);
-        setYAdj(ix, yAdj);
-    }
     public void setSpriteWidthB(int ix, int w) { data.set(ix + 0x18, w); }
     public void setSpriteHeight(int ix, int h) { data.set(ix + 0x19, h); }
 
-    public void setTemp10(int ix, int temp10) { data.set(ix + 0x10, temp10); }
-    public void setTemp11(int ix, int temp11) { data.set(ix + 0x11, temp11); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
     public void setOldSpriteWidthB(int ix, int w) { data.set(ix + 0x1C, w); }

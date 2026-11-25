@@ -70,9 +70,12 @@ public class GraphicObject {
     private int flagsC;
     private int flagsD;
     private int dxAdj, dyAdj;
+    private int temp10, temp11;
+    private int pixelXAdj, pixelYAdj;
 
     public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
-                         int flags7, int screen, int dx, int dy, int dz, int flagsC, int flagsD, int dxAdj, int dyAdj) {
+                         int flags7, int screen, int dx, int dy, int dz, int flagsC, int flagsD, int dxAdj, int dyAdj,
+                         int temp10, int temp11, int pixelXAdj, int pixelYAdj) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -91,10 +94,12 @@ public class GraphicObject {
         this.flagsD = flagsD;
         this.dxAdj = dxAdj;
         this.dyAdj = dyAdj;
+        this.temp10 = temp10;
+        this.temp11 = temp11;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -289,8 +294,8 @@ public class GraphicObject {
     public int getDYu() { return DataBlock.getUS(dy); }
     public int getDZ() { return DataBlock.getSS(dz); }
     public int getDZu() { return DataBlock.getUS(dz); }
-    public int getXAdj() { return parent.getXAdj(ix); }
-    public int getYAdj() { return parent.getYAdj(ix); }
+    public int getXAdj() { return DataBlock.getSS(pixelXAdj); }
+    public int getYAdj() { return DataBlock.getSS(pixelYAdj); }
     public int getDXAdj() { return DataBlock.getSS(dxAdj); }
     public int getDYAdj() { return DataBlock.getSS(dyAdj); }
     public boolean isMoving() { return getDX()!=0 || getDY()!=0 || getDZ()!=0; }
@@ -301,11 +306,11 @@ public class GraphicObject {
     public void setPixelX(int x) { parent.setPixelX(ix, x); }
     public void setPixelY(int y) { parent.setPixelY(ix, y); }
 
-    public int getTemp10() { return parent.getTemp10(ix); }
-    public int getTemp11() { return parent.getTemp11(ix); }
+    public int getTemp10() { return DataBlock.getUS(temp10); }
+    public int getTemp11() { return DataBlock.getUS(temp11); }
 
-    public void setTemp10(int temp10) { parent.setTemp10(ix, temp10); }
-    public void setTemp11(int temp11) { parent.setTemp11(ix, temp11); }
+    public void setTemp10(int temp10) { this.temp10 = temp10; }
+    public void setTemp11(int temp11) { this.temp11 = temp11; }
 
     public int getScreen() { return screen; }
     public void setScreen(int screen) { this.screen = screen; }
@@ -323,9 +328,9 @@ public class GraphicObject {
     public void setDZ(int dz) { this.dz = dz; }
     public void setDXAdj(int dxAdj) { this.dxAdj = dxAdj; }
     public void setDYAdj(int dyAdj) { this.dyAdj = dyAdj; }
-    public void setXAdj(int xAdj) { parent.setXAdj(ix, xAdj); }
-    public void setYAdj(int yAdj) { parent.setYAdj(ix, yAdj); }
-    public void setXYAdj(int xAdj, int yAdj) { parent.setXYAdj(ix, xAdj, yAdj); }
+    public void setXAdj(int xAdj) { this.pixelXAdj = xAdj; }
+    public void setYAdj(int yAdj) { this.pixelYAdj = yAdj; }
+    public void setXYAdj(int xAdj, int yAdj) { setXAdj(xAdj); setYAdj(yAdj); }
     public void setSpriteWidthB(int w) { parent.setSpriteWidthB(ix, w); }
     public void setSpriteHeight(int h) { parent.setSpriteHeight(ix, h); }
 
