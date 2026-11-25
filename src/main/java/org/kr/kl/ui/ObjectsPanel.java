@@ -6,7 +6,6 @@ import org.kr.kl.objects.SpecialObjects;
 import org.kr.kl.objects.SpriteData;
 import org.kr.kl.utils.MathUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
