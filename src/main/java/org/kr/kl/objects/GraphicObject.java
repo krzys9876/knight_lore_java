@@ -390,27 +390,24 @@ public class GraphicObject {
     public int getFlagsC() { return flagsC; }
     public void setFlagsC(int f) { this.flagsC = f; }
 
-    public int getEnterCounter() { return getFlagsC() & 0xF0; }
-    public boolean enteringScreen() { return getEnterCounter() > 0; }
-    public void initEnterCounter() { setFlagsC(getFlagsC() | 0x30); }
-    public void decEnterCounter() {
-        int counter = getEnterCounter();
-        if(counter >= 0x10) setFlagsC((getFlagsC() & 0x0F) + counter - 0x10);
-    }
+    public int getEnterCounter() { return FlagsC.getEnterCounter(getFlagsC()); }
+    public boolean enteringScreen() { return FlagsC.enteringScreen(getFlagsC()); }
+    public void initEnterCounter() { setFlagsC(FlagsC.initEnterCounter(getFlagsC())); }
+    public void decEnterCounter() { setFlagsC(FlagsC.decEnterCounter(getFlagsC()));}
 
-    public boolean isOobX() { return DataBlock.isSetS(0, getFlagsC()); }
-    public boolean isOobY() { return DataBlock.isSetS(1, getFlagsC()); }
-    public boolean isOobXY() { return isOobX() || isOobY(); }
-    public boolean isOobZ() { return DataBlock.isSetS(2, getFlagsC()); }
+    public boolean isOobX() { return FlagsC.isOobX(getFlagsC()); }
+    public boolean isOobY() { return FlagsC.isOobY(getFlagsC()); }
+    public boolean isOobXY() { return FlagsC.isOobXY(getFlagsC()); }
+    public boolean isOobZ() { return FlagsC.isOobZ(getFlagsC()); }
 
-    public void setOobX() { setFlagsC(DataBlock.getWithBitSetS(0, getFlagsC())); }
-    public void setOobY() { setFlagsC(DataBlock.getWithBitSetS(1, getFlagsC())); }
-    public void setOobZ() { setFlagsC(DataBlock.getWithBitSetS(2, getFlagsC())); }
-    public void clearOob() { setFlagsC(getFlagsC() & 0xF8); }
+    public void setOobX() { setFlagsC(FlagsC.setOobX(getFlagsC())); }
+    public void setOobY() { setFlagsC(FlagsC.setOobY(getFlagsC())); }
+    public void setOobZ() { setFlagsC(FlagsC.setOobZ(getFlagsC())); }
+    public void clearOob() { setFlagsC(FlagsC.clearOob(getFlagsC())); }
 
-    public boolean isJumping() { return parent.isJumping(ix); }
-    public void setJumping() { parent.setJumping(ix); }
-    public void resetJumping() { parent.resetJumping(ix); }
+    public boolean isJumping() { return FlagsC.isJumping(getFlagsC()); }
+    public void setJumping() { setFlagsC(FlagsC.setJumping(getFlagsC())); }
+    public void resetJumping() { setFlagsC(FlagsC.resetJumping(getFlagsC())); }
 
     // Flag D
     public int getFlagsD() { return parent.getFlagsD(ix); }

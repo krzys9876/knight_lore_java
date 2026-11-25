@@ -131,7 +131,6 @@ public class GraphicObjects {
     public int getOldSpriteHeight(int ix) { return data.getU(ix + 0x1D); }
     public int getOldPixelX(int ix) { return data.getU(ix + 0x1E); }
     public int getOldPixelY(int ix) { return data.getU(ix + 0x1F); }
-    public boolean isJumping(int ix) { return data.isSet(3, ix + 0x0C); }
     public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
     public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
 
@@ -166,8 +165,6 @@ public class GraphicObjects {
     public void setOldSpriteHeight(int ix, int h) { data.set(ix + 0x1D, h); }
     public void setOldPixelX(int ix, int x) { data.set(ix + 0x1E, x); }
     public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
-    public void setJumping(int ix) { data.setBit(3, ix + 0x0C); }
-    public void resetJumping(int ix) { data.resetBit(3, ix + 0x0C); }
 
     // Flags D
     public int getFlagsD(int ix) { return data.getS(ix + 0x0D); }
