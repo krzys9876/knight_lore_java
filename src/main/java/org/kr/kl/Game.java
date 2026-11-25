@@ -2014,7 +2014,7 @@ public class Game implements Runnable {
         o.setXYAdj(-12, -6);
 
         dec_dZ_and_update_XYZ_C700(o);
-        if(!o.isMovingXY() || o.isOobXY()) {
+        if(o.notMovingXY() || o.isOobXY()) {
             // @label=loc_C5DD
             int rnd3 = (params.getRnd().getSeed3() & 0x03) + 4;
             int dx = graphicObjects.ghostDeltaTbl[rnd3];
@@ -2316,7 +2316,7 @@ public class Game implements Runnable {
     private void upd_144_to_149_152_to_157_B6F9(GraphicObject o) {
         o.setXYAdj(-12, -6);
 
-        if(!o.isMovingXY()) return;
+        if(o.notMovingXY()) return;
         int dx = o.getDX();
         int dy = o.getDY();
         // $B703 CALL $B4AD     ; // ignore audio

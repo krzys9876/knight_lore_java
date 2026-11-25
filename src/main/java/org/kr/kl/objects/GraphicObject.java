@@ -291,7 +291,7 @@ public class GraphicObject {
     public int getDXAdj() { return parent.getDXAdj(ix); }
     public int getDYAdj() { return parent.getDYAdj(ix); }
     public boolean isMoving() { return getDX()!=0 || getDY()!=0 || getDZ()!=0; }
-    public boolean isMovingXY() { return getDX()!=0 || getDY()!=0; }
+    public boolean notMovingXY() { return getDX()==0 && getDY()==0; }
 
     public int getPixelX() { return parent.getPixelX(ix); }
     public int getPixelY() { return parent.getPixelY(ix); }
@@ -325,15 +325,6 @@ public class GraphicObject {
     public void setXYAdj(int xAdj, int yAdj) { parent.setXYAdj(ix, xAdj, yAdj); }
     public void setSpriteWidthB(int w) { parent.setSpriteWidthB(ix, w); }
     public void setSpriteHeight(int h) { parent.setSpriteHeight(ix, h); }
-
-    public boolean isDead() { return parent.isDead(ix); }
-    public void setDead() { parent.setDead(ix); }
-    public void resetDead() { parent.resetDead(ix); }
-    public void setDeadlyIfObjectHitsPlayer() { parent.setDeadlyIfObjectHitsPlayer(ix); }
-    public void setBothDeadlyFlags() { parent.setBothDeadlyFlags(ix); }
-    public boolean getDeadlyIfObjectHitsPlayer() { return parent.getDeadlyIfObjectHitsPlayer(ix); }
-    public boolean getDeadlyIfPlayerHitsObject() { return parent.getDeadlyIfPlayerHitsObject(ix); }
-
 
     public int getSpriteWidthB() { return parent.getSpriteWidthB(ix); }
     public int getSpriteHeight() { return parent.getSpriteHeight(ix); }
@@ -412,37 +403,49 @@ public class GraphicObject {
     public void resetJumping() { setFlagsC(FlagsC.resetJumping(getFlagsC())); }
 
     // Flag D
-    public int getFlagsD() { return parent.getFlagsD(ix); }
-    public void setFlagsD(int f) { parent.setFlagsD(ix, f); }
+    public int getFlagsD() { return flagsD; }
+    public void setFlagsD(int f) { this.flagsD = f; }
 
-    public boolean isDropping() { return parent.isDropping(ix); }
-    public void setRising() { parent.setRising(ix); }
-    public void setDropping() { parent.setDropping(ix); }
-    public boolean isDirUp() { return parent.isDirUp(ix); }
-    public void setDirUp() { parent.setDirUp(ix); }
-    public void setDirDown() { parent.setDirDown(ix); }
+    public boolean isDropping() { return DataBlock.isSetS(2, getFlagsD()); }
+    public void setRising() { setFlagsD(DataBlock.getWithBitResetS(2, getFlagsD())); }
+    public void setDropping() { setFlagsD(DataBlock.getWithBitSetS(2, getFlagsD())); }
+    public boolean isDirUp() { return DataBlock.isSetS(2, getFlagsD()); }
+    public void setDirUp() { setFlagsD(DataBlock.getWithBitSetS(2, getFlagsD())); }
+    public void setDirDown() { setFlagsD(DataBlock.getWithBitResetS(2, getFlagsD())); }
 
-    public boolean isTriggered() { return parent.isTriggered(ix); }
-    public boolean justDropped() { return parent.justDropped(ix); }
-    public void setJustDropped() { parent.setJustDropped(ix); }
-    public void resetJustDropped() { parent.resetJustDropped(ix); }
+    public boolean justDropped() { return DataBlock.isSetS(0, getFlagsD()); }
+    public void setJustDropped() { setFlagsD(DataBlock.getWithBitSetS(0, getFlagsD())); }
+    public void resetJustDropped() { setFlagsD(DataBlock.getWithBitResetS(0, getFlagsD())); }
 
-    public void setTriggered() { parent.setTriggered(ix); }
-    public void resetTriggered() { parent.resetTriggered(ix); }
+    public boolean isTriggered() { return DataBlock.isSetS(3, getFlagsD()); }
+    public void setTriggered() { setFlagsD(DataBlock.getWithBitSetS(3, getFlagsD())); }
+    public void resetTriggered() { setFlagsD(DataBlock.getWithBitResetS(3, getFlagsD())); }
 
-    public boolean isEast() { return parent.isEast(ix); }
-    public boolean isNorth() { return parent.isNorth(ix); }
-    public int getDirection() { return parent.getDirection(ix); }
-    public void incDirection() { parent.incDirection(ix); }
-    public void toggleEastWest() { parent.toggleEastWest(ix); }
-    public void toggleNorthSouth() { parent.toggleNorthSouth(ix); }
+    public boolean isEast() { return DataBlock.isSetS(0, getFlagsD()); }
+    public boolean isNorth() { return DataBlock.isSetS(1, getFlagsD()); }
+    public int getDirection() { return getFlagsD() & 0x03; }
+    public void incDirection() { setFlagsD((getFlagsD() & 0xFC) | ((getDirection() + 1) & 0x03)); }
+    public void toggleEastWest() { setFlagsD(getFlagsD() ^ 1); }
+    public void toggleNorthSouth() { setFlagsD(getFlagsD() ^ 2); }
 
-    public int getLookAroundCounter() { return parent.getLookAroundCounter(ix); } // NOTE: multi-purpose bits
-    public void decLookAroundCounter() { parent.decLookAroundCounter(ix); }
-    public void initLookAroundCounter() { parent.initLookAroundCounter(ix); }
+    public int getLookAroundCounter() { return getFlagsD() & 0x0F; } // NOTE: multi-purpose bits
+    public void decLookAroundCounter() { setFlagsD((getFlagsD() & 0xF0) | ((getLookAroundCounter() - 1) & 0x0F)); }
+    public void initLookAroundCounter() { setFlagsD((getFlagsD() & 0xF0) | 8); }
 
-    public int getTurnCounter() { return parent.getTurnCounter(ix); }
-    public void initTurnCounter() { parent.initTurnCounter(ix); }
-    public void decTurnCounter() { parent.decTurnCounter(ix); }
+    public int getTurnCounter() { return getFlagsD() & 0x07; }
+    public void initTurnCounter() { setFlagsD(2); }
+    public void decTurnCounter() {
+        int counter = getTurnCounter();
+        if(counter >= 1) setFlagsD((getFlagsD() & 0xF8) + counter - 1);
+    }
+
+    public boolean isDead() { return DataBlock.isSetS(6, getFlagsD()); }
+    public void setDead() { setFlagsD(DataBlock.getWithBitSetS(6, getFlagsD())); }
+    public void resetDead() { setFlagsD(DataBlock.getWithBitResetS(6, getFlagsD())); }
+
+    public void setDeadlyIfObjectHitsPlayer() { setFlagsD(DataBlock.getWithBitSetS(7, getFlagsD())); }
+    public void setBothDeadlyFlags() { setFlagsD(getFlagsD() | 0xA0); }
+    public boolean getDeadlyIfObjectHitsPlayer() { return DataBlock.isSetS(7, getFlagsD()); }
+    public boolean getDeadlyIfPlayerHitsObject() { return DataBlock.isSetS(5, getFlagsD()); }
 
 }

@@ -131,8 +131,6 @@ public class GraphicObjects {
     public int getOldSpriteHeight(int ix) { return data.getU(ix + 0x1D); }
     public int getOldPixelX(int ix) { return data.getU(ix + 0x1E); }
     public int getOldPixelY(int ix) { return data.getU(ix + 0x1F); }
-    public boolean isDropping(int ix) { return data.isSet(2, ix + 0x0D); }
-    public boolean isDirUp(int ix) { return data.isSet(2, ix + 0x0D); }
 
     public void setDXAdj(int ix, int dxAdj) { data.set(ix + 0x0E, dxAdj); }
     public void setDYAdj(int ix, int dyAdj) { data.set(ix + 0x0F, dyAdj); }
@@ -145,55 +143,12 @@ public class GraphicObjects {
     public void setSpriteWidthB(int ix, int w) { data.set(ix + 0x18, w); }
     public void setSpriteHeight(int ix, int h) { data.set(ix + 0x19, h); }
 
-    public void setDeadlyIfObjectHitsPlayer(int ix) { data.setBit(7, ix + 0x0D); }
-    public void setBothDeadlyFlags(int ix) { data.set(ix + 0x0D, data.getU(ix + 0x0D) | 0xA0); }
-    public void setDead(int ix) { data.setBit(6, ix + 0x0D); }
-    public void resetDead(int ix) { data.resetBit(6, ix + 0x0D); }
     public void setTemp10(int ix, int temp10) { data.set(ix + 0x10, temp10); }
     public void setTemp11(int ix, int temp11) { data.set(ix + 0x11, temp11); }
-    public void setRising(int ix) { data.resetBit(2, ix + 0x0D); }
-    public void setDropping(int ix) { data.setBit(2, ix + 0x0D); }
-    public void setDirUp(int ix) { data.setBit(2, ix + 0x0D); }
-    public void setDirDown(int ix) { data.resetBit(2, ix + 0x0D); }
-    public void setTriggered(int ix) { data.setBit(3, ix + 0x0D); }
-    public void resetTriggered(int ix) { data.resetBit(3, ix + 0x0D); }
-    public void setJustDropped(int ix) { data.setBit(0, ix + 0x0D); }
-    public void resetJustDropped(int ix) { data.resetBit(0, ix + 0x0D); }
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
     public void setOldSpriteWidthB(int ix, int w) { data.set(ix + 0x1C, w); }
     public void setOldSpriteHeight(int ix, int h) { data.set(ix + 0x1D, h); }
     public void setOldPixelX(int ix, int x) { data.set(ix + 0x1E, x); }
     public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
-
-    // Flags D
-    public int getFlagsD(int ix) { return data.getS(ix + 0x0D); }
-    public void setFlagsD(int ix, int f) { data.set(ix + 0x0D, f); }
-
-    public boolean isDead(int ix) { return data.isSet(6, ix + 0x0D); }
-
-    public int getTurnCounter(int ix) { return getFlagsD(ix) & 0x07; }
-    public void initTurnCounter(int ix) { setFlagsD(ix, 2); }
-    public void decTurnCounter(int ix) {
-        int counter = getTurnCounter(ix);
-        if(counter >= 1) setFlagsD(ix, (getFlagsD(ix) & 0xF8) + counter - 1);
-    }
-
-    public boolean getDeadlyIfObjectHitsPlayer(int ix) { return data.isSet(7, ix + 0x0D); }
-    public boolean getDeadlyIfPlayerHitsObject(int ix) { return data.isSet(5, ix + 0x0D); }
-
-    public boolean isTriggered(int ix) { return data.isSet(3, ix + 0x0D); }
-    public boolean justDropped(int ix) { return data.isSet(0, ix + 0x0D); }
-
-    public boolean isEast(int ix) { return data.isSet(0, ix + 0x0D); }
-    public boolean isNorth(int ix) { return data.isSet(1, ix + 0x0D); }
-    public int getDirection(int ix) { return getFlagsD(ix) & 0x03; }
-    public void incDirection(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xFC) | ((getDirection(ix) + 1) & 0x03)); }
-    public void toggleEastWest(int ix) { setFlagsD(ix, getFlagsD(ix) ^ 1); }
-    public void toggleNorthSouth(int ix) { setFlagsD(ix, getFlagsD(ix) ^ 2); }
-
-    public int getLookAroundCounter(int ix) { return getFlagsD(ix) & 0x0F; } // NOTE: multi-purpose bits
-    public void decLookAroundCounter(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xF0) | ((getLookAroundCounter(ix) - 1) & 0x0F)); }
-    public void initLookAroundCounter(int ix) { setFlagsD(ix, (getFlagsD(ix) & 0xF0) | 8); }
-
 }
