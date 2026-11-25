@@ -22,7 +22,6 @@ public class ObjectsPanel extends GamePanel {
     }
 
     public void update(DataBlock requiredObjects, int requiredPos, int required, SpecialObjects specialObjects) {
-        IO.println("update");
         memory.clear();
         for(int i=memory.attrStart; i<memory.endExcl; i++) memory.setByteAt(i, Color.getAttribute(Color.WHITE, Color.BLACK, true, false));
 
