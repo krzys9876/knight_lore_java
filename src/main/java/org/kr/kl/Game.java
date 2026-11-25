@@ -166,7 +166,9 @@ public class Game implements Runnable {
     }
 
     private void updateObjectsPanel() {
-        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects(), specialObjects);
+        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects(), specialObjects,
+                graphicObjects.firstSpecObj().getGrNo(), graphicObjects.firstSpecObj().next().getGrNo(),
+                graphicObjects.playerBottom().getScreen());
     }
 
     private void saveImage(GamePanel panel, String filePath, String fileName) {

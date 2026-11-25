@@ -8,6 +8,7 @@ import org.kr.kl.utils.MathUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class ObjectsPanel extends GamePanel {
     private VideoMemoryLinear memory;
@@ -21,7 +22,8 @@ public class ObjectsPanel extends GamePanel {
         memory = new VideoMemoryLinear(spriteData);
     }
 
-    public void update(DataBlock requiredObjects, int requiredPos, int required, SpecialObjects specialObjects) {
+    public void update(DataBlock requiredObjects, int requiredPos, int required, SpecialObjects specialObjects,
+                       int loc1GrNo, int loc2GrNo, int currentLocation) {
         memory.clear();
         for(int i=memory.attrStart; i<memory.endExcl; i++) memory.setByteAt(i, Color.getAttribute(Color.WHITE, Color.BLACK, true, false));
 
@@ -56,21 +58,18 @@ public class ObjectsPanel extends GamePanel {
         int locPosY = (14*8) * 0x20;
         for(int i=0; i<locationsText.length; i++) memory.printCharacter(locationsText[i], i + locPosY + 1, font);
 
-        HashMap<Integer, ArrayList<Integer>> specObjMap = new HashMap<>();
+        HashMap<Integer, HashSet<Integer>> specObjMap = new HashMap<>();
 
-        for(int i = 0; i < specialObjects.size; i++) {
-            int grNo = specialObjects.getGraphicNo(i);
-            if(grNo!=0) {
-                ArrayList<Integer> cnt = specObjMap.getOrDefault(grNo, new ArrayList<>());
-                cnt.add(specialObjects.getScreen(i));
-                specObjMap.put(grNo, cnt);
-            }
-        }
+        for(int i = 0; i < specialObjects.size; i++) addLocation(specObjMap, specialObjects.getGraphicNo(i), specialObjects.getScreen(i));
+        // NOTE: the game does not update special objects table when object is dropped - only after leaving the room
+        // it is written back to the table. So must also consider current special objects slots
+        addLocation(specObjMap, loc1GrNo, currentLocation);
+        addLocation(specObjMap, loc2GrNo, currentLocation);
         int locObjX = 0;
         int locObjY = 10*8;
         for(int i=0x60; i<=0x67; i++) {
             printOneObject(i, locObjX, locObjY, specialObjects.getAttr(i));
-            ArrayList<Integer> l = specObjMap.getOrDefault(i, new ArrayList<>());
+            HashSet<Integer> l = specObjMap.getOrDefault(i, new HashSet<>());
             int locPos = 0;
             for(Integer e: l) {
                 int locL = e & 0x0F;
@@ -87,6 +86,14 @@ public class ObjectsPanel extends GamePanel {
         }
 
         setPixelData(memory.toPixels(false));
+    }
+
+    private void addLocation(HashMap<Integer, HashSet<Integer>> map, int grNo, int location) {
+        if(grNo >= 0x60 && grNo <= 0x67) {
+            HashSet<Integer> locations = map.getOrDefault(grNo, new HashSet<>());
+            locations.add(location);
+            map.put(grNo, locations);
+        }
     }
 
     private void printOneObject(int grNo, int x, int y, int attr) {
