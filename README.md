@@ -58,14 +58,25 @@ In the original game you could select different control settings. So far only th
 
 When the game ends press any key to return to the menu.
 
-## Next steps ##
+## Additional windows ##
 
-The rewrite was performed almost 1:1 with the assembler so you won't find any nicely encapsulated classes. 
-It is all based on directly manipulating the memory areas.
+In original game there could be no floating windows. It was always a mistery to me, where are the objects
+and where I should go. It is not easy to navigate through the maze of rooms.
 
-The plan is to refactor the game so the code looks like proper Java.
+Now you can:
+- see the map (a grid of 16 by 16, so it matches hexadecimal convention of 0..F)
+- preview rooms that you are about to enter
+- find all objects' locations. Note that locations are presented in original form: row followed by column. 
+
+Call it cheating, but this is optional so you don't have to look at it.
+
+![Object preview](/images/objects.png)
 
 ## Version history ##
+
+### 0.7 ###
+
+Add floating window with object locations and list of required objects
 
 ### 0.6 ###
 
