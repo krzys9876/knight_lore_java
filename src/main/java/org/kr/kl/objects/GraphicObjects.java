@@ -41,7 +41,6 @@ public class GraphicObjects {
     public final int size;
 
     public GraphicObjects(int start, int size) {
-        //data = new DataBlock(0x5C08, 0x40 + 0x40 + 0x20 + 0x0460);
         this.size = size;
         data = new DataBlock(start, size * 0x20);
 
@@ -64,19 +63,5 @@ public class GraphicObjects {
         }
     }
 
-    public void resetObject(int ix) {
-        for(int i = 0; i < 0x20; i++) data.set(ix + i, 0);
-    }
-
     public String objectInfo(int num, int ix) { return data.objectInfo(num, ix); }
-
-    public int getOldSpriteWidthB(int ix) { return data.getU(ix + 0x1C); }
-    public int getOldSpriteHeight(int ix) { return data.getU(ix + 0x1D); }
-    public int getOldPixelX(int ix) { return data.getU(ix + 0x1E); }
-    public int getOldPixelY(int ix) { return data.getU(ix + 0x1F); }
-
-    public void setOldSpriteWidthB(int ix, int w) { data.set(ix + 0x1C, w); }
-    public void setOldSpriteHeight(int ix, int h) { data.set(ix + 0x1D, h); }
-    public void setOldPixelX(int ix, int x) { data.set(ix + 0x1E, x); }
-    public void setOldPixelY(int ix, int y) { data.set(ix + 0x1F, y); }
 }

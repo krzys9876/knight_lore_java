@@ -150,8 +150,6 @@ public class GraphicObject {
         setOldSpriteHeight(0);
         setOldPixelX(0);
         setOldPixelY(0);
-
-        parent.resetObject(ix);
     }
 
     private static final DataBlock cauldron_bubbles_B8C8 =  InitialData.block("cauldron_bubbles_B8C8");
