@@ -69,9 +69,10 @@ public class GraphicObject {
     private int dx, dy, dz;
     private int flagsC;
     private int flagsD;
+    private int dxAdj, dyAdj;
 
     public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
-                         int flags7, int screen, int dx, int dy, int dz, int flagsC, int flagsD) {
+                         int flags7, int screen, int dx, int dy, int dz, int flagsC, int flagsD, int dxAdj, int dyAdj) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -88,10 +89,12 @@ public class GraphicObject {
         this.dz = dz;
         this.flagsC = flagsC;
         this.flagsD = flagsD;
+        this.dxAdj = dxAdj;
+        this.dyAdj = dyAdj;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -288,8 +291,8 @@ public class GraphicObject {
     public int getDZu() { return DataBlock.getUS(dz); }
     public int getXAdj() { return parent.getXAdj(ix); }
     public int getYAdj() { return parent.getYAdj(ix); }
-    public int getDXAdj() { return parent.getDXAdj(ix); }
-    public int getDYAdj() { return parent.getDYAdj(ix); }
+    public int getDXAdj() { return DataBlock.getSS(dxAdj); }
+    public int getDYAdj() { return DataBlock.getSS(dyAdj); }
     public boolean isMoving() { return getDX()!=0 || getDY()!=0 || getDZ()!=0; }
     public boolean notMovingXY() { return getDX()==0 && getDY()==0; }
 
@@ -318,8 +321,8 @@ public class GraphicObject {
     public void setDX(int dx) { this.dx = dx; }
     public void setDY(int dy) { this.dy = dy; }
     public void setDZ(int dz) { this.dz = dz; }
-    public void setDXAdj(int dxAdj) { parent.setDXAdj(ix, dxAdj); }
-    public void setDYAdj(int dyAdj) { parent.setDYAdj(ix, dyAdj); }
+    public void setDXAdj(int dxAdj) { this.dxAdj = dxAdj; }
+    public void setDYAdj(int dyAdj) { this.dyAdj = dyAdj; }
     public void setXAdj(int xAdj) { parent.setXAdj(ix, xAdj); }
     public void setYAdj(int yAdj) { parent.setYAdj(ix, yAdj); }
     public void setXYAdj(int xAdj, int yAdj) { parent.setXYAdj(ix, xAdj, yAdj); }

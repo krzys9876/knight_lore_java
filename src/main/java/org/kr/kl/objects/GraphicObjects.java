@@ -107,7 +107,8 @@ public class GraphicObjects {
                     data.getU(ix + 4), data.getU(ix + 5), data.getU(ix + 6),
                     data.getU(ix + 7), data.getU(ix + 8),
                     data.getU(ix + 9), data.getU(ix + 0x0A), data.getU(ix + 0x0B),
-                    data.getU(ix + 0x0C), data.getU(ix + 0x0D));
+                    data.getU(ix + 0x0C), data.getU(ix + 0x0D),
+                    data.getU(ix + 0x0E), data.getU(ix + 0x0F));
         }
     }
 
@@ -117,8 +118,6 @@ public class GraphicObjects {
 
     public String objectInfo(int num, int ix) { return data.objectInfo(num, ix); }
 
-    public int getDXAdj(int ix) { return data.getS(ix + 0x0E); }
-    public int getDYAdj(int ix) { return data.getS(ix + 0x0F); }
     public int getTemp10(int ix) { return data.getU(ix + 0x10); }
     public int getTemp11(int ix) { return data.getU(ix + 0x11); }
     public int getXAdj(int ix) { return data.getS(ix + 0x12); }
@@ -132,8 +131,6 @@ public class GraphicObjects {
     public int getOldPixelX(int ix) { return data.getU(ix + 0x1E); }
     public int getOldPixelY(int ix) { return data.getU(ix + 0x1F); }
 
-    public void setDXAdj(int ix, int dxAdj) { data.set(ix + 0x0E, dxAdj); }
-    public void setDYAdj(int ix, int dyAdj) { data.set(ix + 0x0F, dyAdj); }
     public void setXAdj(int ix, int xAdj) { data.set(ix + 0x12, xAdj); }
     public void setYAdj(int ix, int yAdj) { data.set(ix + 0x13, yAdj); }
     public void setXYAdj(int ix, int xAdj, int yAdj) {
