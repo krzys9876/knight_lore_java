@@ -699,7 +699,7 @@ public class Game implements Runnable {
         if(variables.getAllObjectsInCauldron_5BC3() != 0) return;
 
         secondSpecObj.makeCauldronBubbles();
-        secondSpecObj.setXYAdj(-12, -4);
+        secondSpecObj.setPixelXYAdj(-12, -4);
     }
 
     private long getDelayMs() {
@@ -1078,7 +1078,7 @@ public class Game implements Runnable {
     private void upd_2_4_C73C(GraphicObject o) {
         int centreX, centreY;
         if (o.isHFlip()) {
-            o.setXYAdj(-17, -2);
+            o.setPixelXYAdj(-17, -2);
             int x = o.getX() - 0x0D;
             o.setDX(x); // dX
             int y = o.getY();
@@ -1086,8 +1086,8 @@ public class Game implements Runnable {
             centreY = 15;
             centreX = 6;
         } else {
-            if (o.getGrNo() == 4) o.setXYAdj(1, -3);
-            else o.setXYAdj(-7, -3);
+            if (o.getGrNo() == 4) o.setPixelXYAdj(1, -3);
+            else o.setPixelXYAdj(-7, -3);
             int y = o.getY() + 0x0D;
             o.setDY(y); // dY
             int x = o.getX();
@@ -1149,16 +1149,16 @@ public class Game implements Runnable {
     }
 
     private void upd_3_5_C722(GraphicObject o) {
-        if(o.isHFlip()) o.setXYAdj(-7, -2);
-        else o.setXYAdj(-9, -3);
+        if(o.isHFlip()) o.setPixelXYAdj(-7, -2);
+        else o.setPixelXYAdj(-9, -3);
     }
 
     private void upd_6_7_C4E3(GraphicObject o) {
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
     }
 
     private void upd_8_C65E(GraphicObject o) {
-        o.setXYAdj(-12, -6); //FA
+        o.setPixelXYAdj(-12, -6); //FA
 
         boolean moving = variables.isPortcullisMoving_5BAF();
         if(moving) return;
@@ -1184,7 +1184,7 @@ public class Game implements Runnable {
     }
 
     private void upd_9_C6BD(GraphicObject o) {
-        o.setXYAdj(-12, -6);
+        o.setPixelXYAdj(-12, -6);
 
         o.setDeadlyIfObjectHitsPlayer();
         boolean enteringRoom = o.enteringScreen();
@@ -1212,16 +1212,16 @@ public class Game implements Runnable {
         o.resetBitGrNo(0); // graphic_no=8
     }
 
-    private void upd_10_C4E8(GraphicObject o) { o.setXYAdj(-20, -1); }
+    private void upd_10_C4E8(GraphicObject o) { o.setPixelXYAdj(-20, -1); }
 
-    private void upd_11_C4ED(GraphicObject o) { o.setXYAdj(-12, -2); }
+    private void upd_11_C4ED(GraphicObject o) { o.setPixelXYAdj(-12, -2); }
 
-    private void upd_12_to_15_C4F2(GraphicObject o) { o.setXYAdj(-8, -4); }
+    private void upd_12_to_15_C4F2(GraphicObject o) { o.setPixelXYAdj(-8, -4); }
 
-    private void upd_128_to_130_C4D3(GraphicObject o) { o.setXYAdj(-8, -2); }
+    private void upd_128_to_130_C4D3(GraphicObject o) { o.setPixelXYAdj(-8, -2); }
 
     private void upd_131_to_133_B566(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
 
         int z = o.getZ();
         if(z < 0xA4) {
@@ -1269,7 +1269,7 @@ public class Game implements Runnable {
     }
 
     private void upd_16_to_21_24_to_29_C823(GraphicObject o) {
-        o.setXYAdj(-12, -6);
+        o.setPixelXYAdj(-12, -6);
         upd_player_bottom_C82B(o);
     }
 
@@ -1838,16 +1838,16 @@ public class Game implements Runnable {
 
     private void upd_22_B7A3(GraphicObject o) {
         o.setBothDeadlyFlags();
-        o.setXYAdj(-12, -7);
+        o.setPixelXYAdj(-12, -7);
     }
 
     private void upd_23_B7E7(GraphicObject o) {
         o.setBothDeadlyFlags();
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
     }
 
     private void upd_30_31_158_159_B9A5(GraphicObject o) {
-        o.setXYAdj(-12, 3);
+        o.setPixelXYAdj(-12, 3);
 
         dec_dZ_and_update_XYZ_C700(o);
         move_guard_wizard_NSEW_B9CC(o);
@@ -1900,7 +1900,7 @@ public class Game implements Runnable {
     }
 
     private void upd_32_to_47_CDDA(GraphicObject o) {
-        o.setXYAdj(-12, -8);
+        o.setPixelXYAdj(-12, -8);
         upd_player_top_CDE2(o);
     }
 
@@ -1932,7 +1932,7 @@ public class Game implements Runnable {
     }
 
     private void upd_48_to_53_56_to_61_C828(GraphicObject o) {
-        o.setXYAdj(-12, -7);
+        o.setPixelXYAdj(-12, -7);
         upd_player_bottom_C82B(o);
     }
 
@@ -1946,7 +1946,7 @@ public class Game implements Runnable {
     }
 
     private void loc_B6BF(GraphicObject o, boolean isX) {
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
 
         // A random number derived from object index (only starting point is random)
         int blockSeed = ((o.ix >> 1) & 0x10);
@@ -1968,7 +1968,7 @@ public class Game implements Runnable {
     }
 
     private void upd_62_C4AA(GraphicObject o) {
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
         o.setDX(0);
         o.setDY(0);
         // $C4B0 CALL $B3E9    ; // ignore audio
@@ -1979,7 +1979,7 @@ public class Game implements Runnable {
 
     private void upd_63_B7A9(GraphicObject o) {
         o.setBothDeadlyFlags();
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
 
         // This flag is set in every odd room and is cleared after user picks up an object -
         // these are deliberate traps
@@ -2006,12 +2006,12 @@ public class Game implements Runnable {
     }
 
     private void upd_64_to_79_CDDF(GraphicObject o) {
-        o.setXYAdj(-12, -12);
+        o.setPixelXYAdj(-12, -12);
         upd_player_top_CDE2(o);
     }
 
     private void upd_80_to_83_C5C8(GraphicObject o) {
-        o.setXYAdj(-12, -6);
+        o.setPixelXYAdj(-12, -6);
 
         dec_dZ_and_update_XYZ_C700(o);
         if(o.notMovingXY() || o.isOobXY()) {
@@ -2045,7 +2045,7 @@ public class Game implements Runnable {
     }
 
     private void upd_84_C4C3(GraphicObject o) {
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
         dec_dZ_and_update_XYZ_C700(o);
         if(o.isMoving()) {
             o.setDX(0);
@@ -2054,13 +2054,13 @@ public class Game implements Runnable {
     }
 
     private void upd_85_C4B6(GraphicObject o) {
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
         dec_dZ_and_update_XYZ_C700(o);
         // $C4C0 JP $C232      ;// ignore audio
     }
 
     private void upd_86_87_B7ED(GraphicObject o) {
-        o.setXYAdj(-8, -4);
+        o.setPixelXYAdj(-8, -4);
 
         o.setDZ(1); // ; pre-load dZ=1
         o.setDX(o.isEast() ? 2 : -2);
@@ -2080,11 +2080,11 @@ public class Game implements Runnable {
     }
 
     private void upd_88_to_90_C506(GraphicObject o) {
-        o.setXYAdj(-12, -16);
+        o.setPixelXYAdj(-12, -16);
     }
 
     private void upd_91_B683(GraphicObject o) {
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
 
         if(!o.isTriggered()) return;
         o.resetTriggered();
@@ -2101,7 +2101,7 @@ public class Game implements Runnable {
 
     private void upd_92_to_95_C337(GraphicObject o) {
         // NOTE: this applies only to player sprite
-        o.setXYAdj(-12, -2);
+        o.setPixelXYAdj(-12, -2);
         if(o.isDead()) {
             if (variables.getAllObjectsInCauldron_5BC3() == 0) {
                 init_death_sparkles_BF21(o);
@@ -2121,9 +2121,9 @@ public class Game implements Runnable {
             a += 0x10;
             graphicObjects.playerTop().setGrNo(a);
             variables.resetTransformFlag_5BB1();
-            o.setXYAdj(-12, -6);
+            o.setPixelXYAdj(-12, -6);
             boolean spriteFlag = o.isBitSetGrNo(5);
-            if (spriteFlag) o.setYAdj(o.getYAdj() - 1);
+            if (spriteFlag) o.setPixelYAdj(o.getPixelYAdj() - 1);
         } else {
             // Continue transformation
             int nextSprite = (params.getRnd().getSeed3() & 3) | 0x5C;
@@ -2134,7 +2134,7 @@ public class Game implements Runnable {
     }
 
     private void upd_96_to_102_C28B(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
 
         dec_dZ_and_update_XYZ_C700(o);
         if(!o.justDropped() && !o.isMoving()) return;
@@ -2148,7 +2148,7 @@ public class Game implements Runnable {
 
     private void upd_103_C1AB(GraphicObject o) {
         // extra life object
-        o.setXYAdj(-8, -2);
+        o.setPixelXYAdj(-8, -2);
 
         GraphicObject p = graphicObjects.playerBottom();
         int width = p.getW();
@@ -2160,7 +2160,7 @@ public class Game implements Runnable {
         p.setD(depth); //; restore depth
         if(isNear) {
             o.setBitGrNo(3); // ; graphic_no: 103 + 8 = 111, see upd_111
-            o.setXYAdj(-12, -4);
+            o.setPixelXYAdj(-12, -4);
             int l = o.getTemp10();
             int h = o.getTemp11();
             int ptr = h * 256 + l;
@@ -2181,7 +2181,7 @@ public class Game implements Runnable {
     }
 
     private void upd_104_to_110_C1F1(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
 
         int x = o.getX();
         int dX = x - 0x80;
@@ -2277,35 +2277,35 @@ public class Game implements Runnable {
     }
 
     private void upd_112_to_118_184_BF2B(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
         o.setGrNo(o.getGrNo()+1);
         // ignore audio
     }
 
     private void upd_119_BF3F(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
         upd_111_B95E(o); // Fix bug/feature in the source (writing to ROM)
     }
 
     private void upd_120_to_126_BEFE(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
         if(((params.getRnd().getSeed2() ^ 0xFF) & 0x01) == 0) o.setGrNo(o.getGrNo() + 1); // next sprite on odd frames
         o.setWipeAndDraw();
     }
 
     private void upd_127_BF11(GraphicObject o) {
-        o.setXYAdj(-12, -4); //FC
+        o.setPixelXYAdj(-12, -4); //FC
         o.resetDead();
         o.setGrNo(o.getTemp10());
         updateOneSprite(o); // update after sparkes change to player
     }
 
-    private void upd_141_B99C(GraphicObject o) { o.setXYAdj(-16, -12); }
+    private void upd_141_B99C(GraphicObject o) { o.setPixelXYAdj(-16, -12); }
 
-    private void upd_142_B99F(GraphicObject o) { o.setXYAdj(-24, 12); }
+    private void upd_142_B99F(GraphicObject o) { o.setPixelXYAdj(-24, 12); }
 
     private void upd_143_B6A2(GraphicObject o) {
-        o.setXYAdj(-16, -8);
+        o.setPixelXYAdj(-16, -8);
 
         if(o.isTriggered()) {
             o.setGrNo(0xB8); // ; graphic_no = sparkles
@@ -2314,7 +2314,7 @@ public class Game implements Runnable {
     }
 
     private void upd_144_to_149_152_to_157_B6F9(GraphicObject o) {
-        o.setXYAdj(-12, -6);
+        o.setPixelXYAdj(-12, -6);
 
         if(o.notMovingXY()) return;
         int dx = o.getDX();
@@ -2337,7 +2337,7 @@ public class Game implements Runnable {
     }
 
     private void upd_150_151_B73C(GraphicObject o) {
-        o.setXYAdj(-12, 7);
+        o.setPixelXYAdj(-12, 7);
 
         int dx = o.isEast() ? 2 : -2;
         o.setDX(dx);
@@ -2368,7 +2368,7 @@ public class Game implements Runnable {
     }
 
     private void upd_160_to_163_B8DA(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
 
         if(graphicObjects.firstSpecObj().getGrNo() != 0) {
             upd_111_B95E(o);
@@ -2403,7 +2403,7 @@ public class Game implements Runnable {
     }
 
     private void upd_164_to_167_B92C(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
 
         boolean cauldronRoom = o.isCauldronRoom();
         int dx = 4;
@@ -2433,7 +2433,7 @@ public class Game implements Runnable {
     }
 
     private void upd_168_to_175_B923(GraphicObject o) {
-        o.setXYAdj(-12, -4);
+        o.setPixelXYAdj(-12, -4);
         o.setGrNo(0xA0);
     }
 
@@ -2444,7 +2444,7 @@ public class Game implements Runnable {
     }
 
     private void upd_178_179_B865(GraphicObject o) {
-        o.setXYAdj(-8, -4);
+        o.setPixelXYAdj(-8, -4);
 
         int bouncingHeight = variables.getBallBounceHeight_5BBD();
         if(bouncingHeight == 0) variables.setBallBounceHeight_5BBD(o.getZ() + 0x20); // ; calc bounce height
@@ -2465,7 +2465,7 @@ public class Game implements Runnable {
     }
 
     private void upd_180_181_B80F(GraphicObject o) {
-        o.setXYAdj(-8, -4);
+        o.setPixelXYAdj(-8, -4);
 
         o.setDZ(1); // ; pre-load dZ=1
         if(o.isNorth()) o.setDY(2); else o.setDY(-2);
@@ -2475,7 +2475,7 @@ public class Game implements Runnable {
     }
 
     private void upd_182_183_B5FF(GraphicObject o) {
-        o.setXYAdj(-8, -4);
+        o.setPixelXYAdj(-8, -4);
 
         int dx = o.getDXu();
         int dy = o.getDYu();
@@ -2708,9 +2708,9 @@ public class Game implements Runnable {
             return false;
         }
 
-        int x = o.getX() + o.getY() - 0x80 + o.getXAdj();
+        int x = o.getX() + o.getY() - 0x80 + o.getPixelXAdj();
         o.setPixelX(x & 0xFF);
-        int y = (o.getY() - o.getX() + 0x80) / 2 + o.getZ() - 0x68 + o.getYAdj();
+        int y = (o.getY() - o.getX() + 0x80) / 2 + o.getZ() - 0x68 + o.getPixelYAdj();
         o.setPixelY(y & 0xFF);
         // $D6EC CP $C0         ; bottom line of screen?
         return y < 0xC0; // 192

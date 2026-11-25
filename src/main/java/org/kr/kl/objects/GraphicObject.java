@@ -96,6 +96,8 @@ public class GraphicObject {
         this.dyAdj = dyAdj;
         this.temp10 = temp10;
         this.temp11 = temp11;
+        this.pixelXAdj = pixelXAdj;
+        this.pixelYAdj = pixelYAdj;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
@@ -128,8 +130,8 @@ public class GraphicObject {
         setDYAdj(0);
         setTemp10(0);
         setTemp11(0);
-        setXAdj(0);
-        setYAdj(0);
+        setPixelXAdj(0);
+        setPixelYAdj(0);
         setSpriteWidthB(0);
         setSpriteHeight(0);
         setPixelX(0);
@@ -193,8 +195,8 @@ public class GraphicObject {
         setDYAdj(other.getDYAdj());
         setTemp10(other.getTemp10());
         setTemp11(other.getTemp11());
-        setXAdj(other.getXAdj());
-        setYAdj(other.getYAdj());
+        setPixelXAdj(other.getPixelXAdj());
+        setPixelYAdj(other.getPixelYAdj());
         setSpriteWidthB(other.getSpriteWidthB());
         setSpriteHeight(other.getSpriteHeight());
         setPixelX(other.getPixelX());
@@ -294,8 +296,8 @@ public class GraphicObject {
     public int getDYu() { return DataBlock.getUS(dy); }
     public int getDZ() { return DataBlock.getSS(dz); }
     public int getDZu() { return DataBlock.getUS(dz); }
-    public int getXAdj() { return DataBlock.getSS(pixelXAdj); }
-    public int getYAdj() { return DataBlock.getSS(pixelYAdj); }
+    public int getPixelXAdj() { return DataBlock.getSS(pixelXAdj); }
+    public int getPixelYAdj() { return DataBlock.getSS(pixelYAdj); }
     public int getDXAdj() { return DataBlock.getSS(dxAdj); }
     public int getDYAdj() { return DataBlock.getSS(dyAdj); }
     public boolean isMoving() { return getDX()!=0 || getDY()!=0 || getDZ()!=0; }
@@ -328,9 +330,9 @@ public class GraphicObject {
     public void setDZ(int dz) { this.dz = dz; }
     public void setDXAdj(int dxAdj) { this.dxAdj = dxAdj; }
     public void setDYAdj(int dyAdj) { this.dyAdj = dyAdj; }
-    public void setXAdj(int xAdj) { this.pixelXAdj = xAdj; }
-    public void setYAdj(int yAdj) { this.pixelYAdj = yAdj; }
-    public void setXYAdj(int xAdj, int yAdj) { setXAdj(xAdj); setYAdj(yAdj); }
+    public void setPixelXAdj(int xAdj) { this.pixelXAdj = xAdj; }
+    public void setPixelYAdj(int yAdj) { this.pixelYAdj = yAdj; }
+    public void setPixelXYAdj(int xAdj, int yAdj) { setPixelXAdj(xAdj); setPixelYAdj(yAdj); }
     public void setSpriteWidthB(int w) { parent.setSpriteWidthB(ix, w); }
     public void setSpriteHeight(int h) { parent.setSpriteHeight(ix, h); }
 
