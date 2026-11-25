@@ -71,11 +71,13 @@ public class GraphicObject {
     private int flagsD;
     private int dxAdj, dyAdj;
     private int temp10, temp11;
-    private int pixelXAdj, pixelYAdj;
+    private int pixelX, pixelY, pixelXAdj, pixelYAdj, oldPixelX, oldPixelY;
+    private int spriteWidthB, spriteHeight, oldSpriteWidthB, oldSpriteHeight;
+
 
     public GraphicObject(GraphicObjects parent, int ix, int grNo, int x, int y, int z, int w, int d, int h,
                          int flags7, int screen, int dx, int dy, int dz, int flagsC, int flagsD, int dxAdj, int dyAdj,
-                         int temp10, int temp11, int pixelXAdj, int pixelYAdj) {
+                         int temp10, int temp11, int pixelXAdj, int pixelYAdj, int spriteWidthB, int spriteHeight) {
         this.parent = parent;
         this.ix = ix;
         this.grNo = grNo;
@@ -98,10 +100,12 @@ public class GraphicObject {
         this.temp11 = temp11;
         this.pixelXAdj = pixelXAdj;
         this.pixelYAdj = pixelYAdj;
+        this.spriteWidthB = spriteWidthB;
+        this.spriteHeight = spriteHeight;
     }
 
     public GraphicObject(GraphicObjects parent, int ix) {
-        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(parent, ix, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public GraphicObject() {
@@ -333,11 +337,11 @@ public class GraphicObject {
     public void setPixelXAdj(int xAdj) { this.pixelXAdj = xAdj; }
     public void setPixelYAdj(int yAdj) { this.pixelYAdj = yAdj; }
     public void setPixelXYAdj(int xAdj, int yAdj) { setPixelXAdj(xAdj); setPixelYAdj(yAdj); }
-    public void setSpriteWidthB(int w) { parent.setSpriteWidthB(ix, w); }
-    public void setSpriteHeight(int h) { parent.setSpriteHeight(ix, h); }
+    public void setSpriteWidthB(int w) { this.spriteWidthB = w; }
+    public void setSpriteHeight(int h) { this.spriteHeight = h; }
 
-    public int getSpriteWidthB() { return parent.getSpriteWidthB(ix); }
-    public int getSpriteHeight() { return parent.getSpriteHeight(ix); }
+    public int getSpriteWidthB() { return DataBlock.getUS(spriteWidthB); }
+    public int getSpriteHeight() { return DataBlock.getUS(spriteHeight); }
     public int getOldSpriteWidthB() { return parent.getOldSpriteWidthB(ix); }
     public int getOldSpriteHeight() { return parent.getOldSpriteHeight(ix); }
     public void setOldSpriteWidthB(int w) { parent.setOldSpriteWidthB(ix, w); }

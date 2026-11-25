@@ -56,7 +56,8 @@ public class GraphicObjects {
                     data.getU(ix + 0x0C), data.getU(ix + 0x0D),
                     data.getU(ix + 0x0E), data.getU(ix + 0x0F),
                     data.getU(ix + 0x10), data.getU(ix + 0x11),
-                    data.getU(ix + 0x12), data.getU(ix + 0x13));
+                    data.getU(ix + 0x12), data.getU(ix + 0x13),
+                    data.getU(ix + 0x18), data.getU(ix + 0x19));
         }
     }
 
@@ -68,15 +69,10 @@ public class GraphicObjects {
 
     public int getPixelX(int ix) { return data.getU(ix + 0x1A); }
     public int getPixelY(int ix) { return data.getU(ix + 0x1B); }
-    public int getSpriteWidthB(int ix) { return data.getS(ix + 0x18); }
-    public int getSpriteHeight(int ix) { return data.getS(ix + 0x19); }
     public int getOldSpriteWidthB(int ix) { return data.getU(ix + 0x1C); }
     public int getOldSpriteHeight(int ix) { return data.getU(ix + 0x1D); }
     public int getOldPixelX(int ix) { return data.getU(ix + 0x1E); }
     public int getOldPixelY(int ix) { return data.getU(ix + 0x1F); }
-
-    public void setSpriteWidthB(int ix, int w) { data.set(ix + 0x18, w); }
-    public void setSpriteHeight(int ix, int h) { data.set(ix + 0x19, h); }
 
     public void setPixelX(int ix, int x) { data.set(ix + 0x1A, x); }
     public void setPixelY(int ix, int y) { data.set(ix + 0x1B, y); }
