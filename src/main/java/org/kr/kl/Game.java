@@ -152,8 +152,8 @@ public class Game implements Runnable {
         // CALL $B2CF    ; play tune // ignore audio
         if (gameCounter == 0) shuffle_objects_required_B544();
 
-        int overrideRoomId = 0x87;
-        int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
+        int overrideRoomId = -1;
+        int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
         int overrideNS = 0; // -S +N
         int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -2177,6 +2177,7 @@ public class Game implements Runnable {
             variables.setDisableSpikeBallDrop_5BC0();
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
+            updateObjectsPanel();
         }
         dec_dZ_and_update_XYZ_C700(o);
         if(o.isMoving()) {
