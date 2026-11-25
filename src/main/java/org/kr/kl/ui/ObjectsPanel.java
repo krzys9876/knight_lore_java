@@ -30,10 +30,10 @@ public class ObjectsPanel extends GamePanel {
         int posY = (23*8) * 0x20;
         for(int i=0; i<collectedText.length; i++) memory.printCharacter(collectedText[i], i + posY + 1, font);
 
-        requiredPos = MathUtils.byteToBCD(requiredPos);
+        int requiredPosBCD = MathUtils.byteToBCD(requiredPos);
         int requiredBCD = MathUtils.byteToBCD(required);
-        int posL = requiredPos & 0x0F;
-        int posH = (requiredPos & 0xF0) >> 4;
+        int posL = requiredPosBCD & 0x0F;
+        int posH = (requiredPosBCD & 0xF0) >> 4;
         int reqL = requiredBCD & 0x0F;
         int reqH = (requiredBCD & 0xF0) >> 4;
         int posX = collectedText.length + 2;
