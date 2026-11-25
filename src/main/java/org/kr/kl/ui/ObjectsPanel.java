@@ -2,13 +2,18 @@ package org.kr.kl.ui;
 
 import org.kr.kl.data.DataBlock;
 import org.kr.kl.objects.GraphicObject;
+import org.kr.kl.objects.SpecialObjects;
 import org.kr.kl.objects.SpriteData;
 import org.kr.kl.utils.MathUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ObjectsPanel extends GamePanel {
     private VideoMemoryLinear memory;
     private DataBlock font;
     private final int[] collectedText = new int[] {12, 24, 21, 21, 14, 12, 29, 14, 13};
+    private final int[] locationsText = new int[] {21, 24, 12, 10, 29, 18, 24, 23, 28};
 
     public void setFont(DataBlock font) { this.font = font; }
 
@@ -16,12 +21,13 @@ public class ObjectsPanel extends GamePanel {
         memory = new VideoMemoryLinear(spriteData);
     }
 
-    public void update(DataBlock requiredObjects, int requiredPos, int required) {
+    public void update(DataBlock requiredObjects, int requiredPos, int required, SpecialObjects specialObjects) {
+        IO.println("update");
         memory.clear();
         for(int i=memory.attrStart; i<memory.endExcl; i++) memory.setByteAt(i, Color.getAttribute(Color.WHITE, Color.BLACK, true, false));
 
         int posY = (23*8) * 0x20;
-        for(int i=0; i<collectedText.length; i++) memory.printCharacter(collectedText[i], i + posY, font);
+        for(int i=0; i<collectedText.length; i++) memory.printCharacter(collectedText[i], i + posY + 1, font);
 
         requiredPos = MathUtils.byteToBCD(requiredPos);
         int requiredBCD = MathUtils.byteToBCD(required);
@@ -29,7 +35,7 @@ public class ObjectsPanel extends GamePanel {
         int posH = (requiredPos & 0xF0) >> 4;
         int reqL = requiredBCD & 0x0F;
         int reqH = (requiredBCD & 0xF0) >> 4;
-        int posX = collectedText.length + 1;
+        int posX = collectedText.length + 2;
         if(posH > 0) memory.printCharacter(posH, posX + posY, font);
         memory.printCharacter(posL, posX+1 + posY, font);
         memory.printCharacter(24, posX+3 + posY, font); // O
@@ -40,16 +46,59 @@ public class ObjectsPanel extends GamePanel {
         int objY = 19*8;
         int objX = 0;
         for(int i=requiredPos; i < required; i++) {
-            GraphicObject o = new GraphicObject();
-            o.setGrNo(requiredObjects.getU(requiredObjects.start + i) | 0x60);
-            o.setPixelX(objX);
-            o.setPixelY(objY);
-            memory.printSprite(o);
-            if(objX + 2 * o.getSpriteWidthB() * 8 > BASE_WIDTH) {
+            int grNo = requiredObjects.getU(requiredObjects.start + i) | 0x60;
+            printOneObject(grNo, objX, objY, specialObjects.getAttr(grNo));
+            if(objX + 2 * 24 > BASE_WIDTH) {
                 objX = 0;
                 objY -= 24;
-            } else objX += o.getSpriteWidthB()*8;
+            } else objX += 24;
         }
+
+        int locPosY = (14*8) * 0x20;
+        for(int i=0; i<locationsText.length; i++) memory.printCharacter(locationsText[i], i + locPosY + 1, font);
+
+        HashMap<Integer, ArrayList<Integer>> specObjMap = new HashMap<>();
+
+        for(int i = 0; i < specialObjects.size; i++) {
+            int grNo = specialObjects.getGraphicNo(i);
+            if(grNo!=0) {
+                ArrayList<Integer> cnt = specObjMap.getOrDefault(grNo, new ArrayList<>());
+                cnt.add(specialObjects.getScreen(i));
+                specObjMap.put(grNo, cnt);
+            }
+        }
+        int locObjX = 0;
+        int locObjY = 10*8;
+        for(int i=0x60; i<=0x67; i++) {
+            printOneObject(i, locObjX, locObjY, specialObjects.getAttr(i));
+            ArrayList<Integer> l = specObjMap.getOrDefault(i, new ArrayList<>());
+            int locPos = 0;
+            for(Integer e: l) {
+                int locL = e & 0x0F;
+                int locH = (e & 0xF0) >> 4;
+                int baseAddr = 4 + locObjX / 8 + (locObjY + 8) * 0x20 + locPos;
+                memory.printCharacter(locH, baseAddr, font);
+                memory.printCharacter(locL, baseAddr + 1, font);
+                locPos+=3;
+            }
+            if(i == 0x063) {
+                locObjX = 128;
+                locObjY = 10*8;
+            } else locObjY -= 24;
+        }
+
         setPixelData(memory.toPixels(false));
+    }
+
+    private void printOneObject(int grNo, int x, int y, int attr) {
+        GraphicObject o = new GraphicObject();
+        o.setGrNo(grNo);
+        o.setPixelX(x);
+        o.setPixelY(y);
+        memory.printSprite(o);
+        int addr = VideoMemory.calcAttribAddr(y, x);
+        for(int i=0; i<3; i++)
+            for(int j=0; j<3; j++)
+                memory.setByteAt(addr + j - i * 0x20, attr);
     }
 }

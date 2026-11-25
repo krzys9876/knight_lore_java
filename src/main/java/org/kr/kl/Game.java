@@ -151,10 +151,9 @@ public class Game implements Runnable {
 
         // CALL $B2CF    ; play tune // ignore audio
         if (gameCounter == 0) shuffle_objects_required_B544();
-        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects());
 
-        int overrideRoomId = -1;
-        int overrideWE = 0; // -W +E : -60 / +60 for large room (entrance to entrance)
+        int overrideRoomId = 0x87;
+        int overrideWE = 60; // -W +E : -60 / +60 for large room (entrance to entrance)
         int overrideNS = 0; // -S +N
         int overrideZ = 0; // + only : 60 is a little above upper entrance
 
@@ -162,7 +161,12 @@ public class Game implements Runnable {
         init_sun_C46D();
         init_special_objects_C47E();
         player_dies_AFB7();
+        updateObjectsPanel();
         game_loop_AFBA();
+    }
+
+    private void updateObjectsPanel() {
+        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects(), specialObjects);
     }
 
     private void saveImage(GamePanel panel, String filePath, String fileName) {
@@ -1393,6 +1397,7 @@ public class Game implements Runnable {
             obj.setGrNo(currentSlot.getGrNo());
             drop_object_C106(o, obj);
         }
+        updateObjectsPanel();
     }
 
     private void drop_object_C106(GraphicObject player, GraphicObject obj) {
@@ -1406,6 +1411,7 @@ public class Game implements Runnable {
         obj.setTemp11(currentSlot.getPointerH()); // 2-byte pointer to special objects table
         obj.setJustDropped();
         inventory.adjustCarried();
+        updateObjectsPanel();
     }
 
     private boolean is_on_or_near_obj_C17A(GraphicObject player, GraphicObject obj) {
@@ -2227,7 +2233,7 @@ public class Game implements Runnable {
         int ptr = h * 256 + l;
         int spi = specialObjects.getIndex(ptr);
         specialObjects.clearGraphicNo(spi);
-        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects());
+        updateObjectsPanel();
         upd_111_B95E(o);
     }
 
@@ -2641,6 +2647,7 @@ public class Game implements Runnable {
                 i++;
             }
         }
+        updateObjectsPanel();
     }
 
     private void adjust_plyr_xyz_for_room_size_D320() {
