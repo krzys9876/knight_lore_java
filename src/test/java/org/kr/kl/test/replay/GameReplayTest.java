@@ -38,7 +38,7 @@ public class GameReplayTest {
         GamePanel panel1 = new GamePanel();
         GamePanel panel2 = new GamePanel();
         MapPanel panel3 = new MapPanel(new GamePanel());
-        ObjectsPanel panel4 = new ObjectsPanel();
+        ObjectsPanel panel4 = new ObjectsPanel(panel3);
         DebugPanel debugPanel1 = new TestDebugPanel();
         DebugPanel debugPanel2 = new TestDebugPanel();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
