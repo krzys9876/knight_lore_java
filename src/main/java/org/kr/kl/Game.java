@@ -41,7 +41,7 @@ public class Game implements Runnable {
     private String gameId = "";
     private final Inventory inventory = new Inventory();
     private final DataBlock menu_colours_BDA2 = InitialData.block("menu_colours_BDA2");
-    private final Font font_6108 = new Font(InitialData.block("font_6108"), "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.c%:+-");
+    private final Font font_6108 = new Font(InitialData.block("font_6108"), "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.c %:+-");
     private final Font day_font_BCEC = new Font(InitialData.block("day_font_BCEC"), "0123"); // NOTE: this font looks the same but is shifted by half of byte
     private final GraphicObject sprite_scratchpad_BFDB = new GraphicObject();
     private final SpecialObjects specialObjects = new SpecialObjects();
@@ -104,6 +104,7 @@ public class Game implements Runnable {
         this.mapPanel.setFont(font_6108);
         this.objectsPanel.setFont(font_6108);
         this.objectsPanel.initVideoMemory(spriteData);
+        this.settingsPanel.setFont(font_6108);
         this.settingsPanel.initVideoMemory(spriteData);
         params.unfreezeSeed();
     }

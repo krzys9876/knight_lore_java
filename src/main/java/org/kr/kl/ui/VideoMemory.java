@@ -75,6 +75,14 @@ public abstract class VideoMemory {
 
     abstract protected int getYFromAddress(int address);
 
+    public void printText(int[] text, int address, Font font) {
+        for(int i=0; i<text.length; i++) printCharacter(text[i], i + address, font);
+    }
+
+    public void printText(String text, int address, Font font) {
+        printText(font.transcribe(text), address, font);
+    }
+
     public void printCharacter(int character, int address, Font font) {
         int[] charData = font.getChar(character);
         for(int i = 0; i<8; i++) setByteAt(address - i*0x20, charData[i]);
