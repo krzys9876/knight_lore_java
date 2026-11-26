@@ -25,7 +25,7 @@ public class Main {
         ScreenPanel screenPreviewPanel = new ScreenPanel(previewPanel);
         MapPanel mapPanel = new MapPanel(previewPanel);
         ScreenPanel screenMapPanel = new ScreenPanel(mapPanel);
-        ObjectsPanel objectsPanel = new ObjectsPanel();
+        ObjectsPanel objectsPanel = new ObjectsPanel(mapPanel);
         ScreenPanel screenObjectsPanel = new ScreenPanel(objectsPanel);
         SettingsPanel settingsPanel = new SettingsPanel();
         ScreenPanel screenSettingsPanel = new ScreenPanel(settingsPanel);

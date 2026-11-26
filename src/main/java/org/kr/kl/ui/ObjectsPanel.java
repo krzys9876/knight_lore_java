@@ -6,14 +6,24 @@ import org.kr.kl.objects.SpecialObjects;
 import org.kr.kl.objects.SpriteData;
 import org.kr.kl.utils.MathUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class ObjectsPanel extends GamePanel {
     private VideoMemoryLinear memory;
     private DataBlock font;
+    private final MapPanel mapPanel;
     private final int[] collectedText = new int[] {12, 24, 21, 21, 14, 12, 29, 14, 13};
     private final int[] locationsText = new int[] {21, 24, 12, 10, 29, 18, 24, 23, 28};
+
+    private HashMap<Integer, HashSet<Integer>> locationMap = new HashMap<>();
+
+    public ObjectsPanel(MapPanel mapPanel) {
+        super();
+        this.mapPanel = mapPanel;
+    }
 
     public void setFont(DataBlock font) { this.font = font; }
 
@@ -57,20 +67,20 @@ public class ObjectsPanel extends GamePanel {
         int locPosY = (14*8) * 0x20;
         for(int i=0; i<locationsText.length; i++) memory.printCharacter(locationsText[i], i + locPosY + 1, font);
 
-        HashMap<Integer, HashSet<Integer>> specObjMap = new HashMap<>();
+        locationMap.clear();
 
-        for(int i = 0; i < specialObjects.size; i++) addLocation(specObjMap, specialObjects.getGraphicNo(i), specialObjects.getScreen(i));
+        for(int i = 0; i < specialObjects.size; i++) addLocation(locationMap, specialObjects.getGraphicNo(i), specialObjects.getScreen(i));
         // NOTE: the game does not update special objects table when object is dropped - only after leaving the room
         // it is written back to the table. So must also consider current special objects slots
-        addLocation(specObjMap, loc1GrNo, currentLocation);
-        addLocation(specObjMap, loc2GrNo, currentLocation);
+        addLocation(locationMap, loc1GrNo, currentLocation);
+        addLocation(locationMap, loc2GrNo, currentLocation);
         int locObjX = 0;
         int locObjY = 10*8;
         for(int i=0x60; i<=0x67; i++) {
             printOneObject(i, locObjX, locObjY, specialObjects.getAttr(i));
-            HashSet<Integer> l = specObjMap.getOrDefault(i, new HashSet<>());
+            List<Integer> ls = getSortedLocations(i);
             int locPos = 0;
-            for(Integer e: l) {
+            for(Integer e: ls) {
                 int locL = e & 0x0F;
                 int locH = (e & 0xF0) >> 4;
                 int baseAddr = 4 + locObjX / 8 + (locObjY + 8) * 0x20 + locPos;
@@ -108,6 +118,40 @@ public class ObjectsPanel extends GamePanel {
     }
 
     public void doClick(int x, int y) {
-        IO.println(String.format("(%d,%d)", x, y));
+        int row = (191-y)/8;
+        int col = x/8;
+
+        // rows: 10, 7, 4, 1
+        // cols: 4,5 7,8 10,11 13,14 20,21 23,24 26,27 29 30
+
+        int baseObjectId = switch(row) {
+            case 10 -> 0x60;
+            case 7 -> 0x61;
+            case 4 -> 0x62;
+            case 1 -> 0x63;
+            default -> -1;
+        };
+        if(baseObjectId == -1) return;
+        int roomCol = switch(col) {
+            case 4,5,20,21 -> 0;
+            case 7,8,23,24 -> 1;
+            case 10,11,26,27 -> 2;
+            case 13,14,29,30 -> 3;
+            default -> -1;
+        };
+        if(roomCol == -1) return;
+        if(col>=20) baseObjectId += 4;
+
+        var ls = getSortedLocations(baseObjectId);
+        if(roomCol >= ls.size()) return;
+
+        int roomId = ls.get(roomCol);
+        IO.println(String.format("clicked: %02X", roomId));
+        mapPanel.updateAfterClick(roomId);
+    }
+
+    private List<Integer> getSortedLocations(int objectId) {
+        HashSet<Integer> locations = locationMap.getOrDefault(objectId, new HashSet<>());
+        return locations.stream().toList().stream().sorted().toList();
     }
 }

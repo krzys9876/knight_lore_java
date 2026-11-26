@@ -67,12 +67,6 @@ public class MapPanel extends GamePanel {
         VideoMemory memory = loc.getPreview();
         for(int a = memory.attrStart; a < memory.endExcl; a ++) memory.setByteAt(a, attr);
         int[] pixels = memory.toPixels(false);
-        /*VideoMemory memory = new VideoMemoryLinear();
-        for(int a = memory.attrStart; a < memory.endExcl; a ++) memory.setByteAt(a, Color.getAttribute(Color.WHITE, Color.BLACK, false, false));
-        for(int i=0; i<16; i++){
-            memory.printCharacter(i, i + 8 * 0x20, font);
-        }
-        int[] pixels = memory.toPixels(false);*/
 
         previewPanel.setPixelData(pixels);
     }
@@ -137,7 +131,10 @@ public class MapPanel extends GamePanel {
         if(x < MARGIN || x >= MARGIN + CELL_WIDTH * ROW_COL || y < MARGIN || y >= MARGIN + CELL_HEIGHT * ROW_COL) return;
         int gridX = (x - MARGIN) / CELL_WIDTH;
         int gridY = ROW_COL - 1 - (y - MARGIN) / CELL_HEIGHT;
-        int locId = Location.xyToId(gridX, gridY);
+        updateAfterClick(Location.xyToId(gridX, gridY));
+    }
+
+    public void updateAfterClick(int locId) {
         if(locations.exists(locId)) {
             unmarkSelected();
             updatePreview(locId);
