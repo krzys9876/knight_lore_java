@@ -498,14 +498,14 @@ public class Game implements Runnable {
         if(days > params.getMaxDays()) days --; // game over due to timeout
         int daysAddr = 15 + 127 * 0x20; // (x,y)=(120, 127)
         int daysBCD = MathUtils.byteToBCD(days);
-        if(daysBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, + 1, daysBCD);
+        if(daysBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, daysAddr+ 1, daysBCD);
         else print_BCD_number_BCAE(shadowMemory, daysAddr, daysBCD);
         calc_and_display_percent_BC10();
 
         int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
         int objAddr = 23 + 79 * 0x20; // (x,y)=(184, 79)
         int objBCD = MathUtils.byteToBCD(objectsInCauldron);
-        if(objBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, + 1, objBCD);
+        if(objBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, objAddr+ 1, objBCD);
         else print_BCD_number_BCAE(shadowMemory, objAddr, objBCD);
 
         int screens = locations.countVisited();
@@ -542,7 +542,7 @@ public class Game implements Runnable {
         int percentAddr = 19 + 95 * 0x20; // (x,y)=(152, 95)
         int percentBCD = MathUtils.byteToBCD(percent);
         if(percentBCD < 0x10) {
-            print_BCD_lsd_BCC0(shadowMemory, + 1, percentBCD);
+            print_BCD_lsd_BCC0(shadowMemory, percentAddr + 1, percentBCD);
         } else {
             print_BCD_number_BCAE(shadowMemory, percentAddr, percentBCD);
             if(percentBCD >= 0x100) {
