@@ -12,7 +12,6 @@ import org.kr.kl.utils.KeySequence;
 import org.kr.kl.utils.KeySequenceMode;
 import org.kr.kl.utils.SeedGeneratorSequential;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -63,12 +62,6 @@ public class GameReplayTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private int[] rgb(BufferedImage img) {
-        int[] p = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());   // always ARGB, whatever the image type
-        for (int i = 0; i < p.length; i++) p[i] &= 0x00FFFFFF; // 00 - alpha channel, we need zeros here
-        return p;
     }
 
     private void assertTick(Game game, GamePanel panel, Map<String, Long> hashes) {
