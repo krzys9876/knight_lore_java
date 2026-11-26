@@ -19,6 +19,7 @@ public class Game implements Runnable {
     private final GamePanel shadowPanel;
     private final MapPanel mapPanel;
     private final ObjectsPanel objectsPanel;
+    private final SettingsPanel settingsPanel;
     private final DebugPanel debugPanel1;
     private final DebugPanel debugPanel2;
     private final ConcurrentSkipListSet<Integer> keyQueue;
@@ -71,12 +72,14 @@ public class Game implements Runnable {
     }
 
     public Game(GamePanel mainPanel, GamePanel shadowPanel, MapPanel mapPanel, ObjectsPanel objectsPanel,
+                SettingsPanel settingsPanel,
                 DebugPanel debugPanel1, DebugPanel debugPanel2,
                 ConcurrentSkipListSet<Integer> keyQueue, GameParams params, KeySequence keySequence) {
         this.mainPanel = mainPanel;
         this.shadowPanel = shadowPanel;
         this.mapPanel = mapPanel;
         this.objectsPanel = objectsPanel;
+        this.settingsPanel = settingsPanel;
         this.debugPanel1 = debugPanel1;
         this.debugPanel2 = debugPanel2;
         this.keyQueue = keyQueue;
@@ -101,6 +104,7 @@ public class Game implements Runnable {
         this.mapPanel.setFont(font_6108);
         this.objectsPanel.setFont(font_6108);
         this.objectsPanel.initVideoMemory(spriteData);
+        this.settingsPanel.initVideoMemory(spriteData);
         params.unfreezeSeed();
     }
 
@@ -138,6 +142,7 @@ public class Game implements Runnable {
     private void main_AF88() {
         debugPanel1.append("main_AF88");
 
+        settingsPanel.update();
         variables.setGameStart_5BB2();
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
         variables.setLives_5BBA(params.getInitialLives() + 1); // NOTE: the game starts with lose life

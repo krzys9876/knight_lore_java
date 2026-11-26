@@ -17,6 +17,14 @@ public class Main {
     static void main() {
         FlatLightLaf.setup();
 
+        ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
+        KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
+        //KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY); // set SAVE to enable saving or REPLAY to replay the complete gameplay, REPLAY_SAVE to replay and save each frame
+        SeedGenerator rnd = new SeedGeneratorRandom();
+        //SeedGenerator rnd = new SeedGeneratorSequential();
+        //GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
+        GameParams params = new GameParams(rnd, true, false, false, false, 99, 99, 14, 90, 0);
+
         GamePanel gamePanel = new GamePanel();
         ScreenPanel screenGamePanel = new ScreenPanel(gamePanel);
         GamePanel shadowPanel = new GamePanel();
@@ -27,7 +35,7 @@ public class Main {
         ScreenPanel screenMapPanel = new ScreenPanel(mapPanel);
         ObjectsPanel objectsPanel = new ObjectsPanel(mapPanel);
         ScreenPanel screenObjectsPanel = new ScreenPanel(objectsPanel);
-        SettingsPanel settingsPanel = new SettingsPanel();
+        SettingsPanel settingsPanel = new SettingsPanel(params);
         ScreenPanel screenSettingsPanel = new ScreenPanel(settingsPanel);
         ScreenDebugPanel debugPanel1 = new ScreenDebugPanel();
         ScreenDebugPanel debugPanel2 = new ScreenDebugPanel();
@@ -59,14 +67,7 @@ public class Main {
         frame.setVisible(true);
         screenGamePanel.requestFocus();
 
-        ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
-        KeySequence keySequence = new KeySequence(KeySequenceMode.NONE); // set SAVE to enable saving or REPLAY to replay the complete gameplay
-        //KeySequence keySequence = new KeySequence(KeySequenceMode.REPLAY); // set SAVE to enable saving or REPLAY to replay the complete gameplay, REPLAY_SAVE to replay and save each frame
-        SeedGenerator rnd = new SeedGeneratorRandom();
-        //SeedGenerator rnd = new SeedGeneratorSequential();
-        //GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
-        GameParams params = new GameParams(rnd, true, false, false, false, 99, 99, 14, 90, 0);
-        Game game = new Game(gamePanel, shadowPanel, mapPanel, objectsPanel, debugPanel1, debugPanel2, keyQueue, params, keySequence);
+        Game game = new Game(gamePanel, shadowPanel, mapPanel, objectsPanel, settingsPanel, debugPanel1, debugPanel2, keyQueue, params, keySequence);
         Thread gameThread = new Thread(game);
         gameThread.start();
 
