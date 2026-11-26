@@ -69,4 +69,5 @@ public class GamePanel {
         repaintAction = r;
     }
 
+    public void doClick(int x, int y) {}
 }

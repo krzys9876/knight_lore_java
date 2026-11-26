@@ -106,4 +106,8 @@ public class ObjectsPanel extends GamePanel {
             for(int j=0; j<3; j++)
                 memory.setByteAt(addr + j - i * 0x20, attr);
     }
+
+    public void doClick(int x, int y) {
+        IO.println(String.format("(%d,%d)", x, y));
+    }
 }

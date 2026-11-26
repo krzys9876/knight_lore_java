@@ -27,23 +27,19 @@ public class Main {
         ScreenPanel screenMapPanel = new ScreenPanel(mapPanel);
         ObjectsPanel objectsPanel = new ObjectsPanel();
         ScreenPanel screenObjectsPanel = new ScreenPanel(objectsPanel);
+        SettingsPanel settingsPanel = new SettingsPanel();
+        ScreenPanel screenSettingsPanel = new ScreenPanel(settingsPanel);
         ScreenDebugPanel debugPanel1 = new ScreenDebugPanel();
         ScreenDebugPanel debugPanel2 = new ScreenDebugPanel();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(256*4, 192*4);
+        frame.setSize(gamePanel.BASE_WIDTH * 4, gamePanel.BASE_HEIGHT * 4);
         frame.setTitle("Knight Lore recreated");
         frame.add(screenGamePanel, BorderLayout.CENTER);
 
-        screenMapPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (!SwingUtilities.isLeftMouseButton(e)) return;
-                int imgX = e.getX() * mapPanel.BASE_WIDTH  / screenMapPanel.getWidth();
-                int imgY = e.getY() * mapPanel.BASE_HEIGHT / screenMapPanel.getHeight();
-                mapPanel.doClick(imgX, imgY);
-            }
-        });
+        screenMapPanel.addMouseListener(mapPanel);
+        screenObjectsPanel.addMouseListener(objectsPanel);
+        screenSettingsPanel.addMouseListener(settingsPanel);
 
         JMenuBar menuBar = new JMenuBar();
         JMenu windowMenu = new JMenu("Windows");
@@ -53,8 +49,9 @@ public class Main {
         frame.setJMenuBar(menuBar);
 
         ToolWindow.addToggleWindow(frame, windowMenu, "Map", screenMapPanel, new Dimension(mapPanel.BASE_WIDTH, mapPanel.BASE_HEIGHT), null);
-        ToolWindow.addToggleWindow(frame, windowMenu, "Preview", screenPreviewPanel, new Dimension(previewPanel.BASE_WIDTH, previewPanel.BASE_HEIGHT), null);
-        ToolWindow.addToggleWindow(frame, windowMenu, "Objects", screenObjectsPanel, new Dimension(objectsPanel.BASE_WIDTH, objectsPanel.BASE_HEIGHT), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Preview", screenPreviewPanel, new Dimension(previewPanel.BASE_WIDTH * 2, previewPanel.BASE_HEIGHT * 2), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Objects", screenObjectsPanel, new Dimension(objectsPanel.BASE_WIDTH * 2, objectsPanel.BASE_HEIGHT * 2), null);
+        ToolWindow.addToggleWindow(frame, windowMenu, "Settings", screenSettingsPanel, new Dimension(settingsPanel.BASE_WIDTH * 2, settingsPanel.BASE_HEIGHT * 2), null);
         ToolWindow.addToggleWindow(frame, debugMenu, "Debug (1)", debugPanel1, new Dimension(250, 750), null);
         ToolWindow.addToggleWindow(frame, debugMenu, "Debug (2)", debugPanel2, new Dimension(350, 500), null);
         ToolWindow.addToggleWindow(frame, debugMenu, "Shadow memory view", screenShadowPanel, new Dimension(400, 300), null);
