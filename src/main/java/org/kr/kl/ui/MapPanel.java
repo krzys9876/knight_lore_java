@@ -1,6 +1,7 @@
 package org.kr.kl.ui;
 
 import org.kr.kl.data.DataBlock;
+import org.kr.kl.objects.Font;
 import org.kr.kl.objects.Location;
 import org.kr.kl.objects.Locations;
 
@@ -13,7 +14,7 @@ public class MapPanel extends GamePanel {
     private static final int MARGIN = 15;
     private final GamePanel previewPanel;
     private Locations locations;
-    private DataBlock font;
+    private Font font;
     private int selectedId = -1;
     private int currentId = -1;
 
@@ -23,7 +24,7 @@ public class MapPanel extends GamePanel {
     }
 
     public void setLocations(Locations locations) { this.locations = locations; }
-    public void setFont(DataBlock font) { this.font = font; }
+    public void setFont(Font font) { this.font = font; }
 
     public void drawMap(Locations locations, int currentLocId) {
         clear();
@@ -44,16 +45,16 @@ public class MapPanel extends GamePanel {
             int x = MARGIN + i * CELL_WIDTH + CELL_WIDTH/2-4;
             int x1 = MARGIN/2-4;
             int x2 = ROW_COL * CELL_WIDTH + MARGIN + MARGIN/2-4;
+            int[] ch = font.getChar(i);
             for(int b = 0; b<8; b++) {
                 int y1 = (b + MARGIN/2-4) * BASE_WIDTH;
                 int y2 = (b + MARGIN/2-4) * BASE_WIDTH + (ROW_COL * CELL_HEIGHT + MARGIN) * BASE_WIDTH;
                 int y = (b + MARGIN + (ROW_COL - 1 - i) * CELL_HEIGHT + CELL_HEIGHT/2-4) * BASE_WIDTH;
-                int fontByte = font.getU(font.start + i*8 + b);
                 for(int bit = 0; bit<8; bit++) {
-                    pixelData[x + y1 + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
-                    pixelData[x + y2 + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
-                    pixelData[x1 + y + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
-                    pixelData[x2 + y + (7-bit)] = (fontByte & (1 << bit))>0 ? screenColor : 0;
+                    pixelData[x + y1 + (7-bit)] = (ch[b] & (1 << bit))>0 ? screenColor : 0;
+                    pixelData[x + y2 + (7-bit)] = (ch[b] & (1 << bit))>0 ? screenColor : 0;
+                    pixelData[x1 + y + (7-bit)] = (ch[b] & (1 << bit))>0 ? screenColor : 0;
+                    pixelData[x2 + y + (7-bit)] = (ch[b] & (1 << bit))>0 ? screenColor : 0;
                 }
             }
         }

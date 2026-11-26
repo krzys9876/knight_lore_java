@@ -1,6 +1,7 @@
 package org.kr.kl.ui;
 
 import org.kr.kl.data.DataBlock;
+import org.kr.kl.objects.Font;
 import org.kr.kl.objects.GraphicObject;
 import org.kr.kl.objects.SpecialObjects;
 import org.kr.kl.objects.SpriteData;
@@ -12,19 +13,23 @@ import java.util.List;
 
 public class ObjectsPanel extends GamePanel {
     private VideoMemoryLinear memory;
-    private DataBlock font;
+    private Font font;
     private final MapPanel mapPanel;
-    private final int[] collectedText = new int[] {12, 24, 21, 21, 14, 12, 29, 14, 13};
-    private final int[] locationsText = new int[] {21, 24, 12, 10, 29, 18, 24, 23, 28};
+    private int[] collectedText;
+    private int[] locationsText;
 
-    private HashMap<Integer, HashSet<Integer>> locationMap = new HashMap<>();
+    private final HashMap<Integer, HashSet<Integer>> locationMap = new HashMap<>();
 
     public ObjectsPanel(MapPanel mapPanel) {
         super();
         this.mapPanel = mapPanel;
     }
 
-    public void setFont(DataBlock font) { this.font = font; }
+    public void setFont(Font font) {
+        this.font = font;
+        this.collectedText = this.font.transcribe("COLLECTED");
+        this.locationsText = this.font.transcribe("LOCATIONS");
+    }
 
     public void initVideoMemory(SpriteData spriteData) {
         memory = new VideoMemoryLinear(spriteData);

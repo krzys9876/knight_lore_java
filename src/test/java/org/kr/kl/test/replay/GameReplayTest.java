@@ -4,10 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kr.kl.Game;
 import org.kr.kl.GameParams;
-import org.kr.kl.ui.DebugPanel;
-import org.kr.kl.ui.GamePanel;
-import org.kr.kl.ui.MapPanel;
-import org.kr.kl.ui.ObjectsPanel;
+import org.kr.kl.ui.*;
 import org.kr.kl.utils.KeySequence;
 import org.kr.kl.utils.KeySequenceMode;
 import org.kr.kl.utils.SeedGeneratorSequential;
@@ -38,10 +35,11 @@ public class GameReplayTest {
         GamePanel panel2 = new GamePanel();
         MapPanel panel3 = new MapPanel(new GamePanel());
         ObjectsPanel panel4 = new ObjectsPanel(panel3);
+        SettingsPanel panel5 = new SettingsPanel(params);
         DebugPanel debugPanel1 = new TestDebugPanel();
         DebugPanel debugPanel2 = new TestDebugPanel();
         ConcurrentSkipListSet<Integer> keyQueue = new ConcurrentSkipListSet<>();
-        Game game = new Game(panel1, panel2, panel3, panel4, debugPanel1, debugPanel2, keyQueue, params, keySequence);
+        Game game = new Game(panel1, panel2, panel3, panel4, panel5, debugPanel1, debugPanel2, keyQueue, params, keySequence);
 
         Map<String, Long> hashes = new HashMap<>();
         try(var lines = Files.lines(Path.of(referencePath, "hashes.txt"))) {

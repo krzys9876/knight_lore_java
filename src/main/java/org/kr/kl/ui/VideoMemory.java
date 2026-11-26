@@ -1,6 +1,6 @@
 package org.kr.kl.ui;
 
-import org.kr.kl.data.DataBlock;
+import org.kr.kl.objects.Font;
 import org.kr.kl.objects.GraphicObject;
 import org.kr.kl.objects.Sprite;
 import org.kr.kl.objects.SpriteData;
@@ -75,10 +75,9 @@ public abstract class VideoMemory {
 
     abstract protected int getYFromAddress(int address);
 
-    public void printCharacter(int character, int address, DataBlock font) {
-        int baseChar = font.start;
-        int charPointer = (character & 0x7F) * 8 + baseChar; // font address
-        for(int i = 0; i<8; i++) setByteAt(address - i*0x20, font.getU(charPointer + i));
+    public void printCharacter(int character, int address, Font font) {
+        int[] charData = font.getChar(character);
+        for(int i = 0; i<8; i++) setByteAt(address - i*0x20, charData[i]);
     }
 
     public static int calcVideoAddr(int y, int x) { return (x >> 3) + y * 0x20; }
