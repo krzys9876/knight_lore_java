@@ -146,7 +146,7 @@ public class Game implements Runnable {
         settingsPanel.update();
         variables.setGameStart_5BB2();
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
-        variables.setLives_5BBA(params.getInitialLives() + 1); // NOTE: the game starts with lose life
+        params.setLives(params.getInitialLives() + 1); // NOTE: the game starts with lose life
         params.getRnd().updateSeed1();
         clear_scrn_D55F();
         do_menu_selection_BD0C();
@@ -168,6 +168,7 @@ public class Game implements Runnable {
         init_special_objects_C47E();
         player_dies_AFB7();
         updateObjectsPanel();
+        settingsPanel.update();
         game_loop_AFBA();
     }
 
@@ -458,14 +459,14 @@ public class Game implements Runnable {
         graphicObjects.playerBottom().copyFrom(plyr_spr_1_scratchpad_D161);
         graphicObjects.playerTop().copyFrom(plyr_spr_2_scratchpad_D181);
         variables.resetTransformFlag_5BB1();
-        int livesLeft = variables.getLives_5BBA();
+        int livesLeft = params.getLives();
         if(livesLeft < 1) {
-            variables.setLives_5BBA(-1);
+            params.setLives(-1);
             game_over_BA22();
             return;
         }
         int newLivesLeft = params.isDisableLoseLife() ? livesLeft : livesLeft - 1;
-        variables.setLives_5BBA(newLivesLeft);
+        params.setLives(newLivesLeft);
         int scratch = sun_moon_scratchpad_C44D.getGrNo();
         scratch = ((scratch << 5)) & 0x20; // 3 x RRCA & 0x20 effectively means bit 0 shifted to bit 5
         int playerGraphicsNo = graphicObjects.playerBottom().getTemp10();
@@ -474,6 +475,7 @@ public class Game implements Runnable {
         int playerGraphicsNoTop = graphicObjects.playerTop().getTemp10();
         playerGraphicsNoTop = (playerGraphicsNoTop & 0x0F) + scratch + 0x20;
         graphicObjects.playerTop().setTemp10(playerGraphicsNoTop);
+        settingsPanel.update();
     }
 
     private void game_over_BA22() {
@@ -837,7 +839,7 @@ public class Game implements Runnable {
     }
 
     private void print_lives_BCA3() {
-        print_BCD_number_BCAE(shadowMemory, 0x20 * 39 + 4, MathUtils.byteToBCD(variables.getLives_5BBA()));
+        print_BCD_number_BCAE(shadowMemory, 0x20 * 39 + 4, MathUtils.byteToBCD(params.getLives()));
     }
 
     private void list_objects_to_draw_CE62() {
@@ -2180,12 +2182,13 @@ public class Game implements Runnable {
             int ptr = h * 256 + l;
             int spi = specialObjects.getIndex(ptr);
             specialObjects.clearGraphicNo(spi); // ; zap ptr object table entry
-            int lives = variables.getLives_5BBA();
-            variables.setLives_5BBA(lives+1);
+            int lives = params.getLives();
+            params.setLives(lives+1);
             variables.setDisableSpikeBallDrop_5BC0();
             // $C1E2 CALL $B4A3     ; // ignore audio
             print_lives_BCA3();
             updateObjectsPanel();
+            settingsPanel.update();
         }
         dec_dZ_and_update_XYZ_C700(o);
         if(o.isMoving()) {

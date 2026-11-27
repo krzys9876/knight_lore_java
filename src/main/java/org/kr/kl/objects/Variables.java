@@ -26,7 +26,7 @@ public class Variables {
     public void resetPickupPressed_5BB3() { data.set(0x5BB3, 0); }
     public void setGameStart_5BB2() { data.set(0x5BB2, 1); }
     public void resetGameStart_5BB2() { data.set(0x5BB2, 0); }
-    public void setLives_5BBA(int value) { data.set(0x5BBA, value); }
+    //public void setLives_5BBA(int value) { data.set(0x5BBA, value); }
     public void setPortcullisMoveCnt_5BB0(int value) { data.set(0x5BB0, value); }
     public void setPortcullisMoving_5BAF() { data.set(0x5BAF, 1); }
     public void resetPortcullisMoving_5BAF() { data.set(0x5BAF, 0); }
@@ -56,7 +56,7 @@ public class Variables {
     public int getObjectsPutInCauldron_5BBB() { return data.getU(0x5BBB); }
     public boolean isPickupPressed_5BB3() { return data.getU(0x5BB3) == 1; }
     public boolean isGameStart_5BB2() { return data.getU(0x5BB2) == 1; }
-    public int getLives_5BBA() { return data.getU(0x5BBA); }
+    //public int getLives_5BBA() { return data.getU(0x5BBA); }
     public int getPortcullisMoveCnt_5BB0() { return data.getU(0x5BB0); }
     public boolean isPortcullisMoving_5BAF() { return data.getU(0x5BAF) == 1; }
     public boolean isDisableSpikeBallDrop_5BC0() { return data.getU(0x5BC0) == 1; }

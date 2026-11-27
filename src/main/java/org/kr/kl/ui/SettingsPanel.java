@@ -52,7 +52,7 @@ public class SettingsPanel extends GamePanel {
         printText("-10 -1 +1 +10",18, maxLivesY);
 
         printText("LIVES", 1, livesY);
-        //printText(String.format("%d",params.getInitialLives()), params.getInitialLives() < 10 ? 15 : 14, livesY);
+        printText(String.format("%d",params.getLives()), params.getLives() < 10 ? 15 : 14, livesY, valueAttr);
         printText("-10 -1 +1 +10",18, livesY);
 
         printText("MAX. DAYS", 1, maxDaysY);

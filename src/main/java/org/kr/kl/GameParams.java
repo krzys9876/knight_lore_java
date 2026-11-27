@@ -5,17 +5,19 @@ import org.kr.kl.utils.SeedGenerator;
 public class GameParams {
     private final SeedGenerator rnd;
 
-    private final boolean skipMenu;
-    private final boolean disableDeath;
-    private final boolean disableLoseLife;
-    private final boolean disableIncDays;
+    private boolean skipMenu;
+    private boolean disableDeath;
+    private boolean disableLoseLife;
+    private boolean disableIncDays;
 
-    private final int maxDays; // 98 is max (wraps at 99)
-    private final int initialLives;
-    private final int cauldronRequiredObjects; // 0x0E
+    private int maxDays; // 98 is max (wraps at 99)
+    private int initialLives;
+    private int cauldronRequiredObjects; // 0x0E
 
-    private final long delayMs; // 90ms
+    private long delayMs; // 90ms
     private final long delayMsReplay;
+
+    private int lives;
 
     private long tickLimit = -1;
 
@@ -30,6 +32,7 @@ public class GameParams {
 
         this.maxDays = maxDays;
         this.initialLives = initialLives;
+        this.lives = initialLives;
         this.cauldronRequiredObjects = cauldronRequiredObjects;
 
         this.delayMs = delayMs;
@@ -46,6 +49,9 @@ public class GameParams {
     public int getMaxDays() { return maxDays; }
     public int getInitialLives() { return initialLives; }
     public int getCauldronRequiredObjects() { return cauldronRequiredObjects; }
+
+    public int getLives() { return lives; }
+    public void setLives(int lives) { this.lives = lives; }
 
     public long getDelayMs() { return delayMs; }
     public long getDelayMsReplay() { return delayMsReplay; }
