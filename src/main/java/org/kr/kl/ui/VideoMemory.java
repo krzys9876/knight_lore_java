@@ -79,6 +79,10 @@ public abstract class VideoMemory {
         for(int i=0; i<text.length; i++) printCharacter(text[i], i + address, font);
     }
 
+    public void printText(String text, int x, int y, Font font) {
+        printText(font.transcribe(text), y * 8 * 0x20 + x, font);
+    }
+
     public void printText(String text, int address, Font font) {
         printText(font.transcribe(text), address, font);
     }

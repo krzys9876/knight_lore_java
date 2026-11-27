@@ -5,7 +5,6 @@ import org.kr.kl.objects.Font;
 import org.kr.kl.objects.GraphicObject;
 import org.kr.kl.objects.SpecialObjects;
 import org.kr.kl.objects.SpriteData;
-import org.kr.kl.utils.MathUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,8 +14,6 @@ public class ObjectsPanel extends GamePanel {
     private VideoMemoryLinear memory;
     private Font font;
     private final MapPanel mapPanel;
-    private int[] collectedText;
-    private int[] locationsText;
 
     private final HashMap<Integer, HashSet<Integer>> locationMap = new HashMap<>();
 
@@ -27,8 +24,6 @@ public class ObjectsPanel extends GamePanel {
 
     public void setFont(Font font) {
         this.font = font;
-        this.collectedText = this.font.transcribe("COLLECTED");
-        this.locationsText = this.font.transcribe("LOCATIONS");
     }
 
     public void initVideoMemory(SpriteData spriteData) {
@@ -40,22 +35,8 @@ public class ObjectsPanel extends GamePanel {
         memory.clear();
         for(int i=memory.attrStart; i<memory.endExcl; i++) memory.setByteAt(i, Color.getAttribute(Color.WHITE, Color.BLACK, true, false));
 
-        int posY = (23*8) * 0x20;
-        for(int i=0; i<collectedText.length; i++) memory.printCharacter(collectedText[i], i + posY + 1, font);
-
-        int requiredPosBCD = MathUtils.byteToBCD(requiredPos);
-        int requiredBCD = MathUtils.byteToBCD(required);
-        int posL = requiredPosBCD & 0x0F;
-        int posH = (requiredPosBCD & 0xF0) >> 4;
-        int reqL = requiredBCD & 0x0F;
-        int reqH = (requiredBCD & 0xF0) >> 4;
-        int posX = collectedText.length + 2;
-        if(posH > 0) memory.printCharacter(posH, posX + posY, font);
-        memory.printCharacter(posL, posX+1 + posY, font);
-        memory.printCharacter(24, posX+3 + posY, font); // O
-        memory.printCharacter(15, posX+4 + posY, font); // F
-        if(reqH > 0) memory.printCharacter(reqH, posX+6 + posY, font);
-        memory.printCharacter(reqL, posX+7 + posY, font);
+        String collected = "COLLECTED " + (requiredPos < 10 ? " " : "") + String.format("%d OF %d", requiredPos, required);
+        memory.printText(collected, 1, 23, font);
 
         int objY = 19*8;
         int objX = 0;
@@ -68,8 +49,7 @@ public class ObjectsPanel extends GamePanel {
             } else objX += 24;
         }
 
-        int locPosY = (14*8) * 0x20;
-        for(int i=0; i<locationsText.length; i++) memory.printCharacter(locationsText[i], i + locPosY + 1, font);
+        memory.printText("LOCATIONS", 1, 14, font);
 
         locationMap.clear();
 
