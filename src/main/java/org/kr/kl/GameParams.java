@@ -75,6 +75,11 @@ public class GameParams {
     }
 
     public int getLives() { return lives; }
+    public void setLivesInit() {
+        if(!isGameActive) {
+            this.lives = getInitialLives()+1;
+        }
+    }
     public void setLives(int lives) {
         if(lives>=0 && lives<=99 && isGameActive) {
             this.lives = lives;

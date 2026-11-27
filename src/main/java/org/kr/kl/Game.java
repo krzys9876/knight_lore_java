@@ -167,10 +167,10 @@ public class Game implements Runnable {
         init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
         init_sun_C46D();
         init_special_objects_C47E();
-        params.setLives(params.getInitialLives() + 1); // NOTE: the game starts with lose life
+        params.setLivesInit(); // NOTE: the game starts with lose life so we add 1 to initial lives
+        params.setActive(); // We set active so that lives is decremented
         player_dies_AFB7();
         updateObjectsPanel();
-        params.setActive();
         settingsPanel.update();
         game_loop_AFBA();
     }
