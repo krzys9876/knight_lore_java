@@ -23,7 +23,7 @@ public class Main {
         SeedGenerator rnd = new SeedGeneratorRandom();
         //SeedGenerator rnd = new SeedGeneratorSequential();
         //GameParams params = new GameParams(rnd, false, false, false, false, 99, 98, 14, 90, 0);
-        GameParams params = new GameParams(rnd, false, false, false, false, 99, 99, 14, 90, 0);
+        GameParams params = new GameParams(rnd, false, false, false, false, 40, 4, 14, 90, 0);
 
         GamePanel gamePanel = new GamePanel();
         ScreenPanel screenGamePanel = new ScreenPanel(gamePanel);
