@@ -91,7 +91,8 @@ public class SettingsPanel extends GamePanel {
         printText("Y  N",yesX, skipMenuY);
 
         printText("GAME SPEED", 1, gameSpeedY);
-        printText(String.format("%d",params.getDelayMs()), params.getDelayMs() < 10 ? 15 : 14, gameSpeedY, valueAttr);
+        long delayMs = params.getDelayMs();
+        printText(String.format("%d",delayMs), delayMs < 10 ? 15 : 14, gameSpeedY, (delayMs < 60 || delayMs > 120) ? noAttr : delayMs == 90 ? yesAttr : valueAttr);
         printText("-10 -1 +1 +10",minusTenX, gameSpeedY);
 
         printText("PRESS      TO END THE GAME", 1, backToMenuY);
@@ -157,9 +158,8 @@ public class SettingsPanel extends GamePanel {
             case 4: params.setDelayMs(params.getDelayMs() + 10L); break;
             default: break;
         }
-        switch (checkBackToMenu(row, col)) {
-            case 1: params.setInactive(); break;
-            default: break;
+        if (checkBackToMenu(row, col) == 1) {
+            params.setInactive();
         }
 
 
