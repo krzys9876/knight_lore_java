@@ -143,10 +143,11 @@ public class Game implements Runnable {
     private void main_AF88() {
         debugPanel1.append("main_AF88");
 
+        params.setInactive();
+
         settingsPanel.update();
         variables.setGameStart_5BB2();
         plyr_spr_1_scratchpad_D161.setFlagsC(0);
-        params.setLives(params.getInitialLives() + 1); // NOTE: the game starts with lose life
         params.getRnd().updateSeed1();
         clear_scrn_D55F();
         do_menu_selection_BD0C();
@@ -166,8 +167,10 @@ public class Game implements Runnable {
         init_start_location_D1B1(overrideRoomId, overrideWE, overrideNS, overrideZ);
         init_sun_C46D();
         init_special_objects_C47E();
+        params.setLives(params.getInitialLives() + 1); // NOTE: the game starts with lose life
         player_dies_AFB7();
         updateObjectsPanel();
+        params.setActive();
         settingsPanel.update();
         game_loop_AFBA();
     }
@@ -688,6 +691,7 @@ public class Game implements Runnable {
         print_days_BC66();
         print_lives_gfx_BC7A();
         print_lives_BCA3();
+        if(!params.isGameActive()) variables.setGameOver(); // stop the game from settings panel
         if(variables.isGameOver()) return true;
         update_screen_D56F(false);
 
