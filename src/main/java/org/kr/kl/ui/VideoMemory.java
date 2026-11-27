@@ -79,13 +79,18 @@ public abstract class VideoMemory {
         for(int i=0; i<text.length; i++) printCharacter(text[i], i + address, font);
     }
 
-    public void printText(String text, int x, int y, Font font) {
-        printText(font.transcribe(text), y * 8 * 0x20 + x, font);
+    public void printText(String text, int x, int y, Font font, int attr) {
+        int attrAddr = calcAttribAddr(y * 8, x * 8);
+        for(int i=0; i<text.length(); i++) setByteAt(attrAddr + i, attr);
+        printText(font.transcribe(text), xyToCharAddr(x, y), font);
     }
 
-    public void printText(String text, int address, Font font) {
-        printText(font.transcribe(text), address, font);
+    public void printText(String text, int x, int y, Font font) {
+        printText(font.transcribe(text), xyToCharAddr(x, y), font);
     }
+
+    // NOTE: screen coords are reversed!
+    private int xyToCharAddr(int x, int y) { return ((y + 1) * 8 - 1) * 0x20 + x; }
 
     public void printCharacter(int character, int address, Font font) {
         int[] charData = font.getChar(character);
