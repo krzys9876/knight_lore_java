@@ -2241,8 +2241,9 @@ public class Game implements Runnable {
         o.setZ(0x80);
         int hl = ret_next_obj_required_C274();
         int grNo = o.getGrNo();
-        boolean overrideRequired = params.getCauldronRequiredObjects() == 0; // special case set manually in game settings
-        boolean sameAsRequired = overrideRequired || objects_required_C27D.getU(hl) == (grNo & 0x07);
+        // NOTE: this is a special case set manually in game settings. In such case any object ends thew game
+        boolean noMoreRequired = params.getObjectsPutInCauldron() >= params.getCauldronRequiredObjects();
+        boolean sameAsRequired = noMoreRequired || objects_required_C27D.getU(hl) == (grNo & 0x07);
         if(sameAsRequired) {
             params.setObjectsPutInCauldron(params.getObjectsPutInCauldron() + 1);
             cycle_colours_with_sound_C2A5();
