@@ -45,7 +45,6 @@ public class Game implements Runnable {
     private final Font day_font_BCEC = new Font(InitialData.block("day_font_BCEC"), "0123"); // NOTE: this font looks the same but is shifted by half of byte
     private final GraphicObject sprite_scratchpad_BFDB = new GraphicObject();
     private final SpecialObjects specialObjects = new SpecialObjects();
-    private final SpriteData spriteData = new SpriteData();
     private final DataBlock objects_required_C27D =  InitialData.block("objects_required_C27D");
     private final GraphicObject plyr_spr_1_scratchpad_D161 =  new GraphicObject();
     private final GraphicObject plyr_spr_2_scratchpad_D181 =  new GraphicObject();
@@ -107,6 +106,11 @@ public class Game implements Runnable {
         this.settingsPanel.setFont(font_6108);
         this.settingsPanel.initVideoMemory(spriteData);
         params.unfreezeSeed();
+        params.setParamsCallback(this::paramsUpdated);
+    }
+
+    private void paramsUpdated() {
+        updateObjectsPanel();
     }
 
     public void updateMainMemory() { mainPanel.setPixelData(mainMemory.toPixels(keySequence.isReplaying() ? -1 : tickNo)); }
@@ -176,7 +180,7 @@ public class Game implements Runnable {
     }
 
     private void updateObjectsPanel() {
-        objectsPanel.update(objects_required_C27D, variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects(), specialObjects,
+        objectsPanel.update(objects_required_C27D, params.getObjectsPutInCauldron(), params.getCauldronRequiredObjects(), specialObjects,
                 graphicObjects.firstSpecObj().getGrNo(), graphicObjects.firstSpecObj().next().getGrNo(),
                 graphicObjects.playerBottom().getScreen());
     }
@@ -508,7 +512,7 @@ public class Game implements Runnable {
         else print_BCD_number_BCAE(shadowMemory, daysAddr, daysBCD);
         calc_and_display_percent_BC10();
 
-        int objectsInCauldron = variables.getObjectsPutInCauldron_5BBB();
+        int objectsInCauldron = params.getObjectsPutInCauldron();
         int objAddr = 23 + 79 * 0x20; // (x,y)=(184, 79)
         int objBCD = MathUtils.byteToBCD(objectsInCauldron);
         if(objBCD < 0x10) print_BCD_lsd_BCC0(shadowMemory, objAddr+ 1, objBCD);
@@ -542,7 +546,7 @@ public class Game implements Runnable {
 
     private void calc_and_display_percent_BC10() {
         int screens = locations.countVisited();
-        int objInCauldron = variables.getObjectsPutInCauldron_5BBB();
+        int objInCauldron = params.getObjectsPutInCauldron();
         int percent = 100 * (screens + 2*objInCauldron) / 156; // 156 = 128 + 2*14, where 14 is maximum number of charms
         //IO.println("percent = " + percent + " BCD " + String.format("%03X", byteToBCD(percent)));
         int percentAddr = 19 + 95 * 0x20; // (x,y)=(152, 95)
@@ -626,7 +630,7 @@ public class Game implements Runnable {
 
                 debugTable2("Inventory", inventory.data.start, inventory.data.rawCopy());
                 debugPanel1.append(String.format("Current room: %02X (hex)", graphicObjects.playerBottom().getScreen()));
-                debugPanel1.append(String.format("Objects collected: %d of %d", variables.getObjectsPutInCauldron_5BBB(), params.getCauldronRequiredObjects()));
+                debugPanel1.append(String.format("Objects collected: %d of %d", params.getObjectsPutInCauldron(), params.getCauldronRequiredObjects()));
                 int hl = ret_next_obj_required_C274();
                 if(hl < objects_required_C27D.endExcl()) {
                     int required = objects_required_C27D.getU(hl) | 0x60;
@@ -1251,12 +1255,13 @@ public class Game implements Runnable {
             int xy = xBit1 | yBit0;
             int dX = 0;
             int dY = 0;
-            switch(xy) {
-                case 0: dY = 4; dX = -4; break;
-                case 1: dY = 4; dX = 4; break;
-                case 2: dY = -4; dX = -4; break;
-                case 3: dY = -4; dX = 4; break;
-            }
+            dX = switch (xy) {
+                case 0 -> { dY = 4; yield -4; }
+                case 1 -> { dY = 4; yield 4; }
+                case 2 -> { dY = -4; yield -4; }
+                case 3 -> { dY = -4; yield 4; }
+                default -> dX;
+            };
             o.setDX(dX);
             o.setDY(dY);
 
@@ -1354,7 +1359,7 @@ public class Game implements Runnable {
                         }
                     }
                     if(foundPlace) room_to_drop_C0B2(player, slotD, cantDrop);
-                };
+                }
             }
             player.setW(origW);
             player.setD(origD);
@@ -2040,7 +2045,7 @@ public class Game implements Runnable {
             int dx = graphicObjects.ghostDeltaTbl[rnd3];
             o.setDX(dx);
             int rnd2 = (params.getRnd().getSeed2() & 0x03) + 4;
-            int dy = graphicObjects.ghostDeltaTbl[rnd2];;
+            int dy = graphicObjects.ghostDeltaTbl[rnd2];
             o.setDY(dy);
             calc_ghost_sprite_C603(o);
             // $C5FA CALL $B467    ; // ignore audio
@@ -2236,11 +2241,12 @@ public class Game implements Runnable {
         o.setZ(0x80);
         int hl = ret_next_obj_required_C274();
         int grNo = o.getGrNo();
-        boolean sameAsRequired = objects_required_C27D.getU(hl) == (grNo & 0x07);
+        boolean overrideRequired = params.getCauldronRequiredObjects() == 0; // special case set manually in game settings
+        boolean sameAsRequired = overrideRequired || objects_required_C27D.getU(hl) == (grNo & 0x07);
         if(sameAsRequired) {
-            variables.setObjectsPutInCauldron_5BBB(variables.getObjectsPutInCauldron_5BBB() + 1);
+            params.setObjectsPutInCauldron(params.getObjectsPutInCauldron() + 1);
             cycle_colours_with_sound_C2A5();
-            boolean gotAllObjects = variables.getObjectsPutInCauldron_5BBB() == params.getCauldronRequiredObjects();
+            boolean gotAllObjects = params.getObjectsPutInCauldron() >= params.getCauldronRequiredObjects();
             if(gotAllObjects) prepare_final_animation_C2CC();
         }
         variables.setObjectDroppingIntoCauldron_5BC4(0);
@@ -2420,7 +2426,7 @@ public class Game implements Runnable {
     }
 
     private int ret_next_obj_required_C274() {
-        int objsInCauldron = variables.getObjectsPutInCauldron_5BBB();
+        int objsInCauldron = params.getObjectsPutInCauldron();
         return objects_required_C27D.start + objsInCauldron;
     }
 
