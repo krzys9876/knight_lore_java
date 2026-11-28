@@ -61,18 +61,39 @@ When the game ends press any key to return to the menu.
 ## Additional windows ##
 
 In original game there could be no floating windows. It was always a mistery to me, where are the objects
-and where I should go. It is not easy to navigate through the maze of rooms.
+and where I should go. It is not easy to navigate through the maze of rooms. So I decided to add some
+helper windows.
+
+Call it cheating, but this is optional so you don't have to use them!
+
+### Map and room preview ###
+
+I remember Knight Lore artisan maps published in computer magazines. Here you can display a simplified
+map and click on any room to see what's inside. This might prepare you for especially difficult ones.
+
+### Objects ###
 
 Now you can:
 - see the map (a grid of 16 by 16, so it matches hexadecimal convention of 0..F)
 - preview rooms that you are about to enter
-- find all objects' locations. Note that locations are presented in original form: row followed by column. 
+- find all objects' locations. Note that locations are presented in original form: row followed by column.
 
-Call it cheating, but this is optional so you don't have to look at it.
+You may preview the location by clicking on room coordinates.
 
 ![Object preview](/images/objects.png)
 
+### Settings ###
+
+This is something I wanted from the start - enable changing various parameters, particularly lives and days.
+Also you may wish to make the player immortal by disabling death, stop lives and days counters, or just end the game at any time.
+
+![Settings preview](/images/settings.png)
+
 ## Version history ##
+
+### 1.0 ###
+
+Officially finished game. Add settings panel.
 
 ### 0.7 ###
 

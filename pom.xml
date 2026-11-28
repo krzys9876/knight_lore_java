@@ -6,7 +6,7 @@
 
     <groupId>org.kr</groupId>
     <artifactId>kl</artifactId>
-    <version>0.7</version>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
